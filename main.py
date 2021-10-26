@@ -10,10 +10,13 @@ if __name__ == "__main__":
 
     results = []
     for sql_file in sql_files:
-        parser = query.QueryParser(sql_file)
-        tables = parser.detect_tables()
+        parser = query.QueryParser.read_file(sql_path=sql_file)
+        ref_tables = parser.parse_query()
         results.append({
             'sql_file': sql_file,
-            'tables': tables,
+            'ref_tables': ref_tables,
         })
+        map = {}
+        table_name = 'PROJECT_B.DATASET_B.TABLE_A'
+        parser.map_tables(map=map, table_name=table_name, ref_tables=ref_tables)
     pprint(results)
