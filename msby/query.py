@@ -16,7 +16,7 @@ class QueryParser():
         return cls(query_str=query_str)
 
     def parse_query(self):
-        # Check the query has cte
+        # Check the query has cte or not
         cte_pattern = r'(?:with|,)\s*(\w+)\s+as\s*'
         ctes = re.findall(cte_pattern, self.query_str, re.IGNORECASE)
 
@@ -24,7 +24,7 @@ class QueryParser():
         main_pattern = r'\)[;\s]*select' if any(ctes) else r'select'
         main_row_num = re.search(main_pattern, self.query_str, re.IGNORECASE).span()[0]
 
-        # Separate the query to 'main' and 'cte'
+        # Split the query to 'main' and 'cte'
         query_group = {}
         query_group['main'] = self.query_str[main_row_num:].strip()
         query_group['cte'] = self.query_str[:main_row_num].strip()
