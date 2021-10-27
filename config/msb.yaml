@@ -1,0 +1,7 @@
+mapping:
+  - sql_file: 'tests/sql/test_a.sql'
+    table_name: 'PROJECT_X.DATASET_Y.TABLE_A'
+  - sql_file: 'tests/sql/test_b.sql'
+    table_name: 'PROJECT_X.DATASET_Y.TABLE_B'
+exclude:
+  - 'tests/sql/test_exclude.sql'
