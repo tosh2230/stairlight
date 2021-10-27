@@ -1,9 +1,4 @@
-import pathlib
 import re
-
-def search_files(target_dir: str, condition: str):
-    path_obj = pathlib.Path(target_dir)
-    return [str(p) for p in path_obj.glob(condition)]
 
 class QueryParser():
     def __init__(self, sql_path: str=None, query_str: str=None):
@@ -51,16 +46,3 @@ class QueryParser():
             })
 
         return ref_tables
-
-    def map_tables(self, map: dict, table_name: str, ref_tables: list):
-        if not table_name in map:
-            map[table_name] = {}
-
-        for ref_table in ref_tables:
-            ref_table_name = ref_table['table_name']
-            map[table_name][ref_table_name] = {
-                'file': self.sql_path,
-                'line': ref_table['line'],
-                'line_str': ref_table['line_str']
-            }
-        return map
