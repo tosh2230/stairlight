@@ -1,7 +1,7 @@
 import os
 from pprint import pprint
 
-from msb.entrypoint import Msb
+from msb import Msb
 
 if __name__ == "__main__":
     config_file = 'config/msb.yaml'
