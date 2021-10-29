@@ -1,12 +1,16 @@
 import os
-from msb.entrypoint import Msb
-from msb.query_parser import QueryParser
+from lddr.entrypoint import Ladder
+from lddr.query_parser import QueryParser
 
 class TestSearchFilesSuccess:
+    config_file = 'config/lddr.yaml'
     target_dir = os.path.dirname(__file__)
     condition = 'sql/*.sql'
-    msb = Msb(target_dir=target_dir, condition=condition)
+    ladder = Ladder(
+        config_file=config_file,
+        target_dir=target_dir,
+        condition=condition
+    )
 
     def test_search_files(self):
-        results = self.msb.search_files()
-        assert len(results) > 0
+        assert len(self.ladder.maps) > 0

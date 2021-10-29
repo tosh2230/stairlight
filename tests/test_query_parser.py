@@ -1,5 +1,5 @@
 import os
-from msb.query_parser import QueryParser
+from lddr.query_parser import QueryParser
 
 class TestSearchSuccess:
     def test_parse_query_str(self):

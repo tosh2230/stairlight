@@ -1,5 +1,7 @@
 import re
 
+from jinja2 import Environment, FileSystemLoader
+
 class QueryParser():
     def __init__(self, sql_path: str=None, query_str: str=None):
         self.sql_path = sql_path

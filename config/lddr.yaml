@@ -1,6 +1,8 @@
 mapping:
   - sql_file: 'tests/sql/test_a.sql'
     table_name: 'PROJECT_X.DATASET_Y.TABLE_A'
+    params:
+      - aaa: aaa
   - sql_file: 'tests/sql/test_b.sql'
     table_name: 'PROJECT_X.DATASET_Y.TABLE_B'
 exclude:
