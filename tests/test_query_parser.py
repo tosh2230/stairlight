@@ -19,9 +19,9 @@ class TestSearchSuccess:
         ]
 
     def test_parse_query_file_a(self):
-        sql_path = './tests/sql/test_a.sql'
-        parser = QueryParser.read_file(sql_path=sql_path)
-        results = parser.parse_query()
+        with open('tests/sql/test_a.sql') as f:
+            query_str = f.read()
+        results = QueryParser(query_str).parse_query()
         assert results == [
             {
                 'table_name': 'PROJECT_A.DATASET_A.TABLE_A',
@@ -31,9 +31,9 @@ class TestSearchSuccess:
         ]
 
     def test_parse_query_file_b(self):
-        sql_path = './tests/sql/test_b.sql'
-        parser = QueryParser.read_file(sql_path=sql_path)
-        results = parser.parse_query()
+        with open('tests/sql/test_b.sql') as f:
+            query_str = f.read()
+        results = QueryParser(query_str).parse_query()
         assert results == [
             {
                 'table_name': 'PROJECT_B.DATASET_B.TABLE_B',

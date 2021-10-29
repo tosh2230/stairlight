@@ -1,17 +1,8 @@
 import re
 
-from jinja2 import Environment, FileSystemLoader
-
 class QueryParser():
-    def __init__(self, sql_path: str=None, query_str: str=None):
-        self.sql_path = sql_path
+    def __init__(self, query_str: str=None):
         self.query_str = query_str
-
-    @classmethod
-    def read_file(cls, sql_path):
-        with open(sql_path) as f:
-            query_str = f.read()
-        return cls(sql_path=sql_path, query_str=query_str)
 
     def parse_query(self):
         # Check the query has cte or not
@@ -38,9 +29,7 @@ class QueryParser():
 
         ref_tables = []
         for table in tables:
-            line = 0
-            if self.sql_path:
-                line = [i for i, line in enumerate(self.query_str.splitlines()) if table in line][0]
+            line = [i for i, line in enumerate(self.query_str.splitlines()) if table in line][0]
             ref_tables.append({
                 'table_name': table,
                 'line': line + 1,

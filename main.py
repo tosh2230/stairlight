@@ -5,12 +5,13 @@ from lddr import Ladder
 
 if __name__ == "__main__":
     config_file = 'config/lddr.yaml'
-    target_dir = str(os.path.dirname(__file__))
+    home_dir = str(os.path.dirname(os.path.abspath(__file__)))
+    template_dir = f'{home_dir}/tests/sql'
     condition = '**/*.sql'
 
     ladder = Ladder(
         config_file=config_file,
-        target_dir=target_dir,
+        template_dir=template_dir,
         condition=condition
     )
     maps = ladder.maps

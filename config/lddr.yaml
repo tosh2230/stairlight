@@ -1,9 +1,22 @@
 mapping:
-  - sql_file: 'tests/sql/test_a.sql'
-    table_name: 'PROJECT_X.DATASET_Y.TABLE_A'
+  - file: 'tests/sql/a/test_a.sql'
+    table: 'PROJECT_X.DATASET_Y.TABLE_A'
     params:
-      - aaa: aaa
-  - sql_file: 'tests/sql/test_b.sql'
-    table_name: 'PROJECT_X.DATASET_Y.TABLE_B'
+      - param_a:
+        - a: a
+          b: b
+        - a: aa
+          b: bb
+        - a: aaa
+          b: bbb
+      - param_x:
+        - x: x
+          y: y
+        - x: xx
+          y: yy
+        - x: xxx
+          y: yyy
+  - file: 'tests/sql/b/test_b.sql'
+    table: 'PROJECT_X.DATASET_Y.TABLE_B'
 exclude:
-  - 'tests/sql/test_exclude.sql'
+  - 'tests/sql/c/test_exclude.sql'

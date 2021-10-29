@@ -4,11 +4,12 @@ from lddr.query_parser import QueryParser
 
 class TestSearchFilesSuccess:
     config_file = 'config/lddr.yaml'
-    target_dir = os.path.dirname(__file__)
-    condition = 'sql/*.sql'
+    tests_dir = str(os.path.dirname(os.path.abspath(__file__)))
+    template_dir = f'{tests_dir}/sql'
+    condition = '**/*.sql'
     ladder = Ladder(
         config_file=config_file,
-        target_dir=target_dir,
+        template_dir=template_dir,
         condition=condition
     )
 

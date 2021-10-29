@@ -1,14 +1,17 @@
+import os
 import pathlib
 import yaml
+from jinja2 import Environment, FileSystemLoader
 
 from lddr.query_parser import QueryParser
 
 class Ladder():
-    def __init__(self, config_file: str, target_dir: str, condition: str):
-        self.target_dir = target_dir
+    def __init__(self, config_file: str, template_dir: str, condition: str):
+        self.template_dir = template_dir
         self.condition = condition
         self.__config = self.read_config(config_file)
         self._maps = {}
+        self._env = Environment(loader=FileSystemLoader(self.template_dir))
         self.create_maps()
 
     @property
@@ -24,42 +27,72 @@ class Ladder():
         return config
 
     def create_maps(self):
-        for sql_file in self.search_files():
-            if self.check_exclude_list(sql_file):
-                parser = QueryParser.read_file(sql_path=sql_file)
-                self.map_tables(sql_path=sql_file, ref_tables=parser.parse_query())
+        for template_file in self.search_template_file():
+            if self.is_exclude_list(template_file):
+                continue
+            param_list = self.get_param_list(template_file)
+            if param_list:
+                for params in param_list:
+                    self.update_map(template_file=template_file, params=params)
+            else:
+                self.update_map(template_file=template_file)
 
-    def search_files(self):
-        path_obj = pathlib.Path(self.target_dir)
+    def update_map(self, template_file, params=[]):
+        query_str = self.render_query(
+            template_file=template_file,
+            params=params
+        )
+        self.remap(
+            file=template_file,
+            upstream_tables=QueryParser(query_str).parse_query()
+        )
+
+    def search_template_file(self):
+        path_obj = pathlib.Path(self.template_dir)
         for p in path_obj.glob(self.condition):
             yield str(p)
 
-    def check_exclude_list(self, sql_file):
-        result = True
-        for exclude in self.__config.get('exclude'):
-            if sql_file.endswith(exclude):
-                result = False
+    def get_param_list(self, template_file):
+        params_list = []
+        for template in self.__config.get('mapping'):
+            if template_file.endswith(template.get('file')):
+                params_list = template.get('params')
+                break
+        return params_list
+
+    def render_query(self, template_file, params):
+        print(self.template_dir)
+        print(template_file)
+        print(template_file.removeprefix(f'{self.template_dir}/'))
+        template = self._env.get_template(template_file.removeprefix(f'{self.template_dir}/'))
+        return template.render(params=params)
+
+    def is_exclude_list(self, sql_file):
+        result = False
+        for exclude_file in self.__config.get('exclude'):
+            if sql_file.endswith(exclude_file):
+                result = True
                 break
         return result
 
-    def map_tables(self, sql_path: str, ref_tables: list):
-        table_name = self.get_table_name(sql_path=sql_path)
-        if not table_name in self._maps:
-            self._maps[table_name] = {}
+    def remap(self, file: str, upstream_tables: list):
+        downstream_table_name = self.get_table_name(file=file)
+        if not downstream_table_name in self._maps:
+            self._maps[downstream_table_name] = {}
 
-        for ref_table in ref_tables:
-            ref_table_name = ref_table['table_name']
-            self._maps[table_name][ref_table_name] = {
-                'file': sql_path,
-                'line': ref_table['line'],
-                'line_str': ref_table['line_str']
+        for upstream_table in upstream_tables:
+            upstream_table_name = upstream_table['table_name']
+            self._maps[downstream_table_name][upstream_table_name] = {
+                'file': file,
+                'line': upstream_table['line'],
+                'line_str': upstream_table['line_str']
             }
 
-    def get_table_name(self, sql_path):
+    def get_table_name(self, file):
         table_name = ''
         mapping = self.__config.get('mapping')
         for pair in mapping:
-            if sql_path.endswith(pair['sql_file']):
-                table_name = pair['table_name']
+            if file.endswith(pair['file']):
+                table_name = pair['table']
                 break
         return table_name
