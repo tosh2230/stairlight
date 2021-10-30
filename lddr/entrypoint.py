@@ -1,9 +1,11 @@
 import pathlib
 import re
+
 import yaml
 from jinja2 import Environment, FileSystemLoader
 
 from lddr.query_parser import QueryParser
+
 
 class Ladder():
     def __init__(self, config_file: str, template_dir: str, condition: str):

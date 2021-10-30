@@ -1,5 +1,7 @@
 import os
+
 from lddr.query_parser import QueryParser
+
 
 class TestSearchSuccess:
     def test_parse_query_str(self):

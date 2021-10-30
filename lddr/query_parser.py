@@ -1,5 +1,6 @@
 import re
 
+
 class QueryParser():
     def __init__(self, query_str: str=None):
         self.query_str = query_str

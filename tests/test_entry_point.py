@@ -1,6 +1,8 @@
 import os
+
 from lddr.entrypoint import Ladder
 from lddr.query_parser import QueryParser
+
 
 class TestSearchFilesSuccess:
     config_file = 'config/lddr.yaml'
