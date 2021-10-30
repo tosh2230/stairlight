@@ -1,19 +1,19 @@
 [tool.poetry]
-name = "msby"
+name = "lddr"
 version = "0.1.0"
 description = ""
 authors = ["tosh223 <rev.to12@gmail.com>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = "^3.6.2"
 PyYAML = "^6.0"
 Jinja2 = "^3.0.2"
 
 [tool.poetry.dev-dependencies]
-pytest = "^3.0"
 flake8 = "^4.0.1"
 isort = "^5.9.3"
+pytest = "^6.2.5"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
