@@ -23,7 +23,7 @@ class Ladder():
     @staticmethod
     def read_config(config_file):
         config = {}
-        if config_file and config_file.endswith(('.yml', '.yaml')) :
+        if config_file and config_file.endswith(('.yml', '.yaml')):
             with open(config_file) as file:
                 config = yaml.load(file, Loader=yaml.SafeLoader)
         return config
@@ -77,7 +77,7 @@ class Ladder():
 
     def remap(self, file: str, upstream_tables: list):
         downstream_table_name = self.get_table_name(file=file)
-        if not downstream_table_name in self._maps:
+        if downstream_table_name not in self._maps:
             self._maps[downstream_table_name] = {}
 
         for upstream_table in upstream_tables:
