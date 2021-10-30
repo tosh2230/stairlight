@@ -8,7 +8,9 @@ class TestSearchSuccess:
             "INNER JOIN PROJECT_X.DATASET_X.TABLE_Y USING(ID)"
         )
         parser = QueryParser(query_str=query_str)
-        results = parser.parse_query()
+        results = []
+        for result in parser.parse_query():
+            results.append(result)
         assert results == [
             {
                 "table_name": "PROJECT_X.DATASET_X.TABLE_X",
@@ -31,7 +33,10 @@ class TestSearchSuccess:
     def test_parse_query_file_a(self):
         with open("tests/sql/test_a.sql") as f:
             query_str = f.read()
-        results = QueryParser(query_str).parse_query()
+        parser = QueryParser(query_str=query_str)
+        results = []
+        for result in parser.parse_query():
+            results.append(result)
         assert results == [
             {
                 "table_name": "PROJECT_A.DATASET_A.TABLE_A",
@@ -45,7 +50,10 @@ class TestSearchSuccess:
     def test_parse_query_file_b(self):
         with open("tests/sql/test_b.sql") as f:
             query_str = f.read()
-        results = QueryParser(query_str).parse_query()
+        parser = QueryParser(query_str=query_str)
+        results = []
+        for result in parser.parse_query():
+            results.append(result)
         assert results == [
             {
                 "table_name": "PROJECT_B.DATASET_B.TABLE_B",

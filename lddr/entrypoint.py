@@ -76,9 +76,9 @@ class Ladder:
                 self._maps[downstream_table_name] = {}
 
             query_str = self.render_query(template_file=template_file, params=params)
-            upstream_tables = QueryParser(query_str).parse_query()
+            query_parser = QueryParser(query_str)
 
-            for upstream_table in upstream_tables:
+            for upstream_table in query_parser.parse_query():
                 upstream_table_name = upstream_table["table_name"]
                 self._maps[downstream_table_name][upstream_table_name] = {
                     "file": template_file,

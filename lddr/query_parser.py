@@ -30,17 +30,13 @@ class QueryParser:
         cte_tables = re.findall(table_pattern, query_group["cte"], re.IGNORECASE)
         tables.extend(cte_tables)
 
-        ref_tables = []
         for table in tables:
             line = [
                 i for i, line in enumerate(self.query_str.splitlines()) if table in line
             ][0]
-            ref_tables.append(
-                {
-                    "table_name": table,
-                    "line": line + 1,
-                    "line_str": self.query_str.splitlines()[line],
-                }
-            )
 
-        return ref_tables
+            yield {
+                "table_name": table,
+                "line": line + 1,
+                "line_str": self.query_str.splitlines()[line],
+            }
