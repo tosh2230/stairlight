@@ -1,5 +1,5 @@
-import os
 import pathlib
+import re
 import yaml
 from jinja2 import Environment, FileSystemLoader
 
@@ -61,10 +61,8 @@ class Ladder():
         return params_list
 
     def render_query(self, template_file, params):
-        print(self.template_dir)
-        print(template_file)
-        print(template_file.removeprefix(f'{self.template_dir}/'))
-        template = self._env.get_template(template_file.removeprefix(f'{self.template_dir}/'))
+        template_file_name = re.sub(f'{self.template_dir}/', '', template_file)
+        template = self._env.get_template(template_file_name)
         return template.render(params=params)
 
     def is_exclude_list(self, sql_file):
