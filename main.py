@@ -12,5 +12,5 @@ if __name__ == "__main__":
     ladder = Ladder(
         config_file=config_file, template_dir=template_dir, condition=condition
     )
-    maps = ladder.maps
-    pprint(maps)
+    pprint(ladder.maps)
+    print("Undefined files are detected!: " + str(ladder.undefined_files))
