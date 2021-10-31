@@ -19,23 +19,26 @@ class Query:
         cte_pattern = r"(?:with|,)\s*(\w+)\s+as\s*"
         ctes = re.findall(cte_pattern, self.query_str, re.IGNORECASE)
 
-        # Check a row number that main query starts
-        main_row_num = 0
+        # Check a boundary that main query starts
+        boundary_num = 0
         main_pattern = r"\)[;\s]*select" if any(ctes) else r"select"
         main_search_result = re.search(main_pattern, self.query_str, re.IGNORECASE)
         if main_search_result:
-            main_row_num = main_search_result.start()
+            boundary_num = main_search_result.start()
 
         # Split the query to 'main' and 'cte'
         query_group = {}
-        query_group["main"] = self.query_str[main_row_num:].strip()
-        query_group["cte"] = self.query_str[:main_row_num].strip()
+        query_group["main"] = self.query_str[boundary_num:].strip()
+        query_group["cte"] = self.query_str[:boundary_num].strip()
 
         table_pattern = r"(?:from|join)\s+([`.\-\w]+)"
         main_tables_with_cte_alias = re.findall(
             table_pattern, query_group["main"], re.IGNORECASE
         )
+
+        # Exclude cte table alias from main tables
         tables = [table for table in main_tables_with_cte_alias if table not in ctes]
+
         cte_tables = re.findall(table_pattern, query_group["cte"], re.IGNORECASE)
         tables.extend(cte_tables)
 
