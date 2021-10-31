@@ -12,7 +12,8 @@ class Query:
     def render(cls, template_file, params):
         env = Environment(loader=FileSystemLoader(os.path.dirname(template_file)))
         template = env.get_template(os.path.basename(template_file))
-        return cls(query_str=template.render(params=params))
+        query_str = template.render(params=params)
+        return cls(query_str=query_str)
 
     def parse(self):
         # Check the query has cte or not

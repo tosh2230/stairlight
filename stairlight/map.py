@@ -12,45 +12,44 @@ class Map:
     def create(self):
         template = Template()
         for template_file in template.search():
-            param_list = self._get_param_list(template_file)
+            param_list = self._get_params(template_file)
             if param_list:
                 for params in param_list:
                     self._remap(template_file=template_file, params=params)
             else:
                 self._remap(template_file=template_file)
 
-    def _get_param_list(self, template_file):
-        params_list = []
+    def _get_params(self, template_file):
+        param_list = []
         for template in self._map_config.get("mapping"):
             if template_file.endswith(template.get("file_suffix")):
-                params_list = template.get("params")
-                break
-        return params_list
+                param_list.append(template.get("params"))
+        return param_list
 
-    def _remap(self, template_file: str, params: list = []):
-        downstream_tables = self._get_mapped_tables(file=template_file)
-        if not downstream_tables:
+    def _remap(self, template_file: str, params: dict = {}):
+        downstream_table = self._get_table(template_file=template_file, params=params)
+        if not downstream_table:
             self.undefined_files.append(template_file)
             return
 
         query = Query.render(template_file=template_file, params=params)
 
-        for downstream_table_name in downstream_tables:
-            if downstream_table_name not in self.maps:
-                self.maps[downstream_table_name] = {}
+        if downstream_table not in self.maps:
+            self.maps[downstream_table] = {}
 
-            for upstream_table in query.parse():
-                upstream_table_name = upstream_table["table_name"]
-                self.maps[downstream_table_name][upstream_table_name] = {
-                    "file": template_file,
-                    "line": upstream_table["line"],
-                    "line_str": upstream_table["line_str"],
-                }
+        for upstream_table in query.parse():
+            upstream_table_name = upstream_table["table_name"]
+            self.maps[downstream_table][upstream_table_name] = {
+                "file": template_file,
+                "line": upstream_table["line"],
+                "line_str": upstream_table["line_str"],
+            }
 
-    def _get_mapped_tables(self, file):
-        mapped_tables = []
-        mapping = self._map_config.get("mapping")
-        for pair in mapping:
-            if file.endswith(pair["file_suffix"]):
-                mapped_tables.append(pair["table"])
-        return mapped_tables
+    def _get_table(self, template_file, params):
+        table = None
+        for template in self._map_config.get("mapping"):
+            if template_file.endswith(
+                template.get("file_suffix")
+            ) and params == template.get("params"):
+                table = template.get("table")
+        return table

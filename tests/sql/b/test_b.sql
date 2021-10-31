@@ -20,7 +20,7 @@ d AS (
 SELECT
     *
 FROM
-    PROJECT_B.DATASET_B.TABLE_B AS b
+    {{ params.PROJECT }}.{{ params.DATASET }}.{{ params.TABLE }} AS b
     INNER JOIN c
         ON b.test_id = c.test_id
     INNER JOIN d
