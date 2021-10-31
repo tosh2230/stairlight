@@ -14,9 +14,6 @@ class StairLight:
     def __init__(self):
         self._map_config = self.read_config(MAP_CONFIG)
         self._sql_config = self.read_config(SQL_CONFIG)
-
-        self.template_dir = self._sql_config.get("items")[0]["path"]
-        self.template_pattern = self._sql_config.get("items")[0]["pattern"]
         self._maps = {}
         self._undefined_files = []
         self.create_maps()
@@ -49,9 +46,16 @@ class StairLight:
                 self.remap(template_file=template_file)
 
     def search_template_file(self):
-        path_obj = pathlib.Path(self.template_dir)
-        for p in path_obj.glob(self.template_pattern):
-            yield str(p)
+        for source in self._sql_config.get("sources"):
+            type = source.get("type")
+            if type.casefold() == "local":
+                path_obj = pathlib.Path(source.get("path"))
+                for p in path_obj.glob(source.get("pattern")):
+                    yield str(p)
+            if type.casefold() in ["gcs", "gs"]:
+                continue
+            if type.casefold() == "s3":
+                continue
 
     def is_excluded(self, sql_file):
         result = False
@@ -64,7 +68,7 @@ class StairLight:
     def get_param_list(self, template_file):
         params_list = []
         for template in self._map_config.get("mapping"):
-            if template_file.endswith(template.get("file")):
+            if template_file.endswith(template.get("file_suffix")):
                 params_list = template.get("params")
                 break
         return params_list
@@ -99,6 +103,6 @@ class StairLight:
         mapped_tables = []
         mapping = self._map_config.get("mapping")
         for pair in mapping:
-            if file.endswith(pair["file"]):
+            if file.endswith(pair["file_suffix"]):
                 mapped_tables.append(pair["table"])
         return mapped_tables

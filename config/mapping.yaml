@@ -1,14 +1,14 @@
 mapping:
-  - file: "tests/sql/a/test_a.sql"
+  - file_suffix: "tests/sql/a/test_a.sql"
     table: "PROJECT_A.DATASET_B.TABLE_C"
-  - file: "tests/sql/b/test_b.sql"
+  - file_suffix: "tests/sql/b/test_b.sql"
     table: "PROJECT_D.DATASET_E.TABLE_F"
     params:
       - sql_param:
           PROJECT: PROJECT_J
           DATASET: DATASET_K
           TABLE: TABLE_L
-  - file: "tests/sql/b/test_b.sql"
+  - file_suffix: "tests/sql/b/test_b.sql"
     table: "PROJECT_G.DATASET_H.TABLE_I"
     params:
       - sql_param:

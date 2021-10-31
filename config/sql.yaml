@@ -1,6 +1,12 @@
-items:
+sources:
   - type: local
     path: "./tests/sql"
+    pattern: "**/*.sql"
+  - type: gcs
+    path: "gs://stairlighttest"
+    pattern: "**/*.sql"
+  - type: s3
+    path: "s3://stairlighttest"
     pattern: "**/*.sql"
 exclude:
   - "tests/sql/c/test_exclude.sql"
