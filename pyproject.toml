@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "lddr"
+name = "stairlight"
 version = "0.1.0"
 description = ""
 authors = ["tosh223 <rev.to12@gmail.com>"]

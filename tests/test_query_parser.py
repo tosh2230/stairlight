@@ -1,4 +1,4 @@
-from lddr.query_parser import QueryParser
+from stairlight.query_parser import QueryParser
 
 
 class TestSearchSuccess:

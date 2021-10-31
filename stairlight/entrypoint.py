@@ -4,10 +4,10 @@ import re
 import yaml
 from jinja2 import Environment, FileSystemLoader
 
-from lddr.query_parser import QueryParser
+from stairlight.query_parser import QueryParser
 
 
-class Ladder:
+class StairLight:
     def __init__(self, config_file: str, template_dir: str, condition: str):
         self.template_dir = template_dir
         self.condition = condition
