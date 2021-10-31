@@ -4,14 +4,18 @@ import re
 import yaml
 from jinja2 import Environment, FileSystemLoader
 
-from stairlight.query_parser import QueryParser
+from stairlight.query import Query
+
+MAP_CONFIG = "./config/mapping.yaml"
+SQLPATH_CONFIG = "./config/sqlpath.yaml"
 
 
 class StairLight:
-    def __init__(self, config_file: str, template_dir: str, condition: str):
+    def __init__(self, template_dir: str, condition: str):
         self.template_dir = template_dir
         self.condition = condition
-        self.__config = self.read_config(config_file)
+        self._map_config = self.read_config(MAP_CONFIG)
+        self._template_path_config = self.read_config(SQLPATH_CONFIG)
         self._maps = {}
         self._undefined_files = []
         self._env = Environment(loader=FileSystemLoader(self.template_dir))
@@ -51,7 +55,7 @@ class StairLight:
 
     def is_excluded(self, sql_file):
         result = False
-        for exclude_file in self.__config.get("exclude"):
+        for exclude_file in self._template_path_config.get("exclude"):
             if sql_file.endswith(exclude_file):
                 result = True
                 break
@@ -59,7 +63,7 @@ class StairLight:
 
     def get_param_list(self, template_file):
         params_list = []
-        for template in self.__config.get("mapping"):
+        for template in self._map_config.get("mapping"):
             if template_file.endswith(template.get("file")):
                 params_list = template.get("params")
                 break
@@ -76,9 +80,9 @@ class StairLight:
                 self._maps[downstream_table_name] = {}
 
             query_str = self.render_query(template_file=template_file, params=params)
-            query_parser = QueryParser(query_str)
+            query = Query(query_str)
 
-            for upstream_table in query_parser.parse_query():
+            for upstream_table in query.parse():
                 upstream_table_name = upstream_table["table_name"]
                 self._maps[downstream_table_name][upstream_table_name] = {
                     "file": template_file,
@@ -93,7 +97,7 @@ class StairLight:
 
     def get_mapped_tables(self, file):
         mapped_tables = []
-        mapping = self.__config.get("mapping")
+        mapping = self._map_config.get("mapping")
         for pair in mapping:
             if file.endswith(pair["file"]):
                 mapped_tables.append(pair["table"])

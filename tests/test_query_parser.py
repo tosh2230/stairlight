@@ -1,4 +1,4 @@
-from stairlight.query_parser import QueryParser
+from stairlight.query import Query
 
 
 class TestSearchSuccess:
@@ -7,9 +7,9 @@ class TestSearchSuccess:
             "SELECT * FROM PROJECT_X.DATASET_X.TABLE_X "
             "INNER JOIN PROJECT_X.DATASET_X.TABLE_Y USING(ID)"
         )
-        parser = QueryParser(query_str=query_str)
+        query = Query(query_str=query_str)
         results = []
-        for result in parser.parse_query():
+        for result in query.parse():
             results.append(result)
         assert results == [
             {
@@ -33,9 +33,9 @@ class TestSearchSuccess:
     def test_parse_query_file_a(self):
         with open("tests/sql/test_a.sql") as f:
             query_str = f.read()
-        parser = QueryParser(query_str=query_str)
+        query = Query(query_str=query_str)
         results = []
-        for result in parser.parse_query():
+        for result in query.parse():
             results.append(result)
         assert results == [
             {
@@ -50,9 +50,9 @@ class TestSearchSuccess:
     def test_parse_query_file_b(self):
         with open("tests/sql/test_b.sql") as f:
             query_str = f.read()
-        parser = QueryParser(query_str=query_str)
+        query = Query(query_str=query_str)
         results = []
-        for result in parser.parse_query():
+        for result in query.parse():
             results.append(result)
         assert results == [
             {

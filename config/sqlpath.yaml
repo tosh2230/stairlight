@@ -1,0 +1,5 @@
+sqlpath:
+  - type: local
+    path: tests/sql/*
+exclude:
+  - "tests/sql/c/test_exclude.sql"

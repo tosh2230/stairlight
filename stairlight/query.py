@@ -1,11 +1,11 @@
 import re
 
 
-class QueryParser:
+class Query:
     def __init__(self, query_str: str = None):
         self.query_str = query_str
 
-    def parse_query(self):
+    def parse(self):
         # Check the query has cte or not
         cte_pattern = r"(?:with|,)\s*(\w+)\s+as\s*"
         ctes = re.findall(cte_pattern, self.query_str, re.IGNORECASE)

@@ -15,5 +15,3 @@ mapping:
           PROJECT: PROJECT_M
           DATASET: DATASET_N
           TABLE: TABLE_O
-exclude:
-  - "tests/sql/c/test_exclude.sql"
