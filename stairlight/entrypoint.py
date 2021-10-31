@@ -1,5 +1,5 @@
+import os
 import pathlib
-import re
 
 import yaml
 from jinja2 import Environment, FileSystemLoader
@@ -7,18 +7,18 @@ from jinja2 import Environment, FileSystemLoader
 from stairlight.query import Query
 
 MAP_CONFIG = "./config/mapping.yaml"
-SQLPATH_CONFIG = "./config/sqlpath.yaml"
+SQL_CONFIG = "./config/sql.yaml"
 
 
 class StairLight:
-    def __init__(self, template_dir: str, condition: str):
-        self.template_dir = template_dir
-        self.condition = condition
+    def __init__(self):
         self._map_config = self.read_config(MAP_CONFIG)
-        self._template_path_config = self.read_config(SQLPATH_CONFIG)
+        self._sql_config = self.read_config(SQL_CONFIG)
+
+        self.template_dir = self._sql_config.get("items")[0]["path"]
+        self.template_pattern = self._sql_config.get("items")[0]["pattern"]
         self._maps = {}
         self._undefined_files = []
-        self._env = Environment(loader=FileSystemLoader(self.template_dir))
         self.create_maps()
 
     @property
@@ -50,12 +50,12 @@ class StairLight:
 
     def search_template_file(self):
         path_obj = pathlib.Path(self.template_dir)
-        for p in path_obj.glob(self.condition):
+        for p in path_obj.glob(self.template_pattern):
             yield str(p)
 
     def is_excluded(self, sql_file):
         result = False
-        for exclude_file in self._template_path_config.get("exclude"):
+        for exclude_file in self._sql_config.get("exclude"):
             if sql_file.endswith(exclude_file):
                 result = True
                 break
@@ -91,8 +91,8 @@ class StairLight:
                 }
 
     def render_query(self, template_file, params):
-        template_file_name = re.sub(f"{self.template_dir}/", "", template_file)
-        template = self._env.get_template(template_file_name)
+        env = Environment(loader=FileSystemLoader(os.path.dirname(template_file)))
+        template = env.get_template(os.path.basename(template_file))
         return template.render(params=params)
 
     def get_mapped_tables(self, file):

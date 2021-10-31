@@ -1,5 +1,6 @@
-sqlpath:
+items:
   - type: local
-    path: tests/sql/*
+    path: "./tests/sql"
+    pattern: "**/*.sql"
 exclude:
   - "tests/sql/c/test_exclude.sql"
