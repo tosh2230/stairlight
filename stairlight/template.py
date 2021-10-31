@@ -21,14 +21,13 @@ class Template:
         path_obj = pathlib.Path(source.get("path"))
         for p in path_obj.glob(source.get("pattern")):
             if self._is_excluded(str(p)):
-                yield str(p)
-            else:
                 continue
+            yield str(p)
 
     def _is_excluded(self, sql_file):
-        result = True
+        result = False
         for exclude_file in self._sql_config.get("exclude"):
             if sql_file.endswith(exclude_file):
-                result = False
+                result = True
                 break
         return result

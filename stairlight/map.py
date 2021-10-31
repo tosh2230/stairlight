@@ -52,4 +52,5 @@ class Map:
                 template.get("file_suffix")
             ) and params == template.get("params"):
                 table = template.get("table")
+                break
         return table
