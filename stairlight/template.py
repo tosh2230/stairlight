@@ -11,21 +11,21 @@ class Template:
         for source in self._sql_config.get("sources"):
             type = source.get("type")
             if type.casefold() in ["local", "fs"]:
-                yield from self.search_fs(source)
+                yield from self._search_fs(source)
             if type.casefold() in ["gcs", "gs"]:
                 continue
             if type.casefold() == "s3":
                 continue
 
-    def search_fs(self, source):
+    def _search_fs(self, source):
         path_obj = pathlib.Path(source.get("path"))
         for p in path_obj.glob(source.get("pattern")):
-            if self.is_excluded(str(p)):
+            if self._is_excluded(str(p)):
                 yield str(p)
             else:
                 continue
 
-    def is_excluded(self, sql_file):
+    def _is_excluded(self, sql_file):
         result = True
         for exclude_file in self._sql_config.get("exclude"):
             if sql_file.endswith(exclude_file):

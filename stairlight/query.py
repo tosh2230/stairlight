@@ -1,6 +1,5 @@
-import re
-
 import os
+import re
 
 from jinja2 import Environment, FileSystemLoader
 
