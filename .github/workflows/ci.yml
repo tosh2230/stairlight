@@ -21,7 +21,7 @@ jobs:
           poetry install
       - name: Check linting with flake8
         run: |
-          flake8 stairlight tests
+          poetry run flake8 stairlight tests
       - name: Test with pytest
         run: |
-          pytest -v --cov=stairlight
+          poetry run pytest -v --cov=stairlight
