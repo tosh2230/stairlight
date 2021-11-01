@@ -1,11 +1,11 @@
 import pathlib
 
-from stairlight.config import SQL_CONFIG, read_config
+import stairlight.config as config
 
 
 class Template:
     def __init__(self):
-        self._sql_config = read_config(SQL_CONFIG)
+        self._sql_config = config.read(config.SQL_CONFIG)
 
     def search(self):
         for source in self._sql_config.get("sources"):

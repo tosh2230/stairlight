@@ -1,11 +1,11 @@
-from stairlight.config import MAP_CONFIG, read_config
+import stairlight.config as config
 from stairlight.query import Query
 from stairlight.template import Template
 
 
 class Map:
     def __init__(self, maps={}) -> None:
-        self._map_config = read_config(MAP_CONFIG)
+        self._map_config = config.read(config.MAP_CONFIG)
         self.maps = maps
         self.undefined_files = []
 
