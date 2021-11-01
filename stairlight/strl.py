@@ -27,16 +27,15 @@ class StairLight:
     def all(self):
         return json.dumps(self._maps, indent=2)
 
-    def up(self, table_name=None, sql_path=None):
-        result = None
-        if table_name:
-            result = json.dumps(self._maps.get(table_name), indent=2)
-        elif sql_path:
-            pass
-        return result
+    def up(self, table_name):
+        result = self._maps.get(table_name)
+        return json.dumps(result, indent=2)
 
-    def down(self, table_name=None, sql_path=None):
-        pass
+    def down(self, table_name):
+        result = {}
+        for key in [k for k, v in self._maps.items() if v.get(table_name)]:
+            result[key] = self._maps[key][table_name]
+        return json.dumps(result, indent=2)
 
     def check_config(self):
         pass

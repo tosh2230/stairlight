@@ -1,8 +1,8 @@
 from stairlight.query import Query
 
 
-class TestSearchSuccess:
-    def test_parse_query_str(self):
+class TestSuccess:
+    def test_parse_query(self):
         query_str = (
             "SELECT * FROM PROJECT_X.DATASET_X.TABLE_X "
             "INNER JOIN PROJECT_X.DATASET_X.TABLE_Y USING(ID)"
@@ -30,7 +30,7 @@ class TestSearchSuccess:
             },
         ]
 
-    def test_parse_query_file_a(self):
+    def test_parse_file_a(self):
         with open("tests/sql/test_a.sql") as f:
             query_str = f.read()
         query = Query(query_str=query_str)
@@ -47,7 +47,7 @@ class TestSearchSuccess:
             }
         ]
 
-    def test_parse_query_file_b(self):
+    def test_parse_file_b(self):
         with open("tests/sql/test_b.sql") as f:
             query_str = f.read()
         query = Query(query_str=query_str)
