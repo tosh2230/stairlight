@@ -34,7 +34,7 @@ class Template:
         return result
 
 
-def get_variables(template_file):
+def get_jinja_params(template_file):
     with open(template_file) as f:
         template_str = f.read()
     jinja_expressions = "".join(re.findall("{{[^}]*}}", template_str, re.IGNORECASE))

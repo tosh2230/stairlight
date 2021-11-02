@@ -1,6 +1,7 @@
 import json
 
 from stairlight.map import Map
+import stairlight.config as config
 
 
 class StairLight:
@@ -40,5 +41,5 @@ class StairLight:
             result[key] = self._maps[key][table_name]
         return json.dumps(result, indent=2)
 
-    def check_config(self):
-        pass
+    def make_config(self):
+        config.make_template(self._undefined_files)

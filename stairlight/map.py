@@ -1,6 +1,6 @@
 import stairlight.config as config
 from stairlight.query import Query
-from stairlight.template import Template, get_variables
+from stairlight.template import Template, get_jinja_params
 
 
 class Map:
@@ -34,7 +34,7 @@ class Map:
             self.undefined_files.append(
                 {
                     "template_file": template_file,
-                    "undefined_variables": get_variables(template_file),
+                    "params": get_jinja_params(template_file),
                 }
             )
             return
