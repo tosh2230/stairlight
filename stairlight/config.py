@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 import yaml
 
 MAP_CONFIG = "./config/mapping.yaml"
-SQL_CONFIG = "./config/sql.yaml"
+STRL_CONFIG = "./config/stairlight.yaml"
 
 
 def read(config_file):

@@ -8,4 +8,4 @@ class TestSuccess:
 
     @staticmethod
     def test_read_sql():
-        assert config.read(config.SQL_CONFIG)
+        assert config.read(config.STRL_CONFIG)

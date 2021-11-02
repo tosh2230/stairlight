@@ -6,10 +6,10 @@ import stairlight.config as config
 
 class Template:
     def __init__(self):
-        self._sql_config = config.read(config.SQL_CONFIG)
+        self._strl_config = config.read(config.STRL_CONFIG)
 
     def search(self):
-        for source in self._sql_config.get("sources"):
+        for source in self._strl_config.get("sources"):
             type = source.get("type")
             if type.casefold() in ["local", "fs"]:
                 yield from self.search_fs(source)
@@ -27,7 +27,7 @@ class Template:
 
     def is_excluded(self, template_file):
         result = False
-        for exclude_file in self._sql_config.get("exclude"):
+        for exclude_file in self._strl_config.get("exclude"):
             if template_file.endswith(exclude_file):
                 result = True
                 break
