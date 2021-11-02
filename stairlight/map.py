@@ -1,6 +1,6 @@
 import stairlight.config as config
 from stairlight.query import Query
-from stairlight.template import Template
+from stairlight.template import Template, get_variables
 
 
 class Map:
@@ -8,10 +8,10 @@ class Map:
         self._map_config = config.read(config.MAP_CONFIG)
         self.maps = maps
         self.undefined_files = []
+        self.template = Template()
 
     def create(self):
-        template = Template()
-        for template_file in template.search():
+        for template_file in self.template.search():
             param_list = self._get_params(template_file)
             if param_list:
                 for params in param_list:
@@ -28,8 +28,15 @@ class Map:
 
     def _remap(self, template_file: str, params: dict = {}):
         downstream_table = self._get_table(template_file=template_file, params=params)
+
+        # Grep jinja template variables to add a new configuration
         if not downstream_table:
-            self.undefined_files.append(template_file)
+            self.undefined_files.append(
+                {
+                    "template_file": template_file,
+                    "undefined_variables": get_variables(template_file),
+                }
+            )
             return
 
         query = Query.render(template_file=template_file, params=params)

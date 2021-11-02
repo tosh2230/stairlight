@@ -13,9 +13,10 @@ class TestSuccess:
         result = []
         for file in self.template.search_fs(source=source):
             result.append(file)
-        assert result == [
-            "tests/sql/test_b.sql",
+        assert sorted(result) == [
             "tests/sql/test_a.sql",
+            "tests/sql/test_b.sql",
+            "tests/sql/test_c.sql",
         ]
 
     def test_is_excluded(self):

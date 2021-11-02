@@ -9,6 +9,7 @@ class TestProperty:
         assert sorted(stair_light.undefined_files) == [
             "tests/sql/test_a.sql",
             "tests/sql/test_b.sql",
+            "tests/sql/test_c.sql",
         ]
 
 
