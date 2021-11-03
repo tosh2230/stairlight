@@ -6,7 +6,11 @@ class TestProperty:
         assert len(stair_light.maps) > 0
 
     def test_undefined_files(self, stair_light):
-        assert sorted(stair_light.undefined_files) == [
+        file_keys = [
+            undefined_file.get("template_file")
+            for undefined_file in stair_light.undefined_files
+        ]
+        assert sorted(file_keys) == [
             "tests/sql/test_a.sql",
             "tests/sql/test_b.sql",
             "tests/sql/test_c.sql",

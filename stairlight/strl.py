@@ -26,10 +26,7 @@ class StairLight:
 
     @property
     def undefined_files(self):
-        return [
-            undefined_file.get("template_file")
-            for undefined_file in self._undefined_files
-        ]
+        return self._undefined_files
 
     def all(self):
         return json.dumps(self._maps, indent=2)

@@ -10,8 +10,8 @@ def set_log_config():
         "%(asctime)s.%(msecs)03d %(filename)s:%(funcName)s:%(lineno)d "
         "[%(levelname)s]%(message)s"
     )
-    date_fmt = "%Y-%m-%d %H:%M:%S"
-    logging.basicConfig(level=LOG_LEVEL, format=fmt, datefmt=date_fmt)
+    datefmt = "%Y-%m-%d %H:%M:%S"
+    logging.basicConfig(level=LOG_LEVEL, format=fmt, datefmt=datefmt)
 
 
 if __name__ == "__main__":
