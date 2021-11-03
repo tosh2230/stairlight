@@ -1,19 +1,27 @@
 from datetime import datetime, timezone
+import glob
+import re
 import yaml
 
-MAP_CONFIG = "mapping.yaml"
-STRL_CONFIG = "stairlight.yaml"
+MAP_CONFIG = "mapping"
+STRL_CONFIG = "stairlight"
 
 
 class Reader:
     def __init__(self, path):
         self.path = path
 
-    def read(self, config_file):
+    def read(self, prefix):
         config = {}
-        if config_file and config_file.endswith((".yml", ".yaml")):
-            with open(self.path + config_file) as file:
-                config = yaml.load(file, Loader=yaml.SafeLoader)
+        pattern = f".*{prefix}.ya?ml"
+        config_file = [
+            p
+            for p in glob.glob(f"{self.path}/**", recursive=False)
+            if re.search(pattern, p)
+        ]
+        if config_file:
+            with open(config_file[0]) as file:
+                config = yaml.safe_load(file)
         return config
 
 
@@ -21,7 +29,7 @@ def make_template(undefined_files):
     now = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
     file_name = f"./config/mapping_undefined_{now}.yaml"
     with open(file_name, "w") as f:
-        yaml.dump(build_template_dict(undefined_files), f)
+        yaml.safe_dump(build_template_dict(undefined_files), f)
     return file_name
 
 
