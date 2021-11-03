@@ -2,13 +2,13 @@ import stairlight.config as config
 
 
 class TestSuccess:
-    @staticmethod
-    def test_read_map():
-        assert config.read(config.MAP_CONFIG)
+    reader = config.Reader(path="./config/")
 
-    @staticmethod
-    def test_read_sql():
-        assert config.read(config.STRL_CONFIG)
+    def test_read_map(self):
+        assert self.reader.read(config.MAP_CONFIG)
+
+    def test_read_sql(self):
+        assert self.reader.read(config.STRL_CONFIG)
 
     @staticmethod
     def test_build_template_dict():

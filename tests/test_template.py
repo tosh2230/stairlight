@@ -1,8 +1,11 @@
+import stairlight.config as config
 import stairlight.template as template
 
 
 class TestSuccess:
-    template = template.Template()
+    config_reader = config.Reader("./config/")
+    strl_config = config_reader.read(config.STRL_CONFIG)
+    template = template.Template(strl_config=strl_config)
 
     def test_search_fs(self):
         source = {

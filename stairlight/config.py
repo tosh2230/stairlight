@@ -1,17 +1,20 @@
 from datetime import datetime, timezone
-
 import yaml
 
-MAP_CONFIG = "./config/mapping.yaml"
-STRL_CONFIG = "./config/stairlight.yaml"
+MAP_CONFIG = "mapping.yaml"
+STRL_CONFIG = "stairlight.yaml"
 
 
-def read(config_file):
-    config = {}
-    if config_file and config_file.endswith((".yml", ".yaml")):
-        with open(config_file) as file:
-            config = yaml.load(file, Loader=yaml.SafeLoader)
-    return config
+class Reader:
+    def __init__(self, path):
+        self.path = path
+
+    def read(self, config_file):
+        config = {}
+        if config_file and config_file.endswith((".yml", ".yaml")):
+            with open(self.path + config_file) as file:
+                config = yaml.load(file, Loader=yaml.SafeLoader)
+        return config
 
 
 def make_template(undefined_files):

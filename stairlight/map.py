@@ -1,14 +1,13 @@
-import stairlight.config as config
 from stairlight.query import Query
 from stairlight.template import Template, get_jinja_params
 
 
 class Map:
-    def __init__(self, maps={}) -> None:
-        self._map_config = config.read(config.MAP_CONFIG)
+    def __init__(self, map_config, strl_config, maps={}) -> None:
+        self._map_config = map_config
         self.maps = maps
         self.undefined_files = []
-        self.template = Template()
+        self.template = Template(strl_config=strl_config)
 
     def create(self):
         for template_file in self.template.search():

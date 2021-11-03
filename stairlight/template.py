@@ -1,12 +1,10 @@
 import pathlib
 import re
 
-import stairlight.config as config
-
 
 class Template:
-    def __init__(self):
-        self._strl_config = config.read(config.STRL_CONFIG)
+    def __init__(self, strl_config):
+        self._strl_config = strl_config
 
     def search(self):
         for source in self._strl_config.get("sources"):
