@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+
 import yaml
 
 MAP_CONFIG = "./config/mapping.yaml"
@@ -15,8 +16,10 @@ def read(config_file):
 
 def make_template(undefined_files):
     now = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
-    with open(f"./config/mapping_undefined_{now}.yaml", "w") as f:
+    file_name = f"./config/mapping_undefined_{now}.yaml"
+    with open(file_name, "w") as f:
         yaml.dump(build_template_dict(undefined_files), f)
+    return file_name
 
 
 def build_template_dict(undefined_files):

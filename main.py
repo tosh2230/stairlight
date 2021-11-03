@@ -1,15 +1,25 @@
+import logging
+
 from stairlight import StairLight
 
-if __name__ == "__main__":
-    stair_light = StairLight()
-    print("stair_light.all()")
-    print(stair_light.all())
-    print()
-    print('stair_light.up(table_name="PROJECT_D.DATASET_E.TABLE_F")')
-    print(stair_light.up(table_name="PROJECT_D.DATASET_E.TABLE_F"))
-    print()
-    print('stair_light.down(table_name="PROJECT_C.DATASET_C.TABLE_C")')
-    print(stair_light.down(table_name="PROJECT_C.DATASET_C.TABLE_C"))
-    print("Undefined files are detected!: " + str(stair_light.undefined_files))
+LOG_LEVEL = logging.INFO
 
+
+def set_log_config():
+    fmt = (
+        "%(asctime)s.%(msecs)03d %(filename)s:%(funcName)s:%(lineno)d "
+        "[%(levelname)s]%(message)s"
+    )
+    date_fmt = "%Y-%m-%d %H:%M:%S"
+    logging.basicConfig(level=LOG_LEVEL, format=fmt, datefmt=date_fmt)
+
+
+if __name__ == "__main__":
+    set_log_config()
+    logger = logging.getLogger(__name__)
+
+    stair_light = StairLight()
+    stair_light.all()
+    stair_light.up(table_name="PROJECT_D.DATASET_E.TABLE_F")
+    stair_light.down(table_name="PROJECT_C.DATASET_C.TABLE_C")
     stair_light.make_config()
