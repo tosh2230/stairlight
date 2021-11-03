@@ -20,6 +20,6 @@ if __name__ == "__main__":
 
     stair_light = StairLight()
     stair_light.all()
-    stair_light.up(table_name="PROJECT_D.DATASET_E.TABLE_F")
-    stair_light.down(table_name="PROJECT_C.DATASET_C.TABLE_C")
-    stair_light.make_config()
+    stair_light.up(table_name="PROJECT_D.DATASET_E.TABLE_F", recursive=True)
+    stair_light.down(table_name="PROJECT_C.DATASET_C.TABLE_C", recursive=True)
+    # stair_light.make_config()

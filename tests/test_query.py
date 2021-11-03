@@ -71,3 +71,28 @@ class TestSuccess:
                 "line_str": "        PROJECT_d.DATASET_d.TABLE_d",
             },
         ]
+
+    # def test_parse_file_c(self):
+    #     with open("tests/sql/test_c.sql") as f:
+    #         query_str = f.read()
+    #     query = Query(query_str=query_str)
+    #     results = []
+    #     for result in query.parse():
+    #         results.append(result)
+    #     assert results == [
+    #         {
+    #             "table_name": "{{ params.sub_table_01 }}",
+    #             "line": 6,
+    #             "line_str": "        {{ params.sub_table_01 }}",
+    #         },
+    #         {
+    #             "table_name": "{{ params.sub_table_02 }}",
+    #             "line": 15,
+    #             "line_str": "        {{ params.sub_table_02 }}",
+    #         },
+    #         {
+    #             "table_name": "{{ params.main_table }}",
+    #             "line": 23,
+    #             "line_str": "    {{ params.main_table }} AS b",
+    #         },
+    #     ]
