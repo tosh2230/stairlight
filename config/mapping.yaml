@@ -1,19 +1,19 @@
 mapping:
-  - file_suffix: "tests/sql/a/test_a.sql"
+  - file_suffix: "tests/sql/main/test_a.sql"
     table: "PROJECT_A.DATASET_B.TABLE_C"
-  - file_suffix: "tests/sql/b/test_b.sql"
+  - file_suffix: "tests/sql/main/test_b.sql"
     table: "PROJECT_D.DATASET_E.TABLE_F"
     params:
       PROJECT: PROJECT_J
       DATASET: DATASET_K
       TABLE: TABLE_L
-  - file_suffix: "tests/sql/b/test_b.sql"
+  - file_suffix: "tests/sql/main/test_b.sql"
     table: "PROJECT_G.DATASET_H.TABLE_I"
     params:
       PROJECT: PROJECT_M
       DATASET: DATASET_N
       TABLE: TABLE_O
-  - file_suffix: "tests/sql/c/test_c.sql"
+  - file_suffix: "tests/sql/main/test_c.sql"
     table: "PROJECT_J.DATASET_K.TABLE_L"
     params:
       main_table: "PROJECT_P.DATASET_Q.TABLE_R"

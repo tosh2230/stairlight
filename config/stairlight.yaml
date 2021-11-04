@@ -9,7 +9,7 @@ sources:
     path: "s3://stairlighttest"
     pattern: "**/*.sql"
 exclude:
-  - "tests/sql/c/test_exclude.sql"
+  - "tests/sql/main/test_exclude.sql"
 logging:
   level: INFO
   fmt: "%(asctime)s.%(msecs)03d %(filename)s:%(funcName)s:%(lineno)d [%(levelname)s]%(message)s"

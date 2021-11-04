@@ -3,7 +3,7 @@ WITH c AS (
         test_id,
         col_c
     FROM
-        {{ params.sub_table_01 }}
+        PROJECT_C.DATASET_C.TABLE_C
     WHERE
         0 = 0
 ),
@@ -12,7 +12,7 @@ d AS (
         test_id,
         col_d
     FROM
-        {{ params.sub_table_02 }}
+        PROJECT_d.DATASET_d.TABLE_d
     WHERE
         0 = 0
 )
@@ -20,7 +20,7 @@ d AS (
 SELECT
     *
 FROM
-    {{ params.main_table }} AS b
+    {{ params.PROJECT }}.{{ params.DATASET }}.{{ params.TABLE }} AS b
     INNER JOIN c
         ON b.test_id = c.test_id
     INNER JOIN d
