@@ -1,5 +1,5 @@
 sources:
-  - type: local
+  - type: fs
     path: "./tests/sql"
     pattern: "**/*.sql"
   - type: gcs

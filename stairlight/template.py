@@ -1,6 +1,12 @@
 import pathlib
 import re
 
+TYPES = {
+    "FS": "fs",
+    "GCS": "gcs",
+    "S3": "s3",
+}
+
 
 class Template:
     def __init__(self, strl_config):
@@ -9,11 +15,11 @@ class Template:
     def search(self):
         for source in self._strl_config.get("sources"):
             type = source.get("type")
-            if type.casefold() in ["local", "fs"]:
+            if type.casefold() == TYPES["FS"]:
                 yield from self.search_fs(source)
-            if type.casefold() in ["gcs", "gs"]:
+            elif type.casefold() == TYPES["GCS"]:
                 continue
-            if type.casefold() == "s3":
+            elif type.casefold() == TYPES["S3"]:
                 continue
 
     def search_fs(self, source):
@@ -21,7 +27,7 @@ class Template:
         for p in path_obj.glob(source.get("pattern")):
             if self.is_excluded(str(p)):
                 continue
-            yield str(p)
+            yield TYPES["FS"], str(p)
 
     def is_excluded(self, template_file):
         result = False

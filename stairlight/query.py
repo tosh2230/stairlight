@@ -3,17 +3,28 @@ import re
 
 from jinja2 import Environment, FileSystemLoader
 
+from stairlight.template import TYPES
+
 
 class Query:
     def __init__(self, query_str: str = None):
         self.query_str = query_str
 
     @classmethod
-    def render(cls, template_file, params):
+    def render(cls, type, template_file, params):
+        if type == TYPES["FS"]:
+            query_str = cls._render_fs(template_file, params)
+        elif type.casefold() == TYPES["GCS"]:
+            pass
+        elif type.casefold() == TYPES["S3"]:
+            pass
+        return cls(query_str=query_str)
+
+    @staticmethod
+    def _render_fs(template_file, params):
         env = Environment(loader=FileSystemLoader(os.path.dirname(template_file)))
         template = env.get_template(os.path.basename(template_file))
-        query_str = template.render(params=params)
-        return cls(query_str=query_str)
+        return template.render(params=params)
 
     def parse(self):
         # Check the query has cte or not

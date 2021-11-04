@@ -10,13 +10,13 @@ class Map:
         self.template = Template(strl_config=strl_config)
 
     def create(self):
-        for template_file in self.template.search():
+        for type, template_file in self.template.search():
             param_list = self._get_params(template_file)
             if param_list:
                 for params in param_list:
-                    self._remap(template_file=template_file, params=params)
+                    self._remap(type=type, template_file=template_file, params=params)
             else:
-                self._remap(template_file=template_file)
+                self._remap(type=type, template_file=template_file)
 
     def _get_params(self, template_file):
         param_list = []
@@ -25,7 +25,7 @@ class Map:
                 param_list.append(template.get("params"))
         return param_list
 
-    def _remap(self, template_file: str, params: dict = {}):
+    def _remap(self, type: str, template_file: str, params: dict = {}):
         downstream_table = self._get_table(template_file=template_file, params=params)
 
         # Grep jinja template variables to add a new configuration
@@ -38,7 +38,7 @@ class Map:
             )
             return
 
-        query = Query.render(template_file=template_file, params=params)
+        query = Query.render(type=type, template_file=template_file, params=params)
 
         if downstream_table not in self.maps:
             self.maps[downstream_table] = {}
