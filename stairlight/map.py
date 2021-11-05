@@ -28,7 +28,7 @@ class Map:
     def _remap(self, type: str, template_file: str, params: dict = {}):
         downstream_table = self._get_table(template_file=template_file, params=params)
 
-        # Grep jinja template variables to add a new configuration
+        # Grep jinja template variables to suggest new configurations
         if not downstream_table:
             self.undefined_files.append(
                 {

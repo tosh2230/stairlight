@@ -1,6 +1,10 @@
 import pathlib
 import re
 
+from google.cloud import storage
+
+# from google.oauth2 import service_account
+
 TYPES = {
     "FS": "fs",
     "GCS": "gcs",
@@ -18,7 +22,7 @@ class Template:
             if type.casefold() == TYPES["FS"]:
                 yield from self.search_fs(source)
             elif type.casefold() == TYPES["GCS"]:
-                continue
+                yield from self.search_gcs(source)
             elif type.casefold() == TYPES["S3"]:
                 continue
 
@@ -28,6 +32,16 @@ class Template:
             if self.is_excluded(str(p)):
                 continue
             yield TYPES["FS"], str(p)
+
+    def search_gcs(self, source):
+        client = storage.Client(credentials=None, project=source.get("project"))
+        blobs = client.list_blobs(
+            "stairlight", prefix=source.get("prefix"), delimiter="/"
+        )
+        for blob in blobs:
+            if blob.name == source.get("prefix"):
+                continue
+            yield TYPES["GCS"], blob.name
 
     def is_excluded(self, template_file):
         result = False
