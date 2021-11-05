@@ -3,8 +3,6 @@ import re
 
 from google.cloud import storage
 
-# from google.oauth2 import service_account
-
 TYPES = {
     "FS": "fs",
     "GCS": "gcs",
@@ -52,8 +50,14 @@ class Template:
         return result
 
 
-def get_jinja_params(template_file):
-    with open(template_file) as f:
-        template_str = f.read()
-    jinja_expressions = "".join(re.findall("{{[^}]*}}", template_str, re.IGNORECASE))
-    return re.findall("[^{} ]+", jinja_expressions, re.IGNORECASE)
+def get_jinja_params(type, template_file):
+    results = []
+    if type == TYPES["FS"]:
+        with open(template_file) as f:
+            template_str = f.read()
+        jinja_expressions = "".join(
+            re.findall("{{[^}]*}}", template_str, re.IGNORECASE)
+        )
+        results = re.findall("[^{} ]+", jinja_expressions, re.IGNORECASE)
+
+    return results

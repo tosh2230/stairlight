@@ -23,7 +23,9 @@ class TestSuccess:
 
     @staticmethod
     def test_get_jinja_params():
-        assert sorted(template.get_jinja_params("tests/sql/main/test_c.sql")) == [
+        assert sorted(
+            template.get_jinja_params(template.TYPES["FS"], "tests/sql/main/test_c.sql")
+        ) == [
             "params.main_table",
             "params.sub_table_01",
             "params.sub_table_02",

@@ -33,7 +33,7 @@ class Map:
             self.undefined_files.append(
                 {
                     "template_file": template_file,
-                    "params": get_jinja_params(template_file),
+                    "params": get_jinja_params(type=type, template_file=template_file),
                 }
             )
             return
