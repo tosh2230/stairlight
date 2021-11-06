@@ -1,16 +1,23 @@
+import stairlight.config as config
 from stairlight.query import Query
 from stairlight.template import SQLTemplate, SourceType
 
 
 class TestSuccess:
     def test_render_fs(self):
+        config_reader = config.Reader("./config/")
+        map_config = config_reader.read(config.MAP_CONFIG)
         params = {
             "main_table": "PROJECT_P.DATASET_Q.TABLE_R",
             "sub_table_01": "PROJECT_S.DATASET_T.TABLE_U",
             "sub_table_02": "PROJECT_V.DATASET_W.TABLE_X",
         }
-        sql_template = SQLTemplate(SourceType.FS, "tests/sql/main/test_c.sql", params)
-        query_str = Query.render_fs(sql_template, params)
+        sql_template = SQLTemplate(
+            map_config=map_config,
+            source_type=SourceType.FS,
+            file_path="tests/sql/main/test_c.sql",
+        )
+        query_str = Query.render_fs(sql_template=sql_template, params=params)
         expected = """WITH c AS (
     SELECT
         test_id,

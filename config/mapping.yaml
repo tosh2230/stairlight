@@ -19,3 +19,13 @@ mapping:
       main_table: "PROJECT_P.DATASET_Q.TABLE_R"
       sub_table_01: "PROJECT_S.DATASET_T.TABLE_U"
       sub_table_02: "PROJECT_V.DATASET_W.TABLE_X"
+  - bucket: "stairlight"
+    file_suffix: "sql/test_a.sql"
+    table: "PROJECT_a.DATASET_b.TABLE_c"
+  - bucket: "stairlight"
+    file_suffix: "sql/test_b.sql"
+    table: "PROJECT_d.DATASET_e.TABLE_f"
+    params:
+      PROJECT: PROJECT_g
+      DATASET: DATASET_h
+      TABLE: TABLE_i

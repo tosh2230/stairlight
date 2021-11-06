@@ -1,4 +1,5 @@
 import stairlight.config as config
+import stairlight.template as template
 
 
 class TestSuccess:
@@ -10,11 +11,15 @@ class TestSuccess:
     def test_read_sql(self):
         assert self.reader.read(config.STRL_CONFIG)
 
-    @staticmethod
-    def test_build_template_dict():
+    def test_build_template_dict(self):
+        sql_template = template.SQLTemplate(
+            map_config=self.reader.read(config.MAP_CONFIG),
+            source_type=template.SourceType.FS,
+            file_path="tests/sql/test_c.sql",
+        )
         undefined_files = [
             {
-                "template_file": "tests/sql/test_c.sql",
+                "sql_template": sql_template,
                 "params": [
                     "main_table",
                     "sub_table_01",

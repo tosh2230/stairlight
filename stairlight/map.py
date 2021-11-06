@@ -1,5 +1,5 @@
 from stairlight.query import Query
-from stairlight.template import SQLTemplate, TemplateSource
+from stairlight.template import SQLTemplate, TemplateSource, SourceType
 
 
 class Map:
@@ -27,7 +27,7 @@ class Map:
         if not downstream_table:
             self.undefined_files.append(
                 {
-                    "template_file": sql_template.file_path,
+                    "sql_template": sql_template,
                     "params": sql_template.get_jinja_params(),
                 }
             )
@@ -40,8 +40,12 @@ class Map:
 
         for upstream_table in query.parse():
             upstream_table_name = upstream_table["table_name"]
-            self.maps[downstream_table][upstream_table_name] = {
+            values = {
+                "type": sql_template.source_type.value,
                 "file": sql_template.file_path,
                 "line": upstream_table["line"],
                 "line_str": upstream_table["line_str"],
             }
+            if sql_template.source_type in [SourceType.GCS, SourceType.S3]:
+                values["bucket"] = sql_template.bucket
+            self.maps[downstream_table][upstream_table_name] = values

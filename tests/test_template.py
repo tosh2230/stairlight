@@ -40,7 +40,7 @@ class TestTemplateSourceSuccess:
 
 
 @pytest.mark.parametrize(
-    "source_type, file_path, params",
+    "source_type, file_path, params, bucket, mapped_table",
     [
         (
             template.SourceType.FS,
@@ -50,28 +50,47 @@ class TestTemplateSourceSuccess:
                 "sub_table_01": "PROJECT_S.DATASET_T.TABLE_U",
                 "sub_table_02": "PROJECT_V.DATASET_W.TABLE_X",
             },
-        )
+            None,
+            "PROJECT_J.DATASET_K.TABLE_L",
+        ),
+        (
+            template.SourceType.GCS,
+            "sql/test_b.sql",
+            {
+                "PROJECT": "PROJECT_g",
+                "DATASET": "DATASET_h",
+                "TABLE": "TABLE_i",
+            },
+            "stairlight",
+            "PROJECT_d.DATASET_e.TABLE_f",
+        ),
     ],
 )
 class TestSQLTemplateSuccess:
     config_reader = config.Reader("./config/")
     map_config = config_reader.read(config.MAP_CONFIG)
 
-    def test_get_param_list(self, source_type, file_path, params):
-        sql_template = template.SQLTemplate(source_type, file_path, self.map_config)
+    def test_get_param_list(self, source_type, file_path, params, bucket, mapped_table):
+        sql_template = template.SQLTemplate(
+            map_config=self.map_config, source_type=source_type, file_path=file_path
+        )
         assert sql_template.get_param_list() == [params]
 
-    def test_get_mapped_table(self, source_type, file_path, params):
-        sql_template = template.SQLTemplate(source_type, file_path, self.map_config)
-        assert (
-            sql_template.get_mapped_table(params=params)
-            == "PROJECT_J.DATASET_K.TABLE_L"
+    def test_get_mapped_table(
+        self, source_type, file_path, params, bucket, mapped_table
+    ):
+        sql_template = template.SQLTemplate(
+            map_config=self.map_config, source_type=source_type, file_path=file_path
         )
+        assert sql_template.get_mapped_table(params=params) == mapped_table
 
-    def test_get_jinja_params(self, source_type, file_path, params):
-        sql_template = template.SQLTemplate(source_type, file_path, self.map_config)
-        assert sorted(sql_template.get_jinja_params()) == [
-            "params.main_table",
-            "params.sub_table_01",
-            "params.sub_table_02",
-        ]
+    def test_get_jinja_params(
+        self, source_type, file_path, params, bucket, mapped_table
+    ):
+        sql_template = template.SQLTemplate(
+            map_config=self.map_config,
+            source_type=source_type,
+            file_path=file_path,
+            bucket=bucket,
+        )
+        assert len(sql_template.get_jinja_params()) > 0

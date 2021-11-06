@@ -39,24 +39,26 @@ class TemplateSource:
                 logger.debug(f"{str(p)} is skipped.")
                 continue
             yield SQLTemplate(
+                map_config=self._map_config,
                 source_type=SourceType.FS,
                 file_path=str(p),
-                map_config=self._map_config,
             )
 
     def search_gcs(self, source):
-        client = storage.Client(credentials=None, project=source.get("project"))
-        blobs = client.list_blobs(
-            source.get("bucket"), prefix=source.get("prefix"), delimiter="/"
-        )
+        project = source.get("project")
+        client = storage.Client(credentials=None, project=project)
+        bucket = source.get("bucket")
+        blobs = client.list_blobs(bucket, prefix=source.get("prefix"), delimiter="/")
         for blob in blobs:
             if self.is_excluded(blob.name) or blob.name == source.get("prefix"):
                 logger.debug(f"{blob.name} is skipped.")
                 continue
             yield SQLTemplate(
+                map_config=self._map_config,
                 source_type=SourceType.GCS,
                 file_path=blob.name,
-                map_config=self._map_config,
+                project=project,
+                bucket=bucket,
             )
 
     def is_excluded(self, template_file):
@@ -69,10 +71,12 @@ class TemplateSource:
 
 
 class SQLTemplate:
-    def __init__(self, source_type, file_path, map_config):
+    def __init__(self, map_config, source_type, file_path, bucket=None, project=None):
+        self._map_config = map_config
         self.source_type = source_type
         self.file_path = file_path
-        self._map_config = map_config
+        self.bucket = bucket
+        self.project = project
 
     def get_param_list(self):
         param_list = []
@@ -92,13 +96,27 @@ class SQLTemplate:
         return mapped_table
 
     def get_jinja_params(self):
-        jinja_params = []
+        template_str = ""
         if self.source_type == SourceType.FS:
-            with open(self.file_path) as f:
-                template_str = f.read()
-            jinja_expressions = "".join(
-                re.findall("{{[^}]*}}", template_str, re.IGNORECASE)
-            )
-            jinja_params = re.findall("[^{} ]+", jinja_expressions, re.IGNORECASE)
+            template_str = self.get_template_str_fs()
+        elif self.source_type == SourceType.GCS:
+            template_str = self.get_template_str_gcs()
+        elif self.source_type == SourceType.S3:
+            pass
 
-        return jinja_params
+        jinja_expressions = "".join(
+            re.findall("{{[^}]*}}", template_str, re.IGNORECASE)
+        )
+        return re.findall("[^{} ]+", jinja_expressions, re.IGNORECASE)
+
+    def get_template_str_fs(self):
+        template_str = ""
+        with open(self.file_path) as f:
+            template_str = f.read()
+        return template_str
+
+    def get_template_str_gcs(self):
+        client = storage.Client(credentials=None, project=self.project)
+        bucket = client.get_bucket(self.bucket)
+        blob = bucket.blob(self.file_path)
+        return blob.download_as_bytes().decode("utf-8")

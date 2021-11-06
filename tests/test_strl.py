@@ -29,4 +29,5 @@ class TestSuccess:
         assert sorted(result[table_name]["downstream"].keys()) == [
             "PROJECT_D.DATASET_E.TABLE_F",
             "PROJECT_G.DATASET_H.TABLE_I",
+            "PROJECT_d.DATASET_e.TABLE_f",
         ]

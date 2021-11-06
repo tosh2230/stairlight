@@ -22,4 +22,6 @@ if __name__ == "__main__":
     stair_light.all()
     stair_light.up(table_name="PROJECT_D.DATASET_E.TABLE_F", recursive=True)
     stair_light.down(table_name="PROJECT_C.DATASET_C.TABLE_C", recursive=True)
+
+    print(stair_light.undefined_files)
     # stair_light.make_config()

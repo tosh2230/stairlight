@@ -3,6 +3,8 @@ import glob
 import re
 import yaml
 
+from stairlight.template import SourceType
+
 MAP_CONFIG = "mapping"
 STRL_CONFIG = "stairlight"
 
@@ -42,11 +44,14 @@ def build_template_dict(undefined_files):
             params = {}
             for param in undefined_params:
                 params[param] = None
-        template["mapping"].append(
-            {
-                "file_suffix": undefined_file.get("template_file"),
-                "table": None,
-                "params": params,
-            }
-        )
+        sql_template = undefined_file["sql_template"]
+        values = {
+            "type": sql_template.source_type.value,
+            "file_suffix": sql_template.file_path,
+            "table": None,
+            "params": params,
+        }
+        if sql_template.source_type in [SourceType.GCS, SourceType.S3]:
+            values["bucket"] = sql_template.bucket
+        template["mapping"].append(values)
     return template
