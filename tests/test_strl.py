@@ -14,18 +14,18 @@ class TestSuccess:
     def test_all(self, stair_light):
         assert stair_light.all() == stair_light.maps
 
-    def test_up(self, stair_light):
+    def test_up_recursive_verbose(self, stair_light):
         table_name = "PROJECT_D.DATASET_E.TABLE_F"
-        result = stair_light.up(table_name=table_name)
+        result = stair_light.up(table_name=table_name, recursive=True, verbose=True)
         assert sorted(result[table_name]["upstream"].keys()) == [
             "PROJECT_C.DATASET_C.TABLE_C",
             "PROJECT_J.DATASET_K.TABLE_L",
             "PROJECT_d.DATASET_d.TABLE_d",
         ]
 
-    def test_down(self, stair_light):
+    def test_down_recursive_verbose(self, stair_light):
         table_name = "PROJECT_C.DATASET_C.TABLE_C"
-        result = stair_light.down(table_name=table_name)
+        result = stair_light.down(table_name=table_name, recursive=True, verbose=True)
         assert sorted(result[table_name]["downstream"].keys()) == [
             "PROJECT_D.DATASET_E.TABLE_F",
             "PROJECT_G.DATASET_H.TABLE_I",

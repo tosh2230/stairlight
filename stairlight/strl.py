@@ -38,12 +38,35 @@ class StairLight:
         logger.debug(json.dumps(self.maps, indent=2))
         return self.maps
 
-    def up(self, table_name, recursive=False):
+    def up(self, table_name, recursive=False, verbose=False):
+        if verbose:
+            return self.up_verbose(table_name, recursive)
+        else:
+            return self.up_simple(table_name, recursive)
+
+    def up_simple(self, table_name, recursive=False):
+        result = self._maps.get(table_name)
+        response = []
+        if not result:
+            return response
+        for upstream_table_name in result.keys():
+            response.append(upstream_table_name)
+            if recursive:
+                upstream_result = self.up_simple(
+                    table_name=upstream_table_name,
+                    recursive=recursive,
+                )
+                response = response + upstream_result
+        return response
+
+    def up_verbose(self, table_name, recursive=False):
         result = self._maps.get(table_name)
         response = {table_name: {}}
-        if result and recursive:
+        if not result:
+            return response
+        if recursive:
             for upstream_table_name in result.keys():
-                upstream_result = self.up(
+                upstream_result = self.up_verbose(
                     table_name=upstream_table_name,
                     recursive=recursive,
                 )
@@ -59,7 +82,7 @@ class StairLight:
         logger.debug(json.dumps(response, indent=2))
         return response
 
-    def down(self, table_name, recursive=False):
+    def down(self, table_name, recursive=False, verbose=False):
         result = {}
         response = {table_name: {}}
         for key in [k for k, v in self._maps.items() if v.get(table_name)]:
