@@ -1,8 +1,11 @@
 import enum
+from logging import getLogger
 import pathlib
 import re
 
 from google.cloud import storage
+
+logger = getLogger(__name__)
 
 
 class SourceType(enum.Enum):
@@ -33,6 +36,7 @@ class TemplateSource:
         path_obj = pathlib.Path(source.get("path"))
         for p in path_obj.glob(source.get("pattern")):
             if self.is_excluded(str(p)):
+                logger.debug(f"{str(p)} is skipped.")
                 continue
             yield SQLTemplate(
                 source_type=SourceType.FS,
@@ -47,6 +51,7 @@ class TemplateSource:
         )
         for blob in blobs:
             if self.is_excluded(blob.name) or blob.name == source.get("prefix"):
+                logger.debug(f"{blob.name} is skipped.")
                 continue
             yield SQLTemplate(
                 source_type=SourceType.GCS,

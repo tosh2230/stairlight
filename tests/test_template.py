@@ -40,36 +40,35 @@ class TestTemplateSourceSuccess:
 
 
 @pytest.mark.parametrize(
-    "source_type, file_path",
-    [(template.SourceType.FS, "tests/sql/main/test_c.sql")],
+    "source_type, file_path, params",
+    [
+        (
+            template.SourceType.FS,
+            "tests/sql/main/test_c.sql",
+            {
+                "main_table": "PROJECT_P.DATASET_Q.TABLE_R",
+                "sub_table_01": "PROJECT_S.DATASET_T.TABLE_U",
+                "sub_table_02": "PROJECT_V.DATASET_W.TABLE_X",
+            },
+        )
+    ],
 )
 class TestSQLTemplateSuccess:
     config_reader = config.Reader("./config/")
     map_config = config_reader.read(config.MAP_CONFIG)
 
-    def test_get_param_list(self, source_type, file_path):
+    def test_get_param_list(self, source_type, file_path, params):
         sql_template = template.SQLTemplate(source_type, file_path, self.map_config)
-        assert sql_template.get_param_list() == [
-            {
-                "main_table": "PROJECT_P.DATASET_Q.TABLE_R",
-                "sub_table_01": "PROJECT_S.DATASET_T.TABLE_U",
-                "sub_table_02": "PROJECT_V.DATASET_W.TABLE_X",
-            }
-        ]
+        assert sql_template.get_param_list() == [params]
 
-    def test_get_mapped_table(self, source_type, file_path):
+    def test_get_mapped_table(self, source_type, file_path, params):
         sql_template = template.SQLTemplate(source_type, file_path, self.map_config)
-        params = {
-            "main_table": "PROJECT_P.DATASET_Q.TABLE_R",
-            "sub_table_01": "PROJECT_S.DATASET_T.TABLE_U",
-            "sub_table_02": "PROJECT_V.DATASET_W.TABLE_X",
-        }
         assert (
             sql_template.get_mapped_table(params=params)
             == "PROJECT_J.DATASET_K.TABLE_L"
         )
 
-    def test_get_jinja_params(self, source_type, file_path):
+    def test_get_jinja_params(self, source_type, file_path, params):
         sql_template = template.SQLTemplate(source_type, file_path, self.map_config)
         assert sorted(sql_template.get_jinja_params()) == [
             "params.main_table",
