@@ -6,8 +6,8 @@ import stairlight.config as config
 
 def set_logging():
     level = fmt = datefmt = None
-    config_reader = config.Reader(path="./config/")
-    strl_config = config_reader.read(config.STRL_CONFIG).get("logging")
+    configurator = config.Configurator(path="./config/")
+    strl_config = configurator.read(config.STRL_CONFIG).get("logging")
     if strl_config:
         level = strl_config.get("level")
         fmt = strl_config.get("fmt")

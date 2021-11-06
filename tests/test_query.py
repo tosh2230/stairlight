@@ -5,8 +5,8 @@ from stairlight.template import SQLTemplate, SourceType
 
 class TestSuccess:
     def test_render_fs(self):
-        config_reader = config.Reader("./config/")
-        map_config = config_reader.read(config.MAP_CONFIG)
+        configurator = config.Configurator("./config/")
+        map_config = configurator.read(config.MAP_CONFIG)
         params = {
             "main_table": "PROJECT_P.DATASET_Q.TABLE_R",
             "sub_table_01": "PROJECT_S.DATASET_T.TABLE_U",

@@ -9,9 +9,9 @@ logger = getLogger(__name__)
 
 class StairLight:
     def __init__(self, config_path="./config/", cached=False):
-        config_reader = config.Reader(path=config_path)
-        self.map_config = config_reader.read(config.MAP_CONFIG)
-        self.strl_config = config_reader.read(config.STRL_CONFIG)
+        self.configurator = config.Configurator(path=config_path)
+        self.map_config = self.configurator.read(config.MAP_CONFIG)
+        self.strl_config = self.configurator.read(config.STRL_CONFIG)
         self._maps = {}
         self._undefined_files = []
 
@@ -88,5 +88,5 @@ class StairLight:
     def make_config(self):
         if self._undefined_files:
             return
-        config.make_template(self._undefined_files)
+        self.configurator.make_template(self._undefined_files)
         logger.info("Undefined files are detected!: " + str(self._undefined_files))

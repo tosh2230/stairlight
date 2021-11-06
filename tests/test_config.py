@@ -3,17 +3,17 @@ import stairlight.template as template
 
 
 class TestSuccess:
-    reader = config.Reader(path="./config/")
+    configurator = config.Configurator(path="./config/")
 
     def test_read_map(self):
-        assert self.reader.read(config.MAP_CONFIG)
+        assert self.configurator.read(config.MAP_CONFIG)
 
     def test_read_sql(self):
-        assert self.reader.read(config.STRL_CONFIG)
+        assert self.configurator.read(config.STRL_CONFIG)
 
     def test_build_template_dict(self):
         sql_template = template.SQLTemplate(
-            map_config=self.reader.read(config.MAP_CONFIG),
+            map_config=self.configurator.read(config.MAP_CONFIG),
             source_type=template.SourceType.FS,
             file_path="tests/sql/test_c.sql",
         )
@@ -27,4 +27,4 @@ class TestSuccess:
                 ],
             }
         ]
-        assert type(config.build_template_dict(undefined_files)) == dict
+        assert type(self.configurator.build_template_dict(undefined_files)) == dict
