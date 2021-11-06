@@ -34,8 +34,10 @@ class TemplateSource:
 
     def search_fs(self, source):
         path_obj = pathlib.Path(source.get("path"))
-        for p in path_obj.glob(source.get("pattern")):
-            if self.is_excluded(str(p)):
+        for p in path_obj.glob("**/*"):
+            if (
+                not re.fullmatch(rf'{source.get("regex")}', str(p))
+            ) or self.is_excluded(str(p)):
                 logger.debug(f"{str(p)} is skipped.")
                 continue
             yield SQLTemplate(
@@ -48,9 +50,11 @@ class TemplateSource:
         project = source.get("project")
         client = storage.Client(credentials=None, project=project)
         bucket = source.get("bucket")
-        blobs = client.list_blobs(bucket, prefix=source.get("prefix"), delimiter="/")
+        blobs = client.list_blobs(bucket)
         for blob in blobs:
-            if self.is_excluded(blob.name) or blob.name == source.get("prefix"):
+            if (
+                not re.fullmatch(rf'{source.get("regex")}', blob.name)
+            ) or self.is_excluded(blob.name):
                 logger.debug(f"{blob.name} is skipped.")
                 continue
             yield SQLTemplate(

@@ -15,8 +15,8 @@ class TestTemplateSourceSuccess:
     def test_search_fs(self):
         source = {
             "type": "fs",
-            "path": "./tests/sql/main",
-            "pattern": "*.sql",
+            "path": "./tests/sql",
+            "regex": ".*/*.sql",
         }
         result = []
         for file in self.template_source.search_fs(source=source):
@@ -28,7 +28,7 @@ class TestTemplateSourceSuccess:
             "type": "gcs",
             "project": None,
             "bucket": "stairlight",
-            "prefix": "sql/",
+            "regex": "sql/.*/*.sql",
         }
         result = []
         for file in self.template_source.search_gcs(source=source):
@@ -55,7 +55,7 @@ class TestTemplateSourceSuccess:
         ),
         (
             template.SourceType.GCS,
-            "sql/test_b.sql",
+            "sql/test_b/test_b.sql",
             {
                 "PROJECT": "PROJECT_g",
                 "DATASET": "DATASET_h",
