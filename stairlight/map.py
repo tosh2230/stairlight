@@ -1,44 +1,39 @@
 from stairlight.query import Query
-from stairlight.template import Template, get_jinja_params
+from stairlight.template import SQLTemplate, TemplateSource
 
 
 class Map:
-    def __init__(self, map_config, strl_config, maps={}) -> None:
+    def __init__(self, strl_config, map_config, maps={}) -> None:
         self._map_config = map_config
         self.maps = maps
         self.undefined_files = []
-        self.template = Template(strl_config=strl_config)
+        self.template_source = TemplateSource(
+            strl_config=strl_config, map_config=map_config
+        )
 
     def create(self):
-        for type, template_file in self.template.search():
-            param_list = self._get_params(template_file)
+        for sql_template in self.template_source.search():
+            param_list = sql_template.get_param_list()
             if param_list:
                 for params in param_list:
-                    self._remap(type=type, template_file=template_file, params=params)
+                    self._remap(sql_template=sql_template, params=params)
             else:
-                self._remap(type=type, template_file=template_file)
+                self._remap(sql_template=sql_template)
 
-    def _get_params(self, template_file):
-        param_list = []
-        for template in self._map_config.get("mapping"):
-            if template_file.endswith(template.get("file_suffix")):
-                param_list.append(template.get("params"))
-        return param_list
-
-    def _remap(self, type: str, template_file: str, params: dict = {}):
-        downstream_table = self._get_table(template_file=template_file, params=params)
+    def _remap(self, sql_template: SQLTemplate, params: dict = {}):
+        downstream_table = sql_template.get_mapped_table(params=params)
 
         # Grep jinja template variables to suggest new configurations
         if not downstream_table:
             self.undefined_files.append(
                 {
-                    "template_file": template_file,
-                    "params": get_jinja_params(type=type, template_file=template_file),
+                    "template_file": sql_template.file_path,
+                    "params": sql_template.get_jinja_params(),
                 }
             )
             return
 
-        query = Query.render(type=type, template_file=template_file, params=params)
+        query = Query.render(sql_template=sql_template, params=params)
 
         if downstream_table not in self.maps:
             self.maps[downstream_table] = {}
@@ -46,17 +41,7 @@ class Map:
         for upstream_table in query.parse():
             upstream_table_name = upstream_table["table_name"]
             self.maps[downstream_table][upstream_table_name] = {
-                "file": template_file,
+                "file": sql_template.file_path,
                 "line": upstream_table["line"],
                 "line_str": upstream_table["line_str"],
             }
-
-    def _get_table(self, template_file, params):
-        table = None
-        for template in self._map_config.get("mapping"):
-            if template_file.endswith(
-                template.get("file_suffix")
-            ) and params == template.get("params"):
-                table = template.get("table")
-                break
-        return table

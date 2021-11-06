@@ -3,7 +3,7 @@ import re
 
 from jinja2 import Environment, FileSystemLoader
 
-from stairlight.template import TYPES
+from stairlight.template import SourceType, SQLTemplate
 
 
 class Query:
@@ -11,20 +11,22 @@ class Query:
         self.query_str = query_str
 
     @classmethod
-    def render(cls, type, template_file, params):
-        if type == TYPES["FS"]:
-            query_str = cls._render_fs(template_file, params)
-        elif type.casefold() == TYPES["GCS"]:
+    def render(cls, sql_template: SQLTemplate, params: dict):
+        if sql_template.source_type == SourceType.FS:
+            query_str = cls.render_fs(sql_template, params)
+        elif sql_template.source_type == SourceType.GCS:
             pass
-        elif type.casefold() == TYPES["S3"]:
+        elif sql_template.source_type == SourceType.S3:
             pass
         return cls(query_str=query_str)
 
     @staticmethod
-    def _render_fs(template_file, params):
-        env = Environment(loader=FileSystemLoader(os.path.dirname(template_file)))
-        template = env.get_template(os.path.basename(template_file))
-        return template.render(params=params)
+    def render_fs(sql_template: SQLTemplate, params: dict):
+        env = Environment(
+            loader=FileSystemLoader(os.path.dirname(sql_template.file_path))
+        )
+        jinja_template = env.get_template(os.path.basename(sql_template.file_path))
+        return jinja_template.render(params=params)
 
     def parse(self):
         # Check the query has cte or not

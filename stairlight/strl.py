@@ -19,7 +19,8 @@ class StairLight:
             pass
         else:
             dependency_map = Map(
-                map_config=self.map_config, strl_config=self.strl_config
+                strl_config=self.strl_config,
+                map_config=self.map_config,
             )
             dependency_map.create()
             self._maps = dependency_map.maps

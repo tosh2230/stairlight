@@ -1,27 +1,32 @@
+import enum
 import pathlib
 import re
 
 from google.cloud import storage
 
-TYPES = {
-    "FS": "fs",
-    "GCS": "gcs",
-    "S3": "s3",
-}
+
+class SourceType(enum.Enum):
+    FS = "fs"
+    GCS = "gcs"
+    S3 = "s3"
+
+    def __str__(self):
+        return self.name
 
 
-class Template:
-    def __init__(self, strl_config):
+class TemplateSource:
+    def __init__(self, strl_config, map_config):
         self._strl_config = strl_config
+        self._map_config = map_config
 
     def search(self):
         for source in self._strl_config.get("sources"):
             type = source.get("type")
-            if type.casefold() == TYPES["FS"]:
+            if type.casefold() == SourceType.FS.value:
                 yield from self.search_fs(source)
-            elif type.casefold() == TYPES["GCS"]:
+            elif type.casefold() == SourceType.GCS.value:
                 yield from self.search_gcs(source)
-            elif type.casefold() == TYPES["S3"]:
+            elif type.casefold() == SourceType.S3.value:
                 continue
 
     def search_fs(self, source):
@@ -29,17 +34,25 @@ class Template:
         for p in path_obj.glob(source.get("pattern")):
             if self.is_excluded(str(p)):
                 continue
-            yield TYPES["FS"], str(p)
+            yield SQLTemplate(
+                source_type=SourceType.FS,
+                file_path=str(p),
+                map_config=self._map_config,
+            )
 
     def search_gcs(self, source):
         client = storage.Client(credentials=None, project=source.get("project"))
         blobs = client.list_blobs(
-            "stairlight", prefix=source.get("prefix"), delimiter="/"
+            source.get("bucket"), prefix=source.get("prefix"), delimiter="/"
         )
         for blob in blobs:
-            if blob.name == source.get("prefix"):
+            if self.is_excluded(blob.name) or blob.name == source.get("prefix"):
                 continue
-            yield TYPES["GCS"], blob.name
+            yield SQLTemplate(
+                source_type=SourceType.GCS,
+                file_path=blob.name,
+                map_config=self._map_config,
+            )
 
     def is_excluded(self, template_file):
         result = False
@@ -50,14 +63,37 @@ class Template:
         return result
 
 
-def get_jinja_params(type, template_file):
-    results = []
-    if type == TYPES["FS"]:
-        with open(template_file) as f:
-            template_str = f.read()
-        jinja_expressions = "".join(
-            re.findall("{{[^}]*}}", template_str, re.IGNORECASE)
-        )
-        results = re.findall("[^{} ]+", jinja_expressions, re.IGNORECASE)
+class SQLTemplate:
+    def __init__(self, source_type, file_path, map_config):
+        self.source_type = source_type
+        self.file_path = file_path
+        self._map_config = map_config
 
-    return results
+    def get_param_list(self):
+        param_list = []
+        for mapping in self._map_config.get("mapping"):
+            if self.file_path.endswith(mapping.get("file_suffix")):
+                param_list.append(mapping.get("params"))
+        return param_list
+
+    def get_mapped_table(self, params):
+        mapped_table = None
+        for mapping in self._map_config.get("mapping"):
+            if self.file_path.endswith(
+                mapping.get("file_suffix")
+            ) and params == mapping.get("params"):
+                mapped_table = mapping.get("table")
+                break
+        return mapped_table
+
+    def get_jinja_params(self):
+        jinja_params = []
+        if self.source_type == SourceType.FS:
+            with open(self.file_path) as f:
+                template_str = f.read()
+            jinja_expressions = "".join(
+                re.findall("{{[^}]*}}", template_str, re.IGNORECASE)
+            )
+            jinja_params = re.findall("[^{} ]+", jinja_expressions, re.IGNORECASE)
+
+        return jinja_params

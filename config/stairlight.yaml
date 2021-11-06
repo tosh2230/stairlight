@@ -12,6 +12,6 @@ sources:
 exclude:
   - "tests/sql/main/test_exclude.sql"
 logging:
-  level: INFO
+  level: DEBUG
   fmt: "%(asctime)s.%(msecs)03d %(filename)s:%(funcName)s:%(lineno)d [%(levelname)s]%(message)s"
   datefmt: "%Y-%m-%d %H:%M:%S"

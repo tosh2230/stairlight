@@ -1,7 +1,47 @@
 from stairlight.query import Query
+from stairlight.template import SQLTemplate, SourceType
 
 
 class TestSuccess:
+    def test_render_fs(self):
+        params = {
+            "main_table": "PROJECT_P.DATASET_Q.TABLE_R",
+            "sub_table_01": "PROJECT_S.DATASET_T.TABLE_U",
+            "sub_table_02": "PROJECT_V.DATASET_W.TABLE_X",
+        }
+        sql_template = SQLTemplate(SourceType.FS, "tests/sql/main/test_c.sql", params)
+        query_str = Query.render_fs(sql_template, params)
+        expected = """WITH c AS (
+    SELECT
+        test_id,
+        col_c
+    FROM
+        PROJECT_S.DATASET_T.TABLE_U
+    WHERE
+        0 = 0
+),
+d AS (
+    SELECT
+        test_id,
+        col_d
+    FROM
+        PROJECT_V.DATASET_W.TABLE_X
+    WHERE
+        0 = 0
+)
+
+SELECT
+    *
+FROM
+    PROJECT_P.DATASET_Q.TABLE_R AS b
+    INNER JOIN c
+        ON b.test_id = c.test_id
+    INNER JOIN d
+        ON b.test_id = d.test_id
+WHERE
+    1 = 1"""
+        assert query_str == expected
+
     def test_parse_query(self):
         query_str = (
             "SELECT * FROM PROJECT_X.DATASET_X.TABLE_X "
