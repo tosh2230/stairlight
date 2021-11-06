@@ -26,7 +26,7 @@ jobs:
         with:
           create_credentials_file: true
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
-          audience: ${{ secrets.GCP_WORKLOAD_IDP }}
+          audience: "//iam.googleapis.com/${{ secrets.GCP_WORKLOAD_IDP }}"
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
           access_token_lifetime: 300s
       - name: Login to Google Cloud with workload IdP
