@@ -54,85 +54,102 @@ class StairLight:
         verbose=False,
         response_type=ResponseType.TABLE.value,
     ):
+        direction = "upstream"
         if verbose:
-            return self.up_verbose(table_name, recursive)
+            return self.search_verbose(
+                table_name=table_name, direction=direction, recursive=recursive
+            )
         if response_type in [type.value for type in ResponseType]:
-            return self.up_plain(table_name, recursive, response_type)
+            return self.search_plain(
+                table_name=table_name,
+                direction=direction,
+                recursive=recursive,
+                response_type=response_type,
+            )
         return None
 
-    def up_verbose(self, table_name, recursive=False):
-        result = self._maps.get(table_name)
+    def down(
+        self,
+        table_name,
+        recursive=False,
+        verbose=False,
+        response_type=ResponseType.TABLE.value,
+    ):
+        direction = "downstream"
+        if verbose:
+            return self.search_verbose(
+                table_name=table_name, direction=direction, recursive=recursive
+            )
+        if response_type in [type.value for type in ResponseType]:
+            return self.search_plain(
+                table_name=table_name,
+                direction=direction,
+                recursive=recursive,
+                response_type=response_type,
+            )
+        return None
+
+    def search_verbose(self, table_name, direction, recursive=False):
+        result = {}
         response = {table_name: {}}
+        if direction == "upstream":
+            result = self._maps.get(table_name)
+        elif direction == "downstream":
+            for key in [k for k, v in self._maps.items() if v.get(table_name)]:
+                result[key] = self._maps[key][table_name]
+
         if not result:
             return response
         if recursive:
-            for upstream_table_name in result.keys():
-                upstream_result = self.up_verbose(
-                    table_name=upstream_table_name,
+            for next_table_name in result.keys():
+                next_result = self.search_verbose(
+                    table_name=next_table_name,
+                    direction=direction,
                     recursive=recursive,
                 )
 
-                if not upstream_result.get(upstream_table_name):
+                if not next_result.get(next_table_name):
                     continue
-                result[upstream_table_name] = {
-                    **result[upstream_table_name],
-                    **upstream_result[upstream_table_name],
+                result[next_table_name] = {
+                    **result[next_table_name],
+                    **next_result[next_table_name],
                 }
 
-        response[table_name]["upstream"] = result
+        response[table_name][direction] = result
         logger.debug(json.dumps(response, indent=2))
         return response
 
-    def up_plain(self, table_name, recursive, response_type):
-        result = self._maps.get(table_name)
+    def search_plain(self, table_name, direction, recursive, response_type):
+        result = {}
         response = []
+        if direction == "upstream":
+            result = self._maps.get(table_name)
+        elif direction == "downstream":
+            for key in [k for k, v in self._maps.items() if v.get(table_name)]:
+                result[key] = self._maps[key][table_name]
+
         if not result:
             return response
-        for upstream_table_name in result.keys():
+        for next_table_name in result.keys():
             if recursive:
-                upstream_result = self.up_plain(
-                    table_name=upstream_table_name,
+                next_result = self.search_plain(
+                    table_name=next_table_name,
+                    direction=direction,
                     recursive=recursive,
                     response_type=response_type,
                 )
-                response = response + upstream_result
+                response = response + next_result
 
             if response_type == ResponseType.TABLE.value:
-                response.append(upstream_table_name)
+                response.append(next_table_name)
             elif response_type == ResponseType.FILE.value:
-                response.append(result[upstream_table_name].get("file"))
+                response.append(result[next_table_name].get("file"))
             logger.debug(json.dumps(response, indent=2))
 
         return sorted(list(set(response)))
 
-    def down(self, table_name, recursive=False, verbose=False):
-        result = {}
-        response = {table_name: {}}
-        for key in [k for k, v in self._maps.items() if v.get(table_name)]:
-            result[key] = self._maps[key][table_name]
-
-        if result and recursive:
-            for downstream_table_name in result.keys():
-                downstream_result = self.down(
-                    table_name=downstream_table_name,
-                    recursive=recursive,
-                )
-                if not downstream_result.get(downstream_table_name):
-                    continue
-                result[downstream_table_name] = {
-                    **result[downstream_table_name],
-                    **downstream_result[downstream_table_name],
-                }
-
-        if result:
-            response[table_name]["downstream"] = result
-        else:
-            response[table_name]["downstream"] = None
-        logger.debug(json.dumps(response, indent=2))
-        return response
-
     def make_config(self):
         if self._undefined_files:
             return
-        self.configurator.make_template(self._undefined_files)
+        self.configurator.make_template(undefined_files=self._undefined_files)
         logger.info("Undefined files are detected!: " + str(self._undefined_files))

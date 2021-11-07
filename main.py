@@ -50,14 +50,36 @@ if __name__ == "__main__":
             indent=2,
         )
     )
-    # print(
-    #     json.dumps(
-    #         stair_light.down(
-    #           table_name="PROJECT_C.DATASET_C.TABLE_C", recursive=True
-    #         ),
-    #         indent=2,
-    #     )
-    # )
+
+    print(
+        json.dumps(
+            stair_light.down(
+                table_name="PROJECT_C.DATASET_C.TABLE_C", recursive=True, verbose=False
+            ),
+            indent=2,
+        )
+    )
+
+    print(
+        json.dumps(
+            stair_light.down(
+                table_name="PROJECT_C.DATASET_C.TABLE_C",
+                recursive=True,
+                verbose=False,
+                response_type=ResponseType.FILE.value,
+            ),
+            indent=2,
+        )
+    )
+
+    print(
+        json.dumps(
+            stair_light.down(
+                table_name="PROJECT_C.DATASET_C.TABLE_C", recursive=True, verbose=True
+            ),
+            indent=2,
+        )
+    )
 
     # print(stair_light.undefined_files)
     # stair_light.make_config()
