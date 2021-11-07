@@ -16,6 +16,14 @@ class ResponseType(enum.Enum):
         return self.name
 
 
+class SearchDirection(enum.Enum):
+    UP = "upstream"
+    DOWN = "downstream"
+
+    def __str__(self):
+        return self.name
+
+
 class StairLight:
     def __init__(self, config_path="./config/", cached=False):
         self.configurator = config.Configurator(path=config_path)
@@ -54,7 +62,7 @@ class StairLight:
         verbose=False,
         response_type=ResponseType.TABLE.value,
     ):
-        direction = "upstream"
+        direction = SearchDirection.UP
         if verbose:
             return self.search_verbose(
                 table_name=table_name, direction=direction, recursive=recursive
@@ -75,7 +83,7 @@ class StairLight:
         verbose=False,
         response_type=ResponseType.TABLE.value,
     ):
-        direction = "downstream"
+        direction = SearchDirection.DOWN
         if verbose:
             return self.search_verbose(
                 table_name=table_name, direction=direction, recursive=recursive
@@ -110,7 +118,7 @@ class StairLight:
                     **next_response[next_table_name],
                 }
 
-        response[table_name][direction] = current_map
+        response[table_name][direction.value] = current_map
         logger.debug(json.dumps(response, indent=2))
         return response
 
@@ -140,9 +148,9 @@ class StairLight:
 
     def get_current_map(self, table_name, direction):
         current_map = {}
-        if direction == "upstream":
+        if direction == SearchDirection.UP:
             current_map = self._maps.get(table_name)
-        elif direction == "downstream":
+        elif direction == SearchDirection.DOWN:
             for key in [k for k, v in self._maps.items() if v.get(table_name)]:
                 current_map[key] = self._maps[key][table_name]
         return current_map
