@@ -38,26 +38,13 @@ class StairLight:
         logger.debug(json.dumps(self.maps, indent=2))
         return self.maps
 
-    def up(self, table_name, recursive=False, verbose=False):
+    def up(self, table_name, recursive=False, verbose=False, target="table"):
         if verbose:
             return self.up_verbose(table_name, recursive)
+        if target in ("table", "file"):
+            return self.up_plain(table_name, recursive, target)
         else:
-            return self.up_simple(table_name, recursive)
-
-    def up_simple(self, table_name, recursive=False):
-        result = self._maps.get(table_name)
-        response = []
-        if not result:
-            return response
-        for upstream_table_name in result.keys():
-            response.append(upstream_table_name)
-            if recursive:
-                upstream_result = self.up_simple(
-                    table_name=upstream_table_name,
-                    recursive=recursive,
-                )
-                response = response + upstream_result
-        return response
+            return None
 
     def up_verbose(self, table_name, recursive=False):
         result = self._maps.get(table_name)
@@ -81,6 +68,24 @@ class StairLight:
         response[table_name]["upstream"] = result
         logger.debug(json.dumps(response, indent=2))
         return response
+
+    def up_plain(self, table_name, recursive, target):
+        result = self._maps.get(table_name)
+        response = []
+        if not result:
+            return response
+        for upstream_table_name in result.keys():
+            if recursive:
+                upstream_result = self.up_plain(
+                    table_name=upstream_table_name, recursive=recursive, target=target
+                )
+                response = response + upstream_result
+
+            if target == "table":
+                response.append(upstream_table_name)
+            elif target == "file":
+                response.append(result[upstream_table_name].get("file"))
+        return sorted(list(set(response)))
 
     def down(self, table_name, recursive=False, verbose=False):
         result = {}

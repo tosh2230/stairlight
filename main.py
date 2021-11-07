@@ -33,6 +33,18 @@ if __name__ == "__main__":
     print(
         json.dumps(
             stair_light.up(
+                table_name="PROJECT_D.DATASET_E.TABLE_F",
+                recursive=True,
+                verbose=False,
+                target="file",
+            ),
+            indent=2,
+        )
+    )
+
+    print(
+        json.dumps(
+            stair_light.up(
                 table_name="PROJECT_D.DATASET_E.TABLE_F", recursive=True, verbose=True
             ),
             indent=2,
@@ -40,7 +52,9 @@ if __name__ == "__main__":
     )
     # print(
     #     json.dumps(
-    #         stair_light.down(table_name="PROJECT_C.DATASET_C.TABLE_C", recursive=True),
+    #         stair_light.down(
+    #           table_name="PROJECT_C.DATASET_C.TABLE_C", recursive=True
+    #         ),
     #         indent=2,
     #     )
     # )
