@@ -31,3 +31,5 @@ mapping:
       TABLE: TABLE_i
   - file_suffix: "tests/sql/main/test_d.sql"
     table: "PROJECT_j.DATASET_k.TABLE_l"
+  - file_suffix: "tests/sql/main/test_e.sql"
+    table: "PROJECT_z.DATASET_z.TABLE_z"

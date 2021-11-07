@@ -102,14 +102,22 @@ class StairLight:
             )
         return None
 
-    def search_verbose(self, table_name, recursive, direction):
-        current_map = self.get_current_map(table_name, direction)
+    def search_verbose(self, table_name, recursive, direction, ref_tables=[]):
+        relative_map = self.get_relative_map(table_name, direction)
         response = {table_name: {}}
+        ref_tables.append(table_name)
 
-        if not current_map:
+        if not relative_map:
             return response
         if recursive:
-            for next_table_name in current_map.keys():
+            for next_table_name in relative_map.keys():
+                if self.has_circular_reference(
+                    table_name=table_name,
+                    next_table_name=next_table_name,
+                    ref_tables=ref_tables,
+                ):
+                    continue
+
                 next_response = self.search_verbose(
                     table_name=next_table_name,
                     direction=direction,
@@ -118,47 +126,68 @@ class StairLight:
 
                 if not next_response.get(next_table_name):
                     continue
-                current_map[next_table_name] = {
-                    **current_map[next_table_name],
+                relative_map[next_table_name] = {
+                    **relative_map[next_table_name],
                     **next_response[next_table_name],
                 }
 
-        response[table_name][direction.value] = current_map
+        response[table_name][direction.value] = relative_map
         logger.debug(json.dumps(response, indent=2))
         return response
 
-    def search_plain(self, table_name, recursive, response_type, direction):
-        current_map = self.get_current_map(table_name, direction)
+    def search_plain(
+        self, table_name, recursive, response_type, direction, ref_tables=[]
+    ):
+        relative_map = self.get_relative_map(table_name, direction)
         response = []
 
-        if not current_map:
+        if not relative_map:
             return response
-        for next_table_name in current_map.keys():
+        for next_table_name in relative_map.keys():
             if recursive:
+                ref_tables.append(next_table_name)
+                if self.has_circular_reference(
+                    table_name=table_name,
+                    next_table_name=next_table_name,
+                    ref_tables=ref_tables,
+                ):
+                    continue
                 next_response = self.search_plain(
                     table_name=next_table_name,
                     direction=direction,
                     recursive=recursive,
                     response_type=response_type,
+                    ref_tables=ref_tables,
                 )
                 response = response + next_response
 
             if response_type == ResponseType.TABLE.value:
                 response.append(next_table_name)
             elif response_type == ResponseType.FILE.value:
-                response.append(current_map[next_table_name].get("uri"))
+                response.append(relative_map[next_table_name].get("uri"))
             logger.debug(json.dumps(response, indent=2))
 
         return sorted(list(set(response)))
 
-    def get_current_map(self, table_name, direction):
-        current_map = {}
+    def get_relative_map(self, table_name, direction):
+        relative_map = {}
         if direction == SearchDirection.UP:
-            current_map = self._maps.get(table_name)
+            relative_map = self._maps.get(table_name)
         elif direction == SearchDirection.DOWN:
             for key in [k for k, v in self._maps.items() if v.get(table_name)]:
-                current_map[key] = self._maps[key][table_name]
-        return current_map
+                relative_map[key] = self._maps[key][table_name]
+        return relative_map
+
+    def has_circular_reference(self, table_name, next_table_name, ref_tables):
+        if ref_tables.count(table_name) > 2:
+            details = {
+                "table_name": table_name,
+                "next_table_name": next_table_name,
+                "ref_tables": list(set(ref_tables)),
+            }
+            logger.info(f"circular_reference detected!: {details}")
+            return True
+        return False
 
     def make_config(self):
         if self._undefined_files:
