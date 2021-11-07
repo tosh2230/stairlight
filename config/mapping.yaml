@@ -29,3 +29,5 @@ mapping:
       PROJECT: PROJECT_g
       DATASET: DATASET_h
       TABLE: TABLE_i
+  - file_suffix: "tests/sql/main/test_d.sql"
+    table: "PROJECT_j.DATASET_k.TABLE_l"
