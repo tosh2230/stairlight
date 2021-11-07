@@ -18,8 +18,6 @@ class Query:
             query_str = cls.render_fs(sql_template, params)
         elif sql_template.source_type == SourceType.GCS:
             query_str = cls.render_gcs(sql_template, params)
-        elif sql_template.source_type == SourceType.S3:
-            pass
         return cls(query_str=query_str)
 
     @staticmethod

@@ -6,9 +6,6 @@ sources:
     project: null
     bucket: stairlight
     regex: "sql/.*/*.sql"
-  - type: s3
-    bucket: stairlight
-    regex: "**/*.sql"
 exclude:
   - "tests/sql/main/test_exclude.sql"
 logging:

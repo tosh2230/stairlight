@@ -50,7 +50,7 @@ class Configurator:
                 "table": None,
                 "params": params,
             }
-            if sql_template.source_type in [SourceType.GCS, SourceType.S3]:
+            if sql_template.source_type in [SourceType.GCS]:
                 values["bucket"] = sql_template.bucket
             template["mapping"].append(values)
         return template

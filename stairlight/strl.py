@@ -25,23 +25,20 @@ class SearchDirection(enum.Enum):
 
 
 class StairLight:
-    def __init__(self, config_path="./config/", cached=False):
+    def __init__(self, config_path="./config/"):
         self.configurator = config.Configurator(path=config_path)
         self.map_config = self.configurator.read(config.MAP_CONFIG)
         self.strl_config = self.configurator.read(config.STRL_CONFIG)
         self._maps = {}
         self._undefined_files = []
 
-        if cached:
-            pass
-        else:
-            dependency_map = Map(
-                strl_config=self.strl_config,
-                map_config=self.map_config,
-            )
-            dependency_map.create()
-            self._maps = dependency_map.maps
-            self._undefined_files = dependency_map.undefined_files
+        dependency_map = Map(
+            strl_config=self.strl_config,
+            map_config=self.map_config,
+        )
+        dependency_map.create()
+        self._maps = dependency_map.maps
+        self._undefined_files = dependency_map.undefined_files
 
     @property
     def maps(self):

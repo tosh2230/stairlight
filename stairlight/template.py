@@ -11,7 +11,6 @@ logger = getLogger(__name__)
 class SourceType(enum.Enum):
     FS = "fs"
     GCS = "gcs"
-    S3 = "s3"
 
     def __str__(self):
         return self.name
@@ -29,8 +28,6 @@ class TemplateSource:
                 yield from self.search_fs(source)
             elif type.casefold() == SourceType.GCS.value:
                 yield from self.search_gcs(source)
-            elif type.casefold() == SourceType.S3.value:
-                continue
 
     def search_fs(self, source):
         path_obj = pathlib.Path(source.get("path"))
@@ -105,8 +102,6 @@ class SQLTemplate:
             template_str = self.get_template_str_fs()
         elif self.source_type == SourceType.GCS:
             template_str = self.get_template_str_gcs()
-        elif self.source_type == SourceType.S3:
-            pass
 
         jinja_expressions = "".join(
             re.findall("{{[^}]*}}", template_str, re.IGNORECASE)
