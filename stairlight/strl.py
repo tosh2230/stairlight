@@ -149,7 +149,7 @@ class StairLight:
             if response_type == ResponseType.TABLE.value:
                 response.append(next_table_name)
             elif response_type == ResponseType.FILE.value:
-                response.append(current_map[next_table_name].get("file"))
+                response.append(current_map[next_table_name].get("uri"))
             logger.debug(json.dumps(response, indent=2))
 
         return sorted(list(set(response)))

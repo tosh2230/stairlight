@@ -1,3 +1,5 @@
+import pathlib
+
 from stairlight.query import Query
 from stairlight.template import SQLTemplate, TemplateSource, SourceType
 
@@ -46,6 +48,10 @@ class Map:
                 "line": upstream_table["line"],
                 "line_str": upstream_table["line_str"],
             }
-            if sql_template.source_type in [SourceType.GCS, SourceType.S3]:
+            if sql_template.source_type == SourceType.GCS:
+                values["uri"] = f"gs://{sql_template.bucket}/{sql_template.file_path}"
                 values["bucket"] = sql_template.bucket
+            elif sql_template.source_type == SourceType.FS:
+                p = pathlib.Path(sql_template.file_path)
+                values["uri"] = str(p.resolve())
             self.maps[downstream_table][upstream_table_name] = values
