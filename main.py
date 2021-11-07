@@ -1,7 +1,7 @@
 import logging
 import json
 
-from stairlight import StairLight
+from stairlight import StairLight, ResponseType
 import stairlight.config as config
 
 
@@ -36,7 +36,7 @@ if __name__ == "__main__":
                 table_name="PROJECT_D.DATASET_E.TABLE_F",
                 recursive=True,
                 verbose=False,
-                target="file",
+                response_type=ResponseType.FILE.value,
             ),
             indent=2,
         )

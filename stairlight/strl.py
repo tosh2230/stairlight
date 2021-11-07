@@ -1,3 +1,4 @@
+import enum
 import json
 from logging import getLogger
 
@@ -5,6 +6,14 @@ import stairlight.config as config
 from stairlight.map import Map
 
 logger = getLogger(__name__)
+
+
+class ResponseType(enum.Enum):
+    TABLE = "table"
+    FILE = "file"
+
+    def __str__(self):
+        return self.name
 
 
 class StairLight:
@@ -38,13 +47,18 @@ class StairLight:
         logger.debug(json.dumps(self.maps, indent=2))
         return self.maps
 
-    def up(self, table_name, recursive=False, verbose=False, target="table"):
+    def up(
+        self,
+        table_name,
+        recursive=False,
+        verbose=False,
+        response_type=ResponseType.TABLE.value,
+    ):
         if verbose:
             return self.up_verbose(table_name, recursive)
-        if target in ("table", "file"):
-            return self.up_plain(table_name, recursive, target)
-        else:
-            return None
+        if response_type in [type.value for type in ResponseType]:
+            return self.up_plain(table_name, recursive, response_type)
+        return None
 
     def up_verbose(self, table_name, recursive=False):
         result = self._maps.get(table_name)
@@ -69,7 +83,7 @@ class StairLight:
         logger.debug(json.dumps(response, indent=2))
         return response
 
-    def up_plain(self, table_name, recursive, target):
+    def up_plain(self, table_name, recursive, response_type):
         result = self._maps.get(table_name)
         response = []
         if not result:
@@ -77,14 +91,18 @@ class StairLight:
         for upstream_table_name in result.keys():
             if recursive:
                 upstream_result = self.up_plain(
-                    table_name=upstream_table_name, recursive=recursive, target=target
+                    table_name=upstream_table_name,
+                    recursive=recursive,
+                    response_type=response_type,
                 )
                 response = response + upstream_result
 
-            if target == "table":
+            if response_type == ResponseType.TABLE.value:
                 response.append(upstream_table_name)
-            elif target == "file":
+            elif response_type == ResponseType.FILE.value:
                 response.append(result[upstream_table_name].get("file"))
+            logger.debug(json.dumps(response, indent=2))
+
         return sorted(list(set(response)))
 
     def down(self, table_name, recursive=False, verbose=False):
