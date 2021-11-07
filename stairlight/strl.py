@@ -52,7 +52,6 @@ class StairLight:
         return self._undefined_files
 
     def all(self):
-        logger.debug(json.dumps(self.maps, indent=2))
         return self.maps
 
     def up(
@@ -62,19 +61,13 @@ class StairLight:
         verbose=False,
         response_type=ResponseType.TABLE.value,
     ):
-        direction = SearchDirection.UP
-        if verbose:
-            return self.search_verbose(
-                table_name=table_name, direction=direction, recursive=recursive
-            )
-        if response_type in [type.value for type in ResponseType]:
-            return self.search_plain(
-                table_name=table_name,
-                direction=direction,
-                recursive=recursive,
-                response_type=response_type,
-            )
-        return None
+        return self.search(
+            table_name=table_name,
+            recursive=recursive,
+            verbose=verbose,
+            response_type=response_type,
+            direction=SearchDirection.UP,
+        )
 
     def down(
         self,
@@ -83,21 +76,36 @@ class StairLight:
         verbose=False,
         response_type=ResponseType.TABLE.value,
     ):
-        direction = SearchDirection.DOWN
+        return self.search(
+            table_name=table_name,
+            recursive=recursive,
+            verbose=verbose,
+            response_type=response_type,
+            direction=SearchDirection.DOWN,
+        )
+
+    def search(
+        self,
+        table_name,
+        recursive,
+        verbose,
+        response_type,
+        direction,
+    ):
         if verbose:
             return self.search_verbose(
-                table_name=table_name, direction=direction, recursive=recursive
+                table_name=table_name, recursive=recursive, direction=direction
             )
         if response_type in [type.value for type in ResponseType]:
             return self.search_plain(
                 table_name=table_name,
-                direction=direction,
                 recursive=recursive,
                 response_type=response_type,
+                direction=direction,
             )
         return None
 
-    def search_verbose(self, table_name, direction, recursive=False):
+    def search_verbose(self, table_name, recursive, direction):
         current_map = self.get_current_map(table_name, direction)
         response = {table_name: {}}
 
@@ -122,7 +130,7 @@ class StairLight:
         logger.debug(json.dumps(response, indent=2))
         return response
 
-    def search_plain(self, table_name, direction, recursive, response_type):
+    def search_plain(self, table_name, recursive, response_type, direction):
         current_map = self.get_current_map(table_name, direction)
         response = []
 
