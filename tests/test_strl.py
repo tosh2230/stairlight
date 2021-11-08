@@ -1,6 +1,6 @@
 import os
 
-from stairlight import ResponseType
+from stairlight.strl import ResponseType, is_cyclic
 
 
 class TestProperty:
@@ -81,7 +81,6 @@ class TestSuccess:
             "PROJECT_G.DATASET_H.TABLE_I",
             "PROJECT_d.DATASET_e.TABLE_f",
             "PROJECT_j.DATASET_k.TABLE_l",
-            "PROJECT_z.DATASET_z.TABLE_z",
         ]
 
     def test_down_recursive_plain_file(self, stair_light):
@@ -96,6 +95,40 @@ class TestSuccess:
         assert sorted(result) == [
             f"{current_dir}/sql/main/test_b.sql",
             f"{current_dir}/sql/main/test_d.sql",
-            f"{current_dir}/sql/main/test_e.sql",
             "gs://stairlight/sql/test_b/test_b.sql",
         ]
+
+
+class TestIsCyclic:
+    def test_a(self):
+        node_list = [1, 2, 1, 2, 1, 2, 1, 2]
+        assert is_cyclic(node_list)
+
+    def test_b(self):
+        node_list = [1, 2, 3, 2, 3, 2, 3]
+        assert is_cyclic(node_list)
+
+    def test_c(self):
+        node_list = [1, 2, 3, 4, 5, 3, 4, 5]
+        assert is_cyclic(node_list)
+
+    def test_d(self):
+        node_list = [1, 2, 3, 4, 5, 1, 2, 3, 4]
+        assert is_cyclic(node_list)
+
+    def test_e(self):
+        node_list = [1, 2, 3, 4, 5]
+        assert not is_cyclic(node_list)
+
+    def test_f(self):
+        node_list = [
+            "PROJECT_D.DATASET_E.TABLE_F",
+            "PROJECT_J.DATASET_K.TABLE_L",
+            "PROJECT_P.DATASET_Q.TABLE_R",
+            "PROJECT_S.DATASET_T.TABLE_U",
+            "PROJECT_V.DATASET_W.TABLE_X",
+            "PROJECT_C.DATASET_C.TABLE_C",
+            "PROJECT_d.DATASET_d.TABLE_d",
+            "PROJECT_J.DATASET_K.TABLE_L",
+        ]
+        assert is_cyclic(node_list)

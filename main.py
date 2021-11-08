@@ -20,28 +20,25 @@ if __name__ == "__main__":
     set_logging()
 
     stair_light = StairLight()
-    stair_light.all()
+
+    print()
     print(
-        json.dumps(
-            stair_light.up(
-                table_name="PROJECT_D.DATASET_E.TABLE_F", recursive=True, verbose=False
-            ),
-            indent=2,
+        stair_light.up(
+            table_name="PROJECT_D.DATASET_E.TABLE_F", recursive=True, verbose=False
         )
     )
 
+    print()
     print(
-        json.dumps(
-            stair_light.up(
-                table_name="PROJECT_D.DATASET_E.TABLE_F",
-                recursive=True,
-                verbose=False,
-                response_type=ResponseType.FILE.value,
-            ),
-            indent=2,
+        stair_light.up(
+            table_name="PROJECT_D.DATASET_E.TABLE_F",
+            recursive=True,
+            verbose=False,
+            response_type=ResponseType.FILE.value,
         )
     )
 
+    print()
     print(
         json.dumps(
             stair_light.up(
@@ -51,27 +48,24 @@ if __name__ == "__main__":
         )
     )
 
+    print()
     print(
-        json.dumps(
-            stair_light.down(
-                table_name="PROJECT_C.DATASET_C.TABLE_C", recursive=True, verbose=False
-            ),
-            indent=2,
+        stair_light.down(
+            table_name="PROJECT_C.DATASET_C.TABLE_C", recursive=True, verbose=False
         )
     )
 
+    print()
     print(
-        json.dumps(
-            stair_light.down(
-                table_name="PROJECT_C.DATASET_C.TABLE_C",
-                recursive=True,
-                verbose=False,
-                response_type=ResponseType.FILE.value,
-            ),
-            indent=2,
+        stair_light.down(
+            table_name="PROJECT_C.DATASET_C.TABLE_C",
+            recursive=True,
+            verbose=False,
+            response_type=ResponseType.FILE.value,
         )
     )
 
+    print()
     print(
         json.dumps(
             stair_light.down(

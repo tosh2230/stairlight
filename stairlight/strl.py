@@ -24,6 +24,12 @@ class SearchDirection(enum.Enum):
         return self.name
 
 
+class Node:
+    def __init__(self, val, next=None):
+        self.val = val
+        self.next = None
+
+
 class StairLight:
     def __init__(self, config_path="./config/"):
         self.configurator = config.Configurator(path=config_path)
@@ -91,7 +97,11 @@ class StairLight:
     ):
         if verbose:
             return self.search_verbose(
-                table_name=table_name, recursive=recursive, direction=direction
+                table_name=table_name,
+                recursive=recursive,
+                direction=direction,
+                searched_tables=[],
+                head=True,
             )
         if response_type in [type.value for type in ResponseType]:
             return self.search_plain(
@@ -99,29 +109,40 @@ class StairLight:
                 recursive=recursive,
                 response_type=response_type,
                 direction=direction,
+                searched_tables=[],
+                head=True,
             )
         return None
 
-    def search_verbose(self, table_name, recursive, direction, ref_tables=[]):
+    def search_verbose(self, table_name, recursive, direction, searched_tables, head):
         relative_map = self.get_relative_map(table_name, direction)
         response = {table_name: {}}
-        ref_tables.append(table_name)
-
         if not relative_map:
             return response
+
         if recursive:
             for next_table_name in relative_map.keys():
-                if self.has_circular_reference(
-                    table_name=table_name,
-                    next_table_name=next_table_name,
-                    ref_tables=ref_tables,
-                ):
+                if head:
+                    searched_tables = []
+                    searched_tables.append(table_name)
+
+                searched_tables.append(next_table_name)
+
+                if is_cyclic(tables=searched_tables):
+                    details = {
+                        "table_name": table_name,
+                        "next_table_name": next_table_name,
+                        "searched_tables": searched_tables,
+                    }
+                    logger.info(f"circular_reference detected!: {details}")
                     continue
 
                 next_response = self.search_verbose(
                     table_name=next_table_name,
                     direction=direction,
                     recursive=recursive,
+                    searched_tables=searched_tables,
+                    head=False,
                 )
 
                 if not next_response.get(next_table_name):
@@ -136,28 +157,37 @@ class StairLight:
         return response
 
     def search_plain(
-        self, table_name, recursive, response_type, direction, ref_tables=[]
+        self, table_name, recursive, response_type, direction, searched_tables, head
     ):
         relative_map = self.get_relative_map(table_name, direction)
         response = []
-
         if not relative_map:
             return response
+
         for next_table_name in relative_map.keys():
             if recursive:
-                ref_tables.append(next_table_name)
-                if self.has_circular_reference(
-                    table_name=table_name,
-                    next_table_name=next_table_name,
-                    ref_tables=ref_tables,
-                ):
+                if head:
+                    searched_tables = []
+                    searched_tables.append(table_name)
+
+                searched_tables.append(next_table_name)
+
+                if is_cyclic(tables=searched_tables):
+                    details = {
+                        "table_name": table_name,
+                        "next_table_name": next_table_name,
+                        "searched_tables": searched_tables,
+                    }
+                    logger.info(f"Circular reference detected!: {details}")
                     continue
+
                 next_response = self.search_plain(
                     table_name=next_table_name,
                     direction=direction,
                     recursive=recursive,
                     response_type=response_type,
-                    ref_tables=ref_tables,
+                    searched_tables=searched_tables,
+                    head=False,
                 )
                 response = response + next_response
 
@@ -178,19 +208,25 @@ class StairLight:
                 relative_map[key] = self._maps[key][table_name]
         return relative_map
 
-    def has_circular_reference(self, table_name, next_table_name, ref_tables):
-        if ref_tables.count(table_name) > 2:
-            details = {
-                "table_name": table_name,
-                "next_table_name": next_table_name,
-                "ref_tables": list(set(ref_tables)),
-            }
-            logger.info(f"circular_reference detected!: {details}")
-            return True
-        return False
-
     def make_config(self):
         if self._undefined_files:
             return
         self.configurator.make_template(undefined_files=self._undefined_files)
-        logger.info("Undefined files are detected!: " + str(self._undefined_files))
+        logger.info("Undefined files detected!: " + str(self._undefined_files))
+
+
+def is_cyclic(tables):
+    nodes = {}
+    for table in tables:
+        if table not in nodes.keys():
+            nodes[table] = Node(table)
+    for i, table in enumerate(tables):
+        if not nodes[table].next and i < len(tables) - 1:
+            nodes[table].next = nodes[tables[i + 1]]
+    slow = fast = nodes[tables[0]]
+    while fast and fast.next:
+        slow = slow.next
+        fast = fast.next.next
+        if slow == fast:
+            return True
+    return False
