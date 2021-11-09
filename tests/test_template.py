@@ -14,7 +14,7 @@ class TestTemplateSourceSuccess:
 
     def test_search_fs(self):
         source = {
-            "type": "fs",
+            "type": template.SourceType.FS.value,
             "path": "./tests/sql",
             "regex": ".*/*.sql",
         }
@@ -25,7 +25,7 @@ class TestTemplateSourceSuccess:
 
     def test_search_gcs(self):
         source = {
-            "type": "gcs",
+            "type": template.SourceType.GCS.value,
             "project": None,
             "bucket": "stairlight",
             "regex": "sql/.*/*.sql",
@@ -36,7 +36,10 @@ class TestTemplateSourceSuccess:
         assert len(result) > 0
 
     def test_is_excluded(self):
-        assert self.template_source.is_excluded("tests/sql/main/test_exclude.sql")
+        assert self.template_source.is_excluded(
+            source_type=template.SourceType.FS,
+            file_path="tests/sql/main/test_exclude.sql",
+        )
 
 
 @pytest.mark.parametrize(

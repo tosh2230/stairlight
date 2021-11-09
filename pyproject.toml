@@ -2,7 +2,7 @@
 name = "stairlight"
 version = "0.1.0"
 description = ""
-authors = ["tosh223 <rev.to12@gmail.com>"]
+authors = ["tosh2230 <rev.to12@gmail.com>"]
 license = "MIT"
 
 [tool.poetry.dependencies]

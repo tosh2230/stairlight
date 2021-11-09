@@ -32,20 +32,22 @@ class TemplateSource:
                 yield from self.search_gcs(source)
 
     def search_fs(self, source):
+        source_type = SourceType.FS
         path_obj = pathlib.Path(source.get("path"))
         for p in path_obj.glob("**/*"):
             if (
                 not re.fullmatch(rf'{source.get("regex")}', str(p))
-            ) or self.is_excluded(str(p)):
+            ) or self.is_excluded(source_type=source_type, file_path=str(p)):
                 logger.debug(f"{str(p)} is skipped.")
                 continue
             yield SQLTemplate(
                 map_config=self._map_config,
-                source_type=SourceType.FS,
+                source_type=source_type,
                 file_path=str(p),
             )
 
     def search_gcs(self, source):
+        source_type = SourceType.GCS
         project = source.get("project")
         client = storage.Client(credentials=None, project=project)
         bucket = source.get("bucket")
@@ -53,21 +55,23 @@ class TemplateSource:
         for blob in blobs:
             if (
                 not re.fullmatch(rf'{source.get("regex")}', blob.name)
-            ) or self.is_excluded(blob.name):
+            ) or self.is_excluded(source_type=source_type, file_path=blob.name):
                 logger.debug(f"{blob.name} is skipped.")
                 continue
             yield SQLTemplate(
                 map_config=self._map_config,
-                source_type=SourceType.GCS,
+                source_type=source_type,
                 file_path=blob.name,
                 project=project,
                 bucket=bucket,
             )
 
-    def is_excluded(self, template_file):
+    def is_excluded(self, source_type, file_path):
         result = False
-        for exclude_file in self._strl_config.get("exclude"):
-            if template_file.endswith(exclude_file):
+        for exclude in self._strl_config.get("exclude"):
+            if source_type.value == exclude.get("type") and re.search(
+                rf'{exclude.get("regex")}', file_path
+            ):
                 result = True
                 break
         return result
