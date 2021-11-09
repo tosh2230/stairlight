@@ -15,7 +15,7 @@ class TestSuccess:
         sql_template = template.SQLTemplate(
             map_config=self.configurator.read(config.MAP_CONFIG),
             source_type=template.SourceType.FS,
-            file_path="tests/sql/test_c.sql",
+            file_path="tests/sql/main/test_undefined.sql",
         )
         undefined_files = [
             {
@@ -27,4 +27,20 @@ class TestSuccess:
                 ],
             }
         ]
-        assert type(self.configurator.build_template_dict(undefined_files)) == dict
+
+        value = {
+            "uri": sql_template.uri,
+            "file_suffix": sql_template.file_path,
+            "tables": {
+                "table": None,
+                "params": {
+                    "main_table": None,
+                    "sub_table_01": None,
+                    "sub_table_02": None,
+                },
+            },
+        }
+
+        expected = {"mapping": [value]}
+        actual = self.configurator.build_template_dict(undefined_files=undefined_files)
+        assert actual == expected

@@ -26,7 +26,7 @@ class Configurator:
                 config = yaml.safe_load(file)
         return config
 
-    def make_template(self, undefined_files):
+    def make_mapping_template(self, undefined_files):
         now = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
         file_name = f"{self.path}/mapping_undefined_{now}.yaml"
         with open(file_name, "w") as f:
@@ -45,10 +45,12 @@ class Configurator:
                     params[param] = None
             sql_template = undefined_file["sql_template"]
             values = {
-                "type": sql_template.source_type.value,
+                "uri": sql_template.uri,
                 "file_suffix": sql_template.file_path,
-                "table": None,
-                "params": params,
+                "tables": {
+                    "table": None,
+                    "params": params,
+                },
             }
             if sql_template.source_type in [SourceType.GCS]:
                 values["bucket"] = sql_template.bucket

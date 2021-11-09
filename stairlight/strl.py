@@ -211,7 +211,7 @@ class StairLight:
     def make_config(self):
         if self._undefined_files:
             return
-        self.configurator.make_template(undefined_files=self._undefined_files)
+        self.configurator.make_mapping_template(undefined_files=self._undefined_files)
         logger.info("Undefined files detected!: " + str(self._undefined_files))
 
 
