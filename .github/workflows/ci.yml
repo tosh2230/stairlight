@@ -37,9 +37,9 @@ jobs:
       - name: Login to Google Cloud with workload IdP
         run: |
           gcloud auth login --brief --cred-file="${{ steps.auth.outputs.credentials_file_path }}"
-      - name: Check linting with flake8
+      - name: Check linting
         run: |
-          poetry run flake8 stairlight tests
+          make lint
       - name: Test with pytest
         run: |
           poetry run pytest -v --cov=stairlight
