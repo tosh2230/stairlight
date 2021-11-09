@@ -32,19 +32,20 @@ class Map:
             )
             return
 
-        query = Query.render(sql_template=sql_template, params=params)
+        query_str = sql_template.render(params=params)
+        query = Query(query_str=query_str)
 
         if downstream_table not in self.maps:
             self.maps[downstream_table] = {}
 
-        for upstream_table in query.parse():
-            upstream_table_name = upstream_table["table_name"]
+        for upstream_table_attributes in query.parse_upstream():
+            upstream_table_name = upstream_table_attributes["table_name"]
             values = {
                 "type": sql_template.source_type.value,
                 "file": sql_template.file_path,
                 "uri": sql_template.uri,
-                "line": upstream_table["line"],
-                "line_str": upstream_table["line_str"],
+                "line": upstream_table_attributes["line"],
+                "line_str": upstream_table_attributes["line_str"],
             }
             if sql_template.source_type == SourceType.GCS:
                 values["bucket"] = sql_template.bucket

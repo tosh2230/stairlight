@@ -1,9 +1,12 @@
 import enum
 from logging import getLogger
+import os
 import pathlib
 import re
 
 from google.cloud import storage
+from jinja2 import Environment, FileSystemLoader, BaseLoader
+
 
 logger = getLogger(__name__)
 
@@ -135,3 +138,21 @@ class SQLTemplate:
         bucket = client.get_bucket(self.bucket)
         blob = bucket.blob(self.file_path)
         return blob.download_as_bytes().decode("utf-8")
+
+    def render(self, params: dict):
+        query_str = ""
+        if self.source_type == SourceType.FS:
+            query_str = self.render_fs(params)
+        elif self.source_type == SourceType.GCS:
+            query_str = self.render_gcs(params)
+        return query_str
+
+    def render_fs(self, params: dict):
+        env = Environment(loader=FileSystemLoader(os.path.dirname(self.file_path)))
+        jinja_template = env.get_template(os.path.basename(self.file_path))
+        return jinja_template.render(params=params)
+
+    def render_gcs(self, params: dict):
+        template_str = self.get_template_str_gcs()
+        jinja_template = Environment(loader=BaseLoader()).from_string(template_str)
+        return jinja_template.render(params=params)
