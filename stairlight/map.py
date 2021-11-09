@@ -1,12 +1,9 @@
-import pathlib
-
 from stairlight.query import Query
 from stairlight.template import SQLTemplate, TemplateSource, SourceType
 
 
 class Map:
     def __init__(self, strl_config, map_config, maps={}) -> None:
-        self._map_config = map_config
         self.maps = maps
         self.undefined_files = []
         self.template_source = TemplateSource(
@@ -23,7 +20,7 @@ class Map:
                 self._remap(sql_template=sql_template)
 
     def _remap(self, sql_template: SQLTemplate, params: dict = {}):
-        downstream_table = sql_template.get_mapped_table(params=params)
+        downstream_table = sql_template.search_mapped_table(params=params)
 
         # Grep jinja template variables to suggest new configurations
         if not downstream_table:
@@ -45,13 +42,10 @@ class Map:
             values = {
                 "type": sql_template.source_type.value,
                 "file": sql_template.file_path,
+                "uri": sql_template.uri,
                 "line": upstream_table["line"],
                 "line_str": upstream_table["line_str"],
             }
             if sql_template.source_type == SourceType.GCS:
-                values["uri"] = f"gs://{sql_template.bucket}/{sql_template.file_path}"
                 values["bucket"] = sql_template.bucket
-            elif sql_template.source_type == SourceType.FS:
-                p = pathlib.Path(sql_template.file_path)
-                values["uri"] = str(p.resolve())
             self.maps[downstream_table][upstream_table_name] = values

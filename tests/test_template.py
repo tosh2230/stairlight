@@ -72,17 +72,23 @@ class TestSQLTemplateSuccess:
 
     def test_get_param_list(self, source_type, file_path, params, bucket, mapped_table):
         sql_template = template.SQLTemplate(
-            map_config=self.map_config, source_type=source_type, file_path=file_path
+            map_config=self.map_config,
+            source_type=source_type,
+            file_path=file_path,
+            bucket=bucket,
         )
         assert sql_template.get_param_list() == [params]
 
-    def test_get_mapped_table(
+    def test_search_mapped_table(
         self, source_type, file_path, params, bucket, mapped_table
     ):
         sql_template = template.SQLTemplate(
-            map_config=self.map_config, source_type=source_type, file_path=file_path
+            map_config=self.map_config,
+            source_type=source_type,
+            file_path=file_path,
+            bucket=bucket,
         )
-        assert sql_template.get_mapped_table(params=params) == mapped_table
+        assert sql_template.search_mapped_table(params=params) == mapped_table
 
     def test_get_jinja_params(
         self, source_type, file_path, params, bucket, mapped_table

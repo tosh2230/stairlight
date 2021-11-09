@@ -78,21 +78,37 @@ class SQLTemplate:
         self.file_path = file_path
         self.bucket = bucket
         self.project = project
+        self.uri = self.set_uri()
+
+    def set_uri(self):
+        uri = ""
+        if self.source_type == SourceType.FS:
+            p = pathlib.Path(self.file_path)
+            uri = str(p.resolve())
+        elif self.source_type == SourceType.GCS:
+            uri = f"gs://{self.bucket}/{self.file_path}"
+        return uri
+
+    def get_mapped_tables(self):
+        for mapping in self._map_config.get("mapping"):
+            is_suffix = False
+            if mapping.get("file_suffix"):
+                is_suffix = self.file_path.endswith(mapping.get("file_suffix"))
+            if is_suffix or self.uri == mapping.get("uri"):
+                for table in mapping.get("tables"):
+                    yield table
 
     def get_param_list(self):
         param_list = []
-        for mapping in self._map_config.get("mapping"):
-            if self.file_path.endswith(mapping.get("file_suffix")):
-                param_list.append(mapping.get("params"))
+        for table in self.get_mapped_tables():
+            param_list.append(table.get("params"))
         return param_list
 
-    def get_mapped_table(self, params):
+    def search_mapped_table(self, params):
         mapped_table = None
-        for mapping in self._map_config.get("mapping"):
-            if self.file_path.endswith(
-                mapping.get("file_suffix")
-            ) and params == mapping.get("params"):
-                mapped_table = mapping.get("table")
+        for table in self.get_mapped_tables():
+            if table.get("params") == params:
+                mapped_table = table.get("table")
                 break
         return mapped_table
 

@@ -134,7 +134,7 @@ class StairLight:
                         "next_table_name": next_table_name,
                         "searched_tables": searched_tables,
                     }
-                    logger.info(f"circular_reference detected!: {details}")
+                    logger.info(f"Circular reference detected!: {details}")
                     continue
 
                 next_response = self.search_verbose(
