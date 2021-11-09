@@ -1,5 +1,5 @@
 from stairlight.query import Query
-from stairlight.template import SQLTemplate, TemplateSource, SourceType
+from stairlight.template import SourceType, SQLTemplate, TemplateSource
 
 
 class Map:

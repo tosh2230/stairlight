@@ -1,12 +1,11 @@
 import enum
-from logging import getLogger
 import os
 import pathlib
 import re
+from logging import getLogger
 
 from google.cloud import storage
-from jinja2 import Environment, FileSystemLoader, BaseLoader
-
+from jinja2 import BaseLoader, Environment, FileSystemLoader
 
 logger = getLogger(__name__)
 

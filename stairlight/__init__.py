@@ -1,3 +1,3 @@
-from .strl import StairLight, ResponseType
+from .strl import ResponseType, StairLight
 
 __all__ = ["StairLight", "ResponseType"]

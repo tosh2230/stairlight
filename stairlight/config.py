@@ -1,6 +1,7 @@
-from datetime import datetime, timezone
 import glob
 import re
+from datetime import datetime, timezone
+
 import yaml
 
 from stairlight.template import SourceType
