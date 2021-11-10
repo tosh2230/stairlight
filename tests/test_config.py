@@ -11,7 +11,7 @@ class TestSuccess:
     def test_read_sql(self):
         assert self.configurator.read(config.STRL_CONFIG)
 
-    def test_build_template_dict(self):
+    def test_build_template_dict_fs(self):
         sql_template = template.SQLTemplate(
             map_config=self.configurator.read(config.MAP_CONFIG),
             source_type=template.SourceType.FS,
@@ -29,7 +29,6 @@ class TestSuccess:
         ]
 
         value = {
-            "uri": sql_template.uri,
             "file_suffix": sql_template.file_path,
             "tables": {
                 "table": None,

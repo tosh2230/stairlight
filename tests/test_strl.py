@@ -16,9 +16,6 @@ class TestProperty:
 
 
 class TestSuccess:
-    def test_all(self, stair_light):
-        assert stair_light.all() == stair_light.maps
-
     def test_up_next(self, stair_light):
         table_name = "PROJECT_D.DATASET_E.TABLE_F"
         result = stair_light.up(table_name=table_name, recursive=False, verbose=False)

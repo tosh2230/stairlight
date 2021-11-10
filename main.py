@@ -20,6 +20,9 @@ if __name__ == "__main__":
     set_logging()
 
     stair_light = StairLight()
+    stair_light.set()
+    if not stair_light.maps:
+        exit()
 
     print()
     print(

@@ -6,12 +6,24 @@ class Map:
     def __init__(self, strl_config, map_config, maps={}) -> None:
         self.maps = maps
         self.undefined_files = []
-        self.template_source = TemplateSource(
+        self._template_source = TemplateSource(
             strl_config=strl_config, map_config=map_config
         )
 
-    def create(self):
-        for sql_template in self.template_source.search():
+    def write_blank(self):
+        for sql_template in self._template_source.search():
+            self.collect_undefined(sql_template)
+
+    def collect_undefined(self, sql_template):
+        self.undefined_files.append(
+            {
+                "sql_template": sql_template,
+                "params": sql_template.get_jinja_params(),
+            }
+        )
+
+    def write(self):
+        for sql_template in self._template_source.search():
             param_list = sql_template.get_param_list()
             if param_list:
                 for params in param_list:
@@ -24,12 +36,7 @@ class Map:
 
         # Grep jinja template variables to suggest new configurations
         if not downstream_table:
-            self.undefined_files.append(
-                {
-                    "sql_template": sql_template,
-                    "params": sql_template.get_jinja_params(),
-                }
-            )
+            self.collect_undefined(sql_template)
             return
 
         query_str = sql_template.render(params=params)

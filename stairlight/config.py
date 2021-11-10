@@ -16,11 +16,11 @@ class Configurator:
 
     def read(self, prefix):
         config = {}
-        pattern = f".*{prefix}.ya?ml"
+        pattern = f"^{self.path}{prefix}.ya?ml$"
         config_file = [
             p
             for p in glob.glob(f"{self.path}/**", recursive=False)
-            if re.search(pattern, p)
+            if re.fullmatch(pattern, p)
         ]
         if config_file:
             with open(config_file[0]) as file:
@@ -29,7 +29,7 @@ class Configurator:
 
     def make_mapping_template(self, undefined_files):
         now = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
-        file_name = f"{self.path}/mapping_undefined_{now}.yaml"
+        file_name = f"{self.path}/mapping_{now}.yaml"
         with open(file_name, "w") as f:
             yaml.safe_dump(self.build_template_dict(undefined_files), f)
         return file_name
@@ -46,7 +46,6 @@ class Configurator:
                     params[param] = None
             sql_template = undefined_file["sql_template"]
             values = {
-                "uri": sql_template.uri,
                 "file_suffix": sql_template.file_path,
                 "tables": {
                     "table": None,
@@ -54,6 +53,7 @@ class Configurator:
                 },
             }
             if sql_template.source_type in [SourceType.GCS]:
+                values["uri"] = sql_template.uri
                 values["bucket"] = sql_template.bucket
             template["mapping"].append(values)
         return template

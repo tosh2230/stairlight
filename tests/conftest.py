@@ -5,4 +5,6 @@ from stairlight import StairLight
 
 @pytest.fixture(scope="session")
 def stair_light():
-    return StairLight()
+    stairlight = StairLight()
+    stairlight.set()
+    return stairlight

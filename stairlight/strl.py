@@ -32,19 +32,9 @@ class Node:
 
 class StairLight:
     def __init__(self, config_path="./config/"):
-        self.configurator = config.Configurator(path=config_path)
-        self.map_config = self.configurator.read(config.MAP_CONFIG)
-        self.strl_config = self.configurator.read(config.STRL_CONFIG)
+        self._configurator = config.Configurator(path=config_path)
         self._maps = {}
         self._undefined_files = []
-
-        dependency_map = Map(
-            strl_config=self.strl_config,
-            map_config=self.map_config,
-        )
-        dependency_map.create()
-        self._maps = dependency_map.maps
-        self._undefined_files = dependency_map.undefined_files
 
     @property
     def maps(self):
@@ -54,8 +44,35 @@ class StairLight:
     def undefined_files(self):
         return self._undefined_files
 
-    def all(self):
-        return self.maps
+    def on(self):
+        pass
+
+    def set(self):
+        strl_config = self._configurator.read(prefix=config.STRL_CONFIG)
+        if not strl_config:
+            return
+
+        map_config = self._configurator.read(prefix=config.MAP_CONFIG)
+        dependency_map = Map(
+            strl_config=strl_config,
+            map_config=map_config,
+        )
+        if map_config:
+            dependency_map.write()
+            self._maps = dependency_map.maps
+            self._undefined_files = dependency_map.undefined_files
+        else:
+            dependency_map.write_blank()
+            self._undefined_files = dependency_map.undefined_files
+            self.fill()
+
+    def fill(self):
+        if not self._undefined_files:
+            return
+        self._configurator.make_mapping_template(undefined_files=self._undefined_files)
+
+    def save(self):
+        pass
 
     def up(
         self,
@@ -207,12 +224,6 @@ class StairLight:
             for key in [k for k, v in self._maps.items() if v.get(table_name)]:
                 relative_map[key] = self._maps[key][table_name]
         return relative_map
-
-    def make_config(self):
-        if self._undefined_files:
-            return
-        self.configurator.make_mapping_template(undefined_files=self._undefined_files)
-        logger.info("Undefined files detected!: " + str(self._undefined_files))
 
 
 def is_cyclic(tables):
