@@ -2,8 +2,9 @@ import re
 
 
 class Query:
-    def __init__(self, query_str: str = None):
+    def __init__(self, query_str: str = None, default_table_prefix: str = None):
         self.query_str = query_str
+        self.default_table_prefix = default_table_prefix
 
     def parse_upstream(self):
         # Check the query has cte or not
@@ -43,3 +44,10 @@ class Query:
                 "line": line + 1,
                 "line_str": self.query_str.splitlines()[line],
             }
+
+
+def solve_table_prefix(table, default_table_prefix):
+    solved_name = table
+    if table.count(".") <= 1:
+        solved_name = default_table_prefix + "." + solved_name
+    return solved_name

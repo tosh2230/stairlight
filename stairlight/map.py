@@ -33,7 +33,9 @@ class Map:
             return
 
         query_str = sql_template.render(params=params)
-        query = Query(query_str=query_str)
+        query = Query(
+            query_str=query_str, default_table_prefix=sql_template.default_table_prefix
+        )
 
         if downstream_table not in self.maps:
             self.maps[downstream_table] = {}

@@ -12,7 +12,8 @@ jobs:
       matrix:
         python-version: ["3.6", "3.7", "3.8", "3.9"]
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
       - name: Setup Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
@@ -40,6 +41,6 @@ jobs:
       - name: Check linting
         run: |
           make lint
-      - name: Test with pytest
+      - name: Unit test
         run: |
           poetry run pytest -v --cov=stairlight

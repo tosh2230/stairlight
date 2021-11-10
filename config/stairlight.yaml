@@ -2,10 +2,12 @@ sources:
   - type: fs
     path: "./tests/sql"
     regex: ".*/*.sql$"
+    default_table_prefix: "PROJECT_A"
   - type: gcs
     project: null
     bucket: stairlight
     regex: "^sql/.*/*.sql$"
+    default_table_prefix: "PROJECT_A"
 exclude:
   - type: fs
     regex: "main/test_exclude.sql$"

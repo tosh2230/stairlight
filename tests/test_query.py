@@ -1,4 +1,4 @@
-from stairlight.query import Query
+from stairlight.query import Query, solve_table_prefix
 
 
 class TestSuccess:
@@ -109,3 +109,27 @@ class TestSuccess:
                 "line_str": "            LEFT OUTER JOIN PROJECT_e.DATASET_e.TABLE_e",
             },
         ]
+
+    def test_solve_table_prefix_one(self):
+        table = "DATASET_d.TABLE_d"
+        default_table_prefix = "PROJECT_A"
+        assert (
+            solve_table_prefix(table=table, default_table_prefix=default_table_prefix)
+            == "PROJECT_A.DATASET_d.TABLE_d"
+        )
+
+    def test_solve_table_prefix_two(self):
+        table = "TABLE_d"
+        default_table_prefix = "PROJECT_A.DATASET_A"
+        assert (
+            solve_table_prefix(table=table, default_table_prefix=default_table_prefix)
+            == "PROJECT_A.DATASET_A.TABLE_d"
+        )
+
+    def test_solve_table_prefix_nothing(self):
+        table = "PROJECT_d.DATASET_d.TABLE_d"
+        default_table_prefix = "PROJECT_A"
+        assert (
+            solve_table_prefix(table=table, default_table_prefix=default_table_prefix)
+            == "PROJECT_d.DATASET_d.TABLE_d"
+        )

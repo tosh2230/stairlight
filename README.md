@@ -1,3 +1,3 @@
 # StairLight
 
-StairLight detects table dependencies with SQL CTAS queries.
+StairLight detects table dependencies from SQL CTAS queries.

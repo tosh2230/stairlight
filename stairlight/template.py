@@ -44,6 +44,7 @@ class TemplateSource:
                 map_config=self._map_config,
                 source_type=source_type,
                 file_path=str(p),
+                default_table_prefix=source.get("default_table_prefix"),
             )
 
     def search_gcs(self, source):
@@ -64,6 +65,7 @@ class TemplateSource:
                 file_path=blob.name,
                 project=project,
                 bucket=bucket,
+                default_table_prefix=source.get("default_table_prefix"),
             )
 
     def is_excluded(self, source_type, file_path):
@@ -78,12 +80,21 @@ class TemplateSource:
 
 
 class SQLTemplate:
-    def __init__(self, map_config, source_type, file_path, bucket=None, project=None):
+    def __init__(
+        self,
+        map_config,
+        source_type,
+        file_path,
+        bucket=None,
+        project=None,
+        default_table_prefix=None,
+    ):
         self._map_config = map_config
         self.source_type = source_type
         self.file_path = file_path
         self.bucket = bucket
         self.project = project
+        self.default_table_prefix = default_table_prefix
         self.uri = self.set_uri()
 
     def set_uri(self):
