@@ -1,3 +1,3 @@
 # StairLight
 
-StairLight detects table dependencies from SQL CTAS queries.
+StairLight is a table-level data lineage tool, detects table dependencies from `Create Table As Select` SQL files.

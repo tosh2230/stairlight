@@ -44,9 +44,6 @@ class StairLight:
     def undefined_files(self):
         return self._undefined_files
 
-    def on(self):
-        pass
-
     def set(self):
         strl_config = self._configurator.read(prefix=config.STRL_CONFIG)
         if not strl_config:
@@ -70,9 +67,6 @@ class StairLight:
         if not self._undefined_files:
             return
         self._configurator.make_mapping_template(undefined_files=self._undefined_files)
-
-    def save(self):
-        pass
 
     def up(
         self,
