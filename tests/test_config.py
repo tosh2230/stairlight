@@ -6,14 +6,14 @@ class TestSuccess:
     configurator = config.Configurator(path="./config/")
 
     def test_read_map(self):
-        assert self.configurator.read(config.MAP_CONFIG)
+        assert self.configurator.read(prefix=config.MAP_CONFIG_PREFIX)
 
     def test_read_sql(self):
-        assert self.configurator.read(config.STRL_CONFIG)
+        assert self.configurator.read(prefix=config.STRL_CONFIG_PREFIX)
 
     def test_build_template_dict_fs(self):
         sql_template = template.SQLTemplate(
-            map_config=self.configurator.read(config.MAP_CONFIG),
+            map_config=self.configurator.read(prefix=config.MAP_CONFIG_PREFIX),
             source_type=template.SourceType.FS,
             file_path="tests/sql/main/test_undefined.sql",
         )

@@ -6,7 +6,10 @@ from stairlight import StairLight, ResponseType
 
 def set_logging():
     level = "INFO"
-    fmt = "%(asctime)s.%(msecs)03d %(filename)s:%(funcName)s:%(lineno)d [%(levelname)s]%(message)s"
+    fmt = (
+        "%(asctime)s.%(msecs)03d %(filename)s:%(funcName)s:%(lineno)d "
+        "[%(levelname)s]%(message)s"
+    )
     datefmt = "%Y-%m-%d %H:%M:%S"
     logging.basicConfig(level=level, format=fmt, datefmt=datefmt)
 

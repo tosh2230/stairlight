@@ -45,11 +45,17 @@ class StairLight:
         return self._undefined_files
 
     def set(self):
-        strl_config = self._configurator.read(prefix=config.STRL_CONFIG)
+        strl_config = self._configurator.read(prefix=config.STRL_CONFIG_PREFIX)
         if not strl_config:
             return
 
-        map_config = self._configurator.read(prefix=config.MAP_CONFIG)
+        map_config_prefix = config.MAP_CONFIG_PREFIX
+        if "map_setting" in strl_config:
+            map_setting = strl_config["map_setting"]
+            if "prefix" in map_setting:
+                map_config_prefix = map_setting["prefix"]
+        map_config = self._configurator.read(prefix=map_config_prefix)
+
         dependency_map = Map(
             strl_config=strl_config,
             map_config=map_config,

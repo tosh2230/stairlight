@@ -6,8 +6,8 @@ import stairlight.template as template
 
 class TestTemplateSourceSuccess:
     configurator = config.Configurator("./config/")
-    strl_config = configurator.read(config.STRL_CONFIG)
-    map_config = configurator.read(config.MAP_CONFIG)
+    strl_config = configurator.read(prefix=config.STRL_CONFIG_PREFIX)
+    map_config = configurator.read(prefix=config.MAP_CONFIG_PREFIX)
     template_source = template.TemplateSource(
         strl_config=strl_config, map_config=map_config
     )
@@ -71,7 +71,7 @@ class TestTemplateSourceSuccess:
 )
 class TestSQLTemplateSuccess:
     configurator = config.Configurator("./config/")
-    map_config = configurator.read(config.MAP_CONFIG)
+    map_config = configurator.read(prefix=config.MAP_CONFIG_PREFIX)
 
     def test_get_param_list(self, source_type, file_path, params, bucket, mapped_table):
         sql_template = template.SQLTemplate(
@@ -107,7 +107,7 @@ class TestSQLTemplateSuccess:
 
 class TestSQLTemplateRenderSuccess:
     configurator = config.Configurator("./config/")
-    map_config = configurator.read(config.MAP_CONFIG)
+    map_config = configurator.read(prefix=config.MAP_CONFIG_PREFIX)
 
     def test_render_fs(self):
         params = {

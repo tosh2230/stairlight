@@ -11,3 +11,5 @@ sources:
 exclude:
   - type: fs
     regex: "main/test_exclude.sql$"
+map_setting:
+  prefix: "mapping"

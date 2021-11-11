@@ -6,8 +6,8 @@ import yaml
 
 from stairlight.template import SourceType
 
-MAP_CONFIG = "mapping"
-STRL_CONFIG = "stairlight"
+MAP_CONFIG_PREFIX = "mapping"
+STRL_CONFIG_PREFIX = "stairlight"
 
 
 class Configurator:
@@ -39,8 +39,8 @@ class Configurator:
         template = {"mapping": []}
         for undefined_file in undefined_files:
             params = None
-            undefined_params = undefined_file.get("params")
-            if undefined_params:
+            if "params" in undefined_file:
+                undefined_params = undefined_file.get("params")
                 params = {}
                 for param in undefined_params:
                     params[param] = None

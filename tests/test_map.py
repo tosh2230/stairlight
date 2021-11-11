@@ -4,8 +4,8 @@ from stairlight.map import Map
 
 class TestSuccess:
     configurator = config.Configurator("./config/")
-    map_config = configurator.read(config.MAP_CONFIG)
-    strl_config = configurator.read(config.STRL_CONFIG)
+    map_config = configurator.read(prefix=config.MAP_CONFIG_PREFIX)
+    strl_config = configurator.read(prefix=config.STRL_CONFIG_PREFIX)
     dependency_map = Map(strl_config=strl_config, map_config=map_config)
     dependency_map.write()
 
