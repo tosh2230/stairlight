@@ -1,5 +1,5 @@
-import stairlight.config as config
-from stairlight.map import Map
+import src.stairlight.config as config
+from src.stairlight.map import Map
 
 
 class TestSuccess:

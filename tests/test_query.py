@@ -1,4 +1,4 @@
-from stairlight.query import Query, solve_table_prefix
+from src.stairlight.query import Query, solve_table_prefix
 
 
 class TestSuccess:

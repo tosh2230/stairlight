@@ -2,8 +2,8 @@ import enum
 import json
 from logging import getLogger
 
-import stairlight.config as config
-from stairlight.map import Map
+import src.stairlight.config as config
+from src.stairlight.map import Map
 
 logger = getLogger(__name__)
 

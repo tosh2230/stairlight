@@ -1,6 +1,6 @@
 import pytest
 
-from stairlight import StairLight
+from src.stairlight import StairLight
 
 
 @pytest.fixture(scope="session")

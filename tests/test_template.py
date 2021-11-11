@@ -1,7 +1,7 @@
 import pytest
 
-import stairlight.config as config
-import stairlight.template as template
+import src.stairlight.config as config
+import src.stairlight.template as template
 
 
 class TestTemplateSourceSuccess:

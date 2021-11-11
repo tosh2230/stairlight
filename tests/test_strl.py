@@ -1,6 +1,6 @@
 import os
 
-from stairlight.strl import ResponseType, is_cyclic
+from src.stairlight.strl import ResponseType, is_cyclic
 
 
 class TestProperty:
