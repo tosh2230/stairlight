@@ -15,7 +15,7 @@ class Configurator:
         self.path = path
 
     def read(self, prefix):
-        config = {}
+        config = None
         pattern = f"^{self.path}{prefix}.ya?ml$"
         config_file = [
             p
@@ -29,7 +29,7 @@ class Configurator:
 
     def make_mapping_template(self, undefined_files):
         now = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
-        file_name = f"{self.path}/mapping_{now}.yaml"
+        file_name = f"{self.path}mapping_{now}.yaml"
         with open(file_name, "w") as f:
             yaml.safe_dump(self.build_template_dict(undefined_files), f)
         return file_name
@@ -47,11 +47,10 @@ class Configurator:
             sql_template = undefined_file["sql_template"]
             values = {
                 "file_suffix": sql_template.file_path,
-                "tables": {
-                    "table": None,
-                    "params": params,
-                },
+                "tables": [{"table": None}],
             }
+            if params:
+                values["tables"][0]["params"] = params
             if sql_template.source_type in [SourceType.GCS]:
                 values["uri"] = sql_template.uri
                 values["bucket"] = sql_template.bucket

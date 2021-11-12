@@ -30,14 +30,16 @@ class TestSuccess:
 
         value = {
             "file_suffix": sql_template.file_path,
-            "tables": {
-                "table": None,
-                "params": {
-                    "main_table": None,
-                    "sub_table_01": None,
-                    "sub_table_02": None,
-                },
-            },
+            "tables": [
+                {
+                    "table": None,
+                    "params": {
+                        "main_table": None,
+                        "sub_table_01": None,
+                        "sub_table_02": None,
+                    },
+                }
+            ],
         }
 
         expected = {"mapping": [value]}

@@ -4,6 +4,12 @@ import json
 from src.stairlight import ResponseType, StairLight
 
 
+def command_init(stair_light, args):
+    result = stair_light.init()
+    if result:
+        exit(f"'{result}' has created.\nPlease map your tables and parameters.")
+
+
 def command_up(stair_light, args):
     if len(args.table) > 1:
         results = []
@@ -59,13 +65,6 @@ def set_common_parser(parser):
         action="append",
     )
     parser.add_argument(
-        "-c",
-        "--config",
-        help="Directory path contains stairlight configuration files.",
-        type=str,
-        default="./config/",
-    )
-    parser.add_argument(
         "-o",
         "--output",
         help="Output type",
@@ -98,7 +97,18 @@ def set_common_parser(parser):
 
 def _create_parser():
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-c",
+        "--config",
+        help="Directory path contains stairlight configuration files.",
+        type=str,
+        default="./config/",
+    )
+
     subparsers = parser.add_subparsers()
+
+    parser_init = subparsers.add_parser("init", help="Initialize mapping configuration")
+    parser_init.set_defaults(handler=command_init)
 
     parser_up = subparsers.add_parser("up", help="Search upstream tables")
     parser_up.set_defaults(handler=command_up)
@@ -112,21 +122,20 @@ def _create_parser():
 
 
 def main():
-    result = None
     parser = _create_parser()
     args = parser.parse_args()
+    stair_light = StairLight(config_path=args.config)
+    if not stair_light.has_strl_config():
+        exit(f"'{args.config}stairlight.y(a)ml' is not found.")
 
-    stair_light = StairLight()
-    stair_light.set()
-    if not stair_light.maps:
-        exit()
-
+    result = None
     if hasattr(args, "handler"):
         result = args.handler(stair_light, args)
     else:
         result = stair_light.maps
 
-    print(json.dumps(result, indent=2))
+    if result:
+        print(json.dumps(result, indent=2))
 
 
 if __name__ == "__main__":
