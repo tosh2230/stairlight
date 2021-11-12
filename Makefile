@@ -1,7 +1,7 @@
 lint:
-	poetry run flake8 ./stairlight ./tests
-	poetry run isort --check --diff ./stairlight ./tests
-	poetry run black --check ./stairlight ./tests
+	poetry run flake8 ./src ./tests
+	poetry run isort --check --diff ./src ./tests
+	poetry run black --check ./src ./tests
 format:
-	poetry run isort ./stairlight ./tests
-	poetry run black ./stairlight ./tests
+	poetry run isort ./src ./tests
+	poetry run black ./src ./tests
