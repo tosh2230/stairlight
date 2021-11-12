@@ -57,8 +57,8 @@ def set_common_parser(parser):
         "-t",
         "--table",
         help=(
-            "Table name that stairlight searches for. "
-            "It can be specified multiple times."
+            "table name that stairlight searches for, "
+            "can be specified multiple times."
         ),
         # type=str,
         required=True,
@@ -67,7 +67,7 @@ def set_common_parser(parser):
     parser.add_argument(
         "-o",
         "--output",
-        help="Output type",
+        help="output type",
         type=str,
         choices=[ResponseType.TABLE.value, ResponseType.FILE.value],
         default=ResponseType.TABLE.value,
@@ -75,20 +75,20 @@ def set_common_parser(parser):
     parser.add_argument(
         "-v",
         "--verbose",
-        help="Return verbose results",
+        help="return verbose results",
         action="store_true",
         default=False,
     )
     parser.add_argument(
         "-r",
         "--recursive",
-        help="Search recursive",
+        help="search recursive",
         action="store_true",
         default=False,
     )
     parser.add_argument(
         "--gcp_project",
-        help="GCP project id",
+        help="Google Cloud Platform project id",
         type=str,
         default=None,
     )
@@ -96,25 +96,33 @@ def set_common_parser(parser):
 
 
 def _create_parser():
-    parser = argparse.ArgumentParser()
+    description = (
+        "A table-level data lineage tool, "
+        "detects table dependencies from `CREATE TABLE AS SELECT` SQL files."
+        "Without positional arguments, "
+        "return a table dependency map as JSON format."
+    )
+    parser = argparse.ArgumentParser(description=description)
     parser.add_argument(
         "-c",
         "--config",
-        help="Directory path contains stairlight configuration files.",
+        help="directory path contains stairlight configuration files.",
         type=str,
         default="./config/",
     )
 
     subparsers = parser.add_subparsers()
 
-    parser_init = subparsers.add_parser("init", help="Initialize mapping configuration")
+    parser_init = subparsers.add_parser(
+        "init", help="create a new mapping configuration file"
+    )
     parser_init.set_defaults(handler=command_init)
 
-    parser_up = subparsers.add_parser("up", help="Search upstream tables")
+    parser_up = subparsers.add_parser("up", help="return upstream table list(s)")
     parser_up.set_defaults(handler=command_up)
     parser_up = set_common_parser(parser_up)
 
-    parser_down = subparsers.add_parser("down", help="Search downstream tables")
+    parser_down = subparsers.add_parser("down", help="return downstream table list(s)")
     parser_down.set_defaults(handler=command_down)
     parser_down = set_common_parser(parser_down)
 
