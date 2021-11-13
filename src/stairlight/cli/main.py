@@ -2,7 +2,7 @@ import argparse
 import json
 from typing import Callable
 
-from src.stairlight.stairlight import ResponseType, StairLight
+from src.stairlight import ResponseType, StairLight
 
 
 def command_init(stair_light, args):

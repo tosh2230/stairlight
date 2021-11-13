@@ -2,8 +2,8 @@ import enum
 import json
 from logging import getLogger
 
-import src.stairlight.config as config
-from src.stairlight.map import Map
+from .config import MAP_CONFIG_PREFIX, STRL_CONFIG_PREFIX, Configurator
+from .map import Map
 
 logger = getLogger(__name__)
 
@@ -32,10 +32,10 @@ class Node:
 
 class StairLight:
     def __init__(self, config_path="./config/"):
-        self._configurator = config.Configurator(path=config_path)
+        self._configurator = Configurator(path=config_path)
         self._maps = {}
         self._undefined_files = []
-        self._strl_config = self._configurator.read(prefix=config.STRL_CONFIG_PREFIX)
+        self._strl_config = self._configurator.read(prefix=STRL_CONFIG_PREFIX)
         if self._strl_config:
             self._set()
 
@@ -54,7 +54,7 @@ class StairLight:
         if not self._strl_config:
             return
 
-        map_config_prefix = config.MAP_CONFIG_PREFIX
+        map_config_prefix = MAP_CONFIG_PREFIX
         if "map_setting" in self._strl_config:
             map_setting = self._strl_config["map_setting"]
             if "prefix" in map_setting:

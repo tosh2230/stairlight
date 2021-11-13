@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 
 import yaml
 
-from src.stairlight.template import SourceType
+from .template import SourceType
 
 MAP_CONFIG_PREFIX = "mapping"
 STRL_CONFIG_PREFIX = "stairlight"
