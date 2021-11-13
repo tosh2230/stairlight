@@ -5,14 +5,28 @@ from typing import Callable
 from src.stairlight import ResponseType, StairLight
 
 
+def command_init(stair_light, args):
+    message = ""
+    stairlight_template_file = stair_light.init()
+    if stairlight_template_file:
+        message = (
+            f"'{stairlight_template_file}' has created.\n"
+            "Please edit it to set your data sources."
+        )
+        exit(message)
+    exit()
+
+
 def command_check(stair_light, args):
-    result = stair_light.check()
-    if result:
-        exit(
-            f"'{result}' has created.\n"
+    mapping_template_file = stair_light.check()
+    if mapping_template_file:
+        message = (
+            f"'{mapping_template_file}' has created.\n"
             "Please map undefined tables and parameters, "
             "and append to your latest file."
         )
+        exit(message)
+    exit()
 
 
 def command_up(stair_light, args):
@@ -39,7 +53,7 @@ def execute_up_or_down(up_or_down: Callable, args):
     return results
 
 
-def set_up_down_parser(parser):
+def set_config_parser(parser):
     parser.add_argument(
         "-c",
         "--config",
@@ -47,6 +61,10 @@ def set_up_down_parser(parser):
         type=str,
         default=".",
     )
+    return parser
+
+
+def set_up_down_parser(parser):
     parser.add_argument(
         "-t",
         "--table",
@@ -100,21 +118,34 @@ def _create_parser():
 
     subparsers = parser.add_subparsers()
 
+    # init
+    parser_init = subparsers.add_parser(
+        "init", help="create a new stairlight configuration file."
+    )
+    parser_init.set_defaults(handler=command_init)
+    parser_init = set_config_parser(parser_init)
+
+    # check
     parser_check = subparsers.add_parser(
         "check", help="create a new configuration file about undefined mappings."
     )
     parser_check.set_defaults(handler=command_check)
+    parser_check = set_config_parser(parser_check)
 
+    # up
     parser_up = subparsers.add_parser(
         "up", help="return upstream ( table | SQL file ) list"
     )
     parser_up.set_defaults(handler=command_up)
+    parser_up = set_config_parser(parser_up)
     parser_up = set_up_down_parser(parser_up)
 
+    # down
     parser_down = subparsers.add_parser(
         "down", help="return downstream ( table | SQL file ) list"
     )
     parser_down.set_defaults(handler=command_down)
+    parser_down = set_config_parser(parser_down)
     parser_down = set_up_down_parser(parser_down)
 
     return parser
@@ -124,13 +155,17 @@ def main():
     parser = _create_parser()
     args = parser.parse_args()
     stair_light = StairLight(config_path=args.config)
-    if not stair_light.has_strl_config():
-        exit(f"'{args.config}/stairlight.y(a)ml' is not found.")
 
     result = None
     if hasattr(args, "handler"):
+        if args.handler == command_init and stair_light.has_strl_config():
+            exit(f"'{args.config}/stairlight.y(a)ml' already exists.")
+        elif args.handler != command_init and not stair_light.has_strl_config():
+            exit(f"'{args.config}/stairlight.y(a)ml' is not found.")
         result = args.handler(stair_light, args)
     else:
+        if not stair_light.has_strl_config():
+            exit(f"'{args.config}/stairlight.y(a)ml' is not found.")
         result = stair_light.map
 
     if result:

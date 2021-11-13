@@ -1,5 +1,7 @@
 import glob
+import logging
 import re
+from collections import OrderedDict
 from datetime import datetime, timezone
 
 import yaml
@@ -8,6 +10,8 @@ from .template import SourceType
 
 MAP_CONFIG_PREFIX = "mapping"
 STRL_CONFIG_PREFIX = "stairlight"
+
+logger = logging.getLogger()
 
 
 class Configurator:
@@ -27,12 +31,53 @@ class Configurator:
                 config = yaml.safe_load(file)
         return config
 
+    def create_stairlight_template(self):
+        file_name = f"{self.path}/{STRL_CONFIG_PREFIX}.yaml"
+        with open(file_name, "w") as f:
+            yaml.add_representer(OrderedDict, self.represent_odict)
+            yaml.dump(self.build_stairlight_template(), f)
+        return file_name
+
     def create_mapping_template(self, undefined_files):
         now = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
-        file_name = f"{self.path}/mapping_{now}.yaml"
+        file_name = f"{self.path}/{MAP_CONFIG_PREFIX}_{now}.yaml"
         with open(file_name, "w") as f:
-            yaml.safe_dump(self.build_mapping_template(undefined_files), f)
+            yaml.add_representer(OrderedDict, self.represent_odict)
+            yaml.dump(self.build_mapping_template(undefined_files), f)
         return file_name
+
+    @staticmethod
+    def represent_odict(dumper, instance):
+        return dumper.represent_mapping("tag:yaml.org,2002:map", instance.items())
+
+    @staticmethod
+    def build_stairlight_template():
+        return OrderedDict(
+            {
+                "include": [
+                    {
+                        "type": "fs",
+                        "path": None,
+                        "regex": None,
+                        "default_table_prefix": None,
+                    },
+                    {
+                        "type": "gcs",
+                        "project": None,
+                        "bucket": None,
+                        "regex": None,
+                        "default_table_prefix": None,
+                    },
+                ],
+                "exclude": [
+                    {
+                        "type": None,
+                        "regex": None,
+                    }
+                ],
+                "settings": {"mapping_prefix": None},
+            }
+        )
 
     @staticmethod
     def build_mapping_template(undefined_files):

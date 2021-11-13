@@ -1,4 +1,4 @@
-sources:
+include:
   - type: fs
     path: "./tests/sql"
     regex: ".*/*.sql$"
@@ -11,5 +11,5 @@ sources:
 exclude:
   - type: fs
     regex: "main/test_exclude.sql$"
-map_setting:
-  prefix: "mapping"
+settings:
+  mapping_prefix: "mapping"

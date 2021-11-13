@@ -56,10 +56,10 @@ class StairLight:
             return
 
         map_config_prefix = MAP_CONFIG_PREFIX
-        if "map_setting" in self._strl_config:
-            map_setting = self._strl_config["map_setting"]
-            if "prefix" in map_setting:
-                map_config_prefix = map_setting["prefix"]
+        if "settings" in self._strl_config:
+            settings = self._strl_config["settings"]
+            if "mapping_prefix" in settings:
+                map_config_prefix = settings["mapping_prefix"]
         map_config = self._configurator.read(prefix=map_config_prefix)
 
         dependency_map = Map(
@@ -69,13 +69,13 @@ class StairLight:
         if map_config:
             dependency_map.write()
             self._map = dependency_map.map
-            self._undefined_files = dependency_map.undefined_files
         else:
             dependency_map.write_blank()
-            self._undefined_files = dependency_map.undefined_files
+
+        self._undefined_files = dependency_map.undefined_files
 
     def init(self):
-        pass
+        return self._configurator.create_stairlight_template()
 
     def check(self):
         if not self._undefined_files:

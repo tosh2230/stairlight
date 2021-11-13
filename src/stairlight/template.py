@@ -24,7 +24,7 @@ class TemplateSource:
         self._map_config = map_config
 
     def search(self):
-        for source in self._strl_config.get("sources"):
+        for source in self._strl_config.get("include"):
             type = source.get("type")
             if type.casefold() == SourceType.FS.value:
                 yield from self.search_fs(source)
