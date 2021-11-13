@@ -31,7 +31,7 @@ class Node:
 
 
 class StairLight:
-    def __init__(self, config_path="./config/"):
+    def __init__(self, config_path="."):
         self._configurator = Configurator(path=config_path)
         self._map = {}
         self._undefined_files = []
@@ -52,6 +52,7 @@ class StairLight:
 
     def _set_map(self):
         if not self._strl_config:
+            logger.warning(f"{STRL_CONFIG_PREFIX}.y(a)ml' is not found.")
             return
 
         map_config_prefix = MAP_CONFIG_PREFIX
@@ -73,10 +74,13 @@ class StairLight:
             dependency_map.write_blank()
             self._undefined_files = dependency_map.undefined_files
 
+    def init(self):
+        pass
+
     def check(self):
         if not self._undefined_files:
             return None
-        return self._configurator.make_mapping_template(
+        return self._configurator.create_mapping_template(
             undefined_files=self._undefined_files
         )
 

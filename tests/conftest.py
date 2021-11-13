@@ -5,5 +5,5 @@ from src.stairlight import StairLight
 
 @pytest.fixture(scope="session")
 def stair_light():
-    stairlight = StairLight()
+    stairlight = StairLight(config_path="./config")
     return stairlight

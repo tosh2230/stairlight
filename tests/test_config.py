@@ -3,7 +3,7 @@ import src.stairlight.template as template
 
 
 class TestSuccess:
-    configurator = config.Configurator(path="./config/")
+    configurator = config.Configurator(path="./config")
 
     def test_read_map(self):
         assert self.configurator.read(prefix=config.MAP_CONFIG_PREFIX)
@@ -11,7 +11,7 @@ class TestSuccess:
     def test_read_sql(self):
         assert self.configurator.read(prefix=config.STRL_CONFIG_PREFIX)
 
-    def test_build_template_dict_fs(self):
+    def test_build_mapping_template_fs(self):
         sql_template = template.SQLTemplate(
             map_config=self.configurator.read(prefix=config.MAP_CONFIG_PREFIX),
             source_type=template.SourceType.FS,
@@ -43,5 +43,7 @@ class TestSuccess:
         }
 
         expected = {"mapping": [value]}
-        actual = self.configurator.build_template_dict(undefined_files=undefined_files)
+        actual = self.configurator.build_mapping_template(
+            undefined_files=undefined_files
+        )
         assert actual == expected

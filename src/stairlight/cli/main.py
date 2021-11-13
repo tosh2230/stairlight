@@ -39,7 +39,14 @@ def execute_up_or_down(up_or_down: Callable, args):
     return results
 
 
-def set_common_parser(parser):
+def set_up_down_parser(parser):
+    parser.add_argument(
+        "-c",
+        "--config",
+        help="directory path contains stairlight configuration files.",
+        type=str,
+        default=".",
+    )
     parser.add_argument(
         "-t",
         "--table",
@@ -72,12 +79,6 @@ def set_common_parser(parser):
         action="store_true",
         default=False,
     )
-    parser.add_argument(
-        "--gcp_project",
-        help="Google Cloud Platform project id",
-        type=str,
-        default=None,
-    )
     return parser
 
 
@@ -94,7 +95,7 @@ def _create_parser():
         "--config",
         help="directory path contains stairlight configuration files.",
         type=str,
-        default="./config/",
+        default=".",
     )
 
     subparsers = parser.add_subparsers()
@@ -108,13 +109,13 @@ def _create_parser():
         "up", help="return upstream ( table | SQL file ) list"
     )
     parser_up.set_defaults(handler=command_up)
-    parser_up = set_common_parser(parser_up)
+    parser_up = set_up_down_parser(parser_up)
 
     parser_down = subparsers.add_parser(
         "down", help="return downstream ( table | SQL file ) list"
     )
     parser_down.set_defaults(handler=command_down)
-    parser_down = set_common_parser(parser_down)
+    parser_down = set_up_down_parser(parser_down)
 
     return parser
 
@@ -124,7 +125,7 @@ def main():
     args = parser.parse_args()
     stair_light = StairLight(config_path=args.config)
     if not stair_light.has_strl_config():
-        exit(f"'{args.config}stairlight.y(a)ml' is not found.")
+        exit(f"'{args.config}/stairlight.y(a)ml' is not found.")
 
     result = None
     if hasattr(args, "handler"):

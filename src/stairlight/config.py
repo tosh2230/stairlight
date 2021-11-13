@@ -16,7 +16,7 @@ class Configurator:
 
     def read(self, prefix):
         config = None
-        pattern = f"^{self.path}{prefix}.ya?ml$"
+        pattern = f"^{self.path}/{prefix}.ya?ml$"
         config_file = [
             p
             for p in glob.glob(f"{self.path}/**", recursive=False)
@@ -27,15 +27,15 @@ class Configurator:
                 config = yaml.safe_load(file)
         return config
 
-    def make_mapping_template(self, undefined_files):
+    def create_mapping_template(self, undefined_files):
         now = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
-        file_name = f"{self.path}mapping_{now}.yaml"
+        file_name = f"{self.path}/mapping_{now}.yaml"
         with open(file_name, "w") as f:
-            yaml.safe_dump(self.build_template_dict(undefined_files), f)
+            yaml.safe_dump(self.build_mapping_template(undefined_files), f)
         return file_name
 
     @staticmethod
-    def build_template_dict(undefined_files):
+    def build_mapping_template(undefined_files):
         template = {"mapping": []}
         for undefined_file in undefined_files:
             params = None
