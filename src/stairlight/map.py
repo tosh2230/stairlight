@@ -3,8 +3,8 @@ from .template import SourceType, SQLTemplate, TemplateSource
 
 
 class Map:
-    def __init__(self, strl_config, map_config, maps={}) -> None:
-        self.maps = maps
+    def __init__(self, strl_config, map_config, map={}) -> None:
+        self.map = map
         self.undefined_files = []
         self._template_source = TemplateSource(
             strl_config=strl_config, map_config=map_config
@@ -44,8 +44,8 @@ class Map:
             query_str=query_str, default_table_prefix=sql_template.default_table_prefix
         )
 
-        if downstream_table not in self.maps:
-            self.maps[downstream_table] = {}
+        if downstream_table not in self.map:
+            self.map[downstream_table] = {}
 
         for upstream_table_attributes in query.parse_upstream():
             upstream_table_name = upstream_table_attributes["table_name"]
@@ -58,4 +58,4 @@ class Map:
             }
             if sql_template.source_type == SourceType.GCS:
                 values["bucket"] = sql_template.bucket
-            self.maps[downstream_table][upstream_table_name] = values
+            self.map[downstream_table][upstream_table_name] = values

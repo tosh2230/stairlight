@@ -3,7 +3,7 @@ from src.stairlight import StairLight
 if __name__ == "__main__":
     stair_light = StairLight()
     stair_light.set()
-    if not stair_light.maps:
+    if not stair_light.map:
         exit()
 
     result = stair_light.up(

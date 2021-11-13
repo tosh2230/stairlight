@@ -9,8 +9,8 @@ class TestSuccess:
     dependency_map = Map(strl_config=strl_config, map_config=map_config)
     dependency_map.write()
 
-    def test_maps(self):
-        assert len(self.dependency_map.maps) > 0
+    def test_map(self):
+        assert len(self.dependency_map.map) > 0
 
     def test_undefined_files(self):
         assert len(self.dependency_map.undefined_files) > 0

@@ -5,10 +5,14 @@ from typing import Callable
 from src.stairlight import ResponseType, StairLight
 
 
-def command_init(stair_light, args):
-    result = stair_light.init()
+def command_check(stair_light, args):
+    result = stair_light.check()
     if result:
-        exit(f"'{result}' has created.\nPlease map your tables and parameters.")
+        exit(
+            f"'{result}' has created.\n"
+            "Please map undefined tables and parameters, "
+            "and append to your latest file."
+        )
 
 
 def command_up(stair_light, args):
@@ -95,10 +99,10 @@ def _create_parser():
 
     subparsers = parser.add_subparsers()
 
-    parser_init = subparsers.add_parser(
-        "init", help="create a new mapping configuration file"
+    parser_check = subparsers.add_parser(
+        "check", help="create a new configuration file about undefined mappings."
     )
-    parser_init.set_defaults(handler=command_init)
+    parser_check.set_defaults(handler=command_check)
 
     parser_up = subparsers.add_parser(
         "up", help="return upstream ( table | SQL file ) list"
@@ -126,7 +130,7 @@ def main():
     if hasattr(args, "handler"):
         result = args.handler(stair_light, args)
     else:
-        result = stair_light.maps
+        result = stair_light.map
 
     if result:
         print(json.dumps(result, indent=2))

@@ -33,15 +33,15 @@ class Node:
 class StairLight:
     def __init__(self, config_path="./config/"):
         self._configurator = Configurator(path=config_path)
-        self._maps = {}
+        self._map = {}
         self._undefined_files = []
         self._strl_config = self._configurator.read(prefix=STRL_CONFIG_PREFIX)
         if self._strl_config:
-            self._set()
+            self._set_map()
 
     @property
-    def maps(self):
-        return self._maps
+    def map(self):
+        return self._map
 
     @property
     def undefined_files(self):
@@ -50,7 +50,7 @@ class StairLight:
     def has_strl_config(self):
         return self._strl_config is not None
 
-    def _set(self):
+    def _set_map(self):
         if not self._strl_config:
             return
 
@@ -67,13 +67,13 @@ class StairLight:
         )
         if map_config:
             dependency_map.write()
-            self._maps = dependency_map.maps
+            self._map = dependency_map.map
             self._undefined_files = dependency_map.undefined_files
         else:
             dependency_map.write_blank()
             self._undefined_files = dependency_map.undefined_files
 
-    def init(self):
+    def check(self):
         if not self._undefined_files:
             return None
         return self._configurator.make_mapping_template(
@@ -225,10 +225,10 @@ class StairLight:
     def get_relative_map(self, table_name, direction):
         relative_map = {}
         if direction == SearchDirection.UP:
-            relative_map = self._maps.get(table_name)
+            relative_map = self._map.get(table_name)
         elif direction == SearchDirection.DOWN:
-            for key in [k for k, v in self._maps.items() if v.get(table_name)]:
-                relative_map[key] = self._maps[key][table_name]
+            for key in [k for k, v in self._map.items() if v.get(table_name)]:
+                relative_map[key] = self._map[key][table_name]
         return relative_map
 
 
