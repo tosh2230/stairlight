@@ -43,4 +43,4 @@ jobs:
           make lint
       - name: Unit test
         run: |
-          poetry run pytest -v --cov=stairlight
+          poetry run pytest -v --cov=src
