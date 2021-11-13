@@ -1,5 +1,6 @@
 import argparse
 import json
+from typing import Callable
 
 from src.stairlight import ResponseType, StairLight
 
@@ -11,45 +12,27 @@ def command_init(stair_light, args):
 
 
 def command_up(stair_light, args):
-    if len(args.table) > 1:
-        results = []
-        for table_name in args.table:
-            result = stair_light.up(
-                table_name=table_name,
-                recursive=args.recursive,
-                verbose=args.verbose,
-                response_type=args.output,
-            )
-            results.append(result)
-        return results
-    else:
-        return stair_light.up(
-            table_name=args.table[0],
-            recursive=args.recursive,
-            verbose=args.verbose,
-            response_type=args.output,
-        )
+    return execute_up_or_down(stair_light.up, args)
 
 
 def command_down(stair_light, args):
-    if len(args.table) > 1:
-        results = []
-        for table_name in args.table:
-            result = stair_light.down(
-                table_name=table_name,
-                recursive=args.recursive,
-                verbose=args.verbose,
-                response_type=args.output,
-            )
-            results.append(result)
-        return results
-    else:
-        return stair_light.down(
-            table_name=args.table[0],
+    return execute_up_or_down(stair_light.down, args)
+
+
+def execute_up_or_down(up_or_down: Callable, args):
+    results = []
+    for table_name in args.table:
+        result = up_or_down(
+            table_name=table_name,
             recursive=args.recursive,
             verbose=args.verbose,
             response_type=args.output,
         )
+        if len(args.table) > 1:
+            results.append(result)
+        else:
+            return result
+    return results
 
 
 def set_common_parser(parser):
@@ -60,7 +43,6 @@ def set_common_parser(parser):
             "table name that stairlight searches for, "
             "can be specified multiple times."
         ),
-        # type=str,
         required=True,
         action="append",
     )
@@ -98,7 +80,7 @@ def set_common_parser(parser):
 def _create_parser():
     description = (
         "A table-level data lineage tool, "
-        "detects table dependencies from `CREATE TABLE AS SELECT` SQL files."
+        "detects table dependencies from `CREATE TABLE AS SELECT` SQL files. "
         "Without positional arguments, "
         "return a table dependency map as JSON format."
     )
@@ -118,11 +100,15 @@ def _create_parser():
     )
     parser_init.set_defaults(handler=command_init)
 
-    parser_up = subparsers.add_parser("up", help="return upstream table list(s)")
+    parser_up = subparsers.add_parser(
+        "up", help="return upstream ( table | SQL file ) list"
+    )
     parser_up.set_defaults(handler=command_up)
     parser_up = set_common_parser(parser_up)
 
-    parser_down = subparsers.add_parser("down", help="return downstream table list(s)")
+    parser_down = subparsers.add_parser(
+        "down", help="return downstream ( table | SQL file ) list"
+    )
     parser_down.set_defaults(handler=command_down)
     parser_down = set_common_parser(parser_down)
 
