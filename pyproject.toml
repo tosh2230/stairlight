@@ -1,15 +1,16 @@
 [tool.poetry]
 name = "stairlight"
 version = "0.1.0"
-description = ""
+description = "Table-level data lineage tool"
 authors = ["tosh2230 <rev.to12@gmail.com>"]
 license = "MIT"
+readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.6.2"
-PyYAML = "^6.0"
-Jinja2 = "^3.0.2"
-google-cloud-storage = "^1.42.3"
+PyYAML = ">=5.0"
+Jinja2 = ">=2.10.3"
+google-cloud-storage = "^1.28.1"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^4.0.1"
