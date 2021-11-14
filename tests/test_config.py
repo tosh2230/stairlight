@@ -17,7 +17,7 @@ class TestSuccess:
             source_type=template.SourceType.FS,
             file_path="tests/sql/main/test_undefined.sql",
         )
-        undefined_files = [
+        unmapped = [
             {
                 "sql_template": sql_template,
                 "params": [
@@ -43,7 +43,5 @@ class TestSuccess:
         }
 
         expected = {"mapping": [value]}
-        actual = self.configurator.build_mapping_template(
-            undefined_files=undefined_files
-        )
+        actual = self.configurator.build_mapping_template(unmapped=unmapped)
         assert actual == expected

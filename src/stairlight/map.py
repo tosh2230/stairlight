@@ -3,15 +3,15 @@ from .template import SourceType, SQLTemplate, TemplateSource
 
 
 class Map:
-    def __init__(self, strl_config, map_config, map={}) -> None:
-        self.map = map
-        self.undefined_files = []
+    def __init__(self, strl_config, map_config, mapped={}) -> None:
+        self.mapped = mapped
+        self.unmapped = []
         self._template_source = TemplateSource(
             strl_config=strl_config, map_config=map_config
         )
 
     def collect_undefined(self, sql_template):
-        self.undefined_files.append(
+        self.unmapped.append(
             {
                 "sql_template": sql_template,
                 "params": sql_template.get_jinja_params(),
@@ -45,8 +45,8 @@ class Map:
             default_table_prefix=sql_template.default_table_prefix,
         )
 
-        if downstream_table not in self.map:
-            self.map[downstream_table] = {}
+        if downstream_table not in self.mapped:
+            self.mapped[downstream_table] = {}
 
         for upstream_table_attributes in query.parse_upstream():
             upstream_table_name = upstream_table_attributes["table_name"]
@@ -59,4 +59,4 @@ class Map:
             }
             if sql_template.source_type == SourceType.GCS:
                 values["bucket"] = sql_template.bucket
-            self.map[downstream_table][upstream_table_name] = values
+            self.mapped[downstream_table][upstream_table_name] = values

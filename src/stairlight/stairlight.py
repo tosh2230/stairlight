@@ -1,5 +1,6 @@
 import enum
 import json
+import os
 from logging import getLogger
 
 from .config import MAP_CONFIG_PREFIX, STRL_CONFIG_PREFIX, Configurator
@@ -31,26 +32,33 @@ class Node:
 
 
 class StairLight:
-    def __init__(self, config_path="."):
+    def __init__(self, config_path=".", load_file=None, save_file=None):
+        self.load_file = load_file
+        self.save_file = save_file
         self._configurator = Configurator(path=config_path)
-        self._map = {}
-        self._undefined_files = []
+        self._mapped = {}
+        self._unmapped = []
         self._strl_config = self._configurator.read(prefix=STRL_CONFIG_PREFIX)
         if self._strl_config:
-            self._set_map()
+            if self.load_file:
+                self.load()
+            else:
+                self.set()
+                if self.save_file:
+                    self.save()
 
     @property
-    def map(self):
-        return self._map
+    def mapped(self):
+        return self._mapped
 
     @property
-    def undefined_files(self):
-        return self._undefined_files
+    def unmapped(self):
+        return self._unmapped
 
     def has_strl_config(self):
         return self._strl_config is not None
 
-    def _set_map(self):
+    def set(self):
         if not self._strl_config:
             logger.warning(f"{STRL_CONFIG_PREFIX}.y(a)ml' is not found.")
             return
@@ -68,21 +76,33 @@ class StairLight:
         )
         if map_config:
             dependency_map.write()
-            self._map = dependency_map.map
+            self._mapped = dependency_map.mapped
         else:
             dependency_map.write_blank()
 
-        self._undefined_files = dependency_map.undefined_files
+        self._unmapped = dependency_map.unmapped
 
     def init(self):
         return self._configurator.create_stairlight_template()
 
     def check(self):
-        if not self._undefined_files:
+        if self.load_file:
+            logger.warning("Load option is used, skip checking.")
             return None
-        return self._configurator.create_mapping_template(
-            undefined_files=self._undefined_files
-        )
+        elif not self._unmapped:
+            return None
+        return self._configurator.create_mapping_template(unmapped=self._unmapped)
+
+    def save(self):
+        with open(self.save_file, "w") as f:
+            json.dump(self._mapped, f, indent=2)
+
+    def load(self):
+        if not os.path.exists(self.load_file):
+            logger.error(f"{self.load_file} is not found.")
+            exit()
+        with open(self.load_file) as f:
+            self._mapped = json.load(f)
 
     def up(
         self,
@@ -161,7 +181,7 @@ class StairLight:
                         "next_table_name": next_table_name,
                         "searched_tables": searched_tables,
                     }
-                    logger.info(f"Circular reference detected!: {details}")
+                    logger.warning(f"Circular reference detected!: {details}")
                     continue
 
                 next_response = self.search_verbose(
@@ -229,10 +249,10 @@ class StairLight:
     def get_relative_map(self, table_name, direction):
         relative_map = {}
         if direction == SearchDirection.UP:
-            relative_map = self._map.get(table_name)
+            relative_map = self._mapped.get(table_name)
         elif direction == SearchDirection.DOWN:
-            for key in [k for k, v in self._map.items() if v.get(table_name)]:
-                relative_map[key] = self._map[key][table_name]
+            for key in [k for k, v in self._mapped.items() if v.get(table_name)]:
+                relative_map[key] = self._mapped[key][table_name]
         return relative_map
 
 

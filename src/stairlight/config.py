@@ -38,12 +38,12 @@ class Configurator:
             yaml.dump(self.build_stairlight_template(), f)
         return file_name
 
-    def create_mapping_template(self, undefined_files):
+    def create_mapping_template(self, unmapped):
         now = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
         file_name = f"{self.path}/{MAP_CONFIG_PREFIX}_{now}.yaml"
         with open(file_name, "w") as f:
             yaml.add_representer(OrderedDict, self.represent_odict)
-            yaml.dump(self.build_mapping_template(undefined_files), f)
+            yaml.dump(self.build_mapping_template(unmapped), f)
         return file_name
 
     @staticmethod
@@ -80,16 +80,16 @@ class Configurator:
         )
 
     @staticmethod
-    def build_mapping_template(undefined_files):
+    def build_mapping_template(unmapped):
         template = {"mapping": []}
-        for undefined_file in undefined_files:
+        for unmapped_file in unmapped:
             params = None
-            if "params" in undefined_file:
-                undefined_params = undefined_file.get("params")
+            if "params" in unmapped_file:
+                undefined_params = unmapped_file.get("params")
                 params = {}
                 for param in undefined_params:
                     params[param] = None
-            sql_template = undefined_file["sql_template"]
+            sql_template = unmapped_file["sql_template"]
             values = {
                 "file_suffix": sql_template.file_path,
                 "tables": [{"table": None}],

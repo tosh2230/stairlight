@@ -61,6 +61,21 @@ def set_config_parser(parser):
         type=str,
         default=".",
     )
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument(
+        "-s",
+        "--save",
+        help="save results to a file",
+        type=str,
+        default=None,
+    )
+    group.add_argument(
+        "-l",
+        "--load",
+        help="load results from a file",
+        type=str,
+        default=None,
+    )
     return parser
 
 
@@ -108,13 +123,7 @@ def _create_parser():
         "return a table dependency map as JSON format."
     )
     parser = argparse.ArgumentParser(description=description)
-    parser.add_argument(
-        "-c",
-        "--config",
-        help="directory path contains stairlight configuration files.",
-        type=str,
-        default=".",
-    )
+    parser = set_config_parser(parser)
 
     subparsers = parser.add_subparsers()
 
@@ -154,7 +163,9 @@ def _create_parser():
 def main():
     parser = _create_parser()
     args = parser.parse_args()
-    stair_light = StairLight(config_path=args.config)
+    stair_light = StairLight(
+        config_path=args.config, load_file=args.load, save_file=args.save
+    )
 
     result = None
     if hasattr(args, "handler"):
@@ -166,7 +177,7 @@ def main():
     else:
         if not stair_light.has_strl_config():
             exit(f"'{args.config}/stairlight.y(a)ml' is not found.")
-        result = stair_light.map
+        result = stair_light.mapped
 
     if result:
         print(json.dumps(result, indent=2))

@@ -4,13 +4,12 @@ from src.stairlight.stairlight import ResponseType, is_cyclic
 
 
 class TestProperty:
-    def test_map(self, stair_light):
-        assert len(stair_light.map) > 0
+    def test_mapped(self, stair_light):
+        assert len(stair_light.mapped) > 0
 
-    def test_undefined_files(self, stair_light):
+    def test_unmapped(self, stair_light):
         file_keys = [
-            undefined_file.get("template_file")
-            for undefined_file in stair_light.undefined_files
+            unmapped_file.get("template_file") for unmapped_file in stair_light.unmapped
         ]
         assert len(file_keys) > 0
 
