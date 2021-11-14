@@ -40,7 +40,7 @@ class Query:
             ][0]
 
             yield {
-                "table_name": table,
+                "table_name": solve_table_prefix(table, self.default_table_prefix),
                 "line": line + 1,
                 "line_str": self.query_str.splitlines()[line],
             }

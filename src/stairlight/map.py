@@ -10,10 +10,6 @@ class Map:
             strl_config=strl_config, map_config=map_config
         )
 
-    def write_blank(self):
-        for sql_template in self._template_source.search():
-            self.collect_undefined(sql_template)
-
     def collect_undefined(self, sql_template):
         self.undefined_files.append(
             {
@@ -21,6 +17,10 @@ class Map:
                 "params": sql_template.get_jinja_params(),
             }
         )
+
+    def write_blank(self):
+        for sql_template in self._template_source.search():
+            self.collect_undefined(sql_template)
 
     def write(self):
         for sql_template in self._template_source.search():
@@ -41,7 +41,8 @@ class Map:
 
         query_str = sql_template.render(params=params)
         query = Query(
-            query_str=query_str, default_table_prefix=sql_template.default_table_prefix
+            query_str=query_str,
+            default_table_prefix=sql_template.default_table_prefix,
         )
 
         if downstream_table not in self.map:
