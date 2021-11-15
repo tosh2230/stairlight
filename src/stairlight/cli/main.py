@@ -57,7 +57,7 @@ def set_config_parser(parser):
     parser.add_argument(
         "-c",
         "--config",
-        help="directory path contains stairlight configuration files.",
+        help="directory path contains StairLight configuration files.",
         type=str,
         default=".",
     )
@@ -84,7 +84,7 @@ def set_up_down_parser(parser):
         "-t",
         "--table",
         help=(
-            "table name that stairlight searches for, "
+            "table name that StairLight searches for, "
             "can be specified multiple times."
         ),
         required=True,
@@ -118,7 +118,7 @@ def set_up_down_parser(parser):
 def _create_parser():
     description = (
         "A table-level data lineage tool, "
-        "detects table dependencies from `CREATE TABLE AS SELECT` SQL files. "
+        "detects table dependencies from 'Transform' SQL files. "
         "Without positional arguments, "
         "return a table dependency map as JSON format."
     )
@@ -129,7 +129,7 @@ def _create_parser():
 
     # init
     parser_init = subparsers.add_parser(
-        "init", help="create a new stairlight configuration file."
+        "init", help="create a new StairLight configuration file."
     )
     parser_init.set_defaults(handler=command_init)
     parser_init = set_config_parser(parser_init)
