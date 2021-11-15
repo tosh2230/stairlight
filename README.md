@@ -113,20 +113,18 @@ Config files used for unit test in CI can be found [here](https://github.com/tos
 
 'stairlight.yaml' is for setting up StairLight itself.
 
-It is responsible for specifying the destination of SQL files to be read, and for specifying the prefix of the mapping file.
+It is responsible for specifying the destination of SQL files to be read, and for specifying the prefix of mapping files.
 
 SQL files can be read from the following storage.
 
-- Local file system(with pathlib module)
+- Local file system(with python pathlib module)
 - Google Cloud Storage
 
 ### mapping.yaml
 
 'stairlight.yaml' is used to define the correspondence between SQL files and tables.
 
-The `params` attribute allows you to reflect settings in [jinja](https://jinja.palletsprojects.com/) template variables embedded in SQL files.
-
-Multiple settings in a SQL file using jinja template will be considered as a query with the number of settings defined. If multiple settings are applied to a SQL file using a jinja template, the file will be read as if there were the same number of files as the number of settings.
+The `params` attribute allows you to reflect settings in [jinja](https://jinja.palletsprojects.com/) template variables embedded in SQL files. If multiple settings are applied to a SQL file using jinja template, the file will be read as if there were the same number of files as the number of settings.
 
 ## Sub-command and options
 
