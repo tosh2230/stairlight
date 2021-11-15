@@ -108,7 +108,7 @@ def set_up_down_parser(parser):
     parser.add_argument(
         "-r",
         "--recursive",
-        help="search recursive",
+        help="search recursively",
         action="store_true",
         default=False,
     )

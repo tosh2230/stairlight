@@ -173,9 +173,9 @@ The option specification is the same as `init`.
 
 ### up
 
-`up` Outputs a list of tables or SQL files located upstream from the specified table.
+`up` outputs a list of tables or SQL files located upstream from the specified table.
 
-- Recursive option(`-r` or `--recursive`) is set, StairLight will find upstream tables recursively and output as a list.
+- Recursive option(`-r` or `--recursive`) is set, StairLight will find tables recursively and output as a list.
 - Verbose option(`-v` or `--verbose`) is set, StairLight will add detailed information and output it as a dict.
 
 ```txt
@@ -193,10 +193,10 @@ optional arguments:
   -o {table,file}, --output {table,file}
                         output type
   -v, --verbose         return verbose results
-  -r, --recursive       search recursive
+  -r, --recursive       search recursively
 ```
 
 ### down
 
-`down` Outputs a list of tables or SQL files located downstream from the specified table.
+`down` outputs a list of tables or SQL files located downstream from the specified table.
 The option specification is the same as `up`.
