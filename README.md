@@ -16,17 +16,17 @@ $ pip install stairlight
 There are three steps to use.
 
 ```sh
-# Step1: Initialize and set data location settings
+# Step 1: Initialize and set data location settings
 $ stairlight init
 './stairlight.yaml' has created.
 Please edit it to set your data sources.
 
-# Step2: Map SQL files and tables
+# Step 2: Map SQL files and tables
 $ stairlight check
 './mapping_yyyyMMddhhmmss.yaml' has created.
 Please map undefined tables and parameters, and append to your latest file.
 
-# Step3: Get a table dependency map
+# Step 3: Get a table dependency map
 $ stairlight
 ```
 
@@ -42,6 +42,10 @@ $ stairlight
 ### Output
 
 - Dependency map file (JSON)
+
+    <details>
+
+    <summary>Example</summary>
 
     ```json
     {
@@ -99,6 +103,8 @@ $ stairlight
     }
     ```
 
+    </details>
+
 ## Configuration
 
 Config files used for unit test in CI can be found [here](https://github.com/tosh2230/stairlight/tree/main/config).
@@ -124,7 +130,7 @@ Multiple settings in a SQL file using jinja template will be considered as a que
 
 ## Sub-command and options
 
-```
+```txt
 $ stairlight --help
 usage: stairlight [-h] [-c CONFIG] [-s SAVE | -l LOAD] {init,check,up,down} ...
 
@@ -150,7 +156,7 @@ optional arguments:
 
 `init` creates a new StairLight configuration file.
 
-```
+```txt
 $ stairlight init --help
 usage: stairlight init [-h] [-c CONFIG] [-s SAVE | -l LOAD]
 
@@ -174,7 +180,7 @@ The option specification is the same as `init`.
 - Recursive option(`-r` or `--recursive`) is set, StairLight will find upstream tables recursively and output as a list.
 - Verbose option(`-v` or `--verbose`) is set, StairLight will add detailed information and output it as a dict.
 
-```sh
+```txt
 $ stairlight up --help
 usage: stairlight up [-h] [-c CONFIG] [-s SAVE | -l LOAD] -t TABLE [-o {table,file}] [-v] [-r]
 
