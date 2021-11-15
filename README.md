@@ -122,7 +122,7 @@ SQL files can be read from the following storage.
 
 ### mapping.yaml
 
-'stairlight.yaml' is used to define the correspondence between SQL files and tables.
+'mapping.yaml' is used to define the correspondence between SQL files and tables.
 
 The `params` attribute allows you to reflect settings in [jinja](https://jinja.palletsprojects.com/) template variables embedded in SQL files. If multiple settings are applied to a SQL file using jinja template, the file will be read as if there were the same number of files as the number of settings.
 
@@ -132,8 +132,8 @@ The `params` attribute allows you to reflect settings in [jinja](https://jinja.p
 $ stairlight --help
 usage: stairlight [-h] [-c CONFIG] [-s SAVE | -l LOAD] {init,check,up,down} ...
 
-A table-level data lineage tool, detects table dependencies from 'Transform' SQL files. Without positional
-arguments, return a table dependency map as JSON format.
+A table-level data lineage tool, detects table dependencies from 'Transform' SQL files.
+Without positional arguments, return a table dependency map as JSON format.
 
 positional arguments:
   {init,check,up,down}
