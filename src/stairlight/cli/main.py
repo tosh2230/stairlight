@@ -57,10 +57,14 @@ def set_config_parser(parser):
     parser.add_argument(
         "-c",
         "--config",
-        help="directory path contains StairLight configuration files.",
+        help="StairLight configuration path.",
         type=str,
         default=".",
     )
+    return parser
+
+
+def set_save_load_parser(parser):
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
         "-s",
@@ -124,6 +128,7 @@ def _create_parser():
     )
     parser = argparse.ArgumentParser(description=description)
     parser = set_config_parser(parser)
+    parser = set_save_load_parser(parser)
 
     subparsers = parser.add_subparsers()
 
@@ -147,6 +152,7 @@ def _create_parser():
     )
     parser_up.set_defaults(handler=command_up)
     parser_up = set_config_parser(parser_up)
+    parser_up = set_save_load_parser(parser_up)
     parser_up = set_up_down_parser(parser_up)
 
     # down
@@ -155,6 +161,7 @@ def _create_parser():
     )
     parser_down.set_defaults(handler=command_down)
     parser_down = set_config_parser(parser_down)
+    parser_down = set_save_load_parser(parser_down)
     parser_down = set_up_down_parser(parser_down)
 
     return parser

@@ -145,7 +145,7 @@ positional arguments:
 optional arguments:
   -h, --help            show this help message and exit
   -c CONFIG, --config CONFIG
-                        directory path contains StairLight configuration files.
+                        StairLight configuration path.
   -s SAVE, --save SAVE  save results to a file
   -l LOAD, --load LOAD  load results from a file
 ```
@@ -161,9 +161,7 @@ usage: stairlight init [-h] [-c CONFIG] [-s SAVE | -l LOAD]
 optional arguments:
   -h, --help            show this help message and exit
   -c CONFIG, --config CONFIG
-                        directory path contains StairLight configuration files.
-  -s SAVE, --save SAVE  save results to a file
-  -l LOAD, --load LOAD  load results from a file
+                        StairLight configuration path.
 ```
 
 ### check
@@ -185,7 +183,7 @@ usage: stairlight up [-h] [-c CONFIG] [-s SAVE | -l LOAD] -t TABLE [-o {table,fi
 optional arguments:
   -h, --help            show this help message and exit
   -c CONFIG, --config CONFIG
-                        directory path contains StairLight configuration files.
+                        StairLight configuration path.
   -s SAVE, --save SAVE  save results to a file
   -l LOAD, --load LOAD  load results from a file
   -t TABLE, --table TABLE
