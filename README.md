@@ -7,7 +7,6 @@ StairLight is a table-level data lineage tool, detects table dependencies from '
 ## Installation
 
 ```sh
-# WIP...
 $ pip install stairlight
 ```
 
