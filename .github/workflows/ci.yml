@@ -43,5 +43,5 @@ jobs:
           make lint
       - name: Unit test
         run: |
-          make setup-gcs
+          # make setup-gcs
           poetry run pytest -v --cov=src
