@@ -39,7 +39,7 @@ jobs:
           make lint
       - name: Setup
         run: |
-          # make setup-gcs
+          make setup-gcs
 
   test:
     runs-on: ubuntu-latest
