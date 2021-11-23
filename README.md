@@ -1,8 +1,8 @@
-# StairLight
+# Stairlight
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT) [![CI](https://github.com/tosh2230/stairlight/actions/workflows/ci.yml/badge.svg)](https://github.com/tosh2230/stairlight/actions/workflows/ci.yml)
 
-StairLight is a table-level data lineage tool, detects table dependencies from 'Transform' SQL files such as plain SELECT, 'CREATE TABLE AS SELECT', 'CREATE VIEW AS SELECT'.
+Stairlight is a table-level data lineage tool, detects table dependencies from 'Transform' SQL files such as plain SELECT, 'CREATE TABLE AS SELECT', 'CREATE VIEW AS SELECT'.
 
 ## Installation
 
@@ -110,7 +110,7 @@ Config files used for unit test in CI can be found [here](https://github.com/tos
 
 ### stairlight.yaml
 
-'stairlight.yaml' is for setting up StairLight itself.
+'stairlight.yaml' is for setting up Stairlight itself.
 
 It is responsible for specifying the destination of SQL files to be read, and for specifying the prefix of mapping files.
 
@@ -136,7 +136,7 @@ Without positional arguments, return a table dependency map as JSON format.
 
 positional arguments:
   {init,check,up,down}
-    init                create a new StairLight configuration file.
+    init                create a new Stairlight configuration file.
     check               create a new configuration file about undefined mappings.
     up                  return upstream ( table | SQL file ) list
     down                return downstream ( table | SQL file ) list
@@ -144,14 +144,14 @@ positional arguments:
 optional arguments:
   -h, --help            show this help message and exit
   -c CONFIG, --config CONFIG
-                        StairLight configuration path.
+                        Stairlight configuration path.
   -s SAVE, --save SAVE  save results to a file
   -l LOAD, --load LOAD  load results from a file
 ```
 
 ### init
 
-`init` creates a new StairLight configuration file.
+`init` creates a new Stairlight configuration file.
 
 ```txt
 $ stairlight init --help
@@ -160,7 +160,7 @@ usage: stairlight init [-h] [-c CONFIG] [-s SAVE | -l LOAD]
 optional arguments:
   -h, --help            show this help message and exit
   -c CONFIG, --config CONFIG
-                        StairLight configuration path.
+                        Stairlight configuration path.
 ```
 
 ### check
@@ -172,8 +172,8 @@ The option specification is the same as `init`.
 
 `up` outputs a list of tables or SQL files located upstream from the specified table.
 
-- Recursive option(`-r` or `--recursive`) is set, StairLight will find tables recursively and output as a list.
-- Verbose option(`-v` or `--verbose`) is set, StairLight will add detailed information and output it as a dict.
+- Recursive option(`-r` or `--recursive`) is set, Stairlight will find tables recursively and output as a list.
+- Verbose option(`-v` or `--verbose`) is set, Stairlight will add detailed information and output it as a dict.
 
 ```txt
 $ stairlight up --help
@@ -182,11 +182,11 @@ usage: stairlight up [-h] [-c CONFIG] [-s SAVE | -l LOAD] -t TABLE [-o {table,fi
 optional arguments:
   -h, --help            show this help message and exit
   -c CONFIG, --config CONFIG
-                        StairLight configuration path.
+                        Stairlight configuration path.
   -s SAVE, --save SAVE  save results to a file
   -l LOAD, --load LOAD  load results from a file
   -t TABLE, --table TABLE
-                        table name that StairLight searches for, can be specified multiple times.
+                        table name that Stairlight searches for, can be specified multiple times.
   -o {table,file}, --output {table,file}
                         output type
   -v, --verbose         return verbose results
