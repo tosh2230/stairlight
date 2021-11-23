@@ -35,8 +35,35 @@ class TestTemplateSourceSuccess:
             result.append(file)
         assert len(result) > 0
 
-    def test_is_excluded(self):
+    def test_is_excluded_test_a(self):
+        assert not self.template_source.is_excluded(
+            source_type=template.SourceType.FS,
+            file_path="tests/sql/main/test_a.sql",
+        )
+
+    def test_is_excluded_test_exclude(self):
         assert self.template_source.is_excluded(
+            source_type=template.SourceType.FS,
+            file_path="tests/sql/main/test_exclude.sql",
+        )
+
+
+class TestTemplateSourceNoExclude:
+    configurator = config.Configurator(path="./config")
+    strl_config = configurator.read(prefix="stairlight_no_exclude")
+    map_config = configurator.read(prefix=config.MAP_CONFIG_PREFIX)
+    template_source = template.TemplateSource(
+        strl_config=strl_config, map_config=map_config
+    )
+
+    def test_is_excluded_test_a(self):
+        assert not self.template_source.is_excluded(
+            source_type=template.SourceType.FS,
+            file_path="tests/sql/main/test_a.sql",
+        )
+
+    def test_is_excluded_test_exclude(self):
+        assert not self.template_source.is_excluded(
             source_type=template.SourceType.FS,
             file_path="tests/sql/main/test_exclude.sql",
         )
