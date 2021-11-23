@@ -81,7 +81,7 @@ class Configurator:
                         }
                     )
                 ],
-                "settings": {"mapping_prefix": None},
+                "settings": {"mapping_prefix": MAP_CONFIG_PREFIX},
             }
         )
 
