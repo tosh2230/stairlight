@@ -41,11 +41,11 @@ class StairLight:
         self._strl_config = self._configurator.read(prefix=STRL_CONFIG_PREFIX)
         if self._strl_config:
             if self.load_file:
-                self.load()
+                self._load()
             else:
-                self.set()
+                self._set()
                 if self.save_file:
-                    self.save()
+                    self._save()
 
     @property
     def mapped(self):
@@ -58,7 +58,7 @@ class StairLight:
     def has_strl_config(self):
         return self._strl_config is not None
 
-    def set(self):
+    def _set(self):
         if not self._strl_config:
             logger.warning(f"{STRL_CONFIG_PREFIX}.y(a)ml' is not found.")
             return
@@ -93,11 +93,11 @@ class StairLight:
             return None
         return self._configurator.create_mapping_template(unmapped=self._unmapped)
 
-    def save(self):
+    def _save(self):
         with open(self.save_file, "w") as f:
             json.dump(self._mapped, f, indent=2)
 
-    def load(self):
+    def _load(self):
         if not os.path.exists(self.load_file):
             logger.error(f"{self.load_file} is not found.")
             exit()
