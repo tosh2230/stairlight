@@ -55,25 +55,31 @@ class Configurator:
         return OrderedDict(
             {
                 "include": [
-                    {
-                        "type": "fs",
-                        "path": None,
-                        "regex": None,
-                        "default_table_prefix": None,
-                    },
-                    {
-                        "type": "gcs",
-                        "project": None,
-                        "bucket": None,
-                        "regex": None,
-                        "default_table_prefix": None,
-                    },
+                    OrderedDict(
+                        {
+                            "type": "fs",
+                            "path": None,
+                            "regex": None,
+                            "default_table_prefix": None,
+                        }
+                    ),
+                    OrderedDict(
+                        {
+                            "type": "gcs",
+                            "project": None,
+                            "bucket": None,
+                            "regex": None,
+                            "default_table_prefix": None,
+                        }
+                    ),
                 ],
                 "exclude": [
-                    {
-                        "type": None,
-                        "regex": None,
-                    }
+                    OrderedDict(
+                        {
+                            "type": None,
+                            "regex": None,
+                        }
+                    )
                 ],
                 "settings": {"mapping_prefix": None},
             }
@@ -81,19 +87,21 @@ class Configurator:
 
     @staticmethod
     def build_mapping_template(unmapped):
-        template = {"mapping": []}
+        template = OrderedDict({"mapping": []})
         for unmapped_file in unmapped:
             params = None
             if "params" in unmapped_file:
                 undefined_params = unmapped_file.get("params")
-                params = {}
+                params = OrderedDict({})
                 for param in undefined_params:
                     params[param] = None
             sql_template = unmapped_file["sql_template"]
-            values = {
-                "file_suffix": sql_template.file_path,
-                "tables": [{"table": None}],
-            }
+            values = OrderedDict(
+                {
+                    "file_suffix": sql_template.file_path,
+                    "tables": [OrderedDict({"table": None})],
+                }
+            )
             if params:
                 values["tables"][0]["params"] = params
             if sql_template.source_type in [SourceType.GCS]:
