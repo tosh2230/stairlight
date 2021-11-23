@@ -70,7 +70,10 @@ class TemplateSource:
 
     def is_excluded(self, source_type, file_path):
         result = False
-        for exclude in self._strl_config.get("exclude"):
+        exclude_list = self._strl_config.get("exclude")
+        if not exclude_list:
+            return result
+        for exclude in exclude_list:
             if source_type.value == exclude.get("type") and re.search(
                 rf'{exclude.get("regex")}', file_path
             ):
