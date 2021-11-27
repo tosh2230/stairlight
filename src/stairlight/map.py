@@ -32,10 +32,10 @@ class Map:
                 self._remap(sql_template=sql_template)
 
     def _remap(self, sql_template: SQLTemplate, params: dict = {}):
-        downstream_table = sql_template.search_mapped_table(params=params)
+        downstairs = sql_template.search_mapped_table(params=params)
 
         # Grep jinja template variables to suggest new configurations
-        if not downstream_table:
+        if not downstairs:
             self.collect_undefined(sql_template)
             return
 
@@ -45,18 +45,18 @@ class Map:
             default_table_prefix=sql_template.default_table_prefix,
         )
 
-        if downstream_table not in self.mapped:
-            self.mapped[downstream_table] = {}
+        if downstairs not in self.mapped:
+            self.mapped[downstairs] = {}
 
-        for upstream_table_attributes in query.parse_upstream():
-            upstream_table_name = upstream_table_attributes["table_name"]
+        for upstairs_attributes in query.parse_upstairs():
+            upstairs = upstairs_attributes["table_name"]
             values = {
                 "type": sql_template.source_type.value,
                 "file": sql_template.file_path,
                 "uri": sql_template.uri,
-                "line": upstream_table_attributes["line"],
-                "line_str": upstream_table_attributes["line_str"],
+                "line": upstairs_attributes["line"],
+                "line_str": upstairs_attributes["line_str"],
             }
             if sql_template.source_type == SourceType.GCS:
                 values["bucket"] = sql_template.bucket
-            self.mapped[downstream_table][upstream_table_name] = values
+            self.mapped[downstairs][upstairs] = values

@@ -148,7 +148,7 @@ def _create_parser():
 
     # up
     parser_up = subparsers.add_parser(
-        "up", help="return upstream ( table | SQL file ) list"
+        "up", help="return upstairs ( table | SQL file ) list"
     )
     parser_up.set_defaults(handler=command_up)
     parser_up = set_config_parser(parser_up)
@@ -157,7 +157,7 @@ def _create_parser():
 
     # down
     parser_down = subparsers.add_parser(
-        "down", help="return downstream ( table | SQL file ) list"
+        "down", help="return downstairs ( table | SQL file ) list"
     )
     parser_down.set_defaults(handler=command_down)
     parser_down = set_config_parser(parser_down)

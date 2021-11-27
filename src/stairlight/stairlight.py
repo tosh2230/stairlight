@@ -18,8 +18,8 @@ class ResponseType(enum.Enum):
 
 
 class SearchDirection(enum.Enum):
-    UP = "upstream"
-    DOWN = "downstream"
+    UP = "upstairs"
+    DOWN = "downstairs"
 
     def __str__(self):
         return self.name
