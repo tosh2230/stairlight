@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 import src.stairlight.config as config
 import src.stairlight.template as template
 
@@ -21,26 +23,30 @@ class TestSuccess:
             {
                 "sql_template": sql_template,
                 "params": [
-                    "main_table",
-                    "sub_table_01",
-                    "sub_table_02",
+                    "params.main_table",
+                    "params.sub_table_01",
+                    "params.sub_table_02",
                 ],
             }
         ]
 
-        value = {
-            "file_suffix": sql_template.file_path,
-            "tables": [
-                {
-                    "table": None,
-                    "params": {
-                        "main_table": None,
-                        "sub_table_01": None,
-                        "sub_table_02": None,
-                    },
-                }
-            ],
-        }
+        value = OrderedDict(
+            {
+                "file_suffix": sql_template.file_path,
+                "tables": [
+                    OrderedDict(
+                        {
+                            "table": None,
+                            "params": {
+                                "main_table": None,
+                                "sub_table_01": None,
+                                "sub_table_02": None,
+                            },
+                        }
+                    )
+                ],
+            }
+        )
 
         expected = {"mapping": [value]}
         actual = self.configurator.build_mapping_template(unmapped=unmapped)
