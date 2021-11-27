@@ -1,14 +1,15 @@
 name: Setup
+description: Setup environment
 inputs:
   GCP_PROJECT_ID:
+    description: GCP_PROJECT_ID
     required: true
   GCP_WORKLOAD_IDP:
+    description: GCP_WORKLOAD_IDP
     required: true
   GCP_SERVICE_ACCOUNT:
+    description: GCP_SERVICE_ACCOUNT
     required: true
-permissions:
-  contents: read
-  id-token: write
 
 runs:
   using: "composite"
