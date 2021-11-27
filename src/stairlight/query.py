@@ -6,7 +6,7 @@ class Query:
         self.query_str = query_str
         self.default_table_prefix = default_table_prefix
 
-    def parse_upstream(self):
+    def parse_upstairs(self):
         # Check the query has cte or not
         cte_pattern = r"(?:with|,)\s*(\w+)\s+as\s*"
         ctes = re.findall(cte_pattern, self.query_str, re.IGNORECASE)

@@ -28,8 +28,8 @@ class TestSuccess:
         table_name = "PROJECT_D.DATASET_E.TABLE_F"
         result = stair_light.up(table_name=table_name, recursive=True, verbose=True)
         assert sorted(
-            result[table_name]["upstream"]["PROJECT_J.DATASET_K.TABLE_L"][
-                "upstream"
+            result[table_name]["upstairs"]["PROJECT_J.DATASET_K.TABLE_L"][
+                "upstairs"
             ].keys()
         ) == [
             "PROJECT_P.DATASET_Q.TABLE_R",
@@ -83,8 +83,8 @@ class TestSuccess:
         table_name = "PROJECT_C.DATASET_C.TABLE_C"
         result = stair_light.down(table_name=table_name, recursive=True, verbose=True)
         assert sorted(
-            result[table_name]["downstream"]["PROJECT_d.DATASET_e.TABLE_f"][
-                "downstream"
+            result[table_name]["downstairs"]["PROJECT_d.DATASET_e.TABLE_f"][
+                "downstairs"
             ].keys()
         ) == [
             "PROJECT_j.DATASET_k.TABLE_l",
