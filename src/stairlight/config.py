@@ -94,7 +94,8 @@ class Configurator:
                 undefined_params = unmapped_file.get("params")
                 params = OrderedDict({})
                 for param in undefined_params:
-                    params[param] = None
+                    param_str = ".".join(param.split(".")[1:])
+                    params[param_str] = None
             sql_template = unmapped_file["sql_template"]
             values = OrderedDict(
                 {
