@@ -18,6 +18,7 @@ runs:
         python -m pip install --upgrade pip
         python -m pip install poetry
         poetry install
+      shell: bash
     - name: Setup Google Cloud
       uses: "google-github-actions/setup-gcloud@master"
       with:
@@ -31,5 +32,5 @@ runs:
         service_account: ${{ inputs.GCP_SERVICE_ACCOUNT }}
         access_token_lifetime: 300s
     - name: Login to Google Cloud with workload IdP
-      run: |
-        gcloud auth login --brief --cred-file="${{ steps.auth.outputs.credentials_file_path }}"
+      run: gcloud auth login --brief --cred-file="${{ steps.auth.outputs.credentials_file_path }}"
+      shell: bash
