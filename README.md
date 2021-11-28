@@ -138,8 +138,8 @@ positional arguments:
   {init,check,up,down}
     init                create a new Stairlight configuration file.
     check               create a new configuration file about undefined mappings.
-    up                  return upstream ( table | SQL file ) list
-    down                return downstream ( table | SQL file ) list
+    up                  return upstairs ( table | SQL file ) list
+    down                return downstairs ( table | SQL file ) list
 
 optional arguments:
   -h, --help            show this help message and exit
