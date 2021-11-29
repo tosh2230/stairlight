@@ -110,7 +110,7 @@ def set_config_parser(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "-c",
         "--config",
-        help="Stairlight configuration path.",
+        help="set a Stairlight configuration directory.",
         type=str,
         default=".",
     )

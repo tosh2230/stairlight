@@ -5,7 +5,7 @@ import src.stairlight.template as template
 
 
 class TestSuccess:
-    configurator = config.Configurator(path="./config")
+    configurator = config.Configurator(dir="./config")
 
     def test_read_map(self):
         assert self.configurator.read(prefix=config.MAP_CONFIG_PREFIX)

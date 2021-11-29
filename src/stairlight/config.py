@@ -15,13 +15,13 @@ logger = logging.getLogger()
 
 
 class Configurator:
-    def __init__(self, path: str) -> None:
+    def __init__(self, dir: str) -> None:
         """Configuration class
 
         Args:
             path (str): Configuration file path
         """
-        self.path = path
+        self.dir = dir
 
     def read(self, prefix: str) -> dict:
         """Read a configuration file
@@ -33,10 +33,10 @@ class Configurator:
             dict: Results from reading configuration file
         """
         config = None
-        pattern = f"^{self.path}/{prefix}.ya?ml$"
+        pattern = f"^{self.dir}/{prefix}.ya?ml$"
         config_file = [
             p
-            for p in glob.glob(f"{self.path}/**", recursive=False)
+            for p in glob.glob(f"{self.dir}/**", recursive=False)
             if re.fullmatch(pattern, p)
         ]
         if config_file:
@@ -50,7 +50,7 @@ class Configurator:
         Returns:
             str: Created file name
         """
-        file_name = f"{self.path}/{STRL_CONFIG_PREFIX}.yaml"
+        file_name = f"{self.dir}/{STRL_CONFIG_PREFIX}.yaml"
         with open(file_name, "w") as f:
             yaml.add_representer(OrderedDict, self.represent_odict)
             yaml.dump(self.build_stairlight_template(), f)
@@ -66,7 +66,7 @@ class Configurator:
             str: Mapping template file
         """
         now = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
-        file_name = f"{self.path}/{MAP_CONFIG_PREFIX}_{now}.yaml"
+        file_name = f"{self.dir}/{MAP_CONFIG_PREFIX}_{now}.yaml"
         with open(file_name, "w") as f:
             yaml.add_representer(
                 data_type=OrderedDict, representer=self.represent_odict

@@ -10,6 +10,8 @@ logger = getLogger(__name__)
 
 
 class ResponseType(enum.Enum):
+    """Enum: Execution result type of up/dowm command"""
+
     TABLE = "table"
     FILE = "file"
 
@@ -18,6 +20,8 @@ class ResponseType(enum.Enum):
 
 
 class SearchDirection(enum.Enum):
+    """Enum: Search direction"""
+
     UP = "upstairs"
     DOWN = "downstairs"
 
@@ -26,16 +30,30 @@ class SearchDirection(enum.Enum):
 
 
 class Node:
+    """A Node of singly-linked list"""
+
     def __init__(self, val, next=None):
         self.val = val
         self.next = None
 
 
 class StairLight:
-    def __init__(self, config_path=".", load_file=None, save_file=None):
+    """Table dependency detector"""
+
+    def __init__(self, config_dir=".", load_file=None, save_file=None):
+        """Table dependency detector
+
+        Args:
+            config_dir (str, optional):
+                Stairlight configuration directory. Defaults to ".".
+            load_file ([type], optional):
+                A file name of loading results if load option set. Defaults to None.
+            save_file ([type], optional):
+                A file name of saving results if save option set. Defaults to None.
+        """
         self.load_file = load_file
         self.save_file = save_file
-        self._configurator = Configurator(path=config_path)
+        self._configurator = Configurator(dir=config_dir)
         self._mapped = {}
         self._unmapped = []
         self._strl_config = self._configurator.read(prefix=STRL_CONFIG_PREFIX)
