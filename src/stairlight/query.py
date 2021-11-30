@@ -1,12 +1,28 @@
 import re
+from typing import Iterator
 
 
 class Query:
-    def __init__(self, query_str: str = None, default_table_prefix: str = None):
+    """SQL query"""
+
+    def __init__(self, query_str: str = None, default_table_prefix: str = None) -> None:
+        """SQL query
+
+        Args:
+            query_str (str, optional): SQL query string. Defaults to None.
+            default_table_prefix (str, optional):
+                If project or dataset that configured table have are omitted,
+                it will be complement this prefix. Defaults to None.
+        """
         self.query_str = query_str
         self.default_table_prefix = default_table_prefix
 
-    def parse_upstairs(self):
+    def parse_upstairs(self) -> Iterator[dict]:
+        """Parse a SQL query string and get upstream table attributes
+
+        Yields:
+            Iterator[dict]: upstream table attributes
+        """
         # Check the query has cte or not
         cte_pattern = r"(?:with|,)\s*(\w+)\s+as\s*"
         ctes = re.findall(cte_pattern, self.query_str, re.IGNORECASE)
@@ -46,7 +62,18 @@ class Query:
             }
 
 
-def solve_table_prefix(table, default_table_prefix):
+def solve_table_prefix(table: str, default_table_prefix: str) -> str:
+    """Solve table name prefix
+
+    Args:
+        table (str): Table name
+        default_table_prefix (str):
+            If project or dataset that configured table have are omitted,
+            it will be complement this prefix. Defaults to None.
+
+    Returns:
+        str: Solved table name
+    """
     solved_name = table
     if table.count(".") <= 1:
         solved_name = default_table_prefix + "." + solved_name

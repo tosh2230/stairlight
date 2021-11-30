@@ -2,6 +2,7 @@ import enum
 import json
 import os
 from logging import getLogger
+from typing import Union
 
 from .config import MAP_CONFIG_PREFIX, STRL_CONFIG_PREFIX, Configurator
 from .map import Map
@@ -10,14 +11,18 @@ logger = getLogger(__name__)
 
 
 class ResponseType(enum.Enum):
-    TABLE = "table"
-    FILE = "file"
+    """Enum: Execution result type of up/dowm command"""
+
+    TABLE: str = "table"
+    FILE: str = "file"
 
     def __str__(self):
         return self.name
 
 
 class SearchDirection(enum.Enum):
+    """Enum: Search direction"""
+
     UP = "upstairs"
     DOWN = "downstairs"
 
@@ -26,16 +31,30 @@ class SearchDirection(enum.Enum):
 
 
 class Node:
+    """A Node of singly-linked list"""
+
     def __init__(self, val, next=None):
         self.val = val
         self.next = None
 
 
 class StairLight:
-    def __init__(self, config_path=".", load_file=None, save_file=None):
+    """Table dependency detector"""
+
+    def __init__(self, config_dir=".", load_file=None, save_file=None) -> None:
+        """Table dependency detector
+
+        Args:
+            config_dir (str, optional):
+                Stairlight configuration directory. Defaults to ".".
+            load_file ([type], optional):
+                A file name of loading results if load option set. Defaults to None.
+            save_file ([type], optional):
+                A file name of saving results if save option set. Defaults to None.
+        """
         self.load_file = load_file
         self.save_file = save_file
-        self._configurator = Configurator(path=config_path)
+        self._configurator = Configurator(dir=config_dir)
         self._mapped = {}
         self._unmapped = []
         self._strl_config = self._configurator.read(prefix=STRL_CONFIG_PREFIX)
@@ -48,17 +67,17 @@ class StairLight:
                     self._save()
 
     @property
-    def mapped(self):
+    def mapped(self) -> dict:
         return self._mapped
 
     @property
-    def unmapped(self):
+    def unmapped(self) -> list:
         return self._unmapped
 
-    def has_strl_config(self):
+    def has_strl_config(self) -> bool:
         return self._strl_config is not None
 
-    def _set(self):
+    def _set(self) -> None:
         if not self._strl_config:
             logger.warning(f"{STRL_CONFIG_PREFIX}.y(a)ml' is not found.")
             return
@@ -82,10 +101,10 @@ class StairLight:
 
         self._unmapped = dependency_map.unmapped
 
-    def init(self):
+    def init(self) -> str:
         return self._configurator.create_stairlight_template()
 
-    def check(self):
+    def check(self) -> str:
         if self.load_file:
             logger.warning("Load option is used, skip checking.")
             return None
@@ -93,11 +112,11 @@ class StairLight:
             return None
         return self._configurator.create_mapping_template(unmapped=self._unmapped)
 
-    def _save(self):
+    def _save(self) -> None:
         with open(self.save_file, "w") as f:
             json.dump(self._mapped, f, indent=2)
 
-    def _load(self):
+    def _load(self) -> None:
         if not os.path.exists(self.load_file):
             logger.error(f"{self.load_file} is not found.")
             exit()
@@ -106,10 +125,10 @@ class StairLight:
 
     def up(
         self,
-        table_name,
-        recursive=False,
-        verbose=False,
-        response_type=ResponseType.TABLE.value,
+        table_name: str,
+        recursive: bool = False,
+        verbose: bool = False,
+        response_type: str = ResponseType.TABLE.value,
     ):
         return self.search(
             table_name=table_name,
@@ -136,12 +155,12 @@ class StairLight:
 
     def search(
         self,
-        table_name,
-        recursive,
-        verbose,
-        response_type,
-        direction,
-    ):
+        table_name: str,
+        recursive: bool,
+        verbose: bool,
+        response_type: str,
+        direction: SearchDirection,
+    ) -> Union[list, dict]:
         if verbose:
             return self.search_verbose(
                 table_name=table_name,
@@ -161,7 +180,14 @@ class StairLight:
             )
         return None
 
-    def search_verbose(self, table_name, recursive, direction, searched_tables, head):
+    def search_verbose(
+        self,
+        table_name: str,
+        recursive: bool,
+        direction: SearchDirection,
+        searched_tables: list,
+        head: bool,
+    ) -> dict:
         relative_map = self.get_relative_map(table_name, direction)
         response = {table_name: {}}
         if not relative_map:
@@ -204,8 +230,14 @@ class StairLight:
         return response
 
     def search_plain(
-        self, table_name, recursive, response_type, direction, searched_tables, head
-    ):
+        self,
+        table_name: str,
+        recursive: bool,
+        response_type: str,
+        direction: SearchDirection,
+        searched_tables: list,
+        head: bool,
+    ) -> list:
         relative_map = self.get_relative_map(table_name, direction)
         response = []
         if not relative_map:
@@ -246,7 +278,16 @@ class StairLight:
 
         return sorted(list(set(response)))
 
-    def get_relative_map(self, table_name, direction):
+    def get_relative_map(self, table_name: str, direction: SearchDirection) -> dict:
+        """[summary]
+
+        Args:
+            table_name (str): Table name
+            direction (SearchDirection): Search direction
+
+        Returns:
+            dict: Relative map
+        """
         relative_map = {}
         if direction == SearchDirection.UP:
             relative_map = self._mapped.get(table_name)
@@ -256,7 +297,15 @@ class StairLight:
         return relative_map
 
 
-def is_cyclic(tables):
+def is_cyclic(tables: list) -> bool:
+    """Floyd's cycle-finding algorithm
+
+    Args:
+        tables (list): Detected tables
+
+    Returns:
+        bool: Table dependencies are cyclic or not
+    """
     nodes = {}
     for table in tables:
         if table not in nodes.keys():

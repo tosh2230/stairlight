@@ -3,6 +3,7 @@ import os
 import pathlib
 import re
 from logging import getLogger
+from typing import Iterator, Optional
 
 from google.cloud import storage
 from jinja2 import BaseLoader, Environment, FileSystemLoader
@@ -11,6 +12,8 @@ logger = getLogger(__name__)
 
 
 class SourceType(enum.Enum):
+    """SQL template source type"""
+
     FS = "fs"
     GCS = "gcs"
 
@@ -18,12 +21,196 @@ class SourceType(enum.Enum):
         return self.name
 
 
+class SQLTemplate:
+    """SQL template"""
+
+    def __init__(
+        self,
+        map_config: dict,
+        source_type: SourceType,
+        file_path: str,
+        bucket: Optional[str] = None,
+        project: Optional[str] = None,
+        default_table_prefix: Optional[str] = None,
+    ):
+        """SQL template
+
+        Args:
+            map_config (dict): Mapping configuration
+            source_type (SourceType): Source type
+            file_path (str): SQL file path
+            bucket (Optional[str], optional):
+                Bucket name where SQL file saved.Defaults to None.
+            project (Optional[str], optional):
+                Project name where SQL file saved.Defaults to None.
+            default_table_prefix (Optional[str], optional):
+                If project or dataset that configured table have are omitted,
+                it will be complement this prefix. Defaults to None.
+        """
+        self._map_config = map_config
+        self.source_type = source_type
+        self.file_path = file_path
+        self.bucket = bucket
+        self.project = project
+        self.default_table_prefix = default_table_prefix
+        self.uri = self.set_uri()
+
+    def set_uri(self) -> str:
+        """Create uri from file path
+
+        Returns:
+            str: uri
+        """
+        uri = ""
+        if self.source_type == SourceType.FS:
+            p = pathlib.Path(self.file_path)
+            uri = str(p.resolve())
+        elif self.source_type == SourceType.GCS:
+            uri = f"gs://{self.bucket}/{self.file_path}"
+        return uri
+
+    def get_mapped_tables(self) -> Iterator[str]:
+        """Get mapped tables
+
+        Yields:
+            Iterator[str]: Mapped tables
+        """
+        for mapping in self._map_config.get("mapping"):
+            is_suffix = False
+            if mapping.get("file_suffix"):
+                is_suffix = self.file_path.endswith(mapping.get("file_suffix"))
+            if is_suffix or self.uri == mapping.get("uri"):
+                for table in mapping.get("tables"):
+                    yield table
+
+    def get_param_list(self) -> list:
+        """Get a list of jinja parameters as dict
+
+        Returns:
+            list: Jinja parameters as dict
+        """
+        param_list = []
+        for table in self.get_mapped_tables():
+            param_list.append(table.get("params"))
+        return param_list
+
+    def search_mapped_table(self, params: dict) -> str:
+        """Search a mapped table name from a mapping configuration with jinja parameters
+
+        Args:
+            params (dict): Jinja parameters
+
+        Returns:
+            str: Mapped table name
+        """
+        mapped_table = None
+        for table in self.get_mapped_tables():
+            if table.get("params") == params:
+                mapped_table = table.get("table")
+                break
+        return mapped_table
+
+    def get_jinja_params(self) -> dict:
+        """Get jinja parameters
+
+        Returns:
+            dict: Jinja parameters
+        """
+        template_str = ""
+        if self.source_type == SourceType.FS:
+            template_str = self.get_template_str_fs()
+        elif self.source_type == SourceType.GCS:
+            template_str = self.get_template_str_gcs()
+
+        jinja_expressions = "".join(
+            re.findall("{{[^}]*}}", template_str, re.IGNORECASE)
+        )
+        return re.findall("[^{} ]+", jinja_expressions, re.IGNORECASE)
+
+    def get_template_str_fs(self) -> str:
+        """Get file string that read from a file in local file system
+
+        Returns:
+            str: File string
+        """
+        template_str = ""
+        with open(self.file_path) as f:
+            template_str = f.read()
+        return template_str
+
+    def get_template_str_gcs(self) -> str:
+        """Get file string that read from a file in GCS
+
+        Returns:
+            str: File string
+        """
+        client = storage.Client(credentials=None, project=self.project)
+        bucket = client.get_bucket(self.bucket)
+        blob = bucket.blob(self.file_path)
+        return blob.download_as_bytes().decode("utf-8")
+
+    def render(self, params: dict) -> str:
+        """Render SQL query string from a jinja template
+
+        Args:
+            params (dict): Jinja paramters
+
+        Returns:
+            str: SQL query string
+        """
+        query_str = ""
+        if self.source_type == SourceType.FS:
+            query_str = self.render_fs(params)
+        elif self.source_type == SourceType.GCS:
+            query_str = self.render_gcs(params)
+        return query_str
+
+    def render_fs(self, params: dict) -> str:
+        """Render SQL query string from a jinja template on local file system
+
+        Args:
+            params (dict): Jinja paramters
+
+        Returns:
+            str: SQL query string
+        """
+        env = Environment(loader=FileSystemLoader(os.path.dirname(self.file_path)))
+        jinja_template = env.get_template(os.path.basename(self.file_path))
+        return jinja_template.render(params=params)
+
+    def render_gcs(self, params: dict) -> str:
+        """Render SQL query string from a jinja template on GCS
+
+        Args:
+            params (dict): Jinja paramters
+
+        Returns:
+            str: SQL query string
+        """
+        template_str = self.get_template_str_gcs()
+        jinja_template = Environment(loader=BaseLoader()).from_string(template_str)
+        return jinja_template.render(params=params)
+
+
 class TemplateSource:
-    def __init__(self, strl_config, map_config):
+    """SQL template source"""
+
+    def __init__(self, strl_config: dict, map_config: dict) -> None:
+        """SQL template source
+
+        Args:
+            strl_config (dict): Stairlight configuration
+            map_config (dict): Mapping configuration
+        """
         self._strl_config = strl_config
         self._map_config = map_config
 
-    def search(self):
+    def search(self) -> Iterator[SQLTemplate]:
+        """Search SQL template files
+
+        Yields:
+            Iterator[SQLTemplate]: SQL template file attributes
+        """
         for source in self._strl_config.get("include"):
             type = source.get("type")
             if type.casefold() == SourceType.FS.value:
@@ -31,7 +218,15 @@ class TemplateSource:
             elif type.casefold() == SourceType.GCS.value:
                 yield from self.search_gcs(source)
 
-    def search_fs(self, source):
+    def search_fs(self, source: dict) -> Iterator[SQLTemplate]:
+        """Search SQL template files from local file system
+
+        Args:
+            source (dict): Source attributes of SQL template files
+
+        Yields:
+            Iterator[SQLTemplate]: SQL template file attributes
+        """
         source_type = SourceType.FS
         path_obj = pathlib.Path(source.get("path"))
         for p in path_obj.glob("**/*"):
@@ -47,7 +242,15 @@ class TemplateSource:
                 default_table_prefix=source.get("default_table_prefix"),
             )
 
-    def search_gcs(self, source):
+    def search_gcs(self, source: dict) -> Iterator[SQLTemplate]:
+        """Search SQL template files from GCS
+
+        Args:
+            source (dict): Source attributes of SQL template files
+
+        Yields:
+            Iterator[SQLTemplate]: SQL template file attributes
+        """
         source_type = SourceType.GCS
         project = source.get("project")
         client = storage.Client(credentials=None, project=project)
@@ -68,7 +271,16 @@ class TemplateSource:
                 default_table_prefix=source.get("default_table_prefix"),
             )
 
-    def is_excluded(self, source_type, file_path):
+    def is_excluded(self, source_type: SourceType, file_path: str) -> bool:
+        """Check if the specified file is out of scope
+
+        Args:
+            source_type (SourceType): SQL template source type
+            file_path (str): SQL template file path
+
+        Returns:
+            bool: Return True if the specified file is out of scope
+        """
         result = False
         exclude_list = self._strl_config.get("exclude")
         if not exclude_list:
@@ -80,96 +292,3 @@ class TemplateSource:
                 result = True
                 break
         return result
-
-
-class SQLTemplate:
-    def __init__(
-        self,
-        map_config,
-        source_type,
-        file_path,
-        bucket=None,
-        project=None,
-        default_table_prefix=None,
-    ):
-        self._map_config = map_config
-        self.source_type = source_type
-        self.file_path = file_path
-        self.bucket = bucket
-        self.project = project
-        self.default_table_prefix = default_table_prefix
-        self.uri = self.set_uri()
-
-    def set_uri(self):
-        uri = ""
-        if self.source_type == SourceType.FS:
-            p = pathlib.Path(self.file_path)
-            uri = str(p.resolve())
-        elif self.source_type == SourceType.GCS:
-            uri = f"gs://{self.bucket}/{self.file_path}"
-        return uri
-
-    def get_mapped_tables(self):
-        for mapping in self._map_config.get("mapping"):
-            is_suffix = False
-            if mapping.get("file_suffix"):
-                is_suffix = self.file_path.endswith(mapping.get("file_suffix"))
-            if is_suffix or self.uri == mapping.get("uri"):
-                for table in mapping.get("tables"):
-                    yield table
-
-    def get_param_list(self):
-        param_list = []
-        for table in self.get_mapped_tables():
-            param_list.append(table.get("params"))
-        return param_list
-
-    def search_mapped_table(self, params):
-        mapped_table = None
-        for table in self.get_mapped_tables():
-            if table.get("params") == params:
-                mapped_table = table.get("table")
-                break
-        return mapped_table
-
-    def get_jinja_params(self):
-        template_str = ""
-        if self.source_type == SourceType.FS:
-            template_str = self.get_template_str_fs()
-        elif self.source_type == SourceType.GCS:
-            template_str = self.get_template_str_gcs()
-
-        jinja_expressions = "".join(
-            re.findall("{{[^}]*}}", template_str, re.IGNORECASE)
-        )
-        return re.findall("[^{} ]+", jinja_expressions, re.IGNORECASE)
-
-    def get_template_str_fs(self):
-        template_str = ""
-        with open(self.file_path) as f:
-            template_str = f.read()
-        return template_str
-
-    def get_template_str_gcs(self):
-        client = storage.Client(credentials=None, project=self.project)
-        bucket = client.get_bucket(self.bucket)
-        blob = bucket.blob(self.file_path)
-        return blob.download_as_bytes().decode("utf-8")
-
-    def render(self, params: dict):
-        query_str = ""
-        if self.source_type == SourceType.FS:
-            query_str = self.render_fs(params)
-        elif self.source_type == SourceType.GCS:
-            query_str = self.render_gcs(params)
-        return query_str
-
-    def render_fs(self, params: dict):
-        env = Environment(loader=FileSystemLoader(os.path.dirname(self.file_path)))
-        jinja_template = env.get_template(os.path.basename(self.file_path))
-        return jinja_template.render(params=params)
-
-    def render_gcs(self, params: dict):
-        template_str = self.get_template_str_gcs()
-        jinja_template = Environment(loader=BaseLoader()).from_string(template_str)
-        return jinja_template.render(params=params)

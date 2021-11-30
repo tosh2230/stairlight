@@ -3,7 +3,7 @@ from src.stairlight.map import Map
 
 
 class TestSuccess:
-    configurator = config.Configurator(path="./config")
+    configurator = config.Configurator(dir="./config")
     map_config = configurator.read(prefix=config.MAP_CONFIG_PREFIX)
     strl_config = configurator.read(prefix=config.STRL_CONFIG_PREFIX)
     dependency_map = Map(strl_config=strl_config, map_config=map_config)
