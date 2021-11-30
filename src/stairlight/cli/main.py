@@ -237,7 +237,7 @@ def main() -> None:
     parser = create_parser()
     args = parser.parse_args()
     stairlight = StairLight(
-        config_path=args.config, load_file=args.load, save_file=args.save
+        config_dir=args.config, load_file=args.load, save_file=args.save
     )
 
     result = None
