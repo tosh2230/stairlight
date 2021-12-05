@@ -44,29 +44,35 @@ class Configurator:
                 config = yaml.safe_load(file)
         return config
 
-    def create_stairlight_template(self) -> str:
+    def create_stairlight_template(self, prefix: str = STRL_CONFIG_PREFIX) -> str:
         """Create a Stairlight template file
+
+        Args:
+            prefix (str, optional): File prefix. Defaults to STRL_CONFIG_PREFIX.
 
         Returns:
             str: Created file name
         """
-        file_name = f"{self.dir}/{STRL_CONFIG_PREFIX}.yaml"
+        file_name = f"{self.dir}/{prefix}.yaml"
         with open(file_name, "w") as f:
             yaml.add_representer(OrderedDict, self.represent_odict)
             yaml.dump(self.build_stairlight_template(), f)
         return file_name
 
-    def create_mapping_template(self, unmapped: list) -> str:
+    def create_mapping_template(
+        self, unmapped: list, prefix: str = MAP_CONFIG_PREFIX
+    ) -> str:
         """Create a mapping template file
 
         Args:
             unmapped (list): Unmapped results
+            prefix (str, optional): File prefix. Defaults to MAP_CONFIG_PREFIX.
 
         Returns:
             str: Mapping template file
         """
         now = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
-        file_name = f"{self.dir}/{MAP_CONFIG_PREFIX}_{now}.yaml"
+        file_name = f"{self.dir}/{prefix}_{now}.yaml"
         with open(file_name, "w") as f:
             yaml.add_representer(
                 data_type=OrderedDict, representer=self.represent_odict

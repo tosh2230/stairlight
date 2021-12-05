@@ -1,7 +1,30 @@
+import glob
+import os
+import pytest
 from collections import OrderedDict
 
 import src.stairlight.config as config
 import src.stairlight.template as template
+
+
+def teardown(prefix):
+    rm_files = glob.glob(f"./config/{prefix}*.yaml")
+    for file in rm_files:
+        os.remove(file)
+
+
+@pytest.fixture
+def stairlight_template():
+    prefix = "pytest_stairlight"
+    yield prefix
+    teardown(prefix=prefix)
+
+
+@pytest.fixture
+def mapping_template():
+    prefix = "pytest_mapping"
+    yield prefix
+    teardown(prefix=prefix)
 
 
 class TestSuccess:
@@ -13,7 +36,23 @@ class TestSuccess:
     def test_read_sql(self):
         assert self.configurator.read(prefix=config.STRL_CONFIG_PREFIX)
 
-    def test_build_mapping_template_fs(self):
+    def test_create_stairlight_template(self, stairlight_template):
+        file_name = self.configurator.create_stairlight_template(
+            prefix=stairlight_template
+        )
+        assert os.path.exists(file_name)
+
+    def test_create_mapping_template(self, mapping_template):
+        file_name = self.configurator.create_mapping_template(
+            unmapped=[], prefix=mapping_template
+        )
+        assert os.path.exists(file_name)
+
+    def test_build_stairlight_template(self):
+        stairlight_template = self.configurator.build_stairlight_template()
+        assert list(stairlight_template.keys()) == ["include", "exclude", "settings"]
+
+    def test_build_mapping_template(self):
         sql_template = template.SQLTemplate(
             map_config=self.configurator.read(prefix=config.MAP_CONFIG_PREFIX),
             source_type=template.SourceType.FS,
