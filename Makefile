@@ -7,5 +7,8 @@ format:
 	poetry run black ./src ./tests
 test:
 	@poetry run pytest -v --cov=src
+test-report:
+	@rm -r ./htmlcov
+	@poetry run pytest -v --cov=src --cov-report=html
 setup-gcs:
 	@poetry run python ./scripts/setup_test.py

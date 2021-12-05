@@ -1,30 +1,8 @@
-import glob
 import os
-import pytest
 from collections import OrderedDict
 
 import src.stairlight.config as config
 import src.stairlight.template as template
-
-
-def teardown(prefix):
-    rm_files = glob.glob(f"./config/{prefix}*.yaml")
-    for file in rm_files:
-        os.remove(file)
-
-
-@pytest.fixture
-def stairlight_template():
-    prefix = "pytest_stairlight"
-    yield prefix
-    teardown(prefix=prefix)
-
-
-@pytest.fixture
-def mapping_template():
-    prefix = "pytest_mapping"
-    yield prefix
-    teardown(prefix=prefix)
 
 
 class TestSuccess:

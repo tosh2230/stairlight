@@ -101,16 +101,18 @@ class StairLight:
 
         self._unmapped = dependency_map.unmapped
 
-    def init(self) -> str:
-        return self._configurator.create_stairlight_template()
+    def init(self, prefix=STRL_CONFIG_PREFIX) -> str:
+        return self._configurator.create_stairlight_template(prefix=prefix)
 
-    def check(self) -> str:
+    def check(self, prefix=MAP_CONFIG_PREFIX) -> str:
         if self.load_file:
             logger.warning("Load option is used, skip checking.")
             return None
         elif not self._unmapped:
             return None
-        return self._configurator.create_mapping_template(unmapped=self._unmapped)
+        return self._configurator.create_mapping_template(
+            unmapped=self._unmapped, prefix=prefix
+        )
 
     def _save(self) -> None:
         with open(self.save_file, "w") as f:
