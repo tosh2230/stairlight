@@ -11,7 +11,7 @@ logger = getLogger(__name__)
 
 
 class ResponseType(enum.Enum):
-    """Enum: Execution result type of up/dowm command"""
+    """Enum: Execution result type of up/down command"""
 
     TABLE: str = "table"
     FILE: str = "file"
@@ -41,15 +41,17 @@ class Node:
 class StairLight:
     """Table dependency detector"""
 
-    def __init__(self, config_dir=".", load_file=None, save_file=None) -> None:
+    def __init__(
+        self, config_dir: str = ".", load_file: str = None, save_file: str = None
+    ) -> None:
         """Table dependency detector
 
         Args:
             config_dir (str, optional):
                 Stairlight configuration directory. Defaults to ".".
-            load_file ([type], optional):
+            load_file (str, optional):
                 A file name of loading results if load option set. Defaults to None.
-            save_file ([type], optional):
+            save_file (str, optional):
                 A file name of saving results if save option set. Defaults to None.
         """
         self.load_file = load_file
@@ -68,16 +70,32 @@ class StairLight:
 
     @property
     def mapped(self) -> dict:
+        """Return mapped
+
+        Returns:
+            dict: Mapped results
+        """
         return self._mapped
 
     @property
     def unmapped(self) -> list:
+        """Return unmapped
+
+        Returns:
+            list: Unmapped results
+        """
         return self._unmapped
 
     def has_strl_config(self) -> bool:
+        """Exists stairlight configuration file or not
+
+        Returns:
+            bool: Exists stairlight configuration file or not
+        """
         return self._strl_config is not None
 
     def _set(self) -> None:
+        """Set config and get a dependency map"""
         if not self._strl_config:
             logger.warning(f"{STRL_CONFIG_PREFIX}.y(a)ml' is not found.")
             return
@@ -101,22 +119,43 @@ class StairLight:
 
         self._unmapped = dependency_map.unmapped
 
-    def init(self) -> str:
-        return self._configurator.create_stairlight_template()
+    def init(self, prefix: str = STRL_CONFIG_PREFIX) -> str:
+        """Create Stairlight template file
 
-    def check(self) -> str:
+        Args:
+            prefix (str, optional):
+                Template file prefix. Defaults to STRL_CONFIG_PREFIX.
+
+        Returns:
+            str: Template file name
+        """
+        return self._configurator.create_stairlight_template(prefix=prefix)
+
+    def check(self, prefix: str = MAP_CONFIG_PREFIX) -> str:
+        """Check mapped results and create a mapping template file
+
+        Args:
+            prefix (str, optional): Template file prefix. Defaults to MAP_CONFIG_PREFIX.
+
+        Returns:
+            str: Template file name
+        """
         if self.load_file:
             logger.warning("Load option is used, skip checking.")
             return None
         elif not self._unmapped:
             return None
-        return self._configurator.create_mapping_template(unmapped=self._unmapped)
+        return self._configurator.create_mapping_template(
+            unmapped=self._unmapped, prefix=prefix
+        )
 
     def _save(self) -> None:
+        """Save mapped results"""
         with open(self.save_file, "w") as f:
             json.dump(self._mapped, f, indent=2)
 
     def _load(self) -> None:
+        """Load mapped results"""
         if not os.path.exists(self.load_file):
             logger.error(f"{self.load_file} is not found.")
             exit()
@@ -129,7 +168,19 @@ class StairLight:
         recursive: bool = False,
         verbose: bool = False,
         response_type: str = ResponseType.TABLE.value,
-    ):
+    ) -> Union[list, dict]:
+        """Search upstream nodes
+
+        Args:
+            table_name (str): Table name
+            recursive (bool, optional): Search recursively or not. Defaults to False.
+            verbose (bool, optional): Return verbose results or not. Defaults to False.
+            response_type (str, optional):
+                Response type. Defaults to ResponseType.TABLE.value.
+
+        Returns:
+            Union[list, dict]: [description]
+        """
         return self.search(
             table_name=table_name,
             recursive=recursive,
@@ -144,7 +195,19 @@ class StairLight:
         recursive=False,
         verbose=False,
         response_type=ResponseType.TABLE.value,
-    ):
+    ) -> Union[list, dict]:
+        """Search downstream nodes
+
+        Args:
+            table_name (str): Table name
+            recursive (bool, optional): Search recursively or not. Defaults to False.
+            verbose (bool, optional): Return verbose results or not. Defaults to False.
+            response_type (str, optional):
+                Response type. Defaults to ResponseType.TABLE.value.
+
+        Returns:
+            Union[list, dict]: [description]
+        """
         return self.search(
             table_name=table_name,
             recursive=recursive,
@@ -161,6 +224,18 @@ class StairLight:
         response_type: str,
         direction: SearchDirection,
     ) -> Union[list, dict]:
+        """Search nodes
+
+        Args:
+            table_name (str): Table name
+            recursive (bool): Search recursively or not
+            verbose (bool): Return verbose results or not
+            response_type (str): Response type value
+            direction (SearchDirection): Search direction
+
+        Returns:
+            Union[list, dict]: [description]
+        """
         if verbose:
             return self.search_verbose(
                 table_name=table_name,
@@ -188,6 +263,18 @@ class StairLight:
         searched_tables: list,
         head: bool,
     ) -> dict:
+        """Search nodes and return verbose results
+
+        Args:
+            table_name (str): Table name
+            recursive (bool): Search recursively or not
+            direction (SearchDirection): Search direction
+            searched_tables (list): a list of searched tables
+            head (bool): Current position is head or not
+
+        Returns:
+            dict: Search results
+        """
         relative_map = self.get_relative_map(table_name, direction)
         response = {table_name: {}}
         if not relative_map:
@@ -238,6 +325,19 @@ class StairLight:
         searched_tables: list,
         head: bool,
     ) -> list:
+        """Search nodes and return simple results
+
+        Args:
+            table_name (str): Table name
+            recursive (bool): Search recursively or not
+            response_type (str): Response type value
+            direction (SearchDirection): Search direction
+            searched_tables (list): a list of searched tables
+            head (bool): Current position is head or not
+
+        Returns:
+            list: Search results
+        """
         relative_map = self.get_relative_map(table_name, direction)
         response = []
         if not relative_map:

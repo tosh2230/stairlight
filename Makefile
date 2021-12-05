@@ -6,6 +6,9 @@ format:
 	poetry run isort ./src ./tests
 	poetry run black ./src ./tests
 test:
-	poetry run pytest -v --cov=src
+	@poetry run pytest -v --cov=src
+test-report:
+	@rm -r ./htmlcov
+	@poetry run pytest -v --cov=src --cov-report=html
 setup-gcs:
-	poetry run python ./scripts/setup_test.py
+	@poetry run python ./scripts/setup_test.py
