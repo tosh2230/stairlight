@@ -1,9 +1,9 @@
 import os
 
 from src.stairlight.stairlight import (
-    StairLight,
     ResponseType,
     SearchDirection,
+    StairLight,
     is_cyclic,
 )
 

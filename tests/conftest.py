@@ -1,5 +1,6 @@
 import glob
 import os
+
 import pytest
 
 from src.stairlight.stairlight import StairLight
