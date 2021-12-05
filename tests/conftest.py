@@ -10,10 +10,18 @@ from src.stairlight.stairlight import StairLight
 def stairlight(save_file="./tests/test_save_map.json"):
     stairlight = StairLight(config_dir="./config", save_file=save_file)
     yield stairlight
-    teardown_save(save_file)
+    teardown_rm_file(save_file)
+    teardown_config(prefix="mapping_")
 
 
-def teardown_save(file):
+@pytest.fixture(scope="session")
+def stairlight_init():
+    stairlight = StairLight(config_dir="./tests")
+    yield stairlight
+    teardown_rm_file("./tests/stairlight.yaml")
+
+
+def teardown_rm_file(file):
     if os.path.exists(file):
         os.remove(file)
 

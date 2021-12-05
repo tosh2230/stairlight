@@ -19,8 +19,7 @@ def command_init(stairlight: StairLight, args: argparse.Namespace) -> None:
             f"'{stairlight_template_file}' has created.\n"
             "Please edit it to set your data sources."
         )
-        exit(message)
-    exit()
+    return message
 
 
 def command_check(stairlight: StairLight, args: argparse.Namespace) -> None:
@@ -30,6 +29,7 @@ def command_check(stairlight: StairLight, args: argparse.Namespace) -> None:
         stairlight (StairLight): Stairlight class
         args (argparse.Namespace): CLI arguments
     """
+    message = ""
     mapping_template_file = stairlight.check()
     if mapping_template_file:
         message = (
@@ -37,8 +37,7 @@ def command_check(stairlight: StairLight, args: argparse.Namespace) -> None:
             "Please map undefined tables and parameters, "
             "and append to your latest file."
         )
-        exit(message)
-    exit()
+    return message
 
 
 def command_up(
@@ -252,7 +251,9 @@ def main() -> None:
             exit(f"'{args.config}/stairlight.y(a)ml' is not found.")
         result = stairlight.mapped
 
-    if result:
+    if result and isinstance(result, str):
+        exit(result)
+    else:
         print(json.dumps(result, indent=2))
 
 
