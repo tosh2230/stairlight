@@ -110,6 +110,26 @@ class TestSuccess:
             },
         ]
 
+    def test_union_same_table(self):
+        with open("tests/sql/query/union_same_table.sql") as f:
+            query_str = f.read()
+        query = Query(query_str=query_str)
+        results = []
+        for result in query.parse_upstairs():
+            results.append(result)
+        assert results == [
+            {
+                "table_name": "test_project.beam_streaming.taxirides_realtime",
+                "line": 6,
+                "line_str": "    test_project.beam_streaming.taxirides_realtime",
+            },
+            {
+                "table_name": "test_project.beam_streaming.taxirides_realtime",
+                "line": 15,
+                "line_str": "    test_project.beam_streaming.taxirides_realtime",
+            },
+        ]
+
     def test_solve_table_prefix_one(self):
         table = "DATASET_d.TABLE_d"
         default_table_prefix = "PROJECT_A"
