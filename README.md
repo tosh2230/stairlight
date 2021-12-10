@@ -53,31 +53,47 @@ $ stairlight
                 "type": "fs",
                 "file": "tests/sql/main/test_e.sql",
                 "uri": "/foo/bar/stairlight/tests/sql/main/test_e.sql",
-                "line": 1,
-                "line_str": "SELECT * FROM PROJECT_j.DATASET_k.TABLE_l WHERE 1 = 1"
+                "lines": [
+                    {
+                        "num": 1,
+                        "str": "SELECT * FROM PROJECT_j.DATASET_k.TABLE_l WHERE 1 = 1"
+                    }
+                ]
             },
             "PROJECT_g.DATASET_h.TABLE_i": {
                 "type": "gcs",
                 "file": "sql/test_b/test_b.sql",
                 "uri": "gs://baz/sql/test_b/test_b.sql",
-                "line": 23,
-                "line_str": "    PROJECT_g.DATASET_h.TABLE_i AS b",
+                "lines": [
+                    {
+                        "num": 23,
+                        "str": "    PROJECT_g.DATASET_h.TABLE_i AS b",
+                    }
+                ],
                 "bucket": "stairlight"
             },
             "PROJECT_C.DATASET_C.TABLE_C": {
                 "type": "gcs",
                 "file": "sql/test_b/test_b.sql",
                 "uri": "gs://baz/sql/test_b/test_b.sql",
-                "line": 6,
-                "line_str": "        PROJECT_C.DATASET_C.TABLE_C",
+                "lines": [
+                    {
+                        "num": 6,
+                        "str": "        PROJECT_C.DATASET_C.TABLE_C",
+                    }
+                ],
                 "bucket": "stairlight"
             },
             "PROJECT_d.DATASET_d.TABLE_d": {
                 "type": "gcs",
                 "file": "sql/test_b/test_b.sql",
                 "uri": "gs://baz/sql/test_b/test_b.sql",
-                "line": 15,
-                "line_str": "        PROJECT_d.DATASET_d.TABLE_d",
+                "lines": [
+                    {
+                        "num": 15,
+                        "str": "        PROJECT_d.DATASET_d.TABLE_d",
+                    }
+                ],
                 "bucket": "stairlight"
             }
         },
@@ -86,8 +102,12 @@ $ stairlight
                 "type": "fs",
                 "file": "tests/sql/main/test_d.sql",
                 "uri": "/foo/bar/stairlight/tests/sql/main/test_d.sql",
-                "line": 1,
-                "line_str": "SELECT * FROM PROJECT_d.DATASET_e.TABLE_f WHERE 1 = 1"
+                "lines": [
+                    {
+                        "num": 1,
+                        "str": "SELECT * FROM PROJECT_d.DATASET_e.TABLE_f WHERE 1 = 1"
+                    }
+                ]
             }
         },
         "PROJECT_d.DATASET_d.TABLE_d": {
@@ -95,8 +115,12 @@ $ stairlight
                 "type": "fs",
                 "file": "tests/sql/main/test_f.sql",
                 "uri": "/foo/bar/stairlight/tests/sql/main/test_f.sql",
-                "line": 1,
-                "line_str": "SELECT * FROM PROJECT_e.DATASET_e.TABLE_e WHERE 1 = 1"
+                "lines": [
+                    {
+                        "num": 1,
+                        "str": "SELECT * FROM PROJECT_e.DATASET_e.TABLE_e WHERE 1 = 1"
+                    }
+                ]
             }
         },
     }
