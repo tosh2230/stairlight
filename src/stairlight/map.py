@@ -74,13 +74,20 @@ class Map:
 
         for upstairs_attributes in query.parse_upstairs():
             upstairs = upstairs_attributes["table_name"]
-            values = {
-                "type": sql_template.source_type.value,
-                "file": sql_template.file_path,
-                "uri": sql_template.uri,
-                "line": upstairs_attributes["line"],
-                "line_str": upstairs_attributes["line_str"],
-            }
-            if sql_template.source_type == SourceType.GCS:
-                values["bucket"] = sql_template.bucket
-            self.mapped[downstairs][upstairs] = values
+            if not self.mapped[downstairs].get(upstairs):
+                values = {
+                    "type": sql_template.source_type.value,
+                    "file": sql_template.file_path,
+                    "uri": sql_template.uri,
+                    "lines": [],
+                }
+                if sql_template.source_type == SourceType.GCS:
+                    values["bucket"] = sql_template.bucket
+                self.mapped[downstairs][upstairs] = values
+
+            self.mapped[downstairs][upstairs]["lines"].append(
+                {
+                    "num": upstairs_attributes["line"],
+                    "str": upstairs_attributes["line_str"],
+                }
+            )
