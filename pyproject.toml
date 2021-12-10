@@ -27,7 +27,7 @@ profile = "black"
 line_length = 88
 
 [tool.poetry.scripts]
-stairlight = "main:main"
+stairlight = "src.main:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

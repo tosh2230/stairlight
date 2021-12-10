@@ -1,6 +1,6 @@
 # from pytest import monkeypatch
 
-import main as cli_main
+import src.main as cli_main
 
 
 class TestSuccess:
