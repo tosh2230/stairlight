@@ -7,6 +7,11 @@ from src.stairlight.stairlight import StairLight
 
 
 @pytest.fixture(scope="session")
+def tests_dir():
+    return os.path.dirname(os.path.abspath(__file__))
+
+
+@pytest.fixture(scope="session")
 def stairlight(save_file="./tests/test_save_map.json"):
     stairlight = StairLight(config_dir="./config", save_file=save_file)
     yield stairlight

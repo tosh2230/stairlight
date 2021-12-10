@@ -1,5 +1,3 @@
-import os
-
 from src.stairlight.stairlight import (
     ResponseType,
     SearchDirection,
@@ -97,7 +95,7 @@ class TestSuccess:
             "PROJECT_e.DATASET_e.TABLE_e",
         ]
 
-    def test_up_recursive_plain_file(self, stairlight):
+    def test_up_recursive_plain_file(self, stairlight, tests_dir):
         table_name = "PROJECT_D.DATASET_E.TABLE_F"
         result = stairlight.up(
             table_name=table_name,
@@ -105,11 +103,10 @@ class TestSuccess:
             verbose=False,
             response_type=ResponseType.FILE.value,
         )
-        current_dir = os.path.dirname(os.path.abspath(__file__))
         assert sorted(result) == [
-            f"{current_dir}/sql/main/test_b.sql",
-            f"{current_dir}/sql/main/test_c.sql",
-            f"{current_dir}/sql/main/test_f.sql",
+            f"{tests_dir}/sql/main/test_b.sql",
+            f"{tests_dir}/sql/main/test_c.sql",
+            f"{tests_dir}/sql/main/test_f.sql",
         ]
 
     def test_down_next(self, stairlight):
@@ -147,7 +144,7 @@ class TestSuccess:
             "PROJECT_j.DATASET_k.TABLE_l",
         ]
 
-    def test_down_recursive_plain_file(self, stairlight):
+    def test_down_recursive_plain_file(self, stairlight, tests_dir):
         table_name = "PROJECT_C.DATASET_C.TABLE_C"
         result = stairlight.down(
             table_name=table_name,
@@ -155,10 +152,9 @@ class TestSuccess:
             verbose=False,
             response_type=ResponseType.FILE.value,
         )
-        current_dir = os.path.dirname(os.path.abspath(__file__))
         assert sorted(result) == [
-            f"{current_dir}/sql/main/test_b.sql",
-            f"{current_dir}/sql/main/test_d.sql",
+            f"{tests_dir}/sql/main/test_b.sql",
+            f"{tests_dir}/sql/main/test_d.sql",
             "gs://stairlight/sql/test_b/test_b.sql",
         ]
 
