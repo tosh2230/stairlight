@@ -5,6 +5,8 @@ lint:
 format:
 	poetry run isort ./src ./tests
 	poetry run black ./src ./tests
+exec:
+	poetry run python -B ./src/main.py -c config
 test:
 	@poetry run pytest -v --cov=src
 test-report:
