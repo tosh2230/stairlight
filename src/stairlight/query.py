@@ -45,21 +45,27 @@ class Query:
         )
 
         # Exclude cte table alias from main tables
-        tables = [table for table in main_tables_with_cte_alias if table not in ctes]
-
+        main_tables = [
+            table for table in main_tables_with_cte_alias if table not in ctes
+        ]
         cte_tables = re.findall(table_pattern, query_group["cte"], re.IGNORECASE)
-        tables.extend(cte_tables)
+        upstairs_tables = sorted(set(main_tables + cte_tables))
 
-        for table in tables:
-            line = [
-                i for i, line in enumerate(self.query_str.splitlines()) if table in line
-            ][0]
+        for upstairs_table in upstairs_tables:
+            line_indexes = [
+                i
+                for i, line in enumerate(self.query_str.splitlines())
+                if upstairs_table in line
+            ]
 
-            yield {
-                "table_name": solve_table_prefix(table, self.default_table_prefix),
-                "line": line + 1,
-                "line_str": self.query_str.splitlines()[line],
-            }
+            for line_index in line_indexes:
+                yield {
+                    "table_name": solve_table_prefix(
+                        upstairs_table, self.default_table_prefix
+                    ),
+                    "line": line_index + 1,
+                    "line_str": self.query_str.splitlines()[line_index],
+                }
 
 
 def solve_table_prefix(table: str, default_table_prefix: str) -> str:
