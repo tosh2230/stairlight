@@ -221,3 +221,9 @@ optional arguments:
 
 `down` outputs a list of tables or SQL files located downstream from the specified table.
 The option specification is the same as `up`.
+
+## Use as a library
+
+Stairlight can also be used as a library.
+
+[tosh2230/stairlight-app](https://github.com/tosh2230/stairlight-app) is a sample web application rendering table dependency graph with Stairlight, using Graphviz, Streamlit and Google Cloud Run.
