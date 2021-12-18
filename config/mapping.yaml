@@ -31,6 +31,9 @@ mapping:
           PROJECT: PROJECT_g
           DATASET: DATASET_h
           TABLE: TABLE_i
+        labels:
+          source: gcs
+          test: b
   - file_suffix: "tests/sql/main/test_d.sql"
     tables:
       - table: "PROJECT_j.DATASET_k.TABLE_l"

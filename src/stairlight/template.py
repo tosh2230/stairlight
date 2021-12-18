@@ -32,6 +32,7 @@ class SQLTemplate:
         bucket: Optional[str] = None,
         project: Optional[str] = None,
         default_table_prefix: Optional[str] = None,
+        labels: Optional[dict] = None,
     ):
         """SQL template
 
@@ -69,11 +70,11 @@ class SQLTemplate:
             uri = f"gs://{self.bucket}/{self.file_path}"
         return uri
 
-    def get_mapped_tables(self) -> Iterator[str]:
+    def get_mapped_tables(self) -> Iterator[dict]:
         """Get mapped tables
 
         Yields:
-            Iterator[str]: Mapped tables
+            Iterator[dict]: Mapped table
         """
         for mapping in self._map_config.get("mapping"):
             is_suffix = False
@@ -83,32 +84,17 @@ class SQLTemplate:
                 for table in mapping.get("tables"):
                     yield table
 
-    def get_param_list(self) -> list:
-        """Get a list of jinja parameters as dict
+    def is_mapped(self) -> bool:
+        """Check if the template is set to mapping configuration
 
         Returns:
-            list: Jinja parameters as dict
+            bool: Is set or not
         """
-        param_list = []
+        result = False
         for table in self.get_mapped_tables():
-            param_list.append(table.get("params"))
-        return param_list
-
-    def search_mapped_table(self, params: dict) -> str:
-        """Search a mapped table name from a mapping configuration with jinja parameters
-
-        Args:
-            params (dict): Jinja parameters
-
-        Returns:
-            str: Mapped table name
-        """
-        mapped_table = None
-        for table in self.get_mapped_tables():
-            if table.get("params") == params:
-                mapped_table = table.get("table")
-                break
-        return mapped_table
+            result = True
+            break
+        return result
 
     def get_jinja_params(self) -> dict:
         """Get jinja parameters

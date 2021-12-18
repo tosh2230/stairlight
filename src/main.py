@@ -123,14 +123,12 @@ def set_save_load_parser(parser: argparse.ArgumentParser) -> None:
     """
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
-        "-s",
         "--save",
         help="Save results to a file.",
         type=str,
         default=None,
     )
     group.add_argument(
-        "-l",
         "--load",
         help="Load results from a file.",
         type=str,
@@ -144,14 +142,26 @@ def set_up_down_parser(parser: argparse.ArgumentParser) -> None:
     Args:
         parser (argparse.ArgumentParser): ArgumentParser
     """
-    parser.add_argument(
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument(
         "-t",
         "--table",
         help=(
-            "Table name that Stairlight searches for, "
+            "Table names that Stairlight searches for, "
             "can be specified multiple times."
+            "e.g. -t PROJECT_a.DATASET_b.TABLE_c -t PROJECT_d.DATASET_e.TABLE_f"
         ),
-        required=True,
+        action="append",
+    )
+    group.add_argument(
+        "-l",
+        "--label",
+        help=(
+            "Labels set for the table in mapping configuration, "
+            "can be specified multiple times."
+            "The separator between key and value should be a colon(:)."
+            "e.g. -l key_1:value_1 -l key_2:value_2"
+        ),
         action="append",
     )
     parser.add_argument(

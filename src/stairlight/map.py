@@ -21,8 +21,8 @@ class Map:
             strl_config=strl_config, map_config=map_config
         )
 
-    def collect_undefined(self, sql_template: SQLTemplate) -> None:
-        """Create a list of unmapped file attributes
+    def add_unmapped(self, sql_template: SQLTemplate) -> None:
+        """add to the list of unmapped files
 
         Args:
             sql_template (SQLTemplate): SQL template
@@ -37,38 +37,34 @@ class Map:
     def write_blank(self) -> None:
         """Create a list of unmapped file attributes, if no mapping configuration set"""
         for sql_template in self._template_source.search():
-            self.collect_undefined(sql_template)
+            self.add_unmapped(sql_template)
 
     def write(self) -> None:
         """Write a dependency map"""
         for sql_template in self._template_source.search():
-            param_list = sql_template.get_param_list()
-            if param_list:
-                for params in param_list:
-                    self._remap(sql_template=sql_template, params=params)
+            if sql_template.is_mapped():
+                for table_attributes in sql_template.get_mapped_tables():
+                    self._remap(
+                        sql_template=sql_template, table_attributes=table_attributes
+                    )
             else:
-                self._remap(sql_template=sql_template)
+                self.add_unmapped(sql_template)
 
-    def _remap(self, sql_template: SQLTemplate, params: dict = {}) -> None:
+    def _remap(self, sql_template: SQLTemplate, table_attributes: dict) -> None:
         """Remap a dependency map
 
         Args:
             sql_template (SQLTemplate): SQL template
-            params (dict, optional): Jinja parameters. Defaults to {}.
+            table_attributes (dict): Table attributes from mapping configuration
         """
-        downstairs = sql_template.search_mapped_table(params=params)
-
-        # Grep jinja template variables to suggest new configurations
-        if not downstairs:
-            self.collect_undefined(sql_template)
-            return
-
-        query_str = sql_template.render(params=params)
+        query_str = sql_template.render(params=table_attributes.get("params"))
         query = Query(
             query_str=query_str,
             default_table_prefix=sql_template.default_table_prefix,
         )
 
+        downstairs = table_attributes.get("table")
+        labels = table_attributes.get("labels")
         if downstairs not in self.mapped:
             self.mapped[downstairs] = {}
 
@@ -83,6 +79,8 @@ class Map:
                 }
                 if sql_template.source_type == SourceType.GCS:
                     values["bucket"] = sql_template.bucket
+                if labels:
+                    values["labels"] = labels
                 self.mapped[downstairs][upstairs] = values
 
             self.mapped[downstairs][upstairs]["lines"].append(
