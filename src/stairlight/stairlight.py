@@ -87,10 +87,10 @@ class StairLight:
         return self._unmapped
 
     def has_strl_config(self) -> bool:
-        """Exists stairlight configuration file or not
+        """Exists stairlight configuration file or not
 
         Returns:
-            bool: Exists stairlight configuration file or not
+            bool: Exists stairlight configuration file or not
         """
         return self._strl_config is not None
 

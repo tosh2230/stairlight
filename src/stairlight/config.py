@@ -154,6 +154,8 @@ class Configurator:
             if params:
                 values["tables"][0]["params"] = params
 
+            values["tables"][0]["labels"] = OrderedDict({"key": "value"})
+
             if sql_template.source_type in [SourceType.GCS]:
                 values["uri"] = sql_template.uri
                 values["bucket"] = sql_template.bucket

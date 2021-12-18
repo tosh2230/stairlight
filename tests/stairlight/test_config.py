@@ -59,6 +59,9 @@ class TestSuccess:
                                 "sub_table_01": None,
                                 "sub_table_02": None,
                             },
+                            "labels": {
+                                "key": "value",
+                            },
                         }
                     )
                 ],
