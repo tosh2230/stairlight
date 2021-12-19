@@ -20,7 +20,7 @@ $ stairlight init
 './stairlight.yaml' has created.
 Please edit it to set your data sources.
 
-# Step 2: Map SQL files and tables
+# Step 2: Map SQL files and tables, and add metadata
 $ stairlight check
 './mapping_yyyyMMddhhmmss.yaml' has created.
 Please map undefined tables and parameters, and append to your latest file.
@@ -40,7 +40,7 @@ $ stairlight
 
 ### Output
 
-- Dependency map file (JSON)
+- Dependency map (JSON)
 
     <details>
 
@@ -145,32 +145,40 @@ SQL files can be read from the following storage.
 
 ### mapping.yaml
 
-'mapping.yaml' is used to define the correspondence between SQL files and tables.
+'mapping.yaml' is used to define relationships between input files and tables.
+
+#### mapping section
+
+This section is used to define relationships between SQL files and tables created as a result of query execution.
 
 The `params` attribute allows you to reflect settings in [jinja](https://jinja.palletsprojects.com/) template variables embedded in SQL files. If multiple settings are applied to a SQL file using jinja template, the file will be read as if there were the same number of files as the number of settings.
+
+#### metadata section
+
+This section is mainly used to set labels to tables written in SQL files.
 
 ## Sub-command and options
 
 ```txt
 $ stairlight --help
-usage: stairlight [-h] [-c CONFIG] [-s SAVE | -l LOAD] {init,check,up,down} ...
+usage: stairlight [-h] [-c CONFIG] [--save SAVE | --load LOAD] {init,check,up,down} ...
 
 A table-level data lineage tool, detects table dependencies from 'Transform' SQL files.
 Without positional arguments, return a table dependency map as JSON format.
 
 positional arguments:
   {init,check,up,down}
-    init                create a new Stairlight configuration file.
-    check               create a new configuration file about undefined mappings.
+    init                create a new Stairlight configuration file
+    check               create a new configuration file about undefined mappings
     up                  return upstairs ( table | SQL file ) list
     down                return downstairs ( table | SQL file ) list
 
 optional arguments:
   -h, --help            show this help message and exit
   -c CONFIG, --config CONFIG
-                        set a Stairlight configuration directory.
-  -s SAVE, --save SAVE  save results to a file
-  -l LOAD, --load LOAD  load results from a file
+                        set a Stairlight configuration directory
+  --save SAVE           save results to a file
+  --load LOAD           load results from a file
 ```
 
 ### init
@@ -196,21 +204,29 @@ The option specification is the same as `init`.
 
 `up` outputs a list of tables or SQL files located upstream from the specified table.
 
-- Recursive option(`-r` or `--recursive`) is set, Stairlight will find tables recursively and output as a list.
-- Verbose option(`-v` or `--verbose`) is set, Stairlight will add detailed information and output it as a dict.
+- Use table(`-t`, `--table`) or label(`-l`, `--label`) option to specify tables to search.
+- Recursive option(`-r`, `--recursive`) is set, Stairlight will find tables recursively and output as a list.
+- Verbose option(`-v`, `--verbose`) is set, Stairlight will add detailed information and output it as a dict.
 
 ```txt
 $ stairlight up --help
-usage: stairlight up [-h] [-c CONFIG] [-s SAVE | -l LOAD] -t TABLE [-o {table,file}] [-v] [-r]
+usage: stairlight up [-h] [-c CONFIG] [--save SAVE | --load LOAD] (-t TABLE | -l LABEL)
+                  [-o {table,file}] [-v] [-r]
 
 optional arguments:
   -h, --help            show this help message and exit
   -c CONFIG, --config CONFIG
-                        set a Stairlight configuration directory.
-  -s SAVE, --save SAVE  save results to a file
-  -l LOAD, --load LOAD  load results from a file
+                        set a Stairlight configuration directory
+  --save SAVE           save results to a file
+  --load LOAD           load results from a file
   -t TABLE, --table TABLE
-                        table name that Stairlight searches for, can be specified multiple times.
+                        table names that Stairlight searches for, can be specified
+                        multiple times. e.g. -t PROJECT_a.DATASET_b.TABLE_c -t
+                        PROJECT_d.DATASET_e.TABLE_f
+  -l LABEL, --label LABEL
+                        labels set for the table in mapping configuration, can be
+                        specified multiple times. The separator between key and value
+                        should be a colon(:). e.g. -l key_1:value_1 -l key_2:value_2
   -o {table,file}, --output {table,file}
                         output type
   -v, --verbose         return verbose results

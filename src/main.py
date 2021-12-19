@@ -132,7 +132,7 @@ def set_config_parser(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "-c",
         "--config",
-        help="set a Stairlight configuration directory.",
+        help="set a Stairlight configuration directory",
         type=str,
         default=".",
     )
@@ -147,13 +147,13 @@ def set_save_load_parser(parser: argparse.ArgumentParser) -> None:
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
         "--save",
-        help="Save results to a file.",
+        help="save results to a file",
         type=str,
         default=None,
     )
     group.add_argument(
         "--load",
-        help="Load results from a file.",
+        help="load results from a file",
         type=str,
         default=None,
     )
@@ -171,7 +171,7 @@ def set_up_down_parser(parser: argparse.ArgumentParser) -> None:
         "--table",
         help=textwrap.dedent(
             """\
-            Table names that Stairlight searches for, can be specified multiple times.
+            table names that Stairlight searches for, can be specified multiple times.
             e.g. -t PROJECT_a.DATASET_b.TABLE_c -t PROJECT_d.DATASET_e.TABLE_f
         """
         ),
@@ -182,7 +182,7 @@ def set_up_down_parser(parser: argparse.ArgumentParser) -> None:
         "--label",
         help=textwrap.dedent(
             """\
-            Labels set for the table in mapping configuration, can be specified multiple times.
+            labels set for the table in mapping configuration, can be specified multiple times.
             The separator between key and value should be a colon(:).
             e.g. -l key_1:value_1 -l key_2:value_2
         """
@@ -192,7 +192,7 @@ def set_up_down_parser(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "-o",
         "--output",
-        help="Output type",
+        help="output type",
         type=str,
         choices=[ResponseType.TABLE.value, ResponseType.FILE.value],
         default=ResponseType.TABLE.value,
@@ -200,14 +200,14 @@ def set_up_down_parser(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "-v",
         "--verbose",
-        help="Return verbose results.",
+        help="return verbose results",
         action="store_true",
         default=False,
     )
     parser.add_argument(
         "-r",
         "--recursive",
-        help="Search recursively",
+        help="search recursively",
         action="store_true",
         default=False,
     )
@@ -233,21 +233,21 @@ def create_parser() -> argparse.ArgumentParser:
 
     # init
     parser_init = subparsers.add_parser(
-        "init", help="Create a new Stairlight configuration file."
+        "init", help="create a new Stairlight configuration file"
     )
     parser_init.set_defaults(handler=command_init)
     set_config_parser(parser=parser_init)
 
     # check
     parser_check = subparsers.add_parser(
-        "check", help="Create a new configuration file about undefined mappings."
+        "check", help="create a new configuration file about undefined mappings"
     )
     parser_check.set_defaults(handler=command_check)
     set_config_parser(parser=parser_check)
 
     # up
     parser_up = subparsers.add_parser(
-        "up", help="Return upstairs ( table | SQL file ) list."
+        "up", help="return upstairs ( table | SQL file ) list"
     )
     parser_up.set_defaults(handler=command_up)
     set_config_parser(parser=parser_up)
@@ -256,7 +256,7 @@ def create_parser() -> argparse.ArgumentParser:
 
     # down
     parser_down = subparsers.add_parser(
-        "down", help="Return downstairs ( table | SQL file ) list."
+        "down", help="return downstairs ( table | SQL file ) list"
     )
     parser_down.set_defaults(handler=command_down)
     set_config_parser(parser=parser_down)
