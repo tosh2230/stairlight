@@ -162,4 +162,8 @@ class Configurator:
 
             template["mapping"].append(values)
 
+        template["metadata"] = [
+            OrderedDict({"table": None, "labels": OrderedDict({"key": "value"})})
+        ]
+
         return template

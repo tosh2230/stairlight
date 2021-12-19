@@ -1,16 +1,20 @@
 import argparse
 import json
+import textwrap
 from typing import Callable, Union
 
 from stairlight import ResponseType, StairLight
 
 
-def command_init(stairlight: StairLight, args: argparse.Namespace) -> None:
+def command_init(stairlight: StairLight, args: argparse.Namespace) -> str:
     """Execute init command
 
     Args:
         stairlight (StairLight): Stairlight class
         args (argparse.Namespace): CLI arguments
+
+    Returns:
+        str: return messages
     """
     message = ""
     stairlight_template_file = stairlight.init()
@@ -22,12 +26,15 @@ def command_init(stairlight: StairLight, args: argparse.Namespace) -> None:
     return message
 
 
-def command_check(stairlight: StairLight, args: argparse.Namespace) -> None:
+def command_check(stairlight: StairLight, args: argparse.Namespace) -> str:
     """Execute check command
 
     Args:
         stairlight (StairLight): Stairlight class
         args (argparse.Namespace): CLI arguments
+
+    Returns:
+        str: return messages
     """
     message = ""
     mapping_template_file = stairlight.check()
@@ -40,12 +47,8 @@ def command_check(stairlight: StairLight, args: argparse.Namespace) -> None:
     return message
 
 
-def command_up(
-    stairlight: StairLight,
-    args: argparse.Namespace,
-) -> Union[dict, list]:
+def command_up(stairlight: StairLight, args: argparse.Namespace) -> Union[dict, list]:
     """Execute up command
-
 
     Args:
         stairlight (StairLight): Stairlight class
@@ -54,13 +57,11 @@ def command_up(
     Returns:
         Union[dict, list]: Upstairs results
     """
-    return execute_up_or_down(stairlight.up, args)
+    tables = get_tables_to_search(stairlight, args)
+    return execute_up_or_down(stairlight.up, args, tables)
 
 
-def command_down(
-    stairlight: StairLight,
-    args: argparse.Namespace,
-) -> Union[dict, list]:
+def command_down(stairlight: StairLight, args: argparse.Namespace) -> Union[dict, list]:
     """Execute down command
 
     Args:
@@ -70,34 +71,56 @@ def command_down(
     Returns:
         Union[dict, list]: Downstairs results
     """
-    return execute_up_or_down(stairlight.down, args)
+    tables = get_tables_to_search(stairlight, args)
+    return execute_up_or_down(stairlight.down, args, tables)
 
 
 def execute_up_or_down(
-    up_or_down: Callable, args: argparse.Namespace
+    up_or_down: Callable, args: argparse.Namespace, tables: Union[str, list]
 ) -> Union[dict, list]:
     """Execute a command, up or down
 
     Args:
         up_or_down (Callable): Either command_up() or command_down()
         args (argparse.Namespace): CLI arguments
+        tables (Union[str, list]): Tables to search
 
     Returns:
         Union[dict, list]: Results
     """
     results = []
-    for table_name in args.table:
+    for table_name in tables:
         result = up_or_down(
             table_name=table_name,
             recursive=args.recursive,
             verbose=args.verbose,
             response_type=args.output,
         )
-        if len(args.table) > 1:
+        if len(tables) > 1:
             results.append(result)
         else:
             return result
     return results
+
+
+def get_tables_to_search(stairlight: StairLight, args: argparse.Namespace) -> list:
+    """Get tables to search
+
+    Args:
+        stairlight (StairLight): Stairlight class
+        args (argparse.Namespace): CLI arguments
+
+    Returns:
+        list: Tables to search
+    """
+    tables_to_search = []
+    if args.table:
+        tables_to_search = args.table
+    elif args.label:
+        tables_to_search = stairlight.get_tables_by_labels(args.label)
+        if not tables_to_search:
+            exit()
+    return tables_to_search
 
 
 def set_config_parser(parser: argparse.ArgumentParser) -> None:
@@ -146,21 +169,23 @@ def set_up_down_parser(parser: argparse.ArgumentParser) -> None:
     group.add_argument(
         "-t",
         "--table",
-        help=(
-            "Table names that Stairlight searches for, "
-            "can be specified multiple times."
-            "e.g. -t PROJECT_a.DATASET_b.TABLE_c -t PROJECT_d.DATASET_e.TABLE_f"
+        help=textwrap.dedent(
+            """\
+            Table names that Stairlight searches for, can be specified multiple times.
+            e.g. -t PROJECT_a.DATASET_b.TABLE_c -t PROJECT_d.DATASET_e.TABLE_f
+        """
         ),
         action="append",
     )
     group.add_argument(
         "-l",
         "--label",
-        help=(
-            "Labels set for the table in mapping configuration, "
-            "can be specified multiple times."
-            "The separator between key and value should be a colon(:)."
-            "e.g. -l key_1:value_1 -l key_2:value_2"
+        help=textwrap.dedent(
+            """\
+            Labels set for the table in mapping configuration, can be specified multiple times.
+            The separator between key and value should be a colon(:).
+            e.g. -l key_1:value_1 -l key_2:value_2
+        """
         ),
         action="append",
     )

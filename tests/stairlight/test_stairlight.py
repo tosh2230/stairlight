@@ -158,6 +158,44 @@ class TestSuccess:
             "gs://stairlight/sql/test_b/test_b.sql",
         ]
 
+    def test_get_relative_map_up(self, stairlight):
+        table_name = "PROJECT_d.DATASET_d.TABLE_d"
+        result = stairlight.get_relative_map(
+            table_name=table_name, direction=SearchDirection.UP
+        )
+        assert "PROJECT_e.DATASET_e.TABLE_e" in result
+
+    def test_get_relative_map_down(self, stairlight):
+        table_name = "PROJECT_A.DATASET_A.TABLE_A"
+        result = stairlight.get_relative_map(
+            table_name=table_name, direction=SearchDirection.DOWN
+        )
+        assert "PROJECT_A.DATASET_B.TABLE_C" in result
+
+    def test_get_tables_by_labels_single(self, stairlight):
+        targets = ["test:b"]
+        result = stairlight.get_tables_by_labels(targets=targets)
+        assert result == [
+            "PROJECT_D.DATASET_E.TABLE_F",
+            "PROJECT_G.DATASET_H.TABLE_I",
+            "PROJECT_d.DATASET_e.TABLE_f",
+        ]
+
+    def test_get_tables_by_labels_double(self, stairlight):
+        targets = ["test:b", "source:gcs"]
+        result = stairlight.get_tables_by_labels(targets=targets)
+        assert result == ["PROJECT_d.DATASET_e.TABLE_f"]
+
+    def test_is_target_found_true(self, stairlight):
+        targets = ["test:a", "group:c"]
+        labels = {"test": "a", "category": "b", "group": "c"}
+        assert stairlight.is_target_found(targets=targets, labels=labels)
+
+    def test_is_target_found_false(self, stairlight):
+        targets = ["test:a", "category:b", "group:c", "app:d"]
+        labels = {"test": "a", "category": "b", "group": "c"}
+        assert not stairlight.is_target_found(targets=targets, labels=labels)
+
 
 class TestIsCyclic:
     def test_a(self):
