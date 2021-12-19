@@ -182,7 +182,8 @@ def set_up_down_parser(parser: argparse.ArgumentParser) -> None:
         "--label",
         help=textwrap.dedent(
             """\
-            labels set for the table in mapping configuration, can be specified multiple times.
+            labels set for the table in mapping configuration,
+            can be specified multiple times.
             The separator between key and value should be a colon(:).
             e.g. -l key_1:value_1 -l key_2:value_2
         """

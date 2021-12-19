@@ -17,6 +17,7 @@ class Map:
         """
         self.mapped = mapped
         self.unmapped = []
+        self.map_config = map_config
         self._template_source = TemplateSource(
             strl_config=strl_config, map_config=map_config
         )
@@ -64,12 +65,15 @@ class Map:
         )
 
         downstairs = table_attributes.get("table")
-        labels = table_attributes.get("labels")
+        mapping_labels = table_attributes.get("labels")
+        metadata = self.map_config.get("metadata")
+
         if downstairs not in self.mapped:
             self.mapped[downstairs] = {}
 
         for upstairs_attributes in query.parse_upstairs():
             upstairs = upstairs_attributes["table_name"]
+
             if not self.mapped[downstairs].get(upstairs):
                 values = {
                     "type": sql_template.source_type.value,
@@ -79,8 +83,17 @@ class Map:
                 }
                 if sql_template.source_type == SourceType.GCS:
                     values["bucket"] = sql_template.bucket
-                if labels:
-                    values["labels"] = labels
+
+                metadata_labels = [
+                    m.get("labels") for m in metadata if m.get("table") == upstairs
+                ]
+                if mapping_labels or metadata_labels:
+                    values["labels"] = {}
+                if mapping_labels:
+                    values["labels"] = {**values["labels"], **mapping_labels}
+                if metadata_labels:
+                    values["labels"] = {**values["labels"], **metadata_labels[0]}
+
                 self.mapped[downstairs][upstairs] = values
 
             self.mapped[downstairs][upstairs]["lines"].append(
