@@ -157,7 +157,7 @@ The `params` attribute allows you to reflect settings in [jinja](https://jinja.p
 
 This section is mainly used to set labels to tables written in SQL files.
 
-## Sub-command and options
+## Command and option
 
 ```txt
 $ stairlight --help
