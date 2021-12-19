@@ -47,7 +47,7 @@ class TestSuccess:
             }
         ]
 
-        value = OrderedDict(
+        mapping_value = OrderedDict(
             {
                 "file_suffix": sql_template.file_path,
                 "tables": [
@@ -59,12 +59,20 @@ class TestSuccess:
                                 "sub_table_01": None,
                                 "sub_table_02": None,
                             },
+                            "labels": OrderedDict({"key": "value"}),
                         }
                     )
                 ],
             }
         )
 
-        expected = {"mapping": [value]}
+        metadata_value = OrderedDict(
+            {
+                "table": None,
+                "labels": OrderedDict({"key": "value"}),
+            }
+        )
+
+        expected = {"mapping": [mapping_value], "metadata": [metadata_value]}
         actual = self.configurator.build_mapping_template(unmapped=unmapped)
         assert actual == expected

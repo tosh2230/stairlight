@@ -9,11 +9,17 @@ mapping:
           PROJECT: PROJECT_J
           DATASET: DATASET_K
           TABLE: TABLE_L
+        labels:
+          source: fs
+          test: b
       - table: "PROJECT_G.DATASET_H.TABLE_I"
         params:
           PROJECT: PROJECT_M
           DATASET: DATASET_N
           TABLE: TABLE_O
+        labels:
+          source: fs
+          test: b
   - file_suffix: "tests/sql/main/test_c.sql"
     tables:
       - table: "PROJECT_J.DATASET_K.TABLE_L"
@@ -21,6 +27,9 @@ mapping:
           main_table: "PROJECT_P.DATASET_Q.TABLE_R"
           sub_table_01: "PROJECT_S.DATASET_T.TABLE_U"
           sub_table_02: "PROJECT_V.DATASET_W.TABLE_X"
+        labels:
+          source: fs
+          test: c
   - uri: "gs://stairlight/sql/test_a/test_a.sql"
     tables:
       - table: "PROJECT_a.DATASET_b.TABLE_c"
@@ -31,6 +40,9 @@ mapping:
           PROJECT: PROJECT_g
           DATASET: DATASET_h
           TABLE: TABLE_i
+        labels:
+          source: gcs
+          test: b
   - file_suffix: "tests/sql/main/test_d.sql"
     tables:
       - table: "PROJECT_j.DATASET_k.TABLE_l"
@@ -43,3 +55,8 @@ mapping:
   - file_suffix: "tests/sql/main/test_union_same_table.sql"
     tables:
       - table: "test_project.beam_streaming.taxirides_aggregation"
+metadata:
+  - table: "PROJECT_A.DATASET_A.TABLE_A"
+    labels:
+      source: Null
+      test: a

@@ -59,6 +59,7 @@ class StairLight:
         self._configurator = Configurator(dir=config_dir)
         self._mapped = {}
         self._unmapped = []
+        self._map_config = None
         self._strl_config = self._configurator.read(prefix=STRL_CONFIG_PREFIX)
         if self._strl_config:
             if self.load_file:
@@ -87,10 +88,10 @@ class StairLight:
         return self._unmapped
 
     def has_strl_config(self) -> bool:
-        """Exists stairlight configuration file or not
+        """Exists stairlight configuration file or not
 
         Returns:
-            bool: Exists stairlight configuration file or not
+            bool: Exists stairlight configuration file or not
         """
         return self._strl_config is not None
 
@@ -105,13 +106,13 @@ class StairLight:
             settings = self._strl_config["settings"]
             if "mapping_prefix" in settings:
                 map_config_prefix = settings["mapping_prefix"]
-        map_config = self._configurator.read(prefix=map_config_prefix)
+        self._map_config = self._configurator.read(prefix=map_config_prefix)
 
         dependency_map = Map(
             strl_config=self._strl_config,
-            map_config=map_config,
+            map_config=self._map_config,
         )
-        if map_config:
+        if self._map_config:
             dependency_map.write()
             self._mapped = dependency_map.mapped
         else:
@@ -379,7 +380,7 @@ class StairLight:
         return sorted(list(set(response)))
 
     def get_relative_map(self, table_name: str, direction: SearchDirection) -> dict:
-        """[summary]
+        """Get a relative map for the specified direction
 
         Args:
             table_name (str): Table name
@@ -395,6 +396,50 @@ class StairLight:
             for key in [k for k, v in self._mapped.items() if v.get(table_name)]:
                 relative_map[key] = self._mapped[key][table_name]
         return relative_map
+
+    def get_tables_by_labels(self, targets: list) -> list:
+        """Get tables to search by labels
+
+        Args:
+            targets (list): Target labels
+
+        Returns:
+            list: Tables to search
+        """
+        tables_to_search = []
+
+        # "mapping" section in mapping.yaml
+        for configurations in self._map_config.get("mapping"):
+            for table_attributes in configurations.get("tables"):
+                if self.is_target_found(
+                    targets=targets,
+                    labels=table_attributes.get("labels", {}),
+                ):
+                    tables_to_search.append(table_attributes["table"])
+
+        # "metadata" section in mapping.yaml
+        for table_attributes in self._map_config.get("metadata"):
+            if self.is_target_found(
+                targets=targets,
+                labels=table_attributes.get("labels", {}),
+            ):
+                tables_to_search.append(table_attributes["table"])
+
+        return tables_to_search
+
+    @staticmethod
+    def is_target_found(targets: list, labels: dict) -> bool:
+        result = False
+        found = 0
+        for label_key, label_value in labels.items():
+            for target in targets:
+                target_key = target.split(":")[0]
+                target_value = target.split(":")[1]
+                if target_key == label_key and target_value == label_value:
+                    found += 1
+        if found == len(targets):
+            result = True
+        return result
 
 
 def is_cyclic(tables: list) -> bool:

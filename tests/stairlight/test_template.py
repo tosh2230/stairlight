@@ -70,59 +70,56 @@ class TestTemplateSourceNoExclude:
 
 
 @pytest.mark.parametrize(
-    "source_type, file_path, params, bucket, mapped_table",
+    "source_type, file_path, bucket",
     [
-        (
-            template.SourceType.FS,
-            "tests/sql/main/test_c.sql",
-            {
-                "main_table": "PROJECT_P.DATASET_Q.TABLE_R",
-                "sub_table_01": "PROJECT_S.DATASET_T.TABLE_U",
-                "sub_table_02": "PROJECT_V.DATASET_W.TABLE_X",
-            },
-            None,
-            "PROJECT_J.DATASET_K.TABLE_L",
-        ),
-        (
-            template.SourceType.GCS,
-            "sql/test_b/test_b.sql",
-            {
-                "PROJECT": "PROJECT_g",
-                "DATASET": "DATASET_h",
-                "TABLE": "TABLE_i",
-            },
-            "stairlight",
-            "PROJECT_d.DATASET_e.TABLE_f",
-        ),
+        (template.SourceType.FS, "tests/sql/main/test_c.sql", None),
+        (template.SourceType.GCS, "sql/test_b/test_b.sql", "stairlight"),
     ],
 )
-class TestSQLTemplateSuccess:
+class TestSQLTemplateMapped:
     configurator = config.Configurator(dir="./config")
     map_config = configurator.read(prefix=config.MAP_CONFIG_PREFIX)
 
-    def test_get_param_list(self, source_type, file_path, params, bucket, mapped_table):
+    def test_is_mapped(self, source_type, file_path, bucket):
         sql_template = template.SQLTemplate(
             map_config=self.map_config,
             source_type=source_type,
             file_path=file_path,
             bucket=bucket,
         )
-        assert sql_template.get_param_list() == [params]
+        assert sql_template.is_mapped()
 
-    def test_search_mapped_table(
-        self, source_type, file_path, params, bucket, mapped_table
-    ):
+    def test_get_jinja_params(self, source_type, file_path, bucket):
         sql_template = template.SQLTemplate(
             map_config=self.map_config,
             source_type=source_type,
             file_path=file_path,
             bucket=bucket,
         )
-        assert sql_template.search_mapped_table(params=params) == mapped_table
+        assert len(sql_template.get_jinja_params()) > 0
 
-    def test_get_jinja_params(
-        self, source_type, file_path, params, bucket, mapped_table
-    ):
+
+@pytest.mark.parametrize(
+    "source_type, file_path, bucket",
+    [
+        (template.SourceType.FS, "tests/sql/main/test_undefined.sql", None),
+        (template.SourceType.FS, "tests/sql/gcs/test_b/test_b.sql", None),
+    ],
+)
+class TestSQLTemplateNotMapped:
+    configurator = config.Configurator(dir="./config")
+    map_config = configurator.read(prefix=config.MAP_CONFIG_PREFIX)
+
+    def test_is_mapped(self, source_type, file_path, bucket):
+        sql_template = template.SQLTemplate(
+            map_config=self.map_config,
+            source_type=source_type,
+            file_path=file_path,
+            bucket=bucket,
+        )
+        assert not sql_template.is_mapped()
+
+    def test_get_jinja_params(self, source_type, file_path, bucket):
         sql_template = template.SQLTemplate(
             map_config=self.map_config,
             source_type=source_type,

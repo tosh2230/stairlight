@@ -1,16 +1,20 @@
 import argparse
 import json
+import textwrap
 from typing import Callable, Union
 
 from stairlight import ResponseType, StairLight
 
 
-def command_init(stairlight: StairLight, args: argparse.Namespace) -> None:
+def command_init(stairlight: StairLight, args: argparse.Namespace) -> str:
     """Execute init command
 
     Args:
         stairlight (StairLight): Stairlight class
         args (argparse.Namespace): CLI arguments
+
+    Returns:
+        str: return messages
     """
     message = ""
     stairlight_template_file = stairlight.init()
@@ -22,12 +26,15 @@ def command_init(stairlight: StairLight, args: argparse.Namespace) -> None:
     return message
 
 
-def command_check(stairlight: StairLight, args: argparse.Namespace) -> None:
+def command_check(stairlight: StairLight, args: argparse.Namespace) -> str:
     """Execute check command
 
     Args:
         stairlight (StairLight): Stairlight class
         args (argparse.Namespace): CLI arguments
+
+    Returns:
+        str: return messages
     """
     message = ""
     mapping_template_file = stairlight.check()
@@ -40,12 +47,8 @@ def command_check(stairlight: StairLight, args: argparse.Namespace) -> None:
     return message
 
 
-def command_up(
-    stairlight: StairLight,
-    args: argparse.Namespace,
-) -> Union[dict, list]:
+def command_up(stairlight: StairLight, args: argparse.Namespace) -> Union[dict, list]:
     """Execute up command
-
 
     Args:
         stairlight (StairLight): Stairlight class
@@ -54,13 +57,11 @@ def command_up(
     Returns:
         Union[dict, list]: Upstairs results
     """
-    return execute_up_or_down(stairlight.up, args)
+    tables = get_tables_to_search(stairlight, args)
+    return execute_up_or_down(stairlight.up, args, tables)
 
 
-def command_down(
-    stairlight: StairLight,
-    args: argparse.Namespace,
-) -> Union[dict, list]:
+def command_down(stairlight: StairLight, args: argparse.Namespace) -> Union[dict, list]:
     """Execute down command
 
     Args:
@@ -70,34 +71,56 @@ def command_down(
     Returns:
         Union[dict, list]: Downstairs results
     """
-    return execute_up_or_down(stairlight.down, args)
+    tables = get_tables_to_search(stairlight, args)
+    return execute_up_or_down(stairlight.down, args, tables)
 
 
 def execute_up_or_down(
-    up_or_down: Callable, args: argparse.Namespace
+    up_or_down: Callable, args: argparse.Namespace, tables: Union[str, list]
 ) -> Union[dict, list]:
     """Execute a command, up or down
 
     Args:
         up_or_down (Callable): Either command_up() or command_down()
         args (argparse.Namespace): CLI arguments
+        tables (Union[str, list]): Tables to search
 
     Returns:
         Union[dict, list]: Results
     """
     results = []
-    for table_name in args.table:
+    for table_name in tables:
         result = up_or_down(
             table_name=table_name,
             recursive=args.recursive,
             verbose=args.verbose,
             response_type=args.output,
         )
-        if len(args.table) > 1:
+        if len(tables) > 1:
             results.append(result)
         else:
             return result
     return results
+
+
+def get_tables_to_search(stairlight: StairLight, args: argparse.Namespace) -> list:
+    """Get tables to search
+
+    Args:
+        stairlight (StairLight): Stairlight class
+        args (argparse.Namespace): CLI arguments
+
+    Returns:
+        list: Tables to search
+    """
+    tables_to_search = []
+    if args.table:
+        tables_to_search = args.table
+    elif args.label:
+        tables_to_search = stairlight.get_tables_by_labels(args.label)
+        if not tables_to_search:
+            exit()
+    return tables_to_search
 
 
 def set_config_parser(parser: argparse.ArgumentParser) -> None:
@@ -109,7 +132,7 @@ def set_config_parser(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "-c",
         "--config",
-        help="set a Stairlight configuration directory.",
+        help="set a Stairlight configuration directory",
         type=str,
         default=".",
     )
@@ -123,16 +146,14 @@ def set_save_load_parser(parser: argparse.ArgumentParser) -> None:
     """
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
-        "-s",
         "--save",
-        help="Save results to a file.",
+        help="save results to a file",
         type=str,
         default=None,
     )
     group.add_argument(
-        "-l",
         "--load",
-        help="Load results from a file.",
+        help="load results from a file",
         type=str,
         default=None,
     )
@@ -144,20 +165,35 @@ def set_up_down_parser(parser: argparse.ArgumentParser) -> None:
     Args:
         parser (argparse.ArgumentParser): ArgumentParser
     """
-    parser.add_argument(
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument(
         "-t",
         "--table",
-        help=(
-            "Table name that Stairlight searches for, "
-            "can be specified multiple times."
+        help=textwrap.dedent(
+            """\
+            table names that Stairlight searches for, can be specified multiple times.
+            e.g. -t PROJECT_a.DATASET_b.TABLE_c -t PROJECT_d.DATASET_e.TABLE_f
+        """
         ),
-        required=True,
+        action="append",
+    )
+    group.add_argument(
+        "-l",
+        "--label",
+        help=textwrap.dedent(
+            """\
+            labels set for the table in mapping configuration,
+            can be specified multiple times.
+            The separator between key and value should be a colon(:).
+            e.g. -l key_1:value_1 -l key_2:value_2
+        """
+        ),
         action="append",
     )
     parser.add_argument(
         "-o",
         "--output",
-        help="Output type",
+        help="output type",
         type=str,
         choices=[ResponseType.TABLE.value, ResponseType.FILE.value],
         default=ResponseType.TABLE.value,
@@ -165,14 +201,14 @@ def set_up_down_parser(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "-v",
         "--verbose",
-        help="Return verbose results.",
+        help="return verbose results",
         action="store_true",
         default=False,
     )
     parser.add_argument(
         "-r",
         "--recursive",
-        help="Search recursively",
+        help="search recursively",
         action="store_true",
         default=False,
     )
@@ -198,21 +234,21 @@ def create_parser() -> argparse.ArgumentParser:
 
     # init
     parser_init = subparsers.add_parser(
-        "init", help="Create a new Stairlight configuration file."
+        "init", help="create a new Stairlight configuration file"
     )
     parser_init.set_defaults(handler=command_init)
     set_config_parser(parser=parser_init)
 
     # check
     parser_check = subparsers.add_parser(
-        "check", help="Create a new configuration file about undefined mappings."
+        "check", help="create a new configuration file about undefined mappings"
     )
     parser_check.set_defaults(handler=command_check)
     set_config_parser(parser=parser_check)
 
     # up
     parser_up = subparsers.add_parser(
-        "up", help="Return upstairs ( table | SQL file ) list."
+        "up", help="return upstairs ( table | SQL file ) list"
     )
     parser_up.set_defaults(handler=command_up)
     set_config_parser(parser=parser_up)
@@ -221,7 +257,7 @@ def create_parser() -> argparse.ArgumentParser:
 
     # down
     parser_down = subparsers.add_parser(
-        "down", help="Return downstairs ( table | SQL file ) list."
+        "down", help="return downstairs ( table | SQL file ) list"
     )
     parser_down.set_defaults(handler=command_down)
     set_config_parser(parser=parser_down)
