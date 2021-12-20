@@ -3,7 +3,7 @@ import json
 import textwrap
 from typing import Callable, Union
 
-from stairlight import ResponseType, StairLight
+from stairlight.stairlight import ResponseType, StairLight
 
 
 def command_init(stairlight: StairLight, args: argparse.Namespace) -> str:

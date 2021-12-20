@@ -6,11 +6,14 @@ format:
 	poetry run isort ./src ./tests
 	poetry run black ./src ./tests
 exec:
-	poetry run python -B ./src/main.py -c config
+	@poetry install
+	@poetry run python -m stairlight -c config
 test:
+	@poetry install
 	@poetry run pytest -v --cov=src
 test-report:
 	@rm -r ./htmlcov
+	@poetry install
 	@poetry run pytest -v --cov=src --cov-report=html
 setup-gcs:
 	@poetry run python ./scripts/setup_test.py
