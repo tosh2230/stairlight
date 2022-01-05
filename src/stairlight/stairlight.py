@@ -112,11 +112,10 @@ class StairLight:
             strl_config=self._strl_config,
             map_config=self._map_config,
         )
+
+        dependency_map.write()
         if self._map_config:
-            dependency_map.write()
             self._mapped = dependency_map.mapped
-        else:
-            dependency_map.write_blank()
 
         self._unmapped = dependency_map.unmapped
 

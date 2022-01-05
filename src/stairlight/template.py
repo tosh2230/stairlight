@@ -96,22 +96,33 @@ class SQLTemplate:
             break
         return result
 
-    def get_jinja_params(self) -> dict:
+    @staticmethod
+    def get_jinja_params(template_str) -> list:
         """Get jinja parameters
 
+        Args:
+            template_str (str): File string
+
         Returns:
-            dict: Jinja parameters
+            list: Jinja parameters
+        """
+        jinja_expressions = "".join(
+            re.findall("{{[^}]*}}", template_str, re.IGNORECASE)
+        )
+        return re.findall("[^{} ]+", jinja_expressions, re.IGNORECASE)
+
+    def get_template_str(self) -> str:
+        """Get file string that read from a file
+
+        Returns:
+            str: File string
         """
         template_str = ""
         if self.source_type == SourceType.FS:
             template_str = self.get_template_str_fs()
         elif self.source_type == SourceType.GCS:
             template_str = self.get_template_str_gcs()
-
-        jinja_expressions = "".join(
-            re.findall("{{[^}]*}}", template_str, re.IGNORECASE)
-        )
-        return re.findall("[^{} ]+", jinja_expressions, re.IGNORECASE)
+        return template_str
 
     def get_template_str_fs(self) -> str:
         """Get file string that read from a file in local file system
