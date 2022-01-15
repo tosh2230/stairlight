@@ -5,21 +5,23 @@ from .template import SourceType, SQLTemplate, TemplateSource
 class Map:
     """Manages functions related to dependency map objects"""
 
-    def __init__(self, strl_config: dict, map_config: dict, mapped: dict = {}) -> None:
+    def __init__(
+        self, stairlight_config: dict, mapping_config: dict, mapped: dict = {}
+    ) -> None:
         """Manages functions related to dependency map objects
 
         Args:
-            strl_config (dict): Stairlight configuration
-            map_config (dict): Mapping configuration
+            stairlight_config (dict): Stairlight configuration
+            mapping_config (dict): Mapping configuration
             mapped (dict, optional):
                 Mapped file attributes when a mapping configuration file loaded.
                 Defaults to {}.
         """
         self.mapped = mapped
         self.unmapped = []
-        self.map_config = map_config
+        self.mapping_config = mapping_config
         self._template_source = TemplateSource(
-            strl_config=strl_config, map_config=map_config
+            stairlight_config=stairlight_config, mapping_config=mapping_config
         )
 
     def add_unmapped(self, sql_template: SQLTemplate, params: list) -> None:
@@ -45,7 +47,7 @@ class Map:
             sql_template (SQLTemplate): SQL template
             table_attributes (dict): Table attributes from mapping configuration
         """
-        template_str = sql_template.get_template_str()
+        template_str = sql_template.get_template_file_str()
         template_params = sql_template.get_jinja_params(template_str)
         mapped_params_dict = table_attributes.get("params")
         mapped_params = (
@@ -59,9 +61,9 @@ class Map:
 
     def write(self) -> None:
         """Write a dependency map"""
-        for sql_template in self._template_source.search():
+        for sql_template in self._template_source.search_templates_iter():
             if sql_template.is_mapped():
-                for table_attributes in sql_template.get_mapped_tables():
+                for table_attributes in sql_template.get_mapped_tables_iter():
                     self.find_unmapped_params(
                         sql_template=sql_template, table_attributes=table_attributes
                     )
@@ -69,8 +71,8 @@ class Map:
                         sql_template=sql_template, table_attributes=table_attributes
                     )
             else:
-                template_str = sql_template.get_template_str()
-                params = sql_template.get_jinja_params(template_str)
+                template_file_str = sql_template.get_template_file_str()
+                params = sql_template.get_jinja_params(template_file_str)
                 self.add_unmapped(sql_template=sql_template, params=params)
 
     def _remap(self, sql_template: SQLTemplate, table_attributes: dict) -> None:
@@ -88,35 +90,41 @@ class Map:
 
         downstairs = table_attributes.get("table")
         mapping_labels = table_attributes.get("labels")
-        metadata = self.map_config.get("metadata")
+        metadata = self.mapping_config.get("metadata")
 
         if downstairs not in self.mapped:
             self.mapped[downstairs] = {}
 
-        for upstairs_attributes in query.parse_upstairs():
+        for upstairs_attributes in query.get_upstairs_attributes_iter():
             upstairs = upstairs_attributes["table_name"]
 
             if not self.mapped[downstairs].get(upstairs):
-                values = {
+                upstairs_values = {
                     "type": sql_template.source_type.value,
                     "file": sql_template.file_path,
                     "uri": sql_template.uri,
                     "lines": [],
                 }
                 if sql_template.source_type == SourceType.GCS:
-                    values["bucket"] = sql_template.bucket
+                    upstairs_values["bucket"] = sql_template.bucket
 
                 metadata_labels = [
                     m.get("labels") for m in metadata if m.get("table") == upstairs
                 ]
                 if mapping_labels or metadata_labels:
-                    values["labels"] = {}
+                    upstairs_values["labels"] = {}
                 if mapping_labels:
-                    values["labels"] = {**values["labels"], **mapping_labels}
+                    upstairs_values["labels"] = {
+                        **upstairs_values["labels"],
+                        **mapping_labels,
+                    }
                 if metadata_labels:
-                    values["labels"] = {**values["labels"], **metadata_labels[0]}
+                    upstairs_values["labels"] = {
+                        **upstairs_values["labels"],
+                        **metadata_labels[0],
+                    }
 
-                self.mapped[downstairs][upstairs] = values
+                self.mapped[downstairs][upstairs] = upstairs_values
 
             self.mapped[downstairs][upstairs]["lines"].append(
                 {

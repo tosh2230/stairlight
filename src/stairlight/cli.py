@@ -277,13 +277,13 @@ def main() -> None:
 
     result = None
     if hasattr(args, "handler"):
-        if args.handler == command_init and stairlight.has_strl_config():
+        if args.handler == command_init and stairlight.has_stairlight_config():
             exit(f"'{args.config}/stairlight.y(a)ml' already exists.")
-        elif args.handler != command_init and not stairlight.has_strl_config():
+        elif args.handler != command_init and not stairlight.has_stairlight_config():
             exit(f"'{args.config}/stairlight.y(a)ml' is not found.")
         result = args.handler(stairlight, args)
     else:
-        if not stairlight.has_strl_config():
+        if not stairlight.has_stairlight_config():
             exit(f"'{args.config}/stairlight.y(a)ml' is not found.")
         result = stairlight.mapped
 

@@ -4,7 +4,7 @@ import os
 from logging import getLogger
 from typing import Union
 
-from .config import MAP_CONFIG_PREFIX, STRL_CONFIG_PREFIX, Configurator
+from .config import MAPPING_CONFIG_PREFIX, STAIRLIGHT_CONFIG_PREFIX, Configurator
 from .map import Map
 
 logger = getLogger(__name__)
@@ -59,15 +59,18 @@ class StairLight:
         self._configurator = Configurator(dir=config_dir)
         self._mapped = {}
         self._unmapped = []
-        self._map_config = None
-        self._strl_config = self._configurator.read(prefix=STRL_CONFIG_PREFIX)
-        if self._strl_config:
+        self.mapping_config = None
+        self._stairlight_config = self._configurator.read(
+            prefix=STAIRLIGHT_CONFIG_PREFIX
+        )
+        if self._stairlight_config:
             if self.load_file:
-                self._load()
+                self._load_map()
             else:
-                self._set()
+                self._set_config()
+                self._get_map()
                 if self.save_file:
-                    self._save()
+                    self._save_map()
 
     @property
     def mapped(self) -> dict:
@@ -87,55 +90,58 @@ class StairLight:
         """
         return self._unmapped
 
-    def has_strl_config(self) -> bool:
+    def has_stairlight_config(self) -> bool:
         """Exists stairlight configuration file or not
 
         Returns:
             bool: Exists stairlight configuration file or not
         """
-        return self._strl_config is not None
+        return self._stairlight_config is not None
 
-    def _set(self) -> None:
-        """Set config and get a dependency map"""
-        if not self._strl_config:
-            logger.warning(f"{STRL_CONFIG_PREFIX}.y(a)ml' is not found.")
+    def _set_config(self) -> None:
+        """Set config"""
+        if not self._stairlight_config:
+            logger.warning(f"{STAIRLIGHT_CONFIG_PREFIX}.y(a)ml' is not found.")
             return
 
-        map_config_prefix = MAP_CONFIG_PREFIX
-        if "settings" in self._strl_config:
-            settings = self._strl_config["settings"]
+        mapping_config_prefix = MAPPING_CONFIG_PREFIX
+        if "settings" in self._stairlight_config:
+            settings = self._stairlight_config["settings"]
             if "mapping_prefix" in settings:
-                map_config_prefix = settings["mapping_prefix"]
-        self._map_config = self._configurator.read(prefix=map_config_prefix)
+                mapping_config_prefix = settings["mapping_prefix"]
+        self._mapping_config = self._configurator.read(prefix=mapping_config_prefix)
 
+    def _get_map(self) -> None:
+        """get a dependency map"""
         dependency_map = Map(
-            strl_config=self._strl_config,
-            map_config=self._map_config,
+            stairlight_config=self._stairlight_config,
+            mapping_config=self._mapping_config,
         )
 
         dependency_map.write()
-        if self._map_config:
+        if self._mapping_config:
             self._mapped = dependency_map.mapped
 
         self._unmapped = dependency_map.unmapped
 
-    def init(self, prefix: str = STRL_CONFIG_PREFIX) -> str:
+    def init(self, prefix: str = STAIRLIGHT_CONFIG_PREFIX) -> str:
         """Create Stairlight template file
 
         Args:
             prefix (str, optional):
-                Template file prefix. Defaults to STRL_CONFIG_PREFIX.
+                Template file prefix. Defaults to STAIRLIGHT_CONFIG_PREFIX.
 
         Returns:
             str: Template file name
         """
-        return self._configurator.create_stairlight_template(prefix=prefix)
+        return self._configurator.create_stairlight_template_file(prefix=prefix)
 
-    def check(self, prefix: str = MAP_CONFIG_PREFIX) -> str:
+    def check(self, prefix: str = MAPPING_CONFIG_PREFIX) -> str:
         """Check mapped results and create a mapping template file
 
         Args:
-            prefix (str, optional): Template file prefix. Defaults to MAP_CONFIG_PREFIX.
+            prefix (str, optional):
+                Template file prefix. Defaults to MAPPING_CONFIG_PREFIX.
 
         Returns:
             str: Template file name
@@ -145,16 +151,17 @@ class StairLight:
             return None
         elif not self._unmapped:
             return None
-        return self._configurator.create_mapping_template(
+
+        return self._configurator.create_mapping_template_file(
             unmapped=self._unmapped, prefix=prefix
         )
 
-    def _save(self) -> None:
+    def _save_map(self) -> None:
         """Save mapped results"""
         with open(self.save_file, "w") as f:
             json.dump(self._mapped, f, indent=2)
 
-    def _load(self) -> None:
+    def _load_map(self) -> None:
         """Load mapped results"""
         if not os.path.exists(self.load_file):
             logger.error(f"{self.load_file} is not found.")
@@ -244,6 +251,7 @@ class StairLight:
                 searched_tables=[],
                 head=True,
             )
+
         if response_type in [type.value for type in ResponseType]:
             return self.search_plain(
                 table_name=table_name,
@@ -253,6 +261,7 @@ class StairLight:
                 searched_tables=[],
                 head=True,
             )
+
         return None
 
     def search_verbose(
@@ -307,6 +316,7 @@ class StairLight:
 
                 if not next_response.get(next_table_name):
                     continue
+
                 relative_map[next_table_name] = {
                     **relative_map[next_table_name],
                     **next_response[next_table_name],
@@ -408,7 +418,7 @@ class StairLight:
         tables_to_search = []
 
         # "mapping" section in mapping.yaml
-        for configurations in self._map_config.get("mapping"):
+        for configurations in self._mapping_config.get("mapping"):
             for table_attributes in configurations.get("tables"):
                 if self.is_target_found(
                     targets=targets,
@@ -417,7 +427,7 @@ class StairLight:
                     tables_to_search.append(table_attributes["table"])
 
         # "metadata" section in mapping.yaml
-        for table_attributes in self._map_config.get("metadata"):
+        for table_attributes in self._mapping_config.get("metadata"):
             if self.is_target_found(
                 targets=targets,
                 labels=table_attributes.get("labels", {}),

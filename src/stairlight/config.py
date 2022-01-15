@@ -8,8 +8,8 @@ import yaml
 
 from .template import SourceType
 
-MAP_CONFIG_PREFIX = "mapping"
-STRL_CONFIG_PREFIX = "stairlight"
+MAPPING_CONFIG_PREFIX = "mapping"
+STAIRLIGHT_CONFIG_PREFIX = "stairlight"
 
 logger = logging.getLogger()
 
@@ -44,41 +44,43 @@ class Configurator:
                 config = yaml.safe_load(file)
         return config
 
-    def create_stairlight_template(self, prefix: str = STRL_CONFIG_PREFIX) -> str:
+    def create_stairlight_template_file(
+        self, prefix: str = STAIRLIGHT_CONFIG_PREFIX
+    ) -> str:
         """Create a Stairlight template file
 
         Args:
-            prefix (str, optional): File prefix. Defaults to STRL_CONFIG_PREFIX.
+            prefix (str, optional): File prefix. Defaults to STAIRLIGHT_CONFIG_PREFIX.
 
         Returns:
             str: Created file name
         """
-        file_name = f"{self.dir}/{prefix}.yaml"
-        with open(file_name, "w") as f:
+        template_file_name = f"{self.dir}/{prefix}.yaml"
+        with open(template_file_name, "w") as f:
             yaml.add_representer(OrderedDict, self.represent_odict)
             yaml.dump(self.build_stairlight_template(), f)
-        return file_name
+        return template_file_name
 
-    def create_mapping_template(
-        self, unmapped: list, prefix: str = MAP_CONFIG_PREFIX
+    def create_mapping_template_file(
+        self, unmapped: list, prefix: str = MAPPING_CONFIG_PREFIX
     ) -> str:
         """Create a mapping template file
 
         Args:
             unmapped (list): Unmapped results
-            prefix (str, optional): File prefix. Defaults to MAP_CONFIG_PREFIX.
+            prefix (str, optional): File prefix. Defaults to MAPPING_CONFIG_PREFIX.
 
         Returns:
             str: Mapping template file
         """
         now = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
-        file_name = f"{self.dir}/{prefix}_{now}.yaml"
-        with open(file_name, "w") as f:
+        template_file_name = f"{self.dir}/{prefix}_{now}.yaml"
+        with open(template_file_name, "w") as f:
             yaml.add_representer(
                 data_type=OrderedDict, representer=self.represent_odict
             )
             yaml.dump(self.build_mapping_template(unmapped), f)
-        return file_name
+        return template_file_name
 
     @staticmethod
     def represent_odict(
@@ -119,7 +121,7 @@ class Configurator:
                     ),
                 ],
                 "exclude": [OrderedDict({"type": None, "regex": None})],
-                "settings": {"mapping_prefix": MAP_CONFIG_PREFIX},
+                "settings": {"mapping_prefix": MAPPING_CONFIG_PREFIX},
             }
         )
 
