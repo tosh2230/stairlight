@@ -12,16 +12,16 @@ class TestSuccess:
         assert self.configurator.read(prefix=config.MAP_CONFIG_PREFIX)
 
     def test_read_sql(self):
-        assert self.configurator.read(prefix=config.STRL_CONFIG_PREFIX)
+        assert self.configurator.read(prefix=config.STAIRLIGHT_CONFIG_PREFIX)
 
-    def test_create_stairlight_template(self, stairlight_template):
-        file_name = self.configurator.create_stairlight_template(
+    def test_create_stairlight_template_file(self, stairlight_template):
+        file_name = self.configurator.create_stairlight_template_file(
             prefix=stairlight_template
         )
         assert os.path.exists(file_name)
 
-    def test_create_mapping_template(self, mapping_template):
-        file_name = self.configurator.create_mapping_template(
+    def test_create_mapping_template_file(self, mapping_template):
+        file_name = self.configurator.create_mapping_template_file(
             unmapped=[], prefix=mapping_template
         )
         assert os.path.exists(file_name)

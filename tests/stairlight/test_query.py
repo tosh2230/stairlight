@@ -9,7 +9,7 @@ class TestSuccess:
         )
         query = Query(query_str=query_str)
         results = []
-        for result in query.parse_upstairs():
+        for result in query.get_upstairs_attributes_iter():
             results.append(result)
         assert results == [
             {
@@ -35,7 +35,7 @@ class TestSuccess:
             query_str = f.read()
         query = Query(query_str=query_str)
         results = []
-        for result in query.parse_upstairs():
+        for result in query.get_upstairs_attributes_iter():
             results.append(result)
         assert results == [
             {
@@ -60,7 +60,7 @@ class TestSuccess:
             query_str = f.read()
         query = Query(query_str=query_str)
         results = []
-        for result in query.parse_upstairs():
+        for result in query.get_upstairs_attributes_iter():
             results.append(result)
         assert results == [
             {
@@ -85,7 +85,7 @@ class TestSuccess:
             query_str = f.read()
         query = Query(query_str=query_str)
         results = []
-        for result in query.parse_upstairs():
+        for result in query.get_upstairs_attributes_iter():
             results.append(result)
         assert results == [
             {
@@ -115,7 +115,7 @@ class TestSuccess:
             query_str = f.read()
         query = Query(query_str=query_str)
         results = []
-        for result in query.parse_upstairs():
+        for result in query.get_upstairs_attributes_iter():
             results.append(result)
         assert results == [
             {

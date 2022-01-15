@@ -54,10 +54,10 @@ class SQLTemplate:
         self.bucket = bucket
         self.project = project
         self.default_table_prefix = default_table_prefix
-        self.uri = self.set_uri()
+        self.uri = self.get_uri()
 
-    def set_uri(self) -> str:
-        """Create uri from file path
+    def get_uri(self) -> str:
+        """Get uri from file path
 
         Returns:
             str: uri
@@ -70,17 +70,17 @@ class SQLTemplate:
             uri = f"gs://{self.bucket}/{self.file_path}"
         return uri
 
-    def get_mapped_tables(self) -> Iterator[dict]:
-        """Get mapped tables
+    def get_mapped_tables_iter(self) -> Iterator[dict]:
+        """Get mapped tables as iterator
 
         Yields:
             Iterator[dict]: Mapped table
         """
         for mapping in self._map_config.get("mapping"):
-            is_suffix = False
+            has_suffix = False
             if mapping.get("file_suffix"):
-                is_suffix = self.file_path.endswith(mapping.get("file_suffix"))
-            if is_suffix or self.uri == mapping.get("uri"):
+                has_suffix = self.file_path.endswith(mapping.get("file_suffix"))
+            if has_suffix or self.uri == mapping.get("uri"):
                 for table in mapping.get("tables"):
                     yield table
 
@@ -91,7 +91,7 @@ class SQLTemplate:
             bool: Is set or not
         """
         result = False
-        for table in self.get_mapped_tables():
+        for _ in self.get_mapped_tables_iter():
             result = True
             break
         return result
@@ -111,20 +111,20 @@ class SQLTemplate:
         )
         return re.findall("[^{} ]+", jinja_expressions, re.IGNORECASE)
 
-    def get_template_str(self) -> str:
-        """Get file string that read from a file
+    def get_template_file_str(self) -> str:
+        """Get file-strings that read from a template file
 
         Returns:
             str: File string
         """
-        template_str = ""
+        template_file_str = ""
         if self.source_type == SourceType.FS:
-            template_str = self.get_template_str_fs()
+            template_file_str = self.get_template_file_str_fs()
         elif self.source_type == SourceType.GCS:
-            template_str = self.get_template_str_gcs()
-        return template_str
+            template_file_str = self.get_template_file_str_gcs()
+        return template_file_str
 
-    def get_template_str_fs(self) -> str:
+    def get_template_file_str_fs(self) -> str:
         """Get file string that read from a file in local file system
 
         Returns:
@@ -135,7 +135,7 @@ class SQLTemplate:
             template_str = f.read()
         return template_str
 
-    def get_template_str_gcs(self) -> str:
+    def get_template_file_str_gcs(self) -> str:
         """Get file string that read from a file in GCS
 
         Returns:
@@ -157,12 +157,12 @@ class SQLTemplate:
         """
         query_str = ""
         if self.source_type == SourceType.FS:
-            query_str = self.render_fs(params)
+            query_str = self.render_from_fs(params)
         elif self.source_type == SourceType.GCS:
-            query_str = self.render_gcs(params)
+            query_str = self.render_from_gcs(params)
         return query_str
 
-    def render_fs(self, params: dict) -> str:
+    def render_from_fs(self, params: dict) -> str:
         """Render SQL query string from a jinja template on local file system
 
         Args:
@@ -175,7 +175,7 @@ class SQLTemplate:
         jinja_template = env.get_template(os.path.basename(self.file_path))
         return jinja_template.render(params=params)
 
-    def render_gcs(self, params: dict) -> str:
+    def render_from_gcs(self, params: dict) -> str:
         """Render SQL query string from a jinja template on GCS
 
         Args:
@@ -184,38 +184,38 @@ class SQLTemplate:
         Returns:
             str: SQL query string
         """
-        template_str = self.get_template_str_gcs()
-        jinja_template = Environment(loader=BaseLoader()).from_string(template_str)
+        template_file_str = self.get_template_file_str_gcs()
+        jinja_template = Environment(loader=BaseLoader()).from_string(template_file_str)
         return jinja_template.render(params=params)
 
 
 class TemplateSource:
     """SQL template source"""
 
-    def __init__(self, strl_config: dict, map_config: dict) -> None:
+    def __init__(self, stairlight_config: dict, map_config: dict) -> None:
         """SQL template source
 
         Args:
-            strl_config (dict): Stairlight configuration
+            stairlight_config (dict): Stairlight configuration
             map_config (dict): Mapping configuration
         """
-        self._strl_config = strl_config
+        self._stairlight_config = stairlight_config
         self._map_config = map_config
 
-    def search(self) -> Iterator[SQLTemplate]:
+    def search_templates_iter(self) -> Iterator[SQLTemplate]:
         """Search SQL template files
 
         Yields:
             Iterator[SQLTemplate]: SQL template file attributes
         """
-        for source in self._strl_config.get("include"):
+        for source in self._stairlight_config.get("include"):
             type = source.get("type")
             if type.casefold() == SourceType.FS.value:
-                yield from self.search_fs(source)
+                yield from self.search_templates_iter_from_fs(source)
             elif type.casefold() == SourceType.GCS.value:
-                yield from self.search_gcs(source)
+                yield from self.search_templates_iter_from_gcs(source)
 
-    def search_fs(self, source: dict) -> Iterator[SQLTemplate]:
+    def search_templates_iter_from_fs(self, source: dict) -> Iterator[SQLTemplate]:
         """Search SQL template files from local file system
 
         Args:
@@ -239,7 +239,7 @@ class TemplateSource:
                 default_table_prefix=source.get("default_table_prefix"),
             )
 
-    def search_gcs(self, source: dict) -> Iterator[SQLTemplate]:
+    def search_templates_iter_from_gcs(self, source: dict) -> Iterator[SQLTemplate]:
         """Search SQL template files from GCS
 
         Args:
@@ -279,7 +279,7 @@ class TemplateSource:
             bool: Return True if the specified file is out of scope
         """
         result = False
-        exclude_list = self._strl_config.get("exclude")
+        exclude_list = self._stairlight_config.get("exclude")
         if not exclude_list:
             return result
         for exclude in exclude_list:

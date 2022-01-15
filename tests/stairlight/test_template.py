@@ -6,24 +6,24 @@ import src.stairlight.template as template
 
 class TestTemplateSourceSuccess:
     configurator = config.Configurator(dir="./config")
-    strl_config = configurator.read(prefix=config.STRL_CONFIG_PREFIX)
+    stairlight_config = configurator.read(prefix=config.STAIRLIGHT_CONFIG_PREFIX)
     map_config = configurator.read(prefix=config.MAP_CONFIG_PREFIX)
     template_source = template.TemplateSource(
-        strl_config=strl_config, map_config=map_config
+        stairlight_config=stairlight_config, map_config=map_config
     )
 
-    def test_search_fs(self):
+    def test_search_templates_iter_from_fs(self):
         source = {
             "type": template.SourceType.FS.value,
             "path": "./tests/sql",
             "regex": ".*/*.sql",
         }
         result = []
-        for file in self.template_source.search_fs(source=source):
+        for file in self.template_source.search_templates_iter_from_fs(source=source):
             result.append(file)
         assert len(result) > 0
 
-    def test_search_gcs(self):
+    def test_search_templates_iter_from_gcs(self):
         source = {
             "type": template.SourceType.GCS.value,
             "project": None,
@@ -31,7 +31,7 @@ class TestTemplateSourceSuccess:
             "regex": "sql/.*/*.sql",
         }
         result = []
-        for file in self.template_source.search_gcs(source=source):
+        for file in self.template_source.search_templates_iter_from_gcs(source=source):
             result.append(file)
         assert len(result) > 0
 
@@ -50,10 +50,10 @@ class TestTemplateSourceSuccess:
 
 class TestTemplateSourceNoExclude:
     configurator = config.Configurator(dir="./config")
-    strl_config = configurator.read(prefix="stairlight_no_exclude")
+    stairlight_config = configurator.read(prefix="stairlight_no_exclude")
     map_config = configurator.read(prefix=config.MAP_CONFIG_PREFIX)
     template_source = template.TemplateSource(
-        strl_config=strl_config, map_config=map_config
+        stairlight_config=stairlight_config, map_config=map_config
     )
 
     def test_is_excluded_test_a(self):
@@ -96,8 +96,8 @@ class TestSQLTemplateMapped:
             file_path=file_path,
             bucket=bucket,
         )
-        template_str = sql_template.get_template_str()
-        assert len(sql_template.get_jinja_params(template_str)) > 0
+        template_file_str = sql_template.get_template_file_str()
+        assert len(sql_template.get_jinja_params(template_file_str)) > 0
 
 
 @pytest.mark.parametrize(
@@ -127,8 +127,8 @@ class TestSQLTemplateNotMapped:
             file_path=file_path,
             bucket=bucket,
         )
-        template_str = sql_template.get_template_str()
-        assert len(sql_template.get_jinja_params(template_str)) > 0
+        template_file_str = sql_template.get_template_file_str()
+        assert len(sql_template.get_jinja_params(template_file_str)) > 0
 
 
 class TestSQLTemplateRenderSuccess:
@@ -146,7 +146,7 @@ class TestSQLTemplateRenderSuccess:
             source_type=template.SourceType.FS,
             file_path="tests/sql/main/test_c.sql",
         )
-        query_str = sql_template.render_fs(params=params)
+        query_str = sql_template.render_from_fs(params=params)
         expected = """WITH c AS (
     SELECT
         test_id,
