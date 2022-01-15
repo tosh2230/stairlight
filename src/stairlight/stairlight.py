@@ -140,7 +140,8 @@ class StairLight:
         """Check mapped results and create a mapping template file
 
         Args:
-            prefix (str, optional): Template file prefix. Defaults to MAPPING_CONFIG_PREFIX.
+            prefix (str, optional):
+                Template file prefix. Defaults to MAPPING_CONFIG_PREFIX.
 
         Returns:
             str: Template file name
