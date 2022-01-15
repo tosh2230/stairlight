@@ -23,33 +23,7 @@ class Query:
         Yields:
             Iterator[dict]: upstream table attributes
         """
-        # Check the query has cte or not
-        cte_pattern = r"(?:with|,)\s*(\w+)\s+as\s*"
-        ctes = re.findall(cte_pattern, self.query_str, re.IGNORECASE)
-
-        # Check a boundary that main query starts
-        boundary_num = 0
-        main_pattern = r"\)[;\s]*select" if any(ctes) else r"select"
-        main_search_result = re.search(main_pattern, self.query_str, re.IGNORECASE)
-        if main_search_result:
-            boundary_num = main_search_result.start()
-
-        # Split the query to 'main' and 'cte'
-        query_group = {}
-        query_group["main"] = self.query_str[boundary_num:].strip()
-        query_group["cte"] = self.query_str[:boundary_num].strip()
-
-        table_pattern = r"(?:from|join)\s+([`.\-\w]+)"
-        main_tables_with_cte_alias = re.findall(
-            table_pattern, query_group["main"], re.IGNORECASE
-        )
-
-        # Exclude cte table alias from main tables
-        main_tables = [
-            table for table in main_tables_with_cte_alias if table not in ctes
-        ]
-        cte_tables = re.findall(table_pattern, query_group["cte"], re.IGNORECASE)
-        upstairs_tables = sorted(set(main_tables + cte_tables))
+        upstairs_tables = self.parse_and_get_upstairs_tables()
 
         for upstairs_table in upstairs_tables:
             line_indexes = [
@@ -66,6 +40,41 @@ class Query:
                     "line": line_index + 1,
                     "line_str": self.query_str.splitlines()[line_index],
                 }
+
+    def parse_and_get_upstairs_tables(self) -> set:
+        """Parse query and get upstairs tables
+
+        Returns:
+            set: upstairs table set
+        """
+        # Get Common-Table-Expressions(CTE) from query string
+        cte_pattern = r"(?:with|,)\s*(\w+)\s+as\s*"
+        ctes = re.findall(cte_pattern, self.query_str, re.IGNORECASE)
+
+        # Search a boundary line number that main query starts
+        boundary_num = 0
+        main_pattern = r"\)[;\s]*select" if any(ctes) else r"select"
+        main_search_result = re.search(main_pattern, self.query_str, re.IGNORECASE)
+        if main_search_result:
+            boundary_num = main_search_result.start()
+
+        # Split query to main and CTE
+        query_group = {}
+        query_group["main"] = self.query_str[boundary_num:].strip()
+        query_group["cte"] = self.query_str[:boundary_num].strip()
+
+        table_pattern = r"(?:from|join)\s+([`.\-\w]+)"
+        main_tables_with_cte_alias = re.findall(
+            table_pattern, query_group["main"], re.IGNORECASE
+        )
+
+        # Exclude table alias in CTE from main tables
+        main_tables = [
+            table for table in main_tables_with_cte_alias if table not in ctes
+        ]
+        cte_tables = re.findall(table_pattern, query_group["cte"], re.IGNORECASE)
+
+        return sorted(set(main_tables + cte_tables))
 
 
 def solve_table_prefix(table: str, default_table_prefix: str) -> str:

@@ -151,6 +151,7 @@ class StairLight:
             return None
         elif not self._unmapped:
             return None
+
         return self._configurator.create_mapping_template_file(
             unmapped=self._unmapped, prefix=prefix
         )
@@ -250,6 +251,7 @@ class StairLight:
                 searched_tables=[],
                 head=True,
             )
+
         if response_type in [type.value for type in ResponseType]:
             return self.search_plain(
                 table_name=table_name,
@@ -259,6 +261,7 @@ class StairLight:
                 searched_tables=[],
                 head=True,
             )
+
         return None
 
     def search_verbose(
@@ -313,6 +316,7 @@ class StairLight:
 
                 if not next_response.get(next_table_name):
                     continue
+
                 relative_map[next_table_name] = {
                     **relative_map[next_table_name],
                     **next_response[next_table_name],
