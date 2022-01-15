@@ -8,7 +8,7 @@ import yaml
 
 from .template import SourceType
 
-MAP_CONFIG_PREFIX = "mapping"
+MAPPING_CONFIG_PREFIX = "mapping"
 STAIRLIGHT_CONFIG_PREFIX = "stairlight"
 
 logger = logging.getLogger()
@@ -62,13 +62,13 @@ class Configurator:
         return template_file_name
 
     def create_mapping_template_file(
-        self, unmapped: list, prefix: str = MAP_CONFIG_PREFIX
+        self, unmapped: list, prefix: str = MAPPING_CONFIG_PREFIX
     ) -> str:
         """Create a mapping template file
 
         Args:
             unmapped (list): Unmapped results
-            prefix (str, optional): File prefix. Defaults to MAP_CONFIG_PREFIX.
+            prefix (str, optional): File prefix. Defaults to MAPPING_CONFIG_PREFIX.
 
         Returns:
             str: Mapping template file
@@ -121,7 +121,7 @@ class Configurator:
                     ),
                 ],
                 "exclude": [OrderedDict({"type": None, "regex": None})],
-                "settings": {"mapping_prefix": MAP_CONFIG_PREFIX},
+                "settings": {"mapping_prefix": MAPPING_CONFIG_PREFIX},
             }
         )
 

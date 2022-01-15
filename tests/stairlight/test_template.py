@@ -7,9 +7,9 @@ import src.stairlight.template as template
 class TestTemplateSourceSuccess:
     configurator = config.Configurator(dir="./config")
     stairlight_config = configurator.read(prefix=config.STAIRLIGHT_CONFIG_PREFIX)
-    map_config = configurator.read(prefix=config.MAP_CONFIG_PREFIX)
+    mapping_config = configurator.read(prefix=config.MAPPING_CONFIG_PREFIX)
     template_source = template.TemplateSource(
-        stairlight_config=stairlight_config, map_config=map_config
+        stairlight_config=stairlight_config, mapping_config=mapping_config
     )
 
     def test_search_templates_iter_from_fs(self):
@@ -51,9 +51,9 @@ class TestTemplateSourceSuccess:
 class TestTemplateSourceNoExclude:
     configurator = config.Configurator(dir="./config")
     stairlight_config = configurator.read(prefix="stairlight_no_exclude")
-    map_config = configurator.read(prefix=config.MAP_CONFIG_PREFIX)
+    mapping_config = configurator.read(prefix=config.MAPPING_CONFIG_PREFIX)
     template_source = template.TemplateSource(
-        stairlight_config=stairlight_config, map_config=map_config
+        stairlight_config=stairlight_config, mapping_config=mapping_config
     )
 
     def test_is_excluded_test_a(self):
@@ -78,11 +78,11 @@ class TestTemplateSourceNoExclude:
 )
 class TestSQLTemplateMapped:
     configurator = config.Configurator(dir="./config")
-    map_config = configurator.read(prefix=config.MAP_CONFIG_PREFIX)
+    mapping_config = configurator.read(prefix=config.MAPPING_CONFIG_PREFIX)
 
     def test_is_mapped(self, source_type, file_path, bucket):
         sql_template = template.SQLTemplate(
-            map_config=self.map_config,
+            mapping_config=self.mapping_config,
             source_type=source_type,
             file_path=file_path,
             bucket=bucket,
@@ -91,7 +91,7 @@ class TestSQLTemplateMapped:
 
     def test_get_jinja_params(self, source_type, file_path, bucket):
         sql_template = template.SQLTemplate(
-            map_config=self.map_config,
+            mapping_config=self.mapping_config,
             source_type=source_type,
             file_path=file_path,
             bucket=bucket,
@@ -109,11 +109,11 @@ class TestSQLTemplateMapped:
 )
 class TestSQLTemplateNotMapped:
     configurator = config.Configurator(dir="./config")
-    map_config = configurator.read(prefix=config.MAP_CONFIG_PREFIX)
+    mapping_config = configurator.read(prefix=config.MAPPING_CONFIG_PREFIX)
 
     def test_is_mapped(self, source_type, file_path, bucket):
         sql_template = template.SQLTemplate(
-            map_config=self.map_config,
+            mapping_config=self.mapping_config,
             source_type=source_type,
             file_path=file_path,
             bucket=bucket,
@@ -122,7 +122,7 @@ class TestSQLTemplateNotMapped:
 
     def test_get_jinja_params(self, source_type, file_path, bucket):
         sql_template = template.SQLTemplate(
-            map_config=self.map_config,
+            mapping_config=self.mapping_config,
             source_type=source_type,
             file_path=file_path,
             bucket=bucket,
@@ -133,7 +133,7 @@ class TestSQLTemplateNotMapped:
 
 class TestSQLTemplateRenderSuccess:
     configurator = config.Configurator(dir="./config")
-    map_config = configurator.read(prefix=config.MAP_CONFIG_PREFIX)
+    mapping_config = configurator.read(prefix=config.MAPPING_CONFIG_PREFIX)
 
     def test_render_fs(self):
         params = {
@@ -142,7 +142,7 @@ class TestSQLTemplateRenderSuccess:
             "sub_table_02": "PROJECT_V.DATASET_W.TABLE_X",
         }
         sql_template = template.SQLTemplate(
-            map_config=self.map_config,
+            mapping_config=self.mapping_config,
             source_type=template.SourceType.FS,
             file_path="tests/sql/main/test_c.sql",
         )

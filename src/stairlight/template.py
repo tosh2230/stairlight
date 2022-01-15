@@ -26,7 +26,7 @@ class SQLTemplate:
 
     def __init__(
         self,
-        map_config: dict,
+        mapping_config: dict,
         source_type: SourceType,
         file_path: str,
         bucket: Optional[str] = None,
@@ -37,7 +37,7 @@ class SQLTemplate:
         """SQL template
 
         Args:
-            map_config (dict): Mapping configuration
+            mapping_config (dict): Mapping configuration
             source_type (SourceType): Source type
             file_path (str): SQL file path
             bucket (Optional[str], optional):
@@ -48,7 +48,7 @@ class SQLTemplate:
                 If project or dataset that configured table have are omitted,
                 it will be complement this prefix. Defaults to None.
         """
-        self._map_config = map_config
+        self._mapping_config = mapping_config
         self.source_type = source_type
         self.file_path = file_path
         self.bucket = bucket
@@ -76,7 +76,7 @@ class SQLTemplate:
         Yields:
             Iterator[dict]: Mapped table
         """
-        for mapping in self._map_config.get("mapping"):
+        for mapping in self._mapping_config.get("mapping"):
             has_suffix = False
             if mapping.get("file_suffix"):
                 has_suffix = self.file_path.endswith(mapping.get("file_suffix"))
@@ -192,15 +192,15 @@ class SQLTemplate:
 class TemplateSource:
     """SQL template source"""
 
-    def __init__(self, stairlight_config: dict, map_config: dict) -> None:
+    def __init__(self, stairlight_config: dict, mapping_config: dict) -> None:
         """SQL template source
 
         Args:
             stairlight_config (dict): Stairlight configuration
-            map_config (dict): Mapping configuration
+            mapping_config (dict): Mapping configuration
         """
         self._stairlight_config = stairlight_config
-        self._map_config = map_config
+        self._mapping_config = mapping_config
 
     def search_templates_iter(self) -> Iterator[SQLTemplate]:
         """Search SQL template files
@@ -233,7 +233,7 @@ class TemplateSource:
                 logger.debug(f"{str(p)} is skipped.")
                 continue
             yield SQLTemplate(
-                map_config=self._map_config,
+                mapping_config=self._mapping_config,
                 source_type=source_type,
                 file_path=str(p),
                 default_table_prefix=source.get("default_table_prefix"),
@@ -260,7 +260,7 @@ class TemplateSource:
                 logger.debug(f"{blob.name} is skipped.")
                 continue
             yield SQLTemplate(
-                map_config=self._map_config,
+                mapping_config=self._mapping_config,
                 source_type=source_type,
                 file_path=blob.name,
                 project=project,

@@ -9,7 +9,7 @@ class TestSuccess:
     configurator = config.Configurator(dir="./config")
 
     def test_read_map(self):
-        assert self.configurator.read(prefix=config.MAP_CONFIG_PREFIX)
+        assert self.configurator.read(prefix=config.MAPPING_CONFIG_PREFIX)
 
     def test_read_sql(self):
         assert self.configurator.read(prefix=config.STAIRLIGHT_CONFIG_PREFIX)
@@ -32,7 +32,7 @@ class TestSuccess:
 
     def test_build_mapping_template(self):
         sql_template = template.SQLTemplate(
-            map_config=self.configurator.read(prefix=config.MAP_CONFIG_PREFIX),
+            mapping_config=self.configurator.read(prefix=config.MAPPING_CONFIG_PREFIX),
             source_type=template.SourceType.FS,
             file_path="tests/sql/main/test_undefined.sql",
         )

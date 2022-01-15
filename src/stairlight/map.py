@@ -6,22 +6,22 @@ class Map:
     """Manages functions related to dependency map objects"""
 
     def __init__(
-        self, stairlight_config: dict, map_config: dict, mapped: dict = {}
+        self, stairlight_config: dict, mapping_config: dict, mapped: dict = {}
     ) -> None:
         """Manages functions related to dependency map objects
 
         Args:
             stairlight_config (dict): Stairlight configuration
-            map_config (dict): Mapping configuration
+            mapping_config (dict): Mapping configuration
             mapped (dict, optional):
                 Mapped file attributes when a mapping configuration file loaded.
                 Defaults to {}.
         """
         self.mapped = mapped
         self.unmapped = []
-        self.map_config = map_config
+        self.mapping_config = mapping_config
         self._template_source = TemplateSource(
-            stairlight_config=stairlight_config, map_config=map_config
+            stairlight_config=stairlight_config, mapping_config=mapping_config
         )
 
     def add_unmapped(self, sql_template: SQLTemplate, params: list) -> None:
@@ -90,7 +90,7 @@ class Map:
 
         downstairs = table_attributes.get("table")
         mapping_labels = table_attributes.get("labels")
-        metadata = self.map_config.get("metadata")
+        metadata = self.mapping_config.get("metadata")
 
         if downstairs not in self.mapped:
             self.mapped[downstairs] = {}
