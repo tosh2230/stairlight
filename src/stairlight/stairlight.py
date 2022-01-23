@@ -4,9 +4,12 @@ import os
 from logging import getLogger
 from typing import Union
 
+from google.cloud import storage
+
 from .config import MAPPING_CONFIG_PREFIX, STAIRLIGHT_CONFIG_PREFIX, Configurator
 from .map import Map
 
+GCS_URI_PREFIX = "gs://"
 logger = getLogger(__name__)
 
 
@@ -158,6 +161,26 @@ class StairLight:
 
     def _save_map(self) -> None:
         """Save mapped results"""
+        if self.save_file.startswith(GCS_URI_PREFIX):
+            self.save_map_gcs()
+        else:
+            self.save_map_fs()
+
+    def save_map_gcs(self) -> None:
+        """Save mapped results to Google Cloud Storage"""
+        bucket_name = self.save_file.replace(GCS_URI_PREFIX, "").split("/")[0]
+        key = self.save_file.replace(f"{GCS_URI_PREFIX}{bucket_name}/", "")
+
+        client = storage.Client(credentials=None, project=None)
+        bucket = client.get_bucket(bucket_name)
+        blob = bucket.blob(key)
+        blob.upload_from_string(
+            data=json.dumps(obj=self._mapped, indent=2),
+            content_type="application/json",
+        )
+
+    def save_map_fs(self) -> None:
+        """Save mapped results to file system"""
         with open(self.save_file, "w") as f:
             json.dump(self._mapped, f, indent=2)
 
