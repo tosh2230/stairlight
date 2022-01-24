@@ -221,8 +221,8 @@ optional arguments:
   -h, --help            show this help message and exit
   -c CONFIG, --config CONFIG
                         set a Stairlight configuration directory
-  --save SAVE           save results to a file
-  --load LOAD           load results from a file
+  --save SAVE           a file path where results will be saved
+  --load LOAD           a file path in which results are saved
   -t TABLE, --table TABLE
                         table names that Stairlight searches for, can be specified
                         multiple times. e.g. -t PROJECT_a.DATASET_b.TABLE_c -t
