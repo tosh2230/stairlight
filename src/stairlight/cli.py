@@ -147,13 +147,13 @@ def set_save_load_parser(parser: argparse.ArgumentParser) -> None:
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
         "--save",
-        help="save results to a file",
+        help="a file path where results will be saved(File system or GCS)",
         type=str,
         default=None,
     )
     group.add_argument(
         "--load",
-        help="load results from a file",
+        help="a file path in which results are saved(File system or GCS)",
         type=str,
         default=None,
     )
