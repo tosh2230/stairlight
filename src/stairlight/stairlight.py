@@ -68,12 +68,12 @@ class StairLight:
         )
         if self._stairlight_config:
             if self.load_file:
-                self._load_map()
+                self.load_map()
             else:
                 self._set_config()
                 self._get_map()
                 if self.save_file:
-                    self._save_map()
+                    self.save_map()
 
     @property
     def mapped(self) -> dict:
@@ -159,7 +159,7 @@ class StairLight:
             unmapped=self._unmapped, prefix=prefix
         )
 
-    def _save_map(self) -> None:
+    def save_map(self) -> None:
         """Save mapped results"""
         if self.save_file.startswith(GCS_URI_PREFIX):
             self.save_map_gcs()
@@ -168,12 +168,7 @@ class StairLight:
 
     def save_map_gcs(self) -> None:
         """Save mapped results to Google Cloud Storage"""
-        bucket_name = self.save_file.replace(GCS_URI_PREFIX, "").split("/")[0]
-        key = self.save_file.replace(f"{GCS_URI_PREFIX}{bucket_name}/", "")
-
-        client = storage.Client(credentials=None, project=None)
-        bucket = client.get_bucket(bucket_name)
-        blob = bucket.blob(key)
+        blob = self.get_gcs_blob(self.save_file)
         blob.upload_from_string(
             data=json.dumps(obj=self._mapped, indent=2),
             content_type="application/json",
@@ -184,13 +179,37 @@ class StairLight:
         with open(self.save_file, "w") as f:
             json.dump(self._mapped, f, indent=2)
 
-    def _load_map(self) -> None:
+    def load_map(self) -> None:
         """Load mapped results"""
+        if self.load_file.startswith(GCS_URI_PREFIX):
+            self.load_map_gcs()
+        else:
+            self.load_map_fs()
+
+    def load_map_gcs(self) -> None:
+        """Load mapped results from Google Cloud Storage"""
+        blob = self.get_gcs_blob(self.load_file)
+        if not blob.exists():
+            logger.error(f"{self.load_file} is not found.")
+            exit()
+        self._mapped = json.loads(blob.download_as_string())
+
+    def load_map_fs(self) -> None:
+        """Load mapped results from file system"""
         if not os.path.exists(self.load_file):
             logger.error(f"{self.load_file} is not found.")
             exit()
         with open(self.load_file) as f:
             self._mapped = json.load(f)
+
+    @staticmethod
+    def get_gcs_blob(gcs_uri: str) -> storage.Blob:
+        bucket_name = gcs_uri.replace(GCS_URI_PREFIX, "").split("/")[0]
+        key = gcs_uri.replace(f"{GCS_URI_PREFIX}{bucket_name}/", "")
+
+        client = storage.Client(credentials=None, project=None)
+        bucket = client.get_bucket(bucket_name)
+        return bucket.blob(key)
 
     def up(
         self,
