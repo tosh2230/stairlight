@@ -74,19 +74,19 @@ class SQLTemplate:
             uri = f"gs://{self.bucket}/{self.file_path}"
         return uri
 
-    def get_mapped_tables_iter(self) -> Iterator[dict]:
+    def get_mapped_table_attributes_iter(self) -> Iterator[dict]:
         """Get mapped tables as iterator
 
         Yields:
-            Iterator[dict]: Mapped table
+            Iterator[dict]: Mapped table attributes
         """
         for mapping in self._mapping_config.get("mapping"):
             has_suffix = False
             if mapping.get("file_suffix"):
                 has_suffix = self.file_path.endswith(mapping.get("file_suffix"))
             if has_suffix or self.uri == mapping.get("uri"):
-                for table in mapping.get("tables"):
-                    yield table
+                for table_attributes in mapping.get("tables"):
+                    yield table_attributes
 
     def is_mapped(self) -> bool:
         """Check if the template is set to mapping configuration
@@ -95,7 +95,7 @@ class SQLTemplate:
             bool: Is set or not
         """
         result = False
-        for _ in self.get_mapped_tables_iter():
+        for _ in self.get_mapped_table_attributes_iter():
             result = True
             break
         return result

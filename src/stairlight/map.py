@@ -63,11 +63,11 @@ class Map:
         """Write a dependency map"""
         for sql_template in self._template_source.search_templates_iter():
             if sql_template.is_mapped():
-                for table_attributes in sql_template.get_mapped_tables_iter():
+                for table_attributes in sql_template.get_mapped_table_attributes_iter():
                     self.find_unmapped_params(
                         sql_template=sql_template, table_attributes=table_attributes
                     )
-                    self._remap(
+                    self.remap(
                         sql_template=sql_template, table_attributes=table_attributes
                     )
             else:
@@ -75,7 +75,7 @@ class Map:
                 params = sql_template.get_jinja_params(template_str)
                 self.add_unmapped(sql_template=sql_template, params=params)
 
-    def _remap(self, sql_template: SQLTemplate, table_attributes: dict) -> None:
+    def remap(self, sql_template: SQLTemplate, table_attributes: dict) -> None:
         """Remap a dependency map
 
         Args:
