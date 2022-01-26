@@ -126,7 +126,7 @@ class Configurator:
         )
 
     @staticmethod
-    def build_mapping_template(unmapped: list) -> OrderedDict:
+    def build_mapping_template(unmapped_templates: list) -> OrderedDict:
         """Create a OrderedDict for mapping.config
 
         Args:
@@ -136,18 +136,18 @@ class Configurator:
             OrderedDict: mapping.config template
         """
         template = OrderedDict({"mapping": []})
-        for unmapped_file in unmapped:
-            sql_template = unmapped_file["sql_template"]
+        for unmapped_template in unmapped_templates:
+            sql_template = unmapped_template["sql_template"]
             values = OrderedDict(
                 {
-                    "file_suffix": sql_template.file_path,
+                    "type": sql_template.source_type,
                     "tables": [OrderedDict({"table": None})],
                 }
             )
 
             params = None
-            if "params" in unmapped_file:
-                undefined_params = unmapped_file.get("params")
+            if "params" in unmapped_template:
+                undefined_params = unmapped_template.get("params")
                 params = OrderedDict({})
                 for param in undefined_params:
                     param_str = ".".join(param.split(".")[1:])
@@ -158,7 +158,9 @@ class Configurator:
 
             values["tables"][0]["labels"] = OrderedDict({"key": "value"})
 
-            if sql_template.source_type in [SourceType.GCS]:
+            if sql_template.source_type in [SourceType.FS]:
+                values["file_suffix"] = sql_template.file_path
+            elif sql_template.source_type in [SourceType.GCS]:
                 values["uri"] = sql_template.uri
                 values["bucket"] = sql_template.bucket
 
