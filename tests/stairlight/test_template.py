@@ -96,8 +96,8 @@ class TestSQLTemplateMapped:
             file_path=file_path,
             bucket=bucket,
         )
-        template_file_str = sql_template.get_template_file_str()
-        assert len(sql_template.get_jinja_params(template_file_str)) > 0
+        template_str = sql_template.get_template_str()
+        assert len(sql_template.get_jinja_params(template_str)) > 0
 
 
 @pytest.mark.parametrize(
@@ -127,8 +127,8 @@ class TestSQLTemplateNotMapped:
             file_path=file_path,
             bucket=bucket,
         )
-        template_file_str = sql_template.get_template_file_str()
-        assert len(sql_template.get_jinja_params(template_file_str)) > 0
+        template_str = sql_template.get_template_str()
+        assert len(sql_template.get_jinja_params(template_str)) > 0
 
 
 class TestSQLTemplateRenderSuccess:

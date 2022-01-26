@@ -1,8 +1,10 @@
 mapping:
-  - file_suffix: "tests/sql/main/test_a.sql"
+  - type: fs
+    file_suffix: "tests/sql/main/test_a.sql"
     tables:
       - table: "PROJECT_A.DATASET_B.TABLE_C"
-  - file_suffix: "tests/sql/main/test_b.sql"
+  - type: fs
+    file_suffix: "tests/sql/main/test_b.sql"
     tables:
       - table: "PROJECT_D.DATASET_E.TABLE_F"
         params:
@@ -20,7 +22,8 @@ mapping:
         labels:
           source: fs
           test: b
-  - file_suffix: "tests/sql/main/test_c.sql"
+  - type: fs
+    file_suffix: "tests/sql/main/test_c.sql"
     tables:
       - table: "PROJECT_J.DATASET_K.TABLE_L"
         params:
@@ -30,10 +33,12 @@ mapping:
         labels:
           source: fs
           test: c
-  - uri: "gs://stairlight/sql/test_a/test_a.sql"
+  - type: gcs
+    uri: "gs://stairlight/sql/test_a/test_a.sql"
     tables:
       - table: "PROJECT_a.DATASET_b.TABLE_c"
-  - uri: "gs://stairlight/sql/test_b/test_b.sql"
+  - type: gcs
+    uri: "gs://stairlight/sql/test_b/test_b.sql"
     tables:
       - table: "PROJECT_d.DATASET_e.TABLE_f"
         params:
@@ -43,21 +48,26 @@ mapping:
         labels:
           source: gcs
           test: b
-  - file_suffix: "tests/sql/main/test_d.sql"
+  - type: fs
+    file_suffix: "tests/sql/main/test_d.sql"
     tables:
       - table: "PROJECT_j.DATASET_k.TABLE_l"
-  - file_suffix: "tests/sql/main/test_e.sql"
+  - type: fs
+    file_suffix: "tests/sql/main/test_e.sql"
     tables:
       - table: "PROJECT_d.DATASET_e.TABLE_f"
-  - file_suffix: "tests/sql/main/test_f.sql"
+  - type: fs
+    file_suffix: "tests/sql/main/test_f.sql"
     tables:
       - table: "PROJECT_d.DATASET_d.TABLE_d"
-  - file_suffix: "tests/sql/main/test_undefined_part.sql"
+  - type: fs
+    file_suffix: "tests/sql/main/test_undefined_part.sql"
     tables:
       - table: "PROJECT_u.DATASET_u.TABLE_u"
         params:
           main_table: "PROJECT_t.DATASET_t.TABLE_t"
-  - file_suffix: "tests/sql/main/test_union_same_table.sql"
+  - type: fs
+    file_suffix: "tests/sql/main/test_union_same_table.sql"
     tables:
       - table: "test_project.beam_streaming.taxirides_aggregation"
 metadata:

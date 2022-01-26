@@ -7,6 +7,7 @@ from typing import Iterator, Optional
 
 from google.cloud import storage
 from jinja2 import BaseLoader, Environment, FileSystemLoader
+from sqlalchemy import create_engine, text
 
 logger = getLogger(__name__)
 
@@ -16,6 +17,7 @@ class SourceType(enum.Enum):
 
     FS = "fs"
     GCS = "gcs"
+    REDASH = "redash"
 
     def __str__(self):
         return self.name
@@ -33,6 +35,7 @@ class SQLTemplate:
         project: Optional[str] = None,
         default_table_prefix: Optional[str] = None,
         labels: Optional[dict] = None,
+        template_str: Optional[str] = None,
     ):
         """SQL template
 
@@ -55,6 +58,7 @@ class SQLTemplate:
         self.project = project
         self.default_table_prefix = default_table_prefix
         self.uri = self.get_uri()
+        self.template_str = template_str
 
     def get_uri(self) -> str:
         """Get uri from file path
@@ -111,40 +115,50 @@ class SQLTemplate:
         )
         return re.findall("[^{} ]+", jinja_expressions, re.IGNORECASE)
 
-    def get_template_file_str(self) -> str:
-        """Get file-strings that read from a template file
+    def get_template_str(self) -> str:
+        """Get template strings that read from template source
 
         Returns:
-            str: File string
+            str: Template string
         """
-        template_file_str = ""
+        template_str = ""
         if self.source_type == SourceType.FS:
-            template_file_str = self.get_template_file_str_fs()
+            template_str = self.get_template_str_fs()
         elif self.source_type == SourceType.GCS:
-            template_file_str = self.get_template_file_str_gcs()
-        return template_file_str
+            template_str = self.get_template_str_gcs()
+        elif self.source_type == SourceType.REDASH:
+            template_str = self.get_template_str_redash()
+        return template_str
 
-    def get_template_file_str_fs(self) -> str:
-        """Get file string that read from a file in local file system
+    def get_template_str_fs(self) -> str:
+        """Get template string that read from a file in local file system
 
         Returns:
-            str: File string
+            str: Template string
         """
         template_str = ""
         with open(self.file_path) as f:
             template_str = f.read()
         return template_str
 
-    def get_template_file_str_gcs(self) -> str:
-        """Get file string that read from a file in GCS
+    def get_template_str_gcs(self) -> str:
+        """Get template string that read from a file in GCS
 
         Returns:
-            str: File string
+            str: Template string
         """
         client = storage.Client(credentials=None, project=self.project)
         bucket = client.get_bucket(self.bucket)
         blob = bucket.blob(self.file_path)
         return blob.download_as_bytes().decode("utf-8")
+
+    def get_template_str_redash(self) -> str:
+        """Get template string that read from Redash
+
+        Returns:
+            str: Template string
+        """
+        return self.template_str
 
     def render(self, params: dict) -> str:
         """Render SQL query string from a jinja template
@@ -160,6 +174,8 @@ class SQLTemplate:
             query_str = self.render_from_fs(params)
         elif self.source_type == SourceType.GCS:
             query_str = self.render_from_gcs(params)
+        elif self.source_type == SourceType.REDASH:
+            query_str = self.render_from_redash(params)
         return query_str
 
     def render_from_fs(self, params: dict) -> str:
@@ -184,8 +200,24 @@ class SQLTemplate:
         Returns:
             str: SQL query string
         """
-        template_file_str = self.get_template_file_str_gcs()
-        jinja_template = Environment(loader=BaseLoader()).from_string(template_file_str)
+        template_str = self.get_template_str_gcs()
+        return self.render_by_base_loader(template_str=template_str, params=params)
+
+    def render_from_redash(self, params: dict) -> str:
+        """Render SQL query string from a jinja template on Redash queries
+
+        Args:
+            params (dict): Jinja paramters
+
+        Returns:
+            str: SQL query string
+        """
+        template_str = self.get_template_str_redash()
+        return self.render_by_base_loader(template_str=template_str, params=params)
+
+    @staticmethod
+    def render_by_base_loader(template_str: str, params: dict) -> str:
+        jinja_template = Environment(loader=BaseLoader()).from_string(template_str)
         return jinja_template.render(params=params)
 
 
@@ -214,6 +246,8 @@ class TemplateSource:
                 yield from self.search_templates_iter_from_fs(source)
             elif type.casefold() == SourceType.GCS.value:
                 yield from self.search_templates_iter_from_gcs(source)
+            elif type.casefold() == SourceType.REDASH.value:
+                yield from self.search_templates_iter_from_redash(source)
 
     def search_templates_iter_from_fs(self, source: dict) -> Iterator[SQLTemplate]:
         """Search SQL template files from local file system
@@ -266,6 +300,36 @@ class TemplateSource:
                 project=project,
                 bucket=bucket,
                 default_table_prefix=source.get("default_table_prefix"),
+            )
+
+    def search_templates_iter_from_redash(self, source: dict) -> Iterator[SQLTemplate]:
+        connection_str = os.environ.get(source.get("conn_str_env_var"))
+        engine = create_engine(connection_str)
+        query_text = text(
+            """\
+            SELECT
+                queries.query
+            FROM
+                queries
+                INNER JOIN data_sources
+                    ON queries.data_source_id = data_sources.id
+            WHERE
+                data_sources.name = %(data_source)s
+                queries.id IN %(query_id_list)s
+            """
+        )
+        template_str_list = engine.execute(
+            object=query_text,
+            data_source=source.get("data_source"),
+            query_id_list=tuple(source.get("query_id_list")),
+        ).fetchall()
+
+        for template_str in template_str_list:
+            yield SQLTemplate(
+                mapping_config=self._mapping_config,
+                source_type=SourceType.REDASH,
+                file_path=None,
+                template_str=template_str,
             )
 
     def is_excluded(self, source_type: SourceType, file_path: str) -> bool:

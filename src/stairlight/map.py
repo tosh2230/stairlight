@@ -47,7 +47,7 @@ class Map:
             sql_template (SQLTemplate): SQL template
             table_attributes (dict): Table attributes from mapping configuration
         """
-        template_str = sql_template.get_template_file_str()
+        template_str = sql_template.get_template_str()
         template_params = sql_template.get_jinja_params(template_str)
         mapped_params_dict = table_attributes.get("params")
         mapped_params = (
@@ -71,8 +71,8 @@ class Map:
                         sql_template=sql_template, table_attributes=table_attributes
                     )
             else:
-                template_file_str = sql_template.get_template_file_str()
-                params = sql_template.get_jinja_params(template_file_str)
+                template_str = sql_template.get_template_str()
+                params = sql_template.get_jinja_params(template_str)
                 self.add_unmapped(sql_template=sql_template, params=params)
 
     def _remap(self, sql_template: SQLTemplate, table_attributes: dict) -> None:
