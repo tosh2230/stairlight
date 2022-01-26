@@ -24,8 +24,8 @@ class Map:
             stairlight_config=stairlight_config, mapping_config=mapping_config
         )
 
-    def add_unmapped(self, sql_template: SQLTemplate, params: list) -> None:
-        """add to the list of unmapped files
+    def add_unmapped_params(self, sql_template: SQLTemplate, params: list) -> None:
+        """add to the list of unmapped params
 
         Args:
             sql_template (SQLTemplate): SQL template
@@ -57,7 +57,7 @@ class Map:
         )
         diff_params = list(set(template_params) - set(mapped_params))
         if diff_params:
-            self.add_unmapped(sql_template=sql_template, params=diff_params)
+            self.add_unmapped_params(sql_template=sql_template, params=diff_params)
 
     def write(self) -> None:
         """Write a dependency map"""
@@ -73,7 +73,7 @@ class Map:
             else:
                 template_str = sql_template.get_template_str()
                 params = sql_template.get_jinja_params(template_str)
-                self.add_unmapped(sql_template=sql_template, params=params)
+                self.add_unmapped_params(sql_template=sql_template, params=params)
 
     def remap(self, sql_template: SQLTemplate, table_attributes: dict) -> None:
         """Remap a dependency map
