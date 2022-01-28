@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 
 import yaml
 
-from .template import SourceType
+from .source.base import TemplateSourceType
 
 MAPPING_CONFIG_PREFIX = "mapping"
 STAIRLIGHT_CONFIG_PREFIX = "stairlight"
@@ -158,9 +158,9 @@ class Configurator:
 
             values["tables"][0]["labels"] = OrderedDict({"key": "value"})
 
-            if sql_template.source_type in [SourceType.FS]:
+            if sql_template.source_type in [TemplateSourceType.FS]:
                 values["file_suffix"] = sql_template.file_path
-            elif sql_template.source_type in [SourceType.GCS]:
+            elif sql_template.source_type in [TemplateSourceType.GCS]:
                 values["uri"] = sql_template.uri
                 values["bucket"] = sql_template.bucket
 

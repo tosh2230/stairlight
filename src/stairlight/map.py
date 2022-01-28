@@ -1,5 +1,14 @@
+from typing import Iterator
+
 from .query import Query
-from .template import SourceType, SQLTemplate, TemplateSource
+from .source.base import (
+    Template,
+    TemplateSource,
+    TemplateSourceType,
+)
+from .source.fs import FsTemplateSource
+from .source.gcs import GcsTemplateSource
+from .source.redash import RedashTemplateSource
 
 
 class Map:
@@ -19,49 +28,44 @@ class Map:
         """
         self.mapped = mapped
         self.unmapped = []
+        self.stairlight_config = stairlight_config
         self.mapping_config = mapping_config
-        self._template_source = TemplateSource(
-            stairlight_config=stairlight_config, mapping_config=mapping_config
-        )
-
-    def add_unmapped_params(self, sql_template: SQLTemplate, params: list) -> None:
-        """add to the list of unmapped params
-
-        Args:
-            sql_template (SQLTemplate): SQL template
-            params (list): Jinja parameters
-        """
-        self.unmapped.append(
-            {
-                "sql_template": sql_template,
-                "params": params,
-            }
-        )
-
-    def find_unmapped_params(
-        self, sql_template: SQLTemplate, table_attributes: dict
-    ) -> None:
-        """find unmapped parameters in mapped files
-
-        Args:
-            sql_template (SQLTemplate): SQL template
-            table_attributes (dict): Table attributes from mapping configuration
-        """
-        template_str = sql_template.get_template_str()
-        template_params = sql_template.get_jinja_params(template_str)
-        mapped_params_dict = table_attributes.get("params")
-        mapped_params = (
-            [f"params.{key}" for key in table_attributes.get("params").keys()]
-            if mapped_params_dict
-            else {}
-        )
-        diff_params = list(set(template_params) - set(mapped_params))
-        if diff_params:
-            self.add_unmapped_params(sql_template=sql_template, params=diff_params)
 
     def write(self) -> None:
+        for template_source in self.find_template_source(
+            stairlight_config=self.stairlight_config, mapping_config=self.mapping_config
+        ):
+            self.write_by_template_source(template_source=template_source)
+
+    @staticmethod
+    def find_template_source(
+        stairlight_config: dict, mapping_config: dict
+    ) -> Iterator[TemplateSource]:
+        for source_attributes in stairlight_config.get("include"):
+            type = source_attributes.get("type")
+            if type.casefold() == TemplateSourceType.FS.value:
+                template_source = FsTemplateSource(
+                    stairlight_config=stairlight_config,
+                    mapping_config=mapping_config,
+                    source_attributes=source_attributes,
+                )
+            elif type.casefold() == TemplateSourceType.GCS.value:
+                template_source = GcsTemplateSource(
+                    stairlight_config=stairlight_config,
+                    mapping_config=mapping_config,
+                    source_attributes=source_attributes,
+                )
+            elif type.casefold() == TemplateSourceType.REDASH.value:
+                template_source = RedashTemplateSource(
+                    stairlight_config=stairlight_config,
+                    mapping_config=mapping_config,
+                    source_attributes=source_attributes,
+                )
+            yield template_source
+
+    def write_by_template_source(self, template_source: TemplateSource) -> None:
         """Write a dependency map"""
-        for sql_template in self._template_source.search_templates_iter():
+        for sql_template in template_source.search_templates_iter():
             if sql_template.is_mapped():
                 for table_attributes in sql_template.get_mapped_table_attributes_iter():
                     self.find_unmapped_params(
@@ -75,11 +79,11 @@ class Map:
                 params = sql_template.get_jinja_params(template_str)
                 self.add_unmapped_params(sql_template=sql_template, params=params)
 
-    def remap(self, sql_template: SQLTemplate, table_attributes: dict) -> None:
+    def remap(self, sql_template: Template, table_attributes: dict) -> None:
         """Remap a dependency map
 
         Args:
-            sql_template (SQLTemplate): SQL template
+            sql_template (Template): SQL template
             table_attributes (dict): Table attributes from mapping configuration
         """
         query_str = sql_template.render(params=table_attributes.get("params"))
@@ -105,7 +109,7 @@ class Map:
                     "uri": sql_template.uri,
                     "lines": [],
                 }
-                if sql_template.source_type == SourceType.GCS:
+                if sql_template.source_type == TemplateSourceType.GCS:
                     upstairs_values["bucket"] = sql_template.bucket
 
                 metadata_labels = [
@@ -132,3 +136,38 @@ class Map:
                     "str": upstairs_attributes["line_str"],
                 }
             )
+
+    def add_unmapped_params(self, sql_template: Template, params: list) -> None:
+        """add to the list of unmapped params
+
+        Args:
+            sql_template (Template): SQL template
+            params (list): Jinja parameters
+        """
+        self.unmapped.append(
+            {
+                "sql_template": sql_template,
+                "params": params,
+            }
+        )
+
+    def find_unmapped_params(
+        self, sql_template: Template, table_attributes: dict
+    ) -> None:
+        """find unmapped parameters in mapped files
+
+        Args:
+            sql_template (Template): SQL template
+            table_attributes (dict): Table attributes from mapping configuration
+        """
+        template_str = sql_template.get_template_str()
+        template_params = sql_template.get_jinja_params(template_str)
+        mapped_params_dict = table_attributes.get("params")
+        mapped_params = (
+            [f"params.{key}" for key in table_attributes.get("params").keys()]
+            if mapped_params_dict
+            else {}
+        )
+        diff_params = list(set(template_params) - set(mapped_params))
+        if diff_params:
+            self.add_unmapped_params(sql_template=sql_template, params=diff_params)

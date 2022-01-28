@@ -1,20 +1,20 @@
 import pytest
 
 import src.stairlight.config as config
-import src.stairlight.template as template
+import src.stairlight.source.base as base
 
 
 class TestTemplateSourceSuccess:
     configurator = config.Configurator(dir="./config")
     stairlight_config = configurator.read(prefix=config.STAIRLIGHT_CONFIG_PREFIX)
     mapping_config = configurator.read(prefix=config.MAPPING_CONFIG_PREFIX)
-    template_source = template.TemplateSource(
+    template_source = base.TemplateSource(
         stairlight_config=stairlight_config, mapping_config=mapping_config
     )
 
     def test_search_templates_iter_from_fs(self):
         source = {
-            "type": template.SourceType.FS.value,
+            "type": base.TemplateSourceType.FS.value,
             "path": "./tests/sql",
             "regex": ".*/*.sql",
         }
@@ -25,7 +25,7 @@ class TestTemplateSourceSuccess:
 
     def test_search_templates_iter_from_gcs(self):
         source = {
-            "type": template.SourceType.GCS.value,
+            "type": base.TemplateSourceType.GCS.value,
             "project": None,
             "bucket": "stairlight",
             "regex": "sql/.*/*.sql",
@@ -37,13 +37,13 @@ class TestTemplateSourceSuccess:
 
     def test_is_excluded_test_a(self):
         assert not self.template_source.is_excluded(
-            source_type=template.SourceType.FS,
+            source_type=base.TemplateSourceType.FS,
             file_path="tests/sql/main/test_a.sql",
         )
 
     def test_is_excluded_test_exclude(self):
         assert self.template_source.is_excluded(
-            source_type=template.SourceType.FS,
+            source_type=base.TemplateSourceType.FS,
             file_path="tests/sql/main/test_exclude.sql",
         )
 
@@ -52,19 +52,19 @@ class TestTemplateSourceNoExclude:
     configurator = config.Configurator(dir="./config")
     stairlight_config = configurator.read(prefix="stairlight_no_exclude")
     mapping_config = configurator.read(prefix=config.MAPPING_CONFIG_PREFIX)
-    template_source = template.TemplateSource(
+    template_source = base.TemplateSource(
         stairlight_config=stairlight_config, mapping_config=mapping_config
     )
 
     def test_is_excluded_test_a(self):
         assert not self.template_source.is_excluded(
-            source_type=template.SourceType.FS,
+            source_type=base.TemplateSourceType.FS,
             file_path="tests/sql/main/test_a.sql",
         )
 
     def test_is_excluded_test_exclude(self):
         assert not self.template_source.is_excluded(
-            source_type=template.SourceType.FS,
+            source_type=base.TemplateSourceType.FS,
             file_path="tests/sql/main/test_exclude.sql",
         )
 
@@ -72,8 +72,8 @@ class TestTemplateSourceNoExclude:
 @pytest.mark.parametrize(
     "source_type, file_path, bucket",
     [
-        (template.SourceType.FS, "tests/sql/main/test_c.sql", None),
-        (template.SourceType.GCS, "sql/test_b/test_b.sql", "stairlight"),
+        (base.TemplateSourceType.FS, "tests/sql/main/test_c.sql", None),
+        (base.TemplateSourceType.GCS, "sql/test_b/test_b.sql", "stairlight"),
     ],
 )
 class TestSQLTemplateMapped:
@@ -81,7 +81,7 @@ class TestSQLTemplateMapped:
     mapping_config = configurator.read(prefix=config.MAPPING_CONFIG_PREFIX)
 
     def test_is_mapped(self, source_type, file_path, bucket):
-        sql_template = template.SQLTemplate(
+        sql_template = base.Template(
             mapping_config=self.mapping_config,
             source_type=source_type,
             file_path=file_path,
@@ -90,7 +90,7 @@ class TestSQLTemplateMapped:
         assert sql_template.is_mapped()
 
     def test_get_jinja_params(self, source_type, file_path, bucket):
-        sql_template = template.SQLTemplate(
+        sql_template = base.Template(
             mapping_config=self.mapping_config,
             source_type=source_type,
             file_path=file_path,
@@ -103,8 +103,8 @@ class TestSQLTemplateMapped:
 @pytest.mark.parametrize(
     "source_type, file_path, bucket",
     [
-        (template.SourceType.FS, "tests/sql/main/test_undefined.sql", None),
-        (template.SourceType.FS, "tests/sql/gcs/test_b/test_b.sql", None),
+        (base.TemplateSourceType.FS, "tests/sql/main/test_undefined.sql", None),
+        (base.TemplateSourceType.FS, "tests/sql/gcs/test_b/test_b.sql", None),
     ],
 )
 class TestSQLTemplateNotMapped:
@@ -112,7 +112,7 @@ class TestSQLTemplateNotMapped:
     mapping_config = configurator.read(prefix=config.MAPPING_CONFIG_PREFIX)
 
     def test_is_mapped(self, source_type, file_path, bucket):
-        sql_template = template.SQLTemplate(
+        sql_template = base.Template(
             mapping_config=self.mapping_config,
             source_type=source_type,
             file_path=file_path,
@@ -121,7 +121,7 @@ class TestSQLTemplateNotMapped:
         assert not sql_template.is_mapped()
 
     def test_get_jinja_params(self, source_type, file_path, bucket):
-        sql_template = template.SQLTemplate(
+        sql_template = base.Template(
             mapping_config=self.mapping_config,
             source_type=source_type,
             file_path=file_path,
@@ -141,9 +141,9 @@ class TestSQLTemplateRenderSuccess:
             "sub_table_01": "PROJECT_S.DATASET_T.TABLE_U",
             "sub_table_02": "PROJECT_V.DATASET_W.TABLE_X",
         }
-        sql_template = template.SQLTemplate(
+        sql_template = base.Template(
             mapping_config=self.mapping_config,
-            source_type=template.SourceType.FS,
+            source_type=base.TemplateSourceType.FS,
             file_path="tests/sql/main/test_c.sql",
         )
         query_str = sql_template.render_from_fs(params=params)
