@@ -6,7 +6,7 @@ from typing import Union
 
 from google.cloud import storage
 
-from . import config_key
+from . import config_key, map_key
 from .config import Configurator
 from .map import Map
 from .source.gcs import GCS_URI_PREFIX
@@ -27,8 +27,8 @@ class ResponseType(enum.Enum):
 class SearchDirection(enum.Enum):
     """Enum: Search direction"""
 
-    UP = "upstairs"
-    DOWN = "downstairs"
+    UP = "Upstairs"
+    DOWN = "Downstairs"
 
     def __str__(self):
         return self.name
@@ -430,7 +430,7 @@ class StairLight:
             if response_type == ResponseType.TABLE.value:
                 response.append(next_table_name)
             elif response_type == ResponseType.FILE.value:
-                response.append(relative_map[next_table_name].get("uri"))
+                response.append(relative_map[next_table_name].get(map_key.URI))
             logger.debug(json.dumps(response, indent=2))
 
         return sorted(list(set(response)))

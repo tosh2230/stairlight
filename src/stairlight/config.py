@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 import yaml
 
 from . import config_key
+from . import map_key
 from .source.base import Template, TemplateSourceType
 
 logger = logging.getLogger()
@@ -144,7 +145,7 @@ class Configurator:
         """
         template = OrderedDict({config_key.MAPPING_CONFIG_MAPPING_SECTION: []})
         for unmapped_template in unmapped_templates:
-            sql_template: Template = unmapped_template["sql_template"]
+            sql_template: Template = unmapped_template[map_key.TEMPLATE]
             values = OrderedDict(
                 {
                     config_key.TEMPLATE_SOURCE_TYPE: sql_template.source_type.value,
@@ -153,15 +154,12 @@ class Configurator:
             )
 
             params = None
-            if "params" in unmapped_template:
-                undefined_params = unmapped_template.get("params")
+            if map_key.PARAMETERS in unmapped_template:
+                undefined_params = unmapped_template.get(map_key.PARAMETERS)
                 params = OrderedDict({})
                 for param in undefined_params:
                     param_str = ".".join(param.split(".")[1:])
                     params[param_str] = None
-
-                print(f"uri: {sql_template.uri}")
-                print(f"undefined_params: {undefined_params}")
 
             if params:
                 values[config_key.TABLES][0][config_key.PARAMETERS] = params

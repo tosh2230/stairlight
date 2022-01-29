@@ -1,9 +1,9 @@
 import os
 from collections import OrderedDict
 
+from src.stairlight import config_key, map_key
 import src.stairlight.config as config
 import src.stairlight.source.base as base
-from src.stairlight import config_key
 from src.stairlight.source.file import FileTemplate
 
 
@@ -46,8 +46,8 @@ class TestSuccess:
         )
         unmapped_templates = [
             {
-                "sql_template": sql_template,
-                "params": [
+                map_key.TEMPLATE: sql_template,
+                map_key.PARAMETERS: [
                     "params.main_table",
                     "params.sub_table_01",
                     "params.sub_table_02",

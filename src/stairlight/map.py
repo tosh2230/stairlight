@@ -1,6 +1,7 @@
 from typing import Iterator
 
 from . import config_key
+from . import map_key
 from .query import Query
 from .source.base import Template, TemplateSource, TemplateSourceType
 from .source.file import FileTemplateSource
@@ -65,7 +66,7 @@ class Map:
                     source_attributes=source_attributes,
                 )
             else:
-                print(f"Template_source not found!: {type}")
+                print(f"Template source is not found: {type}")
                 continue
             yield template_source
 
@@ -108,17 +109,17 @@ class Map:
             self.mapped[downstairs] = {}
 
         for upstairs_attributes in query.get_upstairs_attributes_iter():
-            upstairs = upstairs_attributes["table_name"]
+            upstairs = upstairs_attributes[map_key.TABLE_NAME]
 
             if not self.mapped[downstairs].get(upstairs):
                 upstairs_values = {
-                    "type": sql_template.source_type.value,
-                    "file": sql_template.key,
-                    "uri": sql_template.uri,
-                    "lines": [],
+                    map_key.TEMPLATE_SOURCE_TYPE: sql_template.source_type.value,
+                    map_key.KEY: sql_template.key,
+                    map_key.URI: sql_template.uri,
+                    map_key.LINES: [],
                 }
                 if sql_template.source_type == TemplateSourceType.GCS:
-                    upstairs_values["bucket"] = sql_template.bucket
+                    upstairs_values[map_key.BUCKET_NAME] = sql_template.bucket
 
                 metadata_labels = [
                     m.get(config_key.LABELS)
@@ -126,24 +127,24 @@ class Map:
                     if m.get(config_key.TABLE_NAME) == upstairs
                 ]
                 if mapping_labels or metadata_labels:
-                    upstairs_values["labels"] = {}
+                    upstairs_values[map_key.LABELS] = {}
                 if mapping_labels:
-                    upstairs_values["labels"] = {
-                        **upstairs_values["labels"],
+                    upstairs_values[map_key.LABELS] = {
+                        **upstairs_values[map_key.LABELS],
                         **mapping_labels,
                     }
                 if metadata_labels:
-                    upstairs_values["labels"] = {
-                        **upstairs_values["labels"],
+                    upstairs_values[map_key.LABELS] = {
+                        **upstairs_values[map_key.LABELS],
                         **metadata_labels[0],
                     }
 
                 self.mapped[downstairs][upstairs] = upstairs_values
 
-            self.mapped[downstairs][upstairs]["lines"].append(
+            self.mapped[downstairs][upstairs][map_key.LINES].append(
                 {
-                    "num": upstairs_attributes["line"],
-                    "str": upstairs_attributes["line_str"],
+                    map_key.LINE_NUMBER: upstairs_attributes[map_key.LINE_NUMBER],
+                    map_key.LINE_STRING: upstairs_attributes[map_key.LINE_STRING],
                 }
             )
 
@@ -156,8 +157,8 @@ class Map:
         """
         self.unmapped.append(
             {
-                "sql_template": sql_template,
-                "params": params,
+                map_key.TEMPLATE: sql_template,
+                map_key.PARAMETERS: params,
             }
         )
 
@@ -179,11 +180,5 @@ class Map:
             else {}
         )
         diff_params = list(set(template_params) - set(mapped_params))
-        print(f"Uri: {sql_template.uri}")
-        print(f"template_params: {template_params}")
-        print(f"mapped_params_dict: {mapped_params_dict}")
-        print(f"mapped_params: {mapped_params}")
-        print(f"diff_params: {diff_params}")
-        print("")
         if diff_params:
             self.add_unmapped_params(sql_template=sql_template, params=diff_params)

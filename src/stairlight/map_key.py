@@ -1,0 +1,12 @@
+TABLE_NAME = "TableName"
+TEMPLATE_SOURCE_TYPE = "TemplateSourceType"
+KEY = "Key"
+URI = "Uri"
+LINES = "Lines"
+LINE_NUMBER = "LineNumber"
+LINE_STRING = "LineString"
+BUCKET_NAME = "BucketName"
+LABELS = "Labels"
+
+TEMPLATE = "Template"
+PARAMETERS = "Parameters"

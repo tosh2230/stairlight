@@ -1,4 +1,5 @@
 from src.stairlight.query import Query, solve_table_prefix
+from src.stairlight import map_key
 
 
 class TestSuccess:
@@ -13,17 +14,17 @@ class TestSuccess:
             results.append(result)
         assert results == [
             {
-                "table_name": "PROJECT_X.DATASET_X.TABLE_X",
-                "line": 1,
-                "line_str": (
+                map_key.TABLE_NAME: "PROJECT_X.DATASET_X.TABLE_X",
+                map_key.LINE_NUMBER: 1,
+                map_key.LINE_STRING: (
                     "SELECT * FROM PROJECT_X.DATASET_X.TABLE_X "
                     "INNER JOIN PROJECT_X.DATASET_X.TABLE_Y USING(ID)"
                 ),
             },
             {
-                "table_name": "PROJECT_X.DATASET_X.TABLE_Y",
-                "line": 1,
-                "line_str": (
+                map_key.TABLE_NAME: "PROJECT_X.DATASET_X.TABLE_Y",
+                map_key.LINE_NUMBER: 1,
+                map_key.LINE_STRING: (
                     "SELECT * FROM PROJECT_X.DATASET_X.TABLE_X "
                     "INNER JOIN PROJECT_X.DATASET_X.TABLE_Y USING(ID)"
                 ),
@@ -39,19 +40,19 @@ class TestSuccess:
             results.append(result)
         assert results == [
             {
-                "table_name": "PROJECT_B.DATASET_B.TABLE_B",
-                "line": 1,
-                "line_str": query_str,
+                map_key.TABLE_NAME: "PROJECT_B.DATASET_B.TABLE_B",
+                map_key.LINE_NUMBER: 1,
+                map_key.LINE_STRING: query_str,
             },
             {
-                "table_name": "PROJECT_C.DATASET_C.TABLE_C",
-                "line": 1,
-                "line_str": query_str,
+                map_key.TABLE_NAME: "PROJECT_C.DATASET_C.TABLE_C",
+                map_key.LINE_NUMBER: 1,
+                map_key.LINE_STRING: query_str,
             },
             {
-                "table_name": "PROJECT_d.DATASET_d.TABLE_d",
-                "line": 1,
-                "line_str": query_str,
+                map_key.TABLE_NAME: "PROJECT_d.DATASET_d.TABLE_d",
+                map_key.LINE_NUMBER: 1,
+                map_key.LINE_STRING: query_str,
             },
         ]
 
@@ -64,19 +65,19 @@ class TestSuccess:
             results.append(result)
         assert results == [
             {
-                "table_name": "PROJECT_B.DATASET_B.TABLE_B",
-                "line": 23,
-                "line_str": "    PROJECT_B.DATASET_B.TABLE_B AS b",
+                map_key.TABLE_NAME: "PROJECT_B.DATASET_B.TABLE_B",
+                map_key.LINE_NUMBER: 23,
+                map_key.LINE_STRING: "    PROJECT_B.DATASET_B.TABLE_B AS b",
             },
             {
-                "table_name": "PROJECT_C.DATASET_C.TABLE_C",
-                "line": 6,
-                "line_str": "        PROJECT_C.DATASET_C.TABLE_C",
+                map_key.TABLE_NAME: "PROJECT_C.DATASET_C.TABLE_C",
+                map_key.LINE_NUMBER: 6,
+                map_key.LINE_STRING: "        PROJECT_C.DATASET_C.TABLE_C",
             },
             {
-                "table_name": "PROJECT_d.DATASET_d.TABLE_d",
-                "line": 15,
-                "line_str": "        PROJECT_d.DATASET_d.TABLE_d",
+                map_key.TABLE_NAME: "PROJECT_d.DATASET_d.TABLE_d",
+                map_key.LINE_NUMBER: 15,
+                map_key.LINE_STRING: "        PROJECT_d.DATASET_d.TABLE_d",
             },
         ]
 
@@ -89,24 +90,24 @@ class TestSuccess:
             results.append(result)
         assert results == [
             {
-                "table_name": "PROJECT_B.DATASET_B.TABLE_B",
-                "line": 4,
-                "line_str": "    PROJECT_B.DATASET_B.TABLE_B AS b",
+                map_key.TABLE_NAME: "PROJECT_B.DATASET_B.TABLE_B",
+                map_key.LINE_NUMBER: 4,
+                map_key.LINE_STRING: "    PROJECT_B.DATASET_B.TABLE_B AS b",
             },
             {
-                "table_name": "PROJECT_C.DATASET_C.TABLE_C",
-                "line": 10,
-                "line_str": "            PROJECT_C.DATASET_C.TABLE_C",
+                map_key.TABLE_NAME: "PROJECT_C.DATASET_C.TABLE_C",
+                map_key.LINE_NUMBER: 10,
+                map_key.LINE_STRING: "            PROJECT_C.DATASET_C.TABLE_C",
             },
             {
-                "table_name": "PROJECT_d.DATASET_d.TABLE_d",
-                "line": 20,
-                "line_str": "            PROJECT_d.DATASET_d.TABLE_d d",
+                map_key.TABLE_NAME: "PROJECT_d.DATASET_d.TABLE_d",
+                map_key.LINE_NUMBER: 20,
+                map_key.LINE_STRING: "            PROJECT_d.DATASET_d.TABLE_d d",
             },
             {
-                "table_name": "PROJECT_e.DATASET_e.TABLE_e",
-                "line": 21,
-                "line_str": "            LEFT OUTER JOIN PROJECT_e.DATASET_e.TABLE_e",
+                map_key.TABLE_NAME: "PROJECT_e.DATASET_e.TABLE_e",
+                map_key.LINE_NUMBER: 21,
+                map_key.LINE_STRING: "            LEFT OUTER JOIN PROJECT_e.DATASET_e.TABLE_e",
             },
         ]
 
@@ -119,14 +120,14 @@ class TestSuccess:
             results.append(result)
         assert results == [
             {
-                "table_name": "test_project.beam_streaming.taxirides_realtime",
-                "line": 6,
-                "line_str": "    test_project.beam_streaming.taxirides_realtime",
+                map_key.TABLE_NAME: "test_project.beam_streaming.taxirides_realtime",
+                map_key.LINE_NUMBER: 6,
+                map_key.LINE_STRING: "    test_project.beam_streaming.taxirides_realtime",
             },
             {
-                "table_name": "test_project.beam_streaming.taxirides_realtime",
-                "line": 15,
-                "line_str": "    test_project.beam_streaming.taxirides_realtime",
+                map_key.TABLE_NAME: "test_project.beam_streaming.taxirides_realtime",
+                map_key.LINE_NUMBER: 15,
+                map_key.LINE_STRING: "    test_project.beam_streaming.taxirides_realtime",
             },
         ]
 
