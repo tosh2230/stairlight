@@ -44,7 +44,7 @@ class Map:
         ):
             template_source: TemplateSource = None
             template_source_type = source_attributes.get(
-                config_key.CONFIG_KEY_TEMPLATE_SOURCE_TYPE
+                config_key.TEMPLATE_SOURCE_TYPE
             )
             if template_source_type == TemplateSourceType.FILE.value:
                 template_source = FileTemplateSource(
@@ -93,15 +93,15 @@ class Map:
             table_attributes (dict): Table attributes from mapping configuration
         """
         query_str = sql_template.render(
-            params=table_attributes.get(config_key.CONFIG_KEY_PARAMETERS)
+            params=table_attributes.get(config_key.PARAMETERS)
         )
         query = Query(
             query_str=query_str,
             default_table_prefix=sql_template.default_table_prefix,
         )
 
-        downstairs = table_attributes.get(config_key.CONFIG_KEY_TABLE_NAME)
-        mapping_labels = table_attributes.get(config_key.CONFIG_KEY_LABELS)
+        downstairs = table_attributes.get(config_key.TABLE_NAME)
+        mapping_labels = table_attributes.get(config_key.LABELS)
         metadata = self.mapping_config.get(config_key.MAPPING_CONFIG_METADATA_SECTION)
 
         if downstairs not in self.mapped:
@@ -121,9 +121,9 @@ class Map:
                     upstairs_values["bucket"] = sql_template.bucket
 
                 metadata_labels = [
-                    m.get(config_key.CONFIG_KEY_LABELS)
+                    m.get(config_key.LABELS)
                     for m in metadata
-                    if m.get(config_key.CONFIG_KEY_TABLE_NAME) == upstairs
+                    if m.get(config_key.TABLE_NAME) == upstairs
                 ]
                 if mapping_labels or metadata_labels:
                     upstairs_values["labels"] = {}
@@ -172,7 +172,7 @@ class Map:
         """
         template_str = sql_template.get_template_str()
         template_params = sql_template.get_jinja_params(template_str)
-        mapped_params_dict = table_attributes.get(config_key.CONFIG_KEY_PARAMETERS)
+        mapped_params_dict = table_attributes.get(config_key.PARAMETERS)
         mapped_params = (
             [f"params.{key}" for key in mapped_params_dict.keys()]
             if mapped_params_dict

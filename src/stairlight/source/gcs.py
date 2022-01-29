@@ -80,14 +80,14 @@ class GcsTemplateSource(TemplateSource):
         Yields:
             Iterator[SQLTemplate]: SQL template file attributes
         """
-        project = self.source_attributes.get(config_key.CONFIG_KEY_PROJECT_ID)
+        project = self.source_attributes.get(config_key.PROJECT_ID)
         client = storage.Client(credentials=None, project=project)
-        bucket = self.source_attributes.get(config_key.CONFIG_KEY_BUCKET_NAME)
+        bucket = self.source_attributes.get(config_key.BUCKET_NAME)
         blobs = client.list_blobs(bucket)
         for blob in blobs:
             if (
                 not re.fullmatch(
-                    rf"{self.source_attributes.get(config_key.CONFIG_KEY_REGEX)}",
+                    rf"{self.source_attributes.get(config_key.REGEX)}",
                     blob.name,
                 )
             ) or self.is_excluded(source_type=self.source_type, key=blob.name):
@@ -100,6 +100,6 @@ class GcsTemplateSource(TemplateSource):
                 project=project,
                 bucket=bucket,
                 default_table_prefix=self.source_attributes.get(
-                    config_key.CONFIG_KEY_DEFAULT_TABLE_PREFIX
+                    config_key.DEFAULT_TABLE_PREFIX
                 ),
             )

@@ -13,10 +13,10 @@ class TestGcsTemplateSource:
     mapping_config = configurator.read(prefix=config_key.MAPPING_CONFIG_FILE_PREFIX)
 
     source_attributes = {
-        config_key.CONFIG_KEY_TEMPLATE_SOURCE_TYPE: TemplateSourceType.GCS.value,
-        config_key.CONFIG_KEY_PROJECT_ID: None,
-        config_key.CONFIG_KEY_BUCKET_NAME: "stairlight",
-        config_key.CONFIG_KEY_REGEX: "sql/.*/*.sql",
+        config_key.TEMPLATE_SOURCE_TYPE: TemplateSourceType.GCS.value,
+        config_key.PROJECT_ID: None,
+        config_key.BUCKET_NAME: "stairlight",
+        config_key.REGEX: "sql/.*/*.sql",
     }
     template_source = GcsTemplateSource(
         stairlight_config=stairlight_config,

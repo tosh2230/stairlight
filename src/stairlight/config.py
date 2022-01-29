@@ -102,32 +102,32 @@ class Configurator:
                 config_key.STAIRLIGHT_CONFIG_INCLUDE_SECTION: [
                     OrderedDict(
                         {
-                            config_key.CONFIG_KEY_TEMPLATE_SOURCE_TYPE: TemplateSourceType.FILE.value,
-                            config_key.CONFIG_KEY_FILE_SYSTEM_PATH: None,
-                            config_key.CONFIG_KEY_REGEX: None,
-                            config_key.CONFIG_KEY_DEFAULT_TABLE_PREFIX: None,
+                            config_key.TEMPLATE_SOURCE_TYPE: TemplateSourceType.FILE.value,
+                            config_key.FILE_SYSTEM_PATH: None,
+                            config_key.REGEX: None,
+                            config_key.DEFAULT_TABLE_PREFIX: None,
                         }
                     ),
                     OrderedDict(
                         {
-                            config_key.CONFIG_KEY_TEMPLATE_SOURCE_TYPE: TemplateSourceType.GCS.value,
-                            config_key.CONFIG_KEY_PROJECT_ID: None,
-                            config_key.CONFIG_KEY_BUCKET_NAME: None,
-                            config_key.CONFIG_KEY_REGEX: None,
-                            config_key.CONFIG_KEY_DEFAULT_TABLE_PREFIX: None,
+                            config_key.TEMPLATE_SOURCE_TYPE: TemplateSourceType.GCS.value,
+                            config_key.PROJECT_ID: None,
+                            config_key.BUCKET_NAME: None,
+                            config_key.REGEX: None,
+                            config_key.DEFAULT_TABLE_PREFIX: None,
                         }
                     ),
                 ],
                 config_key.STAIRLIGHT_CONFIG_EXCLUDE_SECTION: [
                     OrderedDict(
                         {
-                            config_key.CONFIG_KEY_TEMPLATE_SOURCE_TYPE: None,
-                            config_key.CONFIG_KEY_DEFAULT_TABLE_PREFIX: None,
+                            config_key.TEMPLATE_SOURCE_TYPE: None,
+                            config_key.DEFAULT_TABLE_PREFIX: None,
                         }
                     )
                 ],
                 config_key.STAIRLIGHT_CONFIG_SETTING_SECTION: {
-                    config_key.CONFIG_KEY_MAPPING_PREFIX: config_key.MAPPING_CONFIG_FILE_PREFIX
+                    config_key.MAPPING_PREFIX: config_key.MAPPING_CONFIG_FILE_PREFIX
                 },
             }
         )
@@ -147,10 +147,8 @@ class Configurator:
             sql_template: Template = unmapped_template["sql_template"]
             values = OrderedDict(
                 {
-                    config_key.CONFIG_KEY_TEMPLATE_SOURCE_TYPE: sql_template.source_type.value,
-                    config_key.CONFIG_KEY_TABLES: [
-                        OrderedDict({config_key.CONFIG_KEY_TABLE_NAME: None})
-                    ],
+                    config_key.TEMPLATE_SOURCE_TYPE: sql_template.source_type.value,
+                    config_key.TABLES: [OrderedDict({config_key.TABLE_NAME: None})],
                 }
             )
 
@@ -166,27 +164,25 @@ class Configurator:
                 print(f"undefined_params: {undefined_params}")
 
             if params:
-                values[config_key.CONFIG_KEY_TABLES][0][
-                    config_key.CONFIG_KEY_PARAMETERS
-                ] = params
+                values[config_key.TABLES][0][config_key.PARAMETERS] = params
 
-            values[config_key.CONFIG_KEY_TABLES][0][
-                config_key.CONFIG_KEY_LABELS
-            ] = OrderedDict({"key": "value"})
+            values[config_key.TABLES][0][config_key.LABELS] = OrderedDict(
+                {"key": "value"}
+            )
 
             if sql_template.source_type in [TemplateSourceType.FILE]:
-                values[config_key.CONFIG_KEY_FILE_SUFFIX] = sql_template.key
+                values[config_key.FILE_SUFFIX] = sql_template.key
             elif sql_template.source_type in [TemplateSourceType.GCS]:
-                values[config_key.CONFIG_KEY_URI] = sql_template.uri
-                values[config_key.CONFIG_KEY_BUCKET_NAME] = sql_template.bucket
+                values[config_key.URI] = sql_template.uri
+                values[config_key.BUCKET_NAME] = sql_template.bucket
 
             template[config_key.MAPPING_CONFIG_MAPPING_SECTION].append(values)
 
         template[config_key.MAPPING_CONFIG_METADATA_SECTION] = [
             OrderedDict(
                 {
-                    config_key.CONFIG_KEY_TABLE_NAME: None,
-                    config_key.CONFIG_KEY_LABELS: OrderedDict({"key": "value"}),
+                    config_key.TABLE_NAME: None,
+                    config_key.LABELS: OrderedDict({"key": "value"}),
                 }
             )
         ]

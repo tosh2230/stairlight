@@ -57,30 +57,30 @@ class TestSuccess:
 
         mapping_value = OrderedDict(
             {
-                config_key.CONFIG_KEY_TEMPLATE_SOURCE_TYPE: sql_template.source_type.value,
-                config_key.CONFIG_KEY_TABLES: [
+                config_key.TEMPLATE_SOURCE_TYPE: sql_template.source_type.value,
+                config_key.TABLES: [
                     OrderedDict(
                         {
-                            config_key.CONFIG_KEY_TABLE_NAME: None,
-                            config_key.CONFIG_KEY_PARAMETERS: OrderedDict(
+                            config_key.TABLE_NAME: None,
+                            config_key.PARAMETERS: OrderedDict(
                                 {
                                     "main_table": None,
                                     "sub_table_01": None,
                                     "sub_table_02": None,
                                 }
                             ),
-                            config_key.CONFIG_KEY_LABELS: OrderedDict({"key": "value"}),
+                            config_key.LABELS: OrderedDict({"key": "value"}),
                         }
                     )
                 ],
-                config_key.CONFIG_KEY_FILE_SUFFIX: sql_template.key,
+                config_key.FILE_SUFFIX: sql_template.key,
             }
         )
 
         metadata_value = OrderedDict(
             {
-                config_key.CONFIG_KEY_TABLE_NAME: None,
-                config_key.CONFIG_KEY_LABELS: OrderedDict({"key": "value"}),
+                config_key.TABLE_NAME: None,
+                config_key.LABELS: OrderedDict({"key": "value"}),
             }
         )
 

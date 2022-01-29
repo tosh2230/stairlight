@@ -17,9 +17,9 @@ class TestFileTemplateSource:
     mapping_config = configurator.read(prefix=config_key.MAPPING_CONFIG_FILE_PREFIX)
 
     source_attributes = {
-        config_key.CONFIG_KEY_TEMPLATE_SOURCE_TYPE: TemplateSourceType.FILE.value,
-        config_key.CONFIG_KEY_FILE_SYSTEM_PATH: "./tests/sql",
-        config_key.CONFIG_KEY_REGEX: ".*/*.sql",
+        config_key.TEMPLATE_SOURCE_TYPE: TemplateSourceType.FILE.value,
+        config_key.FILE_SYSTEM_PATH: "./tests/sql",
+        config_key.REGEX: ".*/*.sql",
     }
     template_source = FileTemplateSource(
         stairlight_config=stairlight_config,
@@ -59,9 +59,9 @@ class TestFileTemplateSourceNoExclude:
     mapping_config = configurator.read(prefix=config_key.MAPPING_CONFIG_FILE_PREFIX)
 
     source_attributes = {
-        config_key.CONFIG_KEY_TEMPLATE_SOURCE_TYPE: TemplateSourceType.FILE.value,
-        config_key.CONFIG_KEY_FILE_SYSTEM_PATH: "./tests/sql",
-        config_key.CONFIG_KEY_REGEX: ".*/*.sql",
+        config_key.TEMPLATE_SOURCE_TYPE: TemplateSourceType.FILE.value,
+        config_key.FILE_SYSTEM_PATH: "./tests/sql",
+        config_key.REGEX: ".*/*.sql",
     }
     template_source = FileTemplateSource(
         stairlight_config=stairlight_config,

@@ -65,12 +65,10 @@ class Template:
             config_key.MAPPING_CONFIG_MAPPING_SECTION
         ):
             has_suffix = False
-            if mapping.get(config_key.CONFIG_KEY_FILE_SUFFIX):
-                has_suffix = self.key.endswith(
-                    mapping.get(config_key.CONFIG_KEY_FILE_SUFFIX)
-                )
-            if has_suffix or self.uri == mapping.get(config_key.CONFIG_KEY_URI):
-                for table_attributes in mapping.get(config_key.CONFIG_KEY_TABLES):
+            if mapping.get(config_key.FILE_SUFFIX):
+                has_suffix = self.key.endswith(mapping.get(config_key.FILE_SUFFIX))
+            if has_suffix or self.uri == mapping.get(config_key.URI):
+                for table_attributes in mapping.get(config_key.TABLES):
                     yield table_attributes
 
     def is_mapped(self) -> bool:
@@ -159,8 +157,8 @@ class TemplateSource:
             return result
         for exclude in exclude_list:
             if source_type.value == exclude.get(
-                config_key.CONFIG_KEY_TEMPLATE_SOURCE_TYPE
-            ) and re.search(rf"{exclude.get(config_key.CONFIG_KEY_REGEX)}", key):
+                config_key.TEMPLATE_SOURCE_TYPE
+            ) and re.search(rf"{exclude.get(config_key.REGEX)}", key):
                 result = True
                 break
         return result

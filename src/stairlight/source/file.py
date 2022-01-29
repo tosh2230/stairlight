@@ -81,13 +81,11 @@ class FileTemplateSource(TemplateSource):
         Yields:
             Iterator[SQLTemplate]: SQL template file attributes
         """
-        path_obj = pathlib.Path(
-            self.source_attributes.get(config_key.CONFIG_KEY_FILE_SYSTEM_PATH)
-        )
+        path_obj = pathlib.Path(self.source_attributes.get(config_key.FILE_SYSTEM_PATH))
         for p in path_obj.glob("**/*"):
             if (
                 not re.fullmatch(
-                    rf"{self.source_attributes.get(config_key.CONFIG_KEY_REGEX)}",
+                    rf"{self.source_attributes.get(config_key.REGEX)}",
                     str(p),
                 )
             ) or self.is_excluded(source_type=self.source_type, key=str(p)):
@@ -98,6 +96,6 @@ class FileTemplateSource(TemplateSource):
                 source_type=self.source_type,
                 key=str(p),
                 default_table_prefix=self.source_attributes.get(
-                    config_key.CONFIG_KEY_DEFAULT_TABLE_PREFIX
+                    config_key.DEFAULT_TABLE_PREFIX
                 ),
             )

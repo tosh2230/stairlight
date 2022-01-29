@@ -115,8 +115,8 @@ class StairLight:
             settings = self._stairlight_config[
                 config_key.STAIRLIGHT_CONFIG_SETTING_SECTION
             ]
-            if config_key.CONFIG_KEY_MAPPING_PREFIX in settings:
-                mapping_config_prefix = settings[config_key.CONFIG_KEY_MAPPING_PREFIX]
+            if config_key.MAPPING_PREFIX in settings:
+                mapping_config_prefix = settings[config_key.MAPPING_PREFIX]
         self._mapping_config = self._configurator.read(prefix=mapping_config_prefix)
 
     def _get_map(self) -> None:
@@ -468,14 +468,12 @@ class StairLight:
         for configurations in self._mapping_config.get(
             config_key.MAPPING_CONFIG_MAPPING_SECTION
         ):
-            for table_attributes in configurations.get(config_key.CONFIG_KEY_TABLES):
+            for table_attributes in configurations.get(config_key.TABLES):
                 if self.is_target_found(
                     targets=targets,
-                    labels=table_attributes.get(config_key.CONFIG_KEY_LABELS, {}),
+                    labels=table_attributes.get(config_key.LABELS, {}),
                 ):
-                    tables_to_search.append(
-                        table_attributes[config_key.CONFIG_KEY_TABLE_NAME]
-                    )
+                    tables_to_search.append(table_attributes[config_key.TABLE_NAME])
 
         # "metadata" section in mapping.yaml
         for table_attributes in self._mapping_config.get(
@@ -483,11 +481,9 @@ class StairLight:
         ):
             if self.is_target_found(
                 targets=targets,
-                labels=table_attributes.get(config_key.CONFIG_KEY_LABELS, {}),
+                labels=table_attributes.get(config_key.LABELS, {}),
             ):
-                tables_to_search.append(
-                    table_attributes[config_key.CONFIG_KEY_TABLE_NAME]
-                )
+                tables_to_search.append(table_attributes[config_key.TABLE_NAME])
 
         return tables_to_search
 
