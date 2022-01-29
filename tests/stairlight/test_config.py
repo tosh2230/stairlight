@@ -1,6 +1,7 @@
 import os
 from collections import OrderedDict
 
+from src.stairlight import config_key
 import src.stairlight.config as config
 import src.stairlight.source.base as base
 from src.stairlight.source.file import FileTemplate
@@ -10,10 +11,10 @@ class TestSuccess:
     configurator = config.Configurator(dir="./config")
 
     def test_read_map(self):
-        assert self.configurator.read(prefix=config.MAPPING_CONFIG_PREFIX)
+        assert self.configurator.read(prefix=config_key.MAPPING_CONFIG_FILE_PREFIX)
 
     def test_read_sql(self):
-        assert self.configurator.read(prefix=config.STAIRLIGHT_CONFIG_PREFIX)
+        assert self.configurator.read(prefix=config_key.STAIRLIGHT_CONFIG_FILE_PREFIX)
 
     def test_create_stairlight_template_file(self, stairlight_template):
         file_name = self.configurator.create_stairlight_template_file(
@@ -29,15 +30,21 @@ class TestSuccess:
 
     def test_build_stairlight_template(self):
         stairlight_template = self.configurator.build_stairlight_template()
-        assert list(stairlight_template.keys()) == ["include", "exclude", "settings"]
+        assert list(stairlight_template.keys()) == [
+            config_key.STAIRLIGHT_CONFIG_INCLUDE_SECTION,
+            config_key.STAIRLIGHT_CONFIG_EXCLUDE_SECTION,
+            config_key.STAIRLIGHT_CONFIG_SETTING_SECTION,
+        ]
 
     def test_build_mapping_template(self):
         sql_template = FileTemplate(
-            mapping_config=self.configurator.read(prefix=config.MAPPING_CONFIG_PREFIX),
+            mapping_config=self.configurator.read(
+                prefix=config_key.MAPPING_CONFIG_FILE_PREFIX
+            ),
             source_type=base.TemplateSourceType.FILE,
-            file_path="tests/sql/main/test_undefined.sql",
+            key="tests/sql/main/test_undefined.sql",
         )
-        unmapped = [
+        unmapped_templates = [
             {
                 "sql_template": sql_template,
                 "params": [
@@ -50,33 +57,40 @@ class TestSuccess:
 
         mapping_value = OrderedDict(
             {
-                "type": sql_template.source_type,
-                "tables": [
+                config_key.CONFIG_KEY_TEMPLATE_SOURCE_TYPE: sql_template.source_type.value,
+                config_key.CONFIG_KEY_TABLES: [
                     OrderedDict(
                         {
-                            "table": None,
-                            "params": {
-                                "main_table": None,
-                                "sub_table_01": None,
-                                "sub_table_02": None,
-                            },
-                            "labels": OrderedDict({"key": "value"}),
+                            config_key.CONFIG_KEY_TABLE_NAME: None,
+                            config_key.CONFIG_KEY_PARAMETERS: OrderedDict(
+                                {
+                                    "main_table": None,
+                                    "sub_table_01": None,
+                                    "sub_table_02": None,
+                                }
+                            ),
+                            config_key.CONFIG_KEY_LABELS: OrderedDict({"key": "value"}),
                         }
                     )
                 ],
-                "file_suffix": sql_template.file_path,
+                config_key.CONFIG_KEY_FILE_SUFFIX: sql_template.key,
             }
         )
 
         metadata_value = OrderedDict(
             {
-                "table": None,
-                "labels": OrderedDict({"key": "value"}),
+                config_key.CONFIG_KEY_TABLE_NAME: None,
+                config_key.CONFIG_KEY_LABELS: OrderedDict({"key": "value"}),
             }
         )
 
         expected = OrderedDict(
-            {"mapping": [mapping_value], "metadata": [metadata_value]}
+            {
+                config_key.MAPPING_CONFIG_MAPPING_SECTION: [mapping_value],
+                config_key.MAPPING_CONFIG_METADATA_SECTION: [metadata_value],
+            }
         )
-        actual = self.configurator.build_mapping_template(unmapped_templates=unmapped)
+        actual = self.configurator.build_mapping_template(
+            unmapped_templates=unmapped_templates
+        )
         assert actual == expected

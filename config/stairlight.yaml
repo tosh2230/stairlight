@@ -1,22 +1,22 @@
-include:
-  - type: file
-    path: "./tests/sql"
-    regex: ".*/*.sql$"
-    default_table_prefix: "PROJECT_A"
-  - type: gcs
-    project: null
-    bucket: stairlight
-    regex: "^sql/.*/*.sql$"
-    default_table_prefix: "PROJECT_A"
-  # - type: redash
-  #   conn_str_env_var: REDASH_DATABASE_URL
-  #   data_source: ""
-  #   query_id_list:
+Include:
+  - TemplateSourceType: File
+    FileSystemPath: "./tests/sql"
+    Regex: ".*/*.sql$"
+    DefaultTablePrefix: "PROJECT_A"
+  - TemplateSourceType: GCS
+    ProjectId: null
+    BucketName: stairlight
+    Regex: "^sql/.*/*.sql$"
+    DefaultTablePrefix: "PROJECT_A"
+  # - TemplateSourceType: redash
+  #   ConnStrEnvVariable: REDASH_DATABASE_URL
+  #   DataSourceName: ""
+  #   QueryIds:
   #     - 1
   #     - 3
   #     - 5
-exclude:
-  - type: file
-    regex: "main/test_exclude.sql$"
-settings:
-  mapping_prefix: "mapping"
+Exclude:
+  - TemplateSourceType: File
+    Regex: "main/test_exclude.sql$"
+Settings:
+  MappingPrefix: "mapping"

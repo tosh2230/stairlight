@@ -5,13 +5,15 @@ from typing import Iterator, Optional
 
 from jinja2 import BaseLoader, Environment
 
+from .. import config_key
+
 
 class TemplateSourceType(enum.Enum):
     """SQL template source type"""
 
-    FILE = "file"
-    GCS = "gcs"
-    REDASH = "redash"
+    FILE = "File"
+    GCS = "GCS"
+    REDASH = "Redash"
 
     def __str__(self):
         return self.name
@@ -24,11 +26,10 @@ class Template:
         self,
         mapping_config: dict,
         source_type: TemplateSourceType,
-        file_path: str,
+        key: str,
         bucket: Optional[str] = None,
         project: Optional[str] = None,
         default_table_prefix: Optional[str] = None,
-        labels: Optional[dict] = None,
         template_str: Optional[str] = None,
     ):
         """SQL template
@@ -36,7 +37,7 @@ class Template:
         Args:
             mapping_config (dict): Mapping configuration
             source_type (SourceType): Source type
-            file_path (str): SQL file path
+            key (str): SQL file key
             bucket (Optional[str], optional):
                 Bucket name where SQL file saved.Defaults to None.
             project (Optional[str], optional):
@@ -47,11 +48,12 @@ class Template:
         """
         self._mapping_config = mapping_config
         self.source_type = source_type
-        self.file_path = file_path
+        self.key = key
         self.bucket = bucket
         self.project = project
         self.default_table_prefix = default_table_prefix
         self.template_str = template_str
+        self.uri = ""
 
     def get_mapped_table_attributes_iter(self) -> Iterator[dict]:
         """Get mapped tables as iterator
@@ -59,12 +61,16 @@ class Template:
         Yields:
             Iterator[dict]: Mapped table attributes
         """
-        for mapping in self._mapping_config.get("mapping"):
+        for mapping in self._mapping_config.get(
+            config_key.MAPPING_CONFIG_MAPPING_SECTION
+        ):
             has_suffix = False
-            if mapping.get("file_suffix"):
-                has_suffix = self.file_path.endswith(mapping.get("file_suffix"))
-            if has_suffix or self.uri == mapping.get("uri"):
-                for table_attributes in mapping.get("tables"):
+            if mapping.get(config_key.CONFIG_KEY_FILE_SUFFIX):
+                has_suffix = self.key.endswith(
+                    mapping.get(config_key.CONFIG_KEY_FILE_SUFFIX)
+                )
+            if has_suffix or self.uri == mapping.get(config_key.CONFIG_KEY_URI):
+                for table_attributes in mapping.get(config_key.CONFIG_KEY_TABLES):
                     yield table_attributes
 
     def is_mapped(self) -> bool:
@@ -135,24 +141,26 @@ class TemplateSource:
         """
         pass
 
-    def is_excluded(self, source_type: TemplateSourceType, file_path: str) -> bool:
+    def is_excluded(self, source_type: TemplateSourceType, key: str) -> bool:
         """Check if the specified file is out of scope
 
         Args:
             source_type (TemplateSourceType): SQL template source type
-            file_path (str): SQL template file path
+            key (str): SQL template file key
 
         Returns:
             bool: Return True if the specified file is out of scope
         """
         result = False
-        exclude_list = self._stairlight_config.get("exclude")
+        exclude_list = self._stairlight_config.get(
+            config_key.STAIRLIGHT_CONFIG_EXCLUDE_SECTION
+        )
         if not exclude_list:
             return result
         for exclude in exclude_list:
-            if source_type.value == exclude.get("type") and re.search(
-                rf'{exclude.get("regex")}', file_path
-            ):
+            if source_type.value == exclude.get(
+                config_key.CONFIG_KEY_TEMPLATE_SOURCE_TYPE
+            ) and re.search(rf"{exclude.get(config_key.CONFIG_KEY_REGEX)}", key):
                 result = True
                 break
         return result

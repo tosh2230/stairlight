@@ -1,5 +1,6 @@
 from typing import Iterator
 
+from . import config_key
 from .query import Query
 from .source.base import (
     Template,
@@ -33,7 +34,8 @@ class Map:
 
     def write(self) -> None:
         for template_source in self.find_template_source(
-            stairlight_config=self.stairlight_config, mapping_config=self.mapping_config
+            stairlight_config=self.stairlight_config,
+            mapping_config=self.mapping_config,
         ):
             self.write_by_template_source(template_source=template_source)
 
@@ -41,22 +43,26 @@ class Map:
     def find_template_source(
         stairlight_config: dict, mapping_config: dict
     ) -> Iterator[TemplateSource]:
-        for source_attributes in stairlight_config.get("include"):
+        for source_attributes in stairlight_config.get(
+            config_key.STAIRLIGHT_CONFIG_INCLUDE_SECTION
+        ):
             template_source: TemplateSource = None
-            type = source_attributes.get("type")
-            if type.casefold() == TemplateSourceType.FILE.value:
+            template_source_type = source_attributes.get(
+                config_key.CONFIG_KEY_TEMPLATE_SOURCE_TYPE
+            )
+            if template_source_type == TemplateSourceType.FILE.value:
                 template_source = FileTemplateSource(
                     stairlight_config=stairlight_config,
                     mapping_config=mapping_config,
                     source_attributes=source_attributes,
                 )
-            elif type.casefold() == TemplateSourceType.GCS.value:
+            elif template_source_type == TemplateSourceType.GCS.value:
                 template_source = GcsTemplateSource(
                     stairlight_config=stairlight_config,
                     mapping_config=mapping_config,
                     source_attributes=source_attributes,
                 )
-            elif type.casefold() == TemplateSourceType.REDASH.value:
+            elif template_source_type == TemplateSourceType.REDASH.value:
                 template_source = RedashTemplateSource(
                     stairlight_config=stairlight_config,
                     mapping_config=mapping_config,
@@ -90,15 +96,17 @@ class Map:
             sql_template (Template): SQL template
             table_attributes (dict): Table attributes from mapping configuration
         """
-        query_str = sql_template.render(params=table_attributes.get("params"))
+        query_str = sql_template.render(
+            params=table_attributes.get(config_key.CONFIG_KEY_PARAMETERS)
+        )
         query = Query(
             query_str=query_str,
             default_table_prefix=sql_template.default_table_prefix,
         )
 
-        downstairs = table_attributes.get("table")
-        mapping_labels = table_attributes.get("labels")
-        metadata = self.mapping_config.get("metadata")
+        downstairs = table_attributes.get(config_key.CONFIG_KEY_TABLE_NAME)
+        mapping_labels = table_attributes.get(config_key.CONFIG_KEY_LABELS)
+        metadata = self.mapping_config.get(config_key.MAPPING_CONFIG_METADATA_SECTION)
 
         if downstairs not in self.mapped:
             self.mapped[downstairs] = {}
@@ -109,7 +117,7 @@ class Map:
             if not self.mapped[downstairs].get(upstairs):
                 upstairs_values = {
                     "type": sql_template.source_type.value,
-                    "file": sql_template.file_path,
+                    "file": sql_template.key,
                     "uri": sql_template.uri,
                     "lines": [],
                 }
@@ -117,7 +125,9 @@ class Map:
                     upstairs_values["bucket"] = sql_template.bucket
 
                 metadata_labels = [
-                    m.get("labels") for m in metadata if m.get("table") == upstairs
+                    m.get(config_key.CONFIG_KEY_LABELS)
+                    for m in metadata
+                    if m.get(config_key.CONFIG_KEY_TABLE_NAME) == upstairs
                 ]
                 if mapping_labels or metadata_labels:
                     upstairs_values["labels"] = {}
@@ -166,12 +176,18 @@ class Map:
         """
         template_str = sql_template.get_template_str()
         template_params = sql_template.get_jinja_params(template_str)
-        mapped_params_dict = table_attributes.get("params")
+        mapped_params_dict = table_attributes.get(config_key.CONFIG_KEY_PARAMETERS)
         mapped_params = (
-            [f"params.{key}" for key in table_attributes.get("params").keys()]
+            [f"params.{key}" for key in mapped_params_dict.keys()]
             if mapped_params_dict
             else {}
         )
         diff_params = list(set(template_params) - set(mapped_params))
+        print(f"Uri: {sql_template.uri}")
+        print(f"template_params: {template_params}")
+        print(f"mapped_params_dict: {mapped_params_dict}")
+        print(f"mapped_params: {mapped_params}")
+        print(f"diff_params: {diff_params}")
+        print("")
         if diff_params:
             self.add_unmapped_params(sql_template=sql_template, params=diff_params)

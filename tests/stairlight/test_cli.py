@@ -34,9 +34,9 @@ class TestSuccess:
             [
                 "up",
                 "--label",
-                "test:b",
+                "Test:b",
                 "-l",
-                "source:gcs",
+                "Source:gcs",
                 "-r",
                 "-v",
             ]
@@ -60,7 +60,7 @@ class TestSuccess:
             [
                 "down",
                 "--label",
-                "test:c",
+                "Test:c",
                 "-r",
                 "-v",
             ]

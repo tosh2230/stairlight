@@ -4,6 +4,9 @@ from typing import Iterator, Optional
 from google.cloud import storage
 
 from .base import TemplateSourceType, Template, TemplateSource
+from .. import config_key
+
+GCS_URI_PREFIX = "gs://"
 
 
 class GcsTemplate(Template):
@@ -11,21 +14,19 @@ class GcsTemplate(Template):
         self,
         mapping_config: dict,
         source_type: TemplateSourceType,
-        file_path: str,
+        key: str,
         bucket: Optional[str] = None,
         project: Optional[str] = None,
         default_table_prefix: Optional[str] = None,
-        labels: Optional[dict] = None,
         template_str: Optional[str] = None,
     ):
         super().__init__(
             mapping_config,
             source_type,
-            file_path,
+            key,
             bucket=bucket,
             project=project,
             default_table_prefix=default_table_prefix,
-            labels=labels,
             template_str=template_str,
         )
         self.uri = self.get_uri()
@@ -36,7 +37,7 @@ class GcsTemplate(Template):
         Returns:
             str: uri
         """
-        return f"gs://{self.bucket}/{self.file_path}"
+        return f"{GCS_URI_PREFIX}{self.bucket}/{self.key}"
 
     def get_template_str(self) -> str:
         """Get template string that read from a file in GCS
@@ -46,7 +47,7 @@ class GcsTemplate(Template):
         """
         client = storage.Client(credentials=None, project=self.project)
         bucket = client.get_bucket(self.bucket)
-        blob = bucket.blob(self.file_path)
+        blob = bucket.blob(self.key)
         return blob.download_as_bytes().decode("utf-8")
 
     def render(self, params: dict) -> str:
@@ -79,21 +80,26 @@ class GcsTemplateSource(TemplateSource):
         Yields:
             Iterator[SQLTemplate]: SQL template file attributes
         """
-        project = self.source_attributes.get("project")
+        project = self.source_attributes.get(config_key.CONFIG_KEY_PROJECT_ID)
         client = storage.Client(credentials=None, project=project)
-        bucket = self.source_attributes.get("bucket")
+        bucket = self.source_attributes.get(config_key.CONFIG_KEY_BUCKET_NAME)
         blobs = client.list_blobs(bucket)
         for blob in blobs:
             if (
-                not re.fullmatch(rf'{self.source_attributes.get("regex")}', blob.name)
-            ) or self.is_excluded(source_type=self.source_type, file_path=blob.name):
+                not re.fullmatch(
+                    rf"{self.source_attributes.get(config_key.CONFIG_KEY_REGEX)}",
+                    blob.name,
+                )
+            ) or self.is_excluded(source_type=self.source_type, key=blob.name):
                 self.logger.debug(f"{blob.name} is skipped.")
                 continue
             yield GcsTemplate(
                 mapping_config=self._mapping_config,
                 source_type=self.source_type,
-                file_path=blob.name,
+                key=blob.name,
                 project=project,
                 bucket=bucket,
-                default_table_prefix=self.source_attributes.get("default_table_prefix"),
+                default_table_prefix=self.source_attributes.get(
+                    config_key.CONFIG_KEY_DEFAULT_TABLE_PREFIX
+                ),
             )

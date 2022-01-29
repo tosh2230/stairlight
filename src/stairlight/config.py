@@ -6,10 +6,8 @@ from datetime import datetime, timezone
 
 import yaml
 
-from .source.base import TemplateSourceType
-
-MAPPING_CONFIG_PREFIX = "mapping"
-STAIRLIGHT_CONFIG_PREFIX = "stairlight"
+from . import config_key
+from .source.base import Template, TemplateSourceType
 
 logger = logging.getLogger()
 
@@ -45,7 +43,7 @@ class Configurator:
         return config
 
     def create_stairlight_template_file(
-        self, prefix: str = STAIRLIGHT_CONFIG_PREFIX
+        self, prefix: str = config_key.STAIRLIGHT_CONFIG_FILE_PREFIX
     ) -> str:
         """Create a Stairlight template file
 
@@ -62,7 +60,7 @@ class Configurator:
         return template_file_name
 
     def create_mapping_template_file(
-        self, unmapped: list, prefix: str = MAPPING_CONFIG_PREFIX
+        self, unmapped: list, prefix: str = config_key.MAPPING_CONFIG_FILE_PREFIX
     ) -> str:
         """Create a mapping template file
 
@@ -101,27 +99,36 @@ class Configurator:
         """
         return OrderedDict(
             {
-                "include": [
+                config_key.STAIRLIGHT_CONFIG_INCLUDE_SECTION: [
                     OrderedDict(
                         {
-                            "type": "fs",
-                            "path": None,
-                            "regex": None,
-                            "default_table_prefix": None,
+                            config_key.CONFIG_KEY_TEMPLATE_SOURCE_TYPE: TemplateSourceType.FILE.value,
+                            config_key.CONFIG_KEY_FILE_SYSTEM_PATH: None,
+                            config_key.CONFIG_KEY_REGEX: None,
+                            config_key.CONFIG_KEY_DEFAULT_TABLE_PREFIX: None,
                         }
                     ),
                     OrderedDict(
                         {
-                            "type": "gcs",
-                            "project": None,
-                            "bucket": None,
-                            "regex": None,
-                            "default_table_prefix": None,
+                            config_key.CONFIG_KEY_TEMPLATE_SOURCE_TYPE: TemplateSourceType.GCS.value,
+                            config_key.CONFIG_KEY_PROJECT_ID: None,
+                            config_key.CONFIG_KEY_BUCKET_NAME: None,
+                            config_key.CONFIG_KEY_REGEX: None,
+                            config_key.CONFIG_KEY_DEFAULT_TABLE_PREFIX: None,
                         }
                     ),
                 ],
-                "exclude": [OrderedDict({"type": None, "regex": None})],
-                "settings": {"mapping_prefix": MAPPING_CONFIG_PREFIX},
+                config_key.STAIRLIGHT_CONFIG_EXCLUDE_SECTION: [
+                    OrderedDict(
+                        {
+                            config_key.CONFIG_KEY_TEMPLATE_SOURCE_TYPE: None,
+                            config_key.CONFIG_KEY_DEFAULT_TABLE_PREFIX: None,
+                        }
+                    )
+                ],
+                config_key.STAIRLIGHT_CONFIG_SETTING_SECTION: {
+                    config_key.CONFIG_KEY_MAPPING_PREFIX: config_key.MAPPING_CONFIG_FILE_PREFIX
+                },
             }
         )
 
@@ -135,13 +142,15 @@ class Configurator:
         Returns:
             OrderedDict: mapping.config template
         """
-        template = OrderedDict({"mapping": []})
+        template = OrderedDict({config_key.MAPPING_CONFIG_MAPPING_SECTION: []})
         for unmapped_template in unmapped_templates:
-            sql_template = unmapped_template["sql_template"]
+            sql_template: Template = unmapped_template["sql_template"]
             values = OrderedDict(
                 {
-                    "type": sql_template.source_type,
-                    "tables": [OrderedDict({"table": None})],
+                    config_key.CONFIG_KEY_TEMPLATE_SOURCE_TYPE: sql_template.source_type.value,
+                    config_key.CONFIG_KEY_TABLES: [
+                        OrderedDict({config_key.CONFIG_KEY_TABLE_NAME: None})
+                    ],
                 }
             )
 
@@ -153,21 +162,33 @@ class Configurator:
                     param_str = ".".join(param.split(".")[1:])
                     params[param_str] = None
 
-            if params:
-                values["tables"][0]["params"] = params
+                print(f"uri: {sql_template.uri}")
+                print(f"undefined_params: {undefined_params}")
 
-            values["tables"][0]["labels"] = OrderedDict({"key": "value"})
+            if params:
+                values[config_key.CONFIG_KEY_TABLES][0][
+                    config_key.CONFIG_KEY_PARAMETERS
+                ] = params
+
+            values[config_key.CONFIG_KEY_TABLES][0][
+                config_key.CONFIG_KEY_LABELS
+            ] = OrderedDict({"key": "value"})
 
             if sql_template.source_type in [TemplateSourceType.FILE]:
-                values["file_suffix"] = sql_template.file_path
+                values[config_key.CONFIG_KEY_FILE_SUFFIX] = sql_template.key
             elif sql_template.source_type in [TemplateSourceType.GCS]:
-                values["uri"] = sql_template.uri
-                values["bucket"] = sql_template.bucket
+                values[config_key.CONFIG_KEY_URI] = sql_template.uri
+                values[config_key.CONFIG_KEY_BUCKET_NAME] = sql_template.bucket
 
-            template["mapping"].append(values)
+            template[config_key.MAPPING_CONFIG_MAPPING_SECTION].append(values)
 
-        template["metadata"] = [
-            OrderedDict({"table": None, "labels": OrderedDict({"key": "value"})})
+        template[config_key.MAPPING_CONFIG_METADATA_SECTION] = [
+            OrderedDict(
+                {
+                    config_key.CONFIG_KEY_TABLE_NAME: None,
+                    config_key.CONFIG_KEY_LABELS: OrderedDict({"key": "value"}),
+                }
+            )
         ]
 
         return template

@@ -11,21 +11,19 @@ class RedashTemplate(Template):
         self,
         mapping_config: dict,
         source_type: TemplateSourceType,
-        file_path: str,
+        key: str,
         bucket: Optional[str] = None,
         project: Optional[str] = None,
         default_table_prefix: Optional[str] = None,
-        labels: Optional[dict] = None,
         template_str: Optional[str] = None,
     ):
         super().__init__(
             mapping_config,
             source_type,
-            file_path,
+            key,
             bucket=bucket,
             project=project,
             default_table_prefix=default_table_prefix,
-            labels=labels,
             template_str=template_str,
         )
         self.uri = self.get_uri()
@@ -85,6 +83,6 @@ class RedashTemplateSource(TemplateSource):
             yield RedashTemplate(
                 mapping_config=self._mapping_config,
                 source_type=self.source_type,
-                file_path=None,
+                key=None,
                 template_str=template_str,
             )

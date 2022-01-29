@@ -173,7 +173,7 @@ class TestSuccess:
         assert "PROJECT_A.DATASET_B.TABLE_C" in result
 
     def test_get_tables_by_labels_single(self, stairlight):
-        targets = ["test:b"]
+        targets = ["Test:b"]
         result = stairlight.get_tables_by_labels(targets=targets)
         assert result == [
             "PROJECT_D.DATASET_E.TABLE_F",
@@ -182,7 +182,7 @@ class TestSuccess:
         ]
 
     def test_get_tables_by_labels_double(self, stairlight):
-        targets = ["test:b", "source:gcs"]
+        targets = ["Test:b", "Source:gcs"]
         result = stairlight.get_tables_by_labels(targets=targets)
         assert result == ["PROJECT_d.DATASET_e.TABLE_f"]
 

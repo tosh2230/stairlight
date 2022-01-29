@@ -6,10 +6,11 @@ from typing import Union
 
 from google.cloud import storage
 
-from .config import MAPPING_CONFIG_PREFIX, STAIRLIGHT_CONFIG_PREFIX, Configurator
+from . import config_key
+from .config import Configurator
 from .map import Map
+from .source.gcs import GCS_URI_PREFIX
 
-GCS_URI_PREFIX = "gs://"
 logger = getLogger(__name__)
 
 
@@ -64,7 +65,7 @@ class StairLight:
         self._unmapped = []
         self.mapping_config = None
         self._stairlight_config = self._configurator.read(
-            prefix=STAIRLIGHT_CONFIG_PREFIX
+            prefix=config_key.STAIRLIGHT_CONFIG_FILE_PREFIX
         )
         if self._stairlight_config:
             if self.load_file:
@@ -104,14 +105,18 @@ class StairLight:
     def _set_config(self) -> None:
         """Set config"""
         if not self._stairlight_config:
-            logger.warning(f"{STAIRLIGHT_CONFIG_PREFIX}.y(a)ml' is not found.")
+            logger.warning(
+                f"{config_key.STAIRLIGHT_CONFIG_FILE_PREFIX}.y(a)ml' is not found."
+            )
             return
 
-        mapping_config_prefix = MAPPING_CONFIG_PREFIX
-        if "settings" in self._stairlight_config:
-            settings = self._stairlight_config["settings"]
-            if "mapping_prefix" in settings:
-                mapping_config_prefix = settings["mapping_prefix"]
+        mapping_config_prefix = config_key.MAPPING_CONFIG_FILE_PREFIX
+        if config_key.STAIRLIGHT_CONFIG_SETTING_SECTION in self._stairlight_config:
+            settings = self._stairlight_config[
+                config_key.STAIRLIGHT_CONFIG_SETTING_SECTION
+            ]
+            if config_key.CONFIG_KEY_MAPPING_PREFIX in settings:
+                mapping_config_prefix = settings[config_key.CONFIG_KEY_MAPPING_PREFIX]
         self._mapping_config = self._configurator.read(prefix=mapping_config_prefix)
 
     def _get_map(self) -> None:
@@ -127,7 +132,7 @@ class StairLight:
 
         self._unmapped = dependency_map.unmapped
 
-    def init(self, prefix: str = STAIRLIGHT_CONFIG_PREFIX) -> str:
+    def init(self, prefix: str = config_key.STAIRLIGHT_CONFIG_FILE_PREFIX) -> str:
         """Create Stairlight template file
 
         Args:
@@ -139,7 +144,7 @@ class StairLight:
         """
         return self._configurator.create_stairlight_template_file(prefix=prefix)
 
-    def check(self, prefix: str = MAPPING_CONFIG_PREFIX) -> str:
+    def check(self, prefix: str = config_key.MAPPING_CONFIG_FILE_PREFIX) -> str:
         """Check mapped results and create a mapping template file
 
         Args:
@@ -460,21 +465,29 @@ class StairLight:
         tables_to_search = []
 
         # "mapping" section in mapping.yaml
-        for configurations in self._mapping_config.get("mapping"):
-            for table_attributes in configurations.get("tables"):
+        for configurations in self._mapping_config.get(
+            config_key.MAPPING_CONFIG_MAPPING_SECTION
+        ):
+            for table_attributes in configurations.get(config_key.CONFIG_KEY_TABLES):
                 if self.is_target_found(
                     targets=targets,
-                    labels=table_attributes.get("labels", {}),
+                    labels=table_attributes.get(config_key.CONFIG_KEY_LABELS, {}),
                 ):
-                    tables_to_search.append(table_attributes["table"])
+                    tables_to_search.append(
+                        table_attributes[config_key.CONFIG_KEY_TABLE_NAME]
+                    )
 
         # "metadata" section in mapping.yaml
-        for table_attributes in self._mapping_config.get("metadata"):
+        for table_attributes in self._mapping_config.get(
+            config_key.MAPPING_CONFIG_METADATA_SECTION
+        ):
             if self.is_target_found(
                 targets=targets,
-                labels=table_attributes.get("labels", {}),
+                labels=table_attributes.get(config_key.CONFIG_KEY_LABELS, {}),
             ):
-                tables_to_search.append(table_attributes["table"])
+                tables_to_search.append(
+                    table_attributes[config_key.CONFIG_KEY_TABLE_NAME]
+                )
 
         return tables_to_search
 

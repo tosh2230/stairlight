@@ -1,5 +1,6 @@
 import pytest
 
+from src.stairlight import config_key
 import src.stairlight.config as config
 from src.stairlight.source.file import (
     FileTemplate,
@@ -10,13 +11,15 @@ from src.stairlight.source.file import (
 
 class TestFileTemplateSource:
     configurator = config.Configurator(dir="./config")
-    stairlight_config = configurator.read(prefix=config.STAIRLIGHT_CONFIG_PREFIX)
-    mapping_config = configurator.read(prefix=config.MAPPING_CONFIG_PREFIX)
+    stairlight_config = configurator.read(
+        prefix=config_key.STAIRLIGHT_CONFIG_FILE_PREFIX
+    )
+    mapping_config = configurator.read(prefix=config_key.MAPPING_CONFIG_FILE_PREFIX)
 
     source_attributes = {
-        "type": TemplateSourceType.FILE.value,
-        "path": "./tests/sql",
-        "regex": ".*/*.sql",
+        config_key.CONFIG_KEY_TEMPLATE_SOURCE_TYPE: TemplateSourceType.FILE.value,
+        config_key.CONFIG_KEY_FILE_SYSTEM_PATH: "./tests/sql",
+        config_key.CONFIG_KEY_REGEX: ".*/*.sql",
     }
     template_source = FileTemplateSource(
         stairlight_config=stairlight_config,
@@ -33,18 +36,18 @@ class TestFileTemplateSource:
     def test_is_excluded_test_a(self):
         assert not self.template_source.is_excluded(
             source_type=TemplateSourceType.FILE,
-            file_path="tests/sql/main/test_a.sql",
+            key="tests/sql/main/test_a.sql",
         )
 
     def test_is_excluded_test_exclude(self):
         assert self.template_source.is_excluded(
             source_type=TemplateSourceType.FILE,
-            file_path="tests/sql/main/test_exclude.sql",
+            key="tests/sql/main/test_exclude.sql",
         )
 
 
 @pytest.mark.parametrize(
-    "file_path",
+    "key",
     [
         "tests/sql/main/test_a.sql",
         "tests/sql/main/test_exclude.sql",
@@ -53,12 +56,12 @@ class TestFileTemplateSource:
 class TestFileTemplateSourceNoExclude:
     configurator = config.Configurator(dir="./config")
     stairlight_config = configurator.read(prefix="stairlight_no_exclude")
-    mapping_config = configurator.read(prefix=config.MAPPING_CONFIG_PREFIX)
+    mapping_config = configurator.read(prefix=config_key.MAPPING_CONFIG_FILE_PREFIX)
 
     source_attributes = {
-        "type": TemplateSourceType.FILE.value,
-        "path": "./tests/sql",
-        "regex": ".*/*.sql",
+        config_key.CONFIG_KEY_TEMPLATE_SOURCE_TYPE: TemplateSourceType.FILE.value,
+        config_key.CONFIG_KEY_FILE_SYSTEM_PATH: "./tests/sql",
+        config_key.CONFIG_KEY_REGEX: ".*/*.sql",
     }
     template_source = FileTemplateSource(
         stairlight_config=stairlight_config,
@@ -66,37 +69,37 @@ class TestFileTemplateSourceNoExclude:
         source_attributes=source_attributes,
     )
 
-    def test_is_excluded(self, file_path):
+    def test_is_excluded(self, key):
         assert not self.template_source.is_excluded(
             source_type=TemplateSourceType.FILE,
-            file_path=file_path,
+            key=key,
         )
 
 
 @pytest.mark.parametrize(
-    "file_path, bucket",
+    "key, bucket",
     [
         ("tests/sql/main/test_c.sql", None),
     ],
 )
 class TestFileTemplateMapped:
     configurator = config.Configurator(dir="./config")
-    mapping_config = configurator.read(prefix=config.MAPPING_CONFIG_PREFIX)
+    mapping_config = configurator.read(prefix=config_key.MAPPING_CONFIG_FILE_PREFIX)
 
-    def test_is_mapped(self, file_path, bucket):
+    def test_is_mapped(self, key, bucket):
         sql_template = FileTemplate(
             mapping_config=self.mapping_config,
             source_type=TemplateSourceType.FILE,
-            file_path=file_path,
+            key=key,
             bucket=bucket,
         )
         assert sql_template.is_mapped()
 
-    def test_get_jinja_params(self, file_path, bucket):
+    def test_get_jinja_params(self, key, bucket):
         sql_template = FileTemplate(
             mapping_config=self.mapping_config,
             source_type=TemplateSourceType.FILE,
-            file_path=file_path,
+            key=key,
             bucket=bucket,
         )
         template_str = sql_template.get_template_str()
@@ -104,7 +107,7 @@ class TestFileTemplateMapped:
 
 
 @pytest.mark.parametrize(
-    "file_path, bucket",
+    "key, bucket",
     [
         ("tests/sql/main/test_undefined.sql", None),
         ("tests/sql/gcs/test_b/test_b.sql", None),
@@ -112,22 +115,22 @@ class TestFileTemplateMapped:
 )
 class TestFileTemplateNotMapped:
     configurator = config.Configurator(dir="./config")
-    mapping_config = configurator.read(prefix=config.MAPPING_CONFIG_PREFIX)
+    mapping_config = configurator.read(prefix=config_key.MAPPING_CONFIG_FILE_PREFIX)
 
-    def test_is_mapped(self, file_path, bucket):
+    def test_is_mapped(self, key, bucket):
         sql_template = FileTemplate(
             mapping_config=self.mapping_config,
             source_type=TemplateSourceType.FILE,
-            file_path=file_path,
+            key=key,
             bucket=bucket,
         )
         assert not sql_template.is_mapped()
 
-    def test_get_jinja_params(self, file_path, bucket):
+    def test_get_jinja_params(self, key, bucket):
         sql_template = FileTemplate(
             mapping_config=self.mapping_config,
             source_type=TemplateSourceType.FILE,
-            file_path=file_path,
+            key=key,
             bucket=bucket,
         )
         template_str = sql_template.get_template_str()
@@ -136,7 +139,7 @@ class TestFileTemplateNotMapped:
 
 class TestFileTemplateRender:
     configurator = config.Configurator(dir="./config")
-    mapping_config = configurator.read(prefix=config.MAPPING_CONFIG_PREFIX)
+    mapping_config = configurator.read(prefix=config_key.MAPPING_CONFIG_FILE_PREFIX)
 
     def test_render(self):
         params = {
@@ -147,7 +150,7 @@ class TestFileTemplateRender:
         sql_template = FileTemplate(
             mapping_config=self.mapping_config,
             source_type=TemplateSourceType.FILE,
-            file_path="tests/sql/main/test_c.sql",
+            key="tests/sql/main/test_c.sql",
         )
         query_str = sql_template.render(params=params)
         expected = """WITH c AS (

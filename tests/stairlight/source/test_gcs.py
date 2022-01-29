@@ -1,5 +1,6 @@
 import pytest
 
+from src.stairlight import config_key
 import src.stairlight.config as config
 from src.stairlight.source.gcs import (
     GcsTemplate,
@@ -8,16 +9,18 @@ from src.stairlight.source.gcs import (
 )
 
 
-class TestGcsTemplateSourceSuccess:
+class TestGcsTemplateSource:
     configurator = config.Configurator(dir="./config")
-    stairlight_config = configurator.read(prefix=config.STAIRLIGHT_CONFIG_PREFIX)
-    mapping_config = configurator.read(prefix=config.MAPPING_CONFIG_PREFIX)
+    stairlight_config = configurator.read(
+        prefix=config_key.STAIRLIGHT_CONFIG_FILE_PREFIX
+    )
+    mapping_config = configurator.read(prefix=config_key.MAPPING_CONFIG_FILE_PREFIX)
 
     source_attributes = {
-        "type": TemplateSourceType.GCS.value,
-        "project": None,
-        "bucket": "stairlight",
-        "regex": "sql/.*/*.sql",
+        config_key.CONFIG_KEY_TEMPLATE_SOURCE_TYPE: TemplateSourceType.GCS.value,
+        config_key.CONFIG_KEY_PROJECT_ID: None,
+        config_key.CONFIG_KEY_BUCKET_NAME: "stairlight",
+        config_key.CONFIG_KEY_REGEX: "sql/.*/*.sql",
     }
     template_source = GcsTemplateSource(
         stairlight_config=stairlight_config,
@@ -33,29 +36,29 @@ class TestGcsTemplateSourceSuccess:
 
 
 @pytest.mark.parametrize(
-    "file_path, bucket",
+    "key, bucket",
     [
         ("sql/test_b/test_b.sql", "stairlight"),
     ],
 )
 class TestSQLTemplateMapped:
     configurator = config.Configurator(dir="./config")
-    mapping_config = configurator.read(prefix=config.MAPPING_CONFIG_PREFIX)
+    mapping_config = configurator.read(prefix=config_key.MAPPING_CONFIG_FILE_PREFIX)
 
-    def test_is_mapped(self, file_path, bucket):
+    def test_is_mapped(self, key, bucket):
         sql_template = GcsTemplate(
             mapping_config=self.mapping_config,
             source_type=TemplateSourceType.GCS,
-            file_path=file_path,
+            key=key,
             bucket=bucket,
         )
         assert sql_template.is_mapped()
 
-    def test_get_jinja_params(self, file_path, bucket):
+    def test_get_jinja_params(self, key, bucket):
         sql_template = GcsTemplate(
             mapping_config=self.mapping_config,
             source_type=TemplateSourceType.GCS,
-            file_path=file_path,
+            key=key,
             bucket=bucket,
         )
         template_str = sql_template.get_template_str()

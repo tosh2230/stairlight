@@ -5,6 +5,7 @@ from typing import Iterator, Optional
 from jinja2 import Environment, FileSystemLoader
 
 from .base import TemplateSourceType, Template, TemplateSource
+from .. import config_key
 
 
 class FileTemplate(Template):
@@ -12,21 +13,19 @@ class FileTemplate(Template):
         self,
         mapping_config: dict,
         source_type: TemplateSourceType,
-        file_path: str,
+        key: str,
         bucket: Optional[str] = None,
         project: Optional[str] = None,
         default_table_prefix: Optional[str] = None,
-        labels: Optional[dict] = None,
         template_str: Optional[str] = None,
     ):
         super().__init__(
             mapping_config,
             source_type,
-            file_path,
+            key,
             bucket=bucket,
             project=project,
             default_table_prefix=default_table_prefix,
-            labels=labels,
             template_str=template_str,
         )
         self.uri = self.get_uri()
@@ -37,7 +36,7 @@ class FileTemplate(Template):
         Returns:
             str: uri
         """
-        return str(pathlib.Path(self.file_path).resolve())
+        return str(pathlib.Path(self.key).resolve())
 
     def get_template_str(self) -> str:
         """Get template string that read from a file in local file system
@@ -46,7 +45,7 @@ class FileTemplate(Template):
             str: Template string
         """
         template_str = ""
-        with open(self.file_path) as f:
+        with open(self.key) as f:
             template_str = f.read()
         return template_str
 
@@ -59,8 +58,8 @@ class FileTemplate(Template):
         Returns:
             str: SQL query string
         """
-        env = Environment(loader=FileSystemLoader(os.path.dirname(self.file_path)))
-        jinja_template = env.get_template(os.path.basename(self.file_path))
+        env = Environment(loader=FileSystemLoader(os.path.dirname(self.key)))
+        jinja_template = env.get_template(os.path.basename(self.key))
         return jinja_template.render(params=params)
 
 
@@ -81,16 +80,23 @@ class FileTemplateSource(TemplateSource):
         Yields:
             Iterator[SQLTemplate]: SQL template file attributes
         """
-        path_obj = pathlib.Path(self.source_attributes.get("path"))
+        path_obj = pathlib.Path(
+            self.source_attributes.get(config_key.CONFIG_KEY_FILE_SYSTEM_PATH)
+        )
         for p in path_obj.glob("**/*"):
             if (
-                not re.fullmatch(rf'{self.source_attributes.get("regex")}', str(p))
-            ) or self.is_excluded(source_type=self.source_type, file_path=str(p)):
+                not re.fullmatch(
+                    rf"{self.source_attributes.get(config_key.CONFIG_KEY_REGEX)}",
+                    str(p),
+                )
+            ) or self.is_excluded(source_type=self.source_type, key=str(p)):
                 self.logger.debug(f"{str(p)} is skipped.")
                 continue
             yield FileTemplate(
                 mapping_config=self._mapping_config,
                 source_type=self.source_type,
-                file_path=str(p),
-                default_table_prefix=self.source_attributes.get("default_table_prefix"),
+                key=str(p),
+                default_table_prefix=self.source_attributes.get(
+                    config_key.CONFIG_KEY_DEFAULT_TABLE_PREFIX
+                ),
             )
