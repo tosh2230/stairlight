@@ -8,13 +8,13 @@ Include:
     BucketName: stairlight
     Regex: "^sql/.*/*.sql$"
     DefaultTablePrefix: "PROJECT_A"
-  # - TemplateSourceType: redash
-  #   ConnStrEnvVariable: REDASH_DATABASE_URL
-  #   DataSourceName: ""
-  #   QueryIds:
-  #     - 1
-  #     - 3
-  #     - 5
+  - TemplateSourceType: Redash
+    DatabaseUrlEnvironmentVariable: REDASH_DATABASE_URL
+    DataSourceName: metadata
+    QueryIds:
+      - 1
+      - 3
+      - 5
 Exclude:
   - TemplateSourceType: File
     Regex: "main/test_exclude.sql$"

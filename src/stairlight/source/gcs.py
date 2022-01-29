@@ -13,21 +13,19 @@ class GcsTemplate(Template):
     def __init__(
         self,
         mapping_config: dict,
-        source_type: TemplateSourceType,
         key: str,
+        source_type: Optional[TemplateSourceType] = TemplateSourceType.GCS,
         bucket: Optional[str] = None,
         project: Optional[str] = None,
         default_table_prefix: Optional[str] = None,
-        template_str: Optional[str] = None,
     ):
         super().__init__(
-            mapping_config,
-            source_type,
-            key,
+            mapping_config=mapping_config,
+            key=key,
+            source_type=source_type,
             bucket=bucket,
             project=project,
             default_table_prefix=default_table_prefix,
-            template_str=template_str,
         )
         self.uri = self.get_uri()
 
@@ -67,7 +65,9 @@ class GcsTemplateSource(TemplateSource):
     def __init__(
         self, stairlight_config: dict, mapping_config: dict, source_attributes: dict
     ) -> None:
-        super().__init__(stairlight_config, mapping_config)
+        super().__init__(
+            stairlight_config=stairlight_config, mapping_config=mapping_config
+        )
         self.source_attributes = source_attributes
         self.source_type = TemplateSourceType.GCS
 
@@ -95,8 +95,8 @@ class GcsTemplateSource(TemplateSource):
                 continue
             yield GcsTemplate(
                 mapping_config=self._mapping_config,
-                source_type=self.source_type,
                 key=blob.name,
+                source_type=self.source_type,
                 project=project,
                 bucket=bucket,
                 default_table_prefix=self.source_attributes.get(

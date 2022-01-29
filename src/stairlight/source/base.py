@@ -25,19 +25,18 @@ class Template:
     def __init__(
         self,
         mapping_config: dict,
-        source_type: TemplateSourceType,
         key: str,
+        source_type: TemplateSourceType,
         bucket: Optional[str] = None,
         project: Optional[str] = None,
         default_table_prefix: Optional[str] = None,
-        template_str: Optional[str] = None,
     ):
         """SQL template
 
         Args:
             mapping_config (dict): Mapping configuration
-            source_type (SourceType): Source type
             key (str): SQL file key
+            source_type (SourceType): Source type
             bucket (Optional[str], optional):
                 Bucket name where SQL file saved.Defaults to None.
             project (Optional[str], optional):
@@ -47,12 +46,11 @@ class Template:
                 it will be complement this prefix. Defaults to None.
         """
         self._mapping_config = mapping_config
-        self.source_type = source_type
         self.key = key
+        self.source_type = source_type
         self.bucket = bucket
         self.project = project
         self.default_table_prefix = default_table_prefix
-        self.template_str = template_str
         self.uri = ""
 
     def get_mapped_table_attributes_iter(self) -> Iterator[dict]:
@@ -65,7 +63,7 @@ class Template:
             config_key.MAPPING_CONFIG_MAPPING_SECTION
         ):
             has_suffix = False
-            if mapping.get(config_key.FILE_SUFFIX):
+            if self.key and mapping.get(config_key.FILE_SUFFIX):
                 has_suffix = self.key.endswith(mapping.get(config_key.FILE_SUFFIX))
             if has_suffix or self.uri == mapping.get(config_key.URI):
                 for table_attributes in mapping.get(config_key.TABLES):

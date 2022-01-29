@@ -13,21 +13,19 @@ class FileTemplate(Template):
     def __init__(
         self,
         mapping_config: dict,
-        source_type: TemplateSourceType,
         key: str,
+        source_type: Optional[TemplateSourceType] = TemplateSourceType.FILE,
         bucket: Optional[str] = None,
         project: Optional[str] = None,
         default_table_prefix: Optional[str] = None,
-        template_str: Optional[str] = None,
     ):
         super().__init__(
-            mapping_config,
-            source_type,
-            key,
+            mapping_config=mapping_config,
+            key=key,
+            source_type=source_type,
             bucket=bucket,
             project=project,
             default_table_prefix=default_table_prefix,
-            template_str=template_str,
         )
         self.uri = self.get_uri()
 
@@ -45,10 +43,8 @@ class FileTemplate(Template):
         Returns:
             str: Template string
         """
-        template_str = ""
         with open(self.key) as f:
-            template_str = f.read()
-        return template_str
+            return f.read()
 
     def render(self, params: dict) -> str:
         """Render SQL query string from a jinja template on local file system
@@ -93,8 +89,8 @@ class FileTemplateSource(TemplateSource):
                 continue
             yield FileTemplate(
                 mapping_config=self._mapping_config,
-                source_type=self.source_type,
                 key=str(p),
+                source_type=self.source_type,
                 default_table_prefix=self.source_attributes.get(
                     config_key.DEFAULT_TABLE_PREFIX
                 ),
