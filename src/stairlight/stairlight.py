@@ -339,8 +339,7 @@ class StairLight:
         if recursive:
             for next_table_name in relative_map.keys():
                 if head:
-                    searched_tables = []
-                    searched_tables.append(table_name)
+                    searched_tables = [table_name]
 
                 searched_tables.append(next_table_name)
 

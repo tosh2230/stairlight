@@ -8,22 +8,18 @@ from src.stairlight.stairlight import (
 
 class TestResponseType:
     def test_table(self):
-        type_table = ResponseType.TABLE
-        assert str(type_table) == "TABLE"
+        assert ResponseType.TABLE.value == "table"
 
     def test_file(self):
-        type_file = ResponseType.FILE
-        assert str(type_file) == "FILE"
+        assert ResponseType.FILE.value == "file"
 
 
 class TestSearchDirection:
     def test_up(self):
-        direction = SearchDirection.UP
-        assert str(direction) == "UP"
+        assert SearchDirection.UP.value == "Upstairs"
 
     def test_down(self):
-        direction = SearchDirection.DOWN
-        assert str(direction) == "DOWN"
+        assert SearchDirection.DOWN.value == "Downstairs"
 
 
 class TestProperty:
@@ -68,8 +64,8 @@ class TestSuccess:
         table_name = "PROJECT_D.DATASET_E.TABLE_F"
         result = stairlight.up(table_name=table_name, recursive=True, verbose=True)
         assert sorted(
-            result[table_name]["upstairs"]["PROJECT_J.DATASET_K.TABLE_L"][
-                "upstairs"
+            result[table_name][SearchDirection.UP.value]["PROJECT_J.DATASET_K.TABLE_L"][
+                SearchDirection.UP.value
             ].keys()
         ) == [
             "PROJECT_P.DATASET_Q.TABLE_R",
@@ -122,9 +118,9 @@ class TestSuccess:
         table_name = "PROJECT_C.DATASET_C.TABLE_C"
         result = stairlight.down(table_name=table_name, recursive=True, verbose=True)
         assert sorted(
-            result[table_name]["downstairs"]["PROJECT_d.DATASET_e.TABLE_f"][
-                "downstairs"
-            ].keys()
+            result[table_name][SearchDirection.DOWN.value][
+                "PROJECT_d.DATASET_e.TABLE_f"
+            ][SearchDirection.DOWN.value].keys()
         ) == [
             "PROJECT_j.DATASET_k.TABLE_l",
         ]
