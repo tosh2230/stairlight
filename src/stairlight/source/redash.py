@@ -3,7 +3,7 @@ from typing import Iterator, Optional
 
 from sqlalchemy import create_engine, text
 
-from .base import TemplateSourceType, Template, TemplateSource
+from .base import Template, TemplateSource, TemplateSourceType
 
 
 class RedashTemplate(Template):

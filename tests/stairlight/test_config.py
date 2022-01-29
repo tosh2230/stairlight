@@ -1,9 +1,9 @@
 import os
 from collections import OrderedDict
 
-from src.stairlight import config_key
 import src.stairlight.config as config
 import src.stairlight.source.base as base
+from src.stairlight import config_key
 from src.stairlight.source.file import FileTemplate
 
 

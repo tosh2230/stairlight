@@ -1,11 +1,12 @@
-import pathlib
 import os
+import pathlib
 import re
 from typing import Iterator, Optional
+
 from jinja2 import Environment, FileSystemLoader
 
-from .base import TemplateSourceType, Template, TemplateSource
 from .. import config_key
+from .base import Template, TemplateSource, TemplateSourceType
 
 
 class FileTemplate(Template):

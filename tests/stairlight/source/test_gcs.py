@@ -1,12 +1,8 @@
 import pytest
 
-from src.stairlight import config_key
 import src.stairlight.config as config
-from src.stairlight.source.gcs import (
-    GcsTemplate,
-    GcsTemplateSource,
-    TemplateSourceType,
-)
+from src.stairlight import config_key
+from src.stairlight.source.gcs import GcsTemplate, GcsTemplateSource, TemplateSourceType
 
 
 class TestGcsTemplateSource:

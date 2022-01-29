@@ -3,8 +3,8 @@ from typing import Iterator, Optional
 
 from google.cloud import storage
 
-from .base import TemplateSourceType, Template, TemplateSource
 from .. import config_key
+from .base import Template, TemplateSource, TemplateSourceType
 
 GCS_URI_PREFIX = "gs://"
 

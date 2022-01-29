@@ -1,7 +1,7 @@
 import pytest
 
-from src.stairlight import config_key
 import src.stairlight.config as config
+from src.stairlight import config_key
 from src.stairlight.source.file import (
     FileTemplate,
     FileTemplateSource,

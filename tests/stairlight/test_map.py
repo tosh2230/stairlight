@@ -1,8 +1,8 @@
+import src.stairlight.config as config
 from src.stairlight.config_key import (
     MAPPING_CONFIG_FILE_PREFIX,
     STAIRLIGHT_CONFIG_FILE_PREFIX,
 )
-import src.stairlight.config as config
 from src.stairlight.map import Map
 
 

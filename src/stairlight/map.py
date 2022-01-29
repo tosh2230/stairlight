@@ -2,11 +2,7 @@ from typing import Iterator
 
 from . import config_key
 from .query import Query
-from .source.base import (
-    Template,
-    TemplateSource,
-    TemplateSourceType,
-)
+from .source.base import Template, TemplateSource, TemplateSourceType
 from .source.file import FileTemplateSource
 from .source.gcs import GcsTemplateSource
 from .source.redash import RedashTemplateSource
