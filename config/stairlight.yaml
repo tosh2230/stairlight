@@ -1,5 +1,5 @@
 include:
-  - type: fs
+  - type: file
     path: "./tests/sql"
     regex: ".*/*.sql$"
     default_table_prefix: "PROJECT_A"
@@ -16,7 +16,7 @@ include:
   #     - 3
   #     - 5
 exclude:
-  - type: fs
+  - type: file
     regex: "main/test_exclude.sql$"
 settings:
   mapping_prefix: "mapping"

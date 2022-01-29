@@ -9,7 +9,7 @@ from jinja2 import BaseLoader, Environment
 class TemplateSourceType(enum.Enum):
     """SQL template source type"""
 
-    FS = "fs"
+    FILE = "file"
     GCS = "gcs"
     REDASH = "redash"
 

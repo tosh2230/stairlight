@@ -158,7 +158,7 @@ class Configurator:
 
             values["tables"][0]["labels"] = OrderedDict({"key": "value"})
 
-            if sql_template.source_type in [TemplateSourceType.FS]:
+            if sql_template.source_type in [TemplateSourceType.FILE]:
                 values["file_suffix"] = sql_template.file_path
             elif sql_template.source_type in [TemplateSourceType.GCS]:
                 values["uri"] = sql_template.uri

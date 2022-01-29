@@ -6,7 +6,7 @@ from .source.base import (
     TemplateSource,
     TemplateSourceType,
 )
-from .source.fs import FsTemplateSource
+from .source.file import FileTemplateSource
 from .source.gcs import GcsTemplateSource
 from .source.redash import RedashTemplateSource
 
@@ -42,9 +42,10 @@ class Map:
         stairlight_config: dict, mapping_config: dict
     ) -> Iterator[TemplateSource]:
         for source_attributes in stairlight_config.get("include"):
+            template_source: TemplateSource = None
             type = source_attributes.get("type")
-            if type.casefold() == TemplateSourceType.FS.value:
-                template_source = FsTemplateSource(
+            if type.casefold() == TemplateSourceType.FILE.value:
+                template_source = FileTemplateSource(
                     stairlight_config=stairlight_config,
                     mapping_config=mapping_config,
                     source_attributes=source_attributes,
@@ -61,6 +62,9 @@ class Map:
                     mapping_config=mapping_config,
                     source_attributes=source_attributes,
                 )
+            else:
+                print(f"Template_source not found!: {type}")
+                continue
             yield template_source
 
     def write_by_template_source(self, template_source: TemplateSource) -> None:

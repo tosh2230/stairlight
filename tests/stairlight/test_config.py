@@ -3,7 +3,7 @@ from collections import OrderedDict
 
 import src.stairlight.config as config
 import src.stairlight.source.base as base
-from src.stairlight.source.fs import FsTemplate
+from src.stairlight.source.file import FileTemplate
 
 
 class TestSuccess:
@@ -32,9 +32,9 @@ class TestSuccess:
         assert list(stairlight_template.keys()) == ["include", "exclude", "settings"]
 
     def test_build_mapping_template(self):
-        sql_template = FsTemplate(
+        sql_template = FileTemplate(
             mapping_config=self.configurator.read(prefix=config.MAPPING_CONFIG_PREFIX),
-            source_type=base.TemplateSourceType.FS,
+            source_type=base.TemplateSourceType.FILE,
             file_path="tests/sql/main/test_undefined.sql",
         )
         unmapped = [
@@ -50,7 +50,7 @@ class TestSuccess:
 
         mapping_value = OrderedDict(
             {
-                "file_suffix": sql_template.file_path,
+                "type": sql_template.source_type,
                 "tables": [
                     OrderedDict(
                         {
@@ -64,6 +64,7 @@ class TestSuccess:
                         }
                     )
                 ],
+                "file_suffix": sql_template.file_path,
             }
         )
 
@@ -74,6 +75,8 @@ class TestSuccess:
             }
         )
 
-        expected = {"mapping": [mapping_value], "metadata": [metadata_value]}
+        expected = OrderedDict(
+            {"mapping": [mapping_value], "metadata": [metadata_value]}
+        )
         actual = self.configurator.build_mapping_template(unmapped_templates=unmapped)
         assert actual == expected

@@ -7,7 +7,7 @@ from jinja2 import Environment, FileSystemLoader
 from .base import TemplateSourceType, Template, TemplateSource
 
 
-class FsTemplate(Template):
+class FileTemplate(Template):
     def __init__(
         self,
         mapping_config: dict,
@@ -64,13 +64,13 @@ class FsTemplate(Template):
         return jinja_template.render(params=params)
 
 
-class FsTemplateSource(TemplateSource):
+class FileTemplateSource(TemplateSource):
     def __init__(
         self, stairlight_config: dict, mapping_config: dict, source_attributes: dict
     ) -> None:
         super().__init__(stairlight_config, mapping_config)
         self.source_attributes = source_attributes
-        self.source_type = TemplateSourceType.FS
+        self.source_type = TemplateSourceType.FILE
 
     def search_templates_iter(self) -> Iterator[Template]:
         """Search SQL template files from local file system
@@ -88,7 +88,7 @@ class FsTemplateSource(TemplateSource):
             ) or self.is_excluded(source_type=self.source_type, file_path=str(p)):
                 self.logger.debug(f"{str(p)} is skipped.")
                 continue
-            yield FsTemplate(
+            yield FileTemplate(
                 mapping_config=self._mapping_config,
                 source_type=self.source_type,
                 file_path=str(p),

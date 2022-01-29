@@ -1,5 +1,5 @@
 include:
-  - type: fs
+  - type: file
     path: "./tests/sql"
     regex: ".*/*.sql$"
     default_table_prefix: "PROJECT_A"
