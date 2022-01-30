@@ -60,6 +60,23 @@ class RedashTemplateSource(TemplateSource):
         )
         self.source_type = TemplateSourceType.REDASH
         self.source_attributes = source_attributes
+        self.where_clause = []
+        self.conditions = {
+            "data_source": {
+                "key": config_key.DATA_SOURCE_NAME,
+                "query": "data_sources.name = :data_source",
+                "parameters": self.source_attributes.get(config_key.DATA_SOURCE_NAME),
+            },
+            "query_ids": {
+                "key": config_key.QUERY_IDS,
+                "query": "queries.id IN :query_ids",
+                "parameters": (
+                    tuple(self.source_attributes.get(config_key.QUERY_IDS))
+                    if self.source_attributes.get(config_key.QUERY_IDS)
+                    else None
+                ),
+            },
+        }
 
     def search_templates_iter(self) -> Iterator[Template]:
         results = self.get_queries_from_redash()
@@ -72,22 +89,34 @@ class RedashTemplateSource(TemplateSource):
             )
 
     def get_queries_from_redash(self) -> list:
-        connection_str = os.environ.get(
-            self.source_attributes.get(config_key.DATABASE_URL_ENVIRONMENT_VARIABLE)
-        )
+        sql_file_name = "sql/redash_queries.sql"
         current_dir = os.path.dirname(os.path.abspath(__file__))
         query_text = text(
-            self.read_query_from_file(path=f"{current_dir}/sql/redash_queries.sql")
+            self.build_query_string(path=f"{current_dir}/{sql_file_name}")
+        )
+
+        connection_str = os.environ.get(
+            self.source_attributes.get(config_key.DATABASE_URL_ENVIRONMENT_VARIABLE)
         )
         engine = create_engine(connection_str)
         queries = engine.execute(
             query_text,
-            data_source=self.source_attributes.get(config_key.DATA_SOURCE_NAME),
-            query_id_list=tuple(self.source_attributes.get(config_key.QUERY_IDS)),
+            data_source=self.conditions.get("data_source").get("parameters"),
+            query_ids=self.conditions.get("query_ids").get("parameters"),
         ).fetchall()
 
         return queries
 
+    def build_query_string(self, path) -> str:
+        base_query_string = self.read_query_from_file(path=path)
+        for condition in self.conditions.values():
+            self.update_where_clause(key=condition["key"], condition=condition["query"])
+        return base_query_string + "WHERE " + " AND ".join(self.where_clause)
+
     def read_query_from_file(self, path) -> str:
         with open(path, "r", encoding="utf-8") as f:
             return f.read()
+
+    def update_where_clause(self, key, condition) -> None:
+        if self.source_attributes.get(key):
+            self.where_clause.append(condition)
