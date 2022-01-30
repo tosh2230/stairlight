@@ -15,6 +15,7 @@ class RedashTemplate(Template):
         query_id: str,
         query_name: str,
         query_str: str = None,
+        data_source_name: str = None,
         source_type: Optional[TemplateSourceType] = TemplateSourceType.REDASH,
         key: Optional[str] = None,
         bucket: Optional[str] = None,
@@ -32,6 +33,7 @@ class RedashTemplate(Template):
         self.query_id = query_id
         self.query_str = query_str
         self.uri = query_name
+        self.data_source_name = data_source_name
 
     def get_template_str(self) -> str:
         """Get template string that read from Redash
@@ -86,6 +88,7 @@ class RedashTemplateSource(TemplateSource):
                 query_id=result[0],
                 query_name=result[1],
                 query_str=result[2],
+                data_source_name=result[3],
             )
 
     def get_queries_from_redash(self) -> list:
@@ -104,6 +107,8 @@ class RedashTemplateSource(TemplateSource):
             data_source=self.conditions.get("data_source").get("parameters"),
             query_ids=self.conditions.get("query_ids").get("parameters"),
         ).fetchall()
+
+        print(queries)
 
         return queries
 

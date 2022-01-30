@@ -153,6 +153,15 @@ class Configurator:
                 }
             )
 
+            if sql_template.source_type == TemplateSourceType.REDASH:
+                values[config_key.TABLES][0][config_key.TABLE_NAME] = sql_template.uri
+                values[config_key.TABLES][0][
+                    config_key.QUERY_ID
+                ] = sql_template.query_id
+                values[config_key.TABLES][0][
+                    config_key.DATA_SOURCE_NAME
+                ] = sql_template.data_source_name
+
             params = None
             if map_key.PARAMETERS in unmapped_template:
                 undefined_params = unmapped_template.get(map_key.PARAMETERS)

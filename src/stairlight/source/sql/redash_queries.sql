@@ -1,7 +1,8 @@
 SELECT
     queries.id,
     queries.name,
-    queries.query
+    queries.query,
+    data_sources.name
 FROM
     queries
     INNER JOIN data_sources
