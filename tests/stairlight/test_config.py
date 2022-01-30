@@ -29,7 +29,7 @@ class TestSuccess:
         assert os.path.exists(file_name)
 
     def test_build_stairlight_template(self):
-        stairlight_template = self.configurator.build_stairlight_template()
+        stairlight_template = self.configurator.build_stairlight_config()
         assert list(stairlight_template.keys()) == [
             config_key.STAIRLIGHT_CONFIG_INCLUDE_SECTION,
             config_key.STAIRLIGHT_CONFIG_EXCLUDE_SECTION,
@@ -58,22 +58,24 @@ class TestSuccess:
         mapping_value = OrderedDict(
             {
                 config_key.TEMPLATE_SOURCE_TYPE: sql_template.source_type.value,
+                config_key.FILE_SUFFIX: sql_template.key,
                 config_key.TABLES: [
                     OrderedDict(
                         {
                             config_key.TABLE_NAME: None,
                             config_key.PARAMETERS: OrderedDict(
                                 {
-                                    "main_table": None,
-                                    "sub_table_01": None,
-                                    "sub_table_02": None,
+                                    "params": {
+                                        "main_table": None,
+                                        "sub_table_01": None,
+                                        "sub_table_02": None,
+                                    }
                                 }
                             ),
                             config_key.LABELS: OrderedDict({"key": "value"}),
                         }
                     )
                 ],
-                config_key.FILE_SUFFIX: sql_template.key,
             }
         )
 
@@ -90,7 +92,7 @@ class TestSuccess:
                 config_key.MAPPING_CONFIG_METADATA_SECTION: [metadata_value],
             }
         )
-        actual = self.configurator.build_mapping_template(
+        actual = self.configurator.build_mapping_config(
             unmapped_templates=unmapped_templates
         )
         assert actual == expected

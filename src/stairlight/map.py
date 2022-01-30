@@ -1,3 +1,4 @@
+from re import S
 from typing import Iterator
 
 from . import config_key
@@ -148,12 +149,12 @@ class Map:
                 }
             )
 
-    def add_unmapped_params(self, sql_template: Template, params: list) -> None:
+    def add_unmapped_params(self, sql_template: Template, params: dict) -> None:
         """add to the list of unmapped params
 
         Args:
             sql_template (Template): SQL template
-            params (list): Jinja parameters
+            params (dict): Jinja parameters
         """
         self.unmapped.append(
             {
@@ -173,12 +174,25 @@ class Map:
         """
         template_str = sql_template.get_template_str()
         template_params = sql_template.get_jinja_params(template_str)
+        if not template_params:
+            return
+
         mapped_params_dict = table_attributes.get(config_key.PARAMETERS)
-        mapped_params = (
-            [f"params.{key}" for key in mapped_params_dict.keys()]
-            if mapped_params_dict
-            else {}
-        )
+        mapped_params = concat_dict_to_list(mapped_params_dict)
         diff_params = list(set(template_params) - set(mapped_params))
+
         if diff_params:
             self.add_unmapped_params(sql_template=sql_template, params=diff_params)
+
+
+def concat_dict_to_list(d):
+    results = []
+    for key, value in d.items():
+        if isinstance(value, dict):
+            recursive_results = concat_dict_to_list(d=value)
+            for recursive_result in recursive_results:
+                concat = key + "." + recursive_result
+                results.append(concat)
+        else:
+            results.append(key)
+    return results

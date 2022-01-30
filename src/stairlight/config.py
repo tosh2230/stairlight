@@ -57,7 +57,7 @@ class Configurator:
         template_file_name = f"{self.dir}/{prefix}.yaml"
         with open(template_file_name, "w") as f:
             yaml.add_representer(OrderedDict, self.represent_odict)
-            yaml.dump(self.build_stairlight_template(), f)
+            yaml.dump(self.build_stairlight_config(), f)
         return template_file_name
 
     def create_mapping_template_file(
@@ -78,7 +78,7 @@ class Configurator:
             yaml.add_representer(
                 data_type=OrderedDict, representer=self.represent_odict
             )
-            yaml.dump(self.build_mapping_template(unmapped), f)
+            yaml.dump(self.build_mapping_config(unmapped), f)
         return template_file_name
 
     @staticmethod
@@ -92,7 +92,7 @@ class Configurator:
         )
 
     @staticmethod
-    def build_stairlight_template() -> OrderedDict:
+    def build_stairlight_config() -> OrderedDict:
         """Create a OrderedDict object for file 'stairlight.config'
 
         Returns:
@@ -133,8 +133,7 @@ class Configurator:
             }
         )
 
-    @staticmethod
-    def build_mapping_template(unmapped_templates: list) -> OrderedDict:
+    def build_mapping_config(self, unmapped_templates: list) -> OrderedDict:
         """Create a OrderedDict for mapping.config
 
         Args:
@@ -143,49 +142,53 @@ class Configurator:
         Returns:
             OrderedDict: mapping.config template
         """
-        template = OrderedDict({config_key.MAPPING_CONFIG_MAPPING_SECTION: []})
+        mapping_config_dict = OrderedDict(
+            {config_key.MAPPING_CONFIG_MAPPING_SECTION: []}
+        )
         for unmapped_template in unmapped_templates:
             sql_template: Template = unmapped_template[map_key.TEMPLATE]
             values = OrderedDict(
                 {
                     config_key.TEMPLATE_SOURCE_TYPE: sql_template.source_type.value,
-                    config_key.TABLES: [OrderedDict({config_key.TABLE_NAME: None})],
                 }
             )
 
+            if sql_template.source_type == TemplateSourceType.FILE:
+                values[config_key.FILE_SUFFIX] = sql_template.key
+            elif sql_template.source_type == TemplateSourceType.GCS:
+                values[config_key.URI] = sql_template.uri
+                values[config_key.BUCKET_NAME] = sql_template.bucket
+            elif sql_template.source_type == TemplateSourceType.REDASH:
+                values[config_key.QUERY_ID] = sql_template.query_id
+                values[config_key.DATA_SOURCE_NAME] = sql_template.data_source_name
+
+            # Tables
+            values[config_key.TABLES] = [OrderedDict({config_key.TABLE_NAME: None})]
             if sql_template.source_type == TemplateSourceType.REDASH:
                 values[config_key.TABLES][0][config_key.TABLE_NAME] = sql_template.uri
-                values[config_key.TABLES][0][
-                    config_key.QUERY_ID
-                ] = sql_template.query_id
-                values[config_key.TABLES][0][
-                    config_key.DATA_SOURCE_NAME
-                ] = sql_template.data_source_name
 
-            params = None
+            # Parameters
+            parameters = None
             if map_key.PARAMETERS in unmapped_template:
                 undefined_params = unmapped_template.get(map_key.PARAMETERS)
-                params = OrderedDict({})
-                for param in undefined_params:
-                    param_str = ".".join(param.split(".")[1:])
-                    params[param_str] = None
+                parameters = OrderedDict()
+                for undefined_param in undefined_params:
+                    splitted_params = undefined_param.split(".")
+                    create_nested_dict(keys=splitted_params, results=parameters)
 
-            if params:
-                values[config_key.TABLES][0][config_key.PARAMETERS] = params
+            if parameters:
+                values[config_key.TABLES][0][config_key.PARAMETERS] = parameters
 
+            # Labels
             values[config_key.TABLES][0][config_key.LABELS] = OrderedDict(
                 {"key": "value"}
             )
 
-            if sql_template.source_type in [TemplateSourceType.FILE]:
-                values[config_key.FILE_SUFFIX] = sql_template.key
-            elif sql_template.source_type in [TemplateSourceType.GCS]:
-                values[config_key.URI] = sql_template.uri
-                values[config_key.BUCKET_NAME] = sql_template.bucket
+            mapping_config_dict[config_key.MAPPING_CONFIG_MAPPING_SECTION].append(
+                values
+            )
 
-            template[config_key.MAPPING_CONFIG_MAPPING_SECTION].append(values)
-
-        template[config_key.MAPPING_CONFIG_METADATA_SECTION] = [
+        mapping_config_dict[config_key.MAPPING_CONFIG_METADATA_SECTION] = [
             OrderedDict(
                 {
                     config_key.TABLE_NAME: None,
@@ -194,4 +197,14 @@ class Configurator:
             )
         ]
 
-        return template
+        return mapping_config_dict
+
+
+def create_nested_dict(keys, results, density=0, default_value=None):
+    key = keys[density]
+    if density < len(keys) - 1:
+        if key not in results:
+            results[key] = {}
+        create_nested_dict(keys=keys, results=results[key], density=density + 1)
+    else:
+        results[key] = default_value

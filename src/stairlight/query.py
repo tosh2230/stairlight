@@ -35,11 +35,15 @@ class Query:
             ]
 
             for line_index in line_indexes:
-                yield {
-                    map_key.TABLE_NAME: solve_table_prefix(
+                if self.default_table_prefix:
+                    table_name = solve_table_prefix(
                         table=upstairs_table,
                         default_table_prefix=self.default_table_prefix,
-                    ),
+                    )
+                else:
+                    table_name = upstairs_table
+                yield {
+                    map_key.TABLE_NAME: table_name,
                     map_key.LINE_NUMBER: line_index + 1,
                     map_key.LINE_STRING: self.query_str.splitlines()[line_index],
                 }

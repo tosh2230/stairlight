@@ -2,6 +2,7 @@ import os
 import pathlib
 import re
 from typing import Iterator, Optional
+from unittest import result
 
 from jinja2 import Environment, FileSystemLoader
 
@@ -55,9 +56,13 @@ class FileTemplate(Template):
         Returns:
             str: SQL query string
         """
-        env = Environment(loader=FileSystemLoader(os.path.dirname(self.key)))
-        jinja_template = env.get_template(os.path.basename(self.key))
-        return jinja_template.render(params=params)
+        if params:
+            env = Environment(loader=FileSystemLoader(os.path.dirname(self.key)))
+            jinja_template = env.get_template(os.path.basename(self.key))
+            results = jinja_template.render(params)
+        else:
+            results = self.get_template_str()
+        return results
 
 
 class FileTemplateSource(TemplateSource):

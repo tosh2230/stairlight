@@ -8,17 +8,19 @@ Mapping:
     Tables:
       - TableName: "PROJECT_D.DATASET_E.TABLE_F"
         Parameters:
-          PROJECT: PROJECT_J
-          DATASET: DATASET_K
-          TABLE: TABLE_L
+          params:
+            PROJECT: PROJECT_J
+            DATASET: DATASET_K
+            TABLE: TABLE_L
         Labels:
           Source: file
           Test: b
       - TableName: "PROJECT_G.DATASET_H.TABLE_I"
         Parameters:
-          PROJECT: PROJECT_M
-          DATASET: DATASET_N
-          TABLE: TABLE_O
+          params:
+            PROJECT: PROJECT_M
+            DATASET: DATASET_N
+            TABLE: TABLE_O
         Labels:
           Source: file
           Test: b
@@ -27,9 +29,10 @@ Mapping:
     Tables:
       - TableName: "PROJECT_J.DATASET_K.TABLE_L"
         Parameters:
-          main_table: "PROJECT_P.DATASET_Q.TABLE_R"
-          sub_table_01: "PROJECT_S.DATASET_T.TABLE_U"
-          sub_table_02: "PROJECT_V.DATASET_W.TABLE_X"
+          params:
+            main_table: "PROJECT_P.DATASET_Q.TABLE_R"
+            sub_table_01: "PROJECT_S.DATASET_T.TABLE_U"
+            sub_table_02: "PROJECT_V.DATASET_W.TABLE_X"
         Labels:
           Source: file
           Test: c
@@ -42,9 +45,10 @@ Mapping:
     Tables:
       - TableName: "PROJECT_d.DATASET_e.TABLE_f"
         Parameters:
-          PROJECT: PROJECT_g
-          DATASET: DATASET_h
-          TABLE: TABLE_i
+          params:
+            PROJECT: PROJECT_g
+            DATASET: DATASET_h
+            TABLE: TABLE_i
         Labels:
           Source: gcs
           Test: b
@@ -65,11 +69,21 @@ Mapping:
     Tables:
       - TableName: "PROJECT_u.DATASET_u.TABLE_u"
         Parameters:
-          main_table: "PROJECT_t.DATASET_t.TABLE_t"
+          params:
+            main_table: "PROJECT_t.DATASET_t.TABLE_t"
   - TemplateSourceType: File
     FileSuffix: "tests/sql/main/test_union_same_table.sql"
     Tables:
       - TableName: "test_project.beam_streaming.taxirides_aggregation"
+  - TemplateSourceType: Redash
+    QueryId: 5
+    DataSourceName: metadata
+    Tables:
+      - TableName: Copy of (#4) New Query
+        Parameters:
+          table: dashboards
+        Labels:
+          Category: Redash test
 Metadata:
   - TableName: "PROJECT_A.DATASET_A.TABLE_A"
     Labels:

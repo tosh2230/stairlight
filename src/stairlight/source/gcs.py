@@ -58,7 +58,13 @@ class GcsTemplate(Template):
             str: SQL query string
         """
         template_str = self.get_template_str()
-        return self.render_by_base_loader(template_str=template_str, params=params)
+        if params:
+            results = self.render_by_base_loader(
+                template_str=template_str, params=params
+            )
+        else:
+            results = template_str
+        return results
 
 
 class GcsTemplateSource(TemplateSource):

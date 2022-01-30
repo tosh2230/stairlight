@@ -68,6 +68,7 @@ class Template:
             if has_suffix or self.uri == mapping.get(config_key.URI):
                 for table_attributes in mapping.get(config_key.TABLES):
                     yield table_attributes
+                break
 
     def is_mapped(self) -> bool:
         """Check if the template is set to mapping configuration
@@ -99,7 +100,7 @@ class Template:
     @staticmethod
     def render_by_base_loader(template_str: str, params: dict) -> str:
         jinja_template = Environment(loader=BaseLoader()).from_string(template_str)
-        return jinja_template.render(params=params)
+        return jinja_template.render(params)
 
     def get_uri(self) -> str:
         """Get uri"""

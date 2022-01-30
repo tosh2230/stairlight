@@ -35,6 +35,23 @@ class RedashTemplate(Template):
         self.uri = query_name
         self.data_source_name = data_source_name
 
+    def get_mapped_table_attributes_iter(self) -> Iterator[dict]:
+        """Get mapped tables as iterator
+
+        Yields:
+            Iterator[dict]: Mapped table attributes
+        """
+        for mapping in self._mapping_config.get(
+            config_key.MAPPING_CONFIG_MAPPING_SECTION
+        ):
+            if (
+                mapping.get(config_key.QUERY_ID) == self.query_id
+                and mapping.get(config_key.DATA_SOURCE_NAME) == self.data_source_name
+            ):
+                for table_attributes in mapping.get(config_key.TABLES):
+                    yield table_attributes
+                break
+
     def get_template_str(self) -> str:
         """Get template string that read from Redash
         Returns:
@@ -50,7 +67,13 @@ class RedashTemplate(Template):
             str: SQL query string
         """
         template_str = self.get_template_str()
-        return self.render_by_base_loader(template_str=template_str, params=params)
+        if params:
+            results = self.render_by_base_loader(
+                template_str=template_str, params=params
+            )
+        else:
+            results = template_str
+        return results
 
 
 class RedashTemplateSource(TemplateSource):
@@ -107,8 +130,6 @@ class RedashTemplateSource(TemplateSource):
             data_source=self.conditions.get("data_source").get("parameters"),
             query_ids=self.conditions.get("query_ids").get("parameters"),
         ).fetchall()
-
-        print(queries)
 
         return queries
 

@@ -107,31 +107,31 @@ class TestFileTemplateMapped:
 
 
 @pytest.mark.parametrize(
-    "key, bucket",
+    "key",
     [
-        ("tests/sql/main/test_undefined.sql", None),
-        ("tests/sql/gcs/test_b/test_b.sql", None),
+        "tests/sql/main/test_undefined.sql",
+        "tests/sql/gcs/test_b/test_b.sql",
     ],
 )
 class TestFileTemplateNotMapped:
     configurator = config.Configurator(dir="./config")
     mapping_config = configurator.read(prefix=config_key.MAPPING_CONFIG_FILE_PREFIX)
 
-    def test_is_mapped(self, key, bucket):
+    def test_is_mapped(self, key):
         sql_template = FileTemplate(
             mapping_config=self.mapping_config,
             source_type=TemplateSourceType.FILE,
             key=key,
-            bucket=bucket,
+            bucket=None,
         )
         assert not sql_template.is_mapped()
 
-    def test_get_jinja_params(self, key, bucket):
+    def test_get_jinja_params(self, key):
         sql_template = FileTemplate(
             mapping_config=self.mapping_config,
             source_type=TemplateSourceType.FILE,
             key=key,
-            bucket=bucket,
+            bucket=None,
         )
         template_str = sql_template.get_template_str()
         assert len(sql_template.get_jinja_params(template_str)) > 0
@@ -143,9 +143,11 @@ class TestFileTemplateRender:
 
     def test_render(self):
         params = {
-            "main_table": "PROJECT_P.DATASET_Q.TABLE_R",
-            "sub_table_01": "PROJECT_S.DATASET_T.TABLE_U",
-            "sub_table_02": "PROJECT_V.DATASET_W.TABLE_X",
+            "params": {
+                "main_table": "PROJECT_P.DATASET_Q.TABLE_R",
+                "sub_table_01": "PROJECT_S.DATASET_T.TABLE_U",
+                "sub_table_02": "PROJECT_V.DATASET_W.TABLE_X",
+            }
         }
         sql_template = FileTemplate(
             mapping_config=self.mapping_config,
