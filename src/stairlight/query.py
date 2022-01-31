@@ -1,6 +1,8 @@
 import re
 from typing import Iterator
 
+from . import map_key
+
 
 class Query:
     """SQL query"""
@@ -33,12 +35,17 @@ class Query:
             ]
 
             for line_index in line_indexes:
+                if self.default_table_prefix:
+                    table_name = solve_table_prefix(
+                        table=upstairs_table,
+                        default_table_prefix=self.default_table_prefix,
+                    )
+                else:
+                    table_name = upstairs_table
                 yield {
-                    "table_name": solve_table_prefix(
-                        upstairs_table, self.default_table_prefix
-                    ),
-                    "line": line_index + 1,
-                    "line_str": self.query_str.splitlines()[line_index],
+                    map_key.TABLE_NAME: table_name,
+                    map_key.LINE_NUMBER: line_index + 1,
+                    map_key.LINE_STRING: self.query_str.splitlines()[line_index],
                 }
 
     def parse_and_get_upstairs_tables(self) -> set:

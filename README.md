@@ -6,7 +6,14 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square)](https://github.com/psf/black)
 [![CI](https://github.com/tosh2230/stairlight/actions/workflows/ci.yml/badge.svg)](https://github.com/tosh2230/stairlight/actions/workflows/ci.yml)
 
-Stairlight is a table-level data lineage tool, detects table dependencies from 'Transform' SQL files.
+Stairlight is a table-level data lineage tool, detects table dependencies by SELECT queries.
+
+Queries can be read from following systems.
+
+- [Google Cloud Storage](https://cloud.google.com/storage)
+    - Mainly designed for use with [Google Cloud Composer](https://cloud.google.com/composer)
+- [Redash](https://redash.io/)
+- Local file system(with Python Pathlib module)
 
 ## Installation
 
@@ -16,7 +23,7 @@ $ pip install stairlight
 
 ## Getting Started
 
-There are three steps to use.
+There are 3 steps to use.
 
 ```sh
 # Step 1: Initialize and set data location settings
@@ -26,8 +33,8 @@ Please edit it to set your data sources.
 
 # Step 2: Map SQL files and tables, and add metadata
 $ stairlight check
-'./mapping_yyyyMMddhhmmss.yaml' has created.
-Please map undefined tables and parameters, and append to your latest file.
+'./mapping_checked_yyyyMMddhhmmss.yaml' has created.
+Please map undefined tables and parameters, and append to your latest configuration file.
 
 # Step 3: Get a table dependency map
 $ stairlight
@@ -37,10 +44,10 @@ $ stairlight
 
 ### Input
 
-- SQL files
+- SQL `SELECT` queries
 - Configuration files (YAML)
-    - stairlight.yaml: SQL file locations and include/exclude files.
-    - mapping.yaml: Mapping SQL files and tables.
+    - stairlight.yaml: SQL query locations and include/exclude conditions.
+    - mapping.yaml: Mapping SQL queries and tables.
 
 ### Output
 
@@ -54,77 +61,48 @@ $ stairlight
     {
         "PROJECT_d.DATASET_e.TABLE_f": {
             "PROJECT_j.DATASET_k.TABLE_l": {
-                "type": "fs",
-                "file": "tests/sql/main/test_e.sql",
-                "uri": "/foo/bar/stairlight/tests/sql/main/test_e.sql",
-                "lines": [
+                "TemplateSourceType": "File",
+                "Key": "tests/sql/main/test_e.sql",
+                "Uri": "/foo/bar/stairlight/tests/sql/main/test_e.sql",
+                "Lines": [
                     {
-                        "num": 1,
-                        "str": "SELECT * FROM PROJECT_j.DATASET_k.TABLE_l WHERE 1 = 1"
+                        "LineNumber": 1,
+                        "LineString": "SELECT * FROM PROJECT_j.DATASET_k.TABLE_l WHERE 1 = 1"
                     }
                 ]
-            },
-            "PROJECT_g.DATASET_h.TABLE_i": {
-                "type": "gcs",
-                "file": "sql/test_b/test_b.sql",
-                "uri": "gs://baz/sql/test_b/test_b.sql",
-                "lines": [
-                    {
-                        "num": 23,
-                        "str": "    PROJECT_g.DATASET_h.TABLE_i AS b",
-                    }
-                ],
-                "bucket": "stairlight"
             },
             "PROJECT_C.DATASET_C.TABLE_C": {
-                "type": "gcs",
-                "file": "sql/test_b/test_b.sql",
-                "uri": "gs://baz/sql/test_b/test_b.sql",
-                "lines": [
+                "TemplateSourceType": "GCS",
+                "Key": "sql/test_b/test_b.sql",
+                "Uri": "gs://stairlight/sql/test_b/test_b.sql",
+                "Lines": [
                     {
-                        "num": 6,
-                        "str": "        PROJECT_C.DATASET_C.TABLE_C",
+                        "LineNumber": 6,
+                        "LineString": "        PROJECT_C.DATASET_C.TABLE_C"
                     }
                 ],
-                "bucket": "stairlight"
-            },
-            "PROJECT_d.DATASET_d.TABLE_d": {
-                "type": "gcs",
-                "file": "sql/test_b/test_b.sql",
-                "uri": "gs://baz/sql/test_b/test_b.sql",
-                "lines": [
-                    {
-                        "num": 15,
-                        "str": "        PROJECT_d.DATASET_d.TABLE_d",
-                    }
-                ],
-                "bucket": "stairlight"
+                "BucketName": "stairlight",
+                "Labels": {
+                    "Source": "gcs",
+                    "Test": "b"
+                }
             }
         },
-        "PROJECT_j.DATASET_k.TABLE_l": {
-            "PROJECT_d.DATASET_e.TABLE_f": {
-                "type": "fs",
-                "file": "tests/sql/main/test_d.sql",
-                "uri": "/foo/bar/stairlight/tests/sql/main/test_d.sql",
-                "lines": [
-                    {
-                        "num": 1,
-                        "str": "SELECT * FROM PROJECT_d.DATASET_e.TABLE_f WHERE 1 = 1"
-                    }
-                ]
-            }
-        },
-        "PROJECT_d.DATASET_d.TABLE_d": {
+        "AggregateSales": {
             "PROJECT_e.DATASET_e.TABLE_e": {
-                "type": "fs",
-                "file": "tests/sql/main/test_f.sql",
-                "uri": "/foo/bar/stairlight/tests/sql/main/test_f.sql",
-                "lines": [
+                "TemplateSourceType": "Redash",
+                "Key": 5,
+                "Uri": "AggregateSales",
+                "Lines": [
                     {
-                        "num": 1,
-                        "str": "SELECT * FROM PROJECT_e.DATASET_e.TABLE_e WHERE 1 = 1"
+                        "LineNumber": 1,
+                        "LineString": "SELECT service, SUM(total_amount) FROM PROJECT_e.DATASET_e.TABLE_e GROUP BY service"
                     }
-                ]
+                ],
+                "DataSourceName": "BigQuery",
+                "Labels": {
+                    "Category": "Sales"
+                }
             }
         },
     }
@@ -134,32 +112,80 @@ $ stairlight
 
 ## Configuration
 
-Config files used for unit test in CI can be found [here](https://github.com/tosh2230/stairlight/tree/main/config).
+Configuration files can be found [here](https://github.com/tosh2230/stairlight/tree/main/config), used for unit test in CI.
 
 ### stairlight.yaml
 
 'stairlight.yaml' is for setting up Stairlight itself.
 
-It is responsible for specifying the destination of SQL files to be read, and for specifying the prefix of mapping files.
+It is responsible for specifying the destination of SQL queries to be read, and for specifying data sources.
 
-SQL files can be read from the following storage.
-
-- Local file system(with python pathlib module)
-- Google Cloud Storage
+```yaml
+Include:
+  - TemplateSourceType: File
+    FileSystemPath: "./tests/sql"
+    Regex: ".*/*.sql$"
+    DefaultTablePrefix: "PROJECT_A"
+  - TemplateSourceType: GCS
+    ProjectId: null
+    BucketName: stairlight
+    Regex: "^sql/.*/*.sql$"
+    DefaultTablePrefix: "PROJECT_A"
+  - TemplateSourceType: Redash
+    DatabaseUrlEnvironmentVariable: REDASH_DATABASE_URL
+    DataSourceName: BigQuery
+    QueryIds:
+      - 1
+      - 3
+      - 5
+Exclude:
+  - TemplateSourceType: File
+    Regex: "main/test_exclude.sql$"
+Settings:
+  MappingPrefix: "mapping"
+```
 
 ### mapping.yaml
 
-'mapping.yaml' is used to define relationships between input files and tables.
+'mapping.yaml' is used to define relationships between input queries and tables.
+
+A template of this file can be created by `check` command, based on the configuration of 'stairlight.yaml'.
+
+```yaml
+Mapping:
+  - TemplateSourceType: File
+    FileSuffix: "tests/sql/main/test_union_same_table.sql"
+    Tables:
+      - TableName: "test_project.beam_streaming.taxirides_aggregation"
+  - TemplateSourceType: GCS
+    Uri: "gs://stairlight/sql/test_a/test_a.sql"
+    Tables:
+      - TableName: "PROJECT_a.DATASET_b.TABLE_c"
+  - TemplateSourceType: Redash
+    QueryId: 5
+    DataSourceName: metadata
+    Tables:
+      - TableName: Copy of (#4) New Query
+        Parameters:
+          table: dashboards
+        Labels:
+          Category: Redash test
+Metadata:
+  - TableName: "PROJECT_A.DATASET_A.TABLE_A"
+    Labels:
+      Source: Null
+      Test: a
+```
 
 #### mapping section
 
-This section is used to define relationships between SQL files and tables created as a result of query execution.
+This section is used to define relationships between queries and tables that created as a result of query execution.
 
-The `params` attribute allows you to reflect settings in [jinja](https://jinja.palletsprojects.com/) template variables embedded in SQL files. If multiple settings are applied to a SQL file using jinja template, the file will be read as if there were the same number of files as the number of settings.
+`Parameters` attribute allows you to reflect settings in [jinja](https://jinja.palletsprojects.com/) template variables embedded in queries. If multiple settings are applied to a query using jinja template, the query will be read as if there were the same number of queries as the number of settings.
 
 #### metadata section
 
-This section is mainly used to set labels to tables written in SQL files.
+This section is mainly used to set metadata to tables appears only in queries.
 
 ## Command and option
 
@@ -167,22 +193,22 @@ This section is mainly used to set labels to tables written in SQL files.
 $ stairlight --help
 usage: stairlight [-h] [-c CONFIG] [--save SAVE | --load LOAD] {init,check,up,down} ...
 
-A table-level data lineage tool, detects table dependencies from 'Transform' SQL files.
+A table-level data lineage tool, detects table dependencies by SELECT queries.
 Without positional arguments, return a table dependency map as JSON format.
 
 positional arguments:
   {init,check,up,down}
-    init                create a new Stairlight configuration file
-    check               create a new configuration file about undefined mappings
+    init                create new Stairlight configuration file
+    check               create new configuration file about undefined mappings
     up                  return upstairs ( table | SQL file ) list
     down                return downstairs ( table | SQL file ) list
 
 optional arguments:
   -h, --help            show this help message and exit
   -c CONFIG, --config CONFIG
-                        set a Stairlight configuration directory
-  --save SAVE           save results to a file
-  --load LOAD           load results from a file
+                        set Stairlight configuration directory
+  --save SAVE           file path where results will be saved(File system or GCS)
+  --load LOAD           file path in which results are saved(File system or GCS)
 ```
 
 ### init
@@ -196,12 +222,12 @@ usage: stairlight init [-h] [-c CONFIG] [-s SAVE | -l LOAD]
 optional arguments:
   -h, --help            show this help message and exit
   -c CONFIG, --config CONFIG
-                        set a Stairlight configuration directory.
+                        set Stairlight configuration directory.
 ```
 
 ### check
 
-`check` creates a new configuration file about undefined mappings.
+`check` creates new configuration file about undefined mappings.
 The option specification is the same as `init`.
 
 ### up
@@ -220,9 +246,9 @@ usage: stairlight up [-h] [-c CONFIG] [--save SAVE | --load LOAD] (-t TABLE | -l
 optional arguments:
   -h, --help            show this help message and exit
   -c CONFIG, --config CONFIG
-                        set a Stairlight configuration directory
-  --save SAVE           a file path where results will be saved(File system or GCS)
-  --load LOAD           a file path in which results are saved(File system or GCS)
+                        set Stairlight configuration directory
+  --save SAVE           file path where results will be saved(File system or GCS)
+  --load LOAD           file path in which results are saved(File system or GCS)
   -t TABLE, --table TABLE
                         table names that Stairlight searches for, can be specified
                         multiple times. e.g. -t PROJECT_a.DATASET_b.TABLE_c -t

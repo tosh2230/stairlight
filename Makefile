@@ -6,8 +6,13 @@ format:
 	poetry run isort ./src ./tests
 	poetry run black ./src ./tests
 exec:
-	@poetry install
+	@poetry build
+	@pip install ./dist/stairlight-0.2.0.tar.gz
 	@poetry run python -m stairlight -c config
+check:
+	@poetry build
+	@pip install ./dist/stairlight-0.2.0.tar.gz
+	@poetry run python -m stairlight check -c config
 test:
 	@poetry install
 	@poetry run pytest -v --cov=src

@@ -1,12 +1,12 @@
-include:
-  - type: fs
-    path: "./tests/sql"
-    regex: ".*/*.sql$"
-    default_table_prefix: "PROJECT_A"
-  - type: gcs
-    project: null
-    bucket: stairlight
-    regex: "^sql/.*/*.sql$"
-    default_table_prefix: "PROJECT_A"
-settings:
-  mapping_prefix: "mapping"
+Include:
+  - TemplateSourceType: File
+    FileSystemPath: "./tests/sql"
+    Regex: ".*/*.sql$"
+    DefaultTablePrefix: "PROJECT_A"
+  - TemplateSourceType: GCS
+    ProjectId: null
+    BucketName: stairlight
+    Regex: "^sql/.*/*.sql$"
+    DefaultTablePrefix: "PROJECT_A"
+Settings:
+  MappingPrefix: "mapping"

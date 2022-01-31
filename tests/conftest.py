@@ -16,7 +16,7 @@ def stairlight(save_file="./tests/test_save_map.json"):
     stairlight = StairLight(config_dir="./config", save_file=save_file)
     yield stairlight
     teardown_rm_file(save_file)
-    teardown_config(prefix="mapping_")
+    teardown_config(prefix="mapping_checked_")
 
 
 @pytest.fixture(scope="session")

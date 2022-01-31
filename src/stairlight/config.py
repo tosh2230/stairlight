@@ -6,10 +6,8 @@ from datetime import datetime, timezone
 
 import yaml
 
-from .template import SourceType
-
-MAPPING_CONFIG_PREFIX = "mapping"
-STAIRLIGHT_CONFIG_PREFIX = "stairlight"
+from . import config_key, map_key
+from .source.base import Template, TemplateSourceType
 
 logger = logging.getLogger()
 
@@ -45,7 +43,7 @@ class Configurator:
         return config
 
     def create_stairlight_template_file(
-        self, prefix: str = STAIRLIGHT_CONFIG_PREFIX
+        self, prefix: str = config_key.STAIRLIGHT_CONFIG_FILE_PREFIX
     ) -> str:
         """Create a Stairlight template file
 
@@ -58,11 +56,11 @@ class Configurator:
         template_file_name = f"{self.dir}/{prefix}.yaml"
         with open(template_file_name, "w") as f:
             yaml.add_representer(OrderedDict, self.represent_odict)
-            yaml.dump(self.build_stairlight_template(), f)
+            yaml.dump(self.build_stairlight_config(), f)
         return template_file_name
 
     def create_mapping_template_file(
-        self, unmapped: list, prefix: str = MAPPING_CONFIG_PREFIX
+        self, unmapped: list, prefix: str = config_key.MAPPING_CONFIG_FILE_PREFIX
     ) -> str:
         """Create a mapping template file
 
@@ -74,12 +72,12 @@ class Configurator:
             str: Mapping template file
         """
         now = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
-        template_file_name = f"{self.dir}/{prefix}_{now}.yaml"
+        template_file_name = f"{self.dir}/{prefix}_checked_{now}.yaml"
         with open(template_file_name, "w") as f:
             yaml.add_representer(
                 data_type=OrderedDict, representer=self.represent_odict
             )
-            yaml.dump(self.build_mapping_template(unmapped), f)
+            yaml.dump(self.build_mapping_config(unmapped), f)
         return template_file_name
 
     @staticmethod
@@ -93,40 +91,50 @@ class Configurator:
         )
 
     @staticmethod
-    def build_stairlight_template() -> OrderedDict:
+    def build_stairlight_config() -> OrderedDict:
         """Create a OrderedDict object for file 'stairlight.config'
 
         Returns:
             OrderedDict: stairlight.config template
         """
+        include_section_file = OrderedDict(
+            {
+                config_key.TEMPLATE_SOURCE_TYPE: TemplateSourceType.FILE.value,
+                config_key.FILE_SYSTEM_PATH: None,
+                config_key.REGEX: None,
+                config_key.DEFAULT_TABLE_PREFIX: None,
+            }
+        )
+        include_section_gcs = OrderedDict(
+            {
+                config_key.TEMPLATE_SOURCE_TYPE: TemplateSourceType.GCS.value,
+                config_key.PROJECT_ID: None,
+                config_key.BUCKET_NAME: None,
+                config_key.REGEX: None,
+                config_key.DEFAULT_TABLE_PREFIX: None,
+            }
+        )
         return OrderedDict(
             {
-                "include": [
-                    OrderedDict(
-                        {
-                            "type": "fs",
-                            "path": None,
-                            "regex": None,
-                            "default_table_prefix": None,
-                        }
-                    ),
-                    OrderedDict(
-                        {
-                            "type": "gcs",
-                            "project": None,
-                            "bucket": None,
-                            "regex": None,
-                            "default_table_prefix": None,
-                        }
-                    ),
+                config_key.STAIRLIGHT_CONFIG_INCLUDE_SECTION: [
+                    include_section_file,
+                    include_section_gcs,
                 ],
-                "exclude": [OrderedDict({"type": None, "regex": None})],
-                "settings": {"mapping_prefix": MAPPING_CONFIG_PREFIX},
+                config_key.STAIRLIGHT_CONFIG_EXCLUDE_SECTION: [
+                    OrderedDict(
+                        {
+                            config_key.TEMPLATE_SOURCE_TYPE: None,
+                            config_key.DEFAULT_TABLE_PREFIX: None,
+                        }
+                    )
+                ],
+                config_key.STAIRLIGHT_CONFIG_SETTING_SECTION: {
+                    config_key.MAPPING_PREFIX: config_key.MAPPING_CONFIG_FILE_PREFIX
+                },
             }
         )
 
-    @staticmethod
-    def build_mapping_template(unmapped: list) -> OrderedDict:
+    def build_mapping_config(self, unmapped_templates: list) -> OrderedDict:
         """Create a OrderedDict for mapping.config
 
         Args:
@@ -135,37 +143,69 @@ class Configurator:
         Returns:
             OrderedDict: mapping.config template
         """
-        template = OrderedDict({"mapping": []})
-        for unmapped_file in unmapped:
-            sql_template = unmapped_file["sql_template"]
+        mapping_config_dict = OrderedDict(
+            {config_key.MAPPING_CONFIG_MAPPING_SECTION: []}
+        )
+        for unmapped_template in unmapped_templates:
+            sql_template: Template = unmapped_template[map_key.TEMPLATE]
             values = OrderedDict(
                 {
-                    "file_suffix": sql_template.file_path,
-                    "tables": [OrderedDict({"table": None})],
+                    config_key.TEMPLATE_SOURCE_TYPE: sql_template.source_type.value,
                 }
             )
 
-            params = None
-            if "params" in unmapped_file:
-                undefined_params = unmapped_file.get("params")
-                params = OrderedDict({})
-                for param in undefined_params:
-                    param_str = ".".join(param.split(".")[1:])
-                    params[param_str] = None
+            if sql_template.source_type == TemplateSourceType.FILE:
+                values[config_key.FILE_SUFFIX] = sql_template.key
+            elif sql_template.source_type == TemplateSourceType.GCS:
+                values[config_key.URI] = sql_template.uri
+                values[config_key.BUCKET_NAME] = sql_template.bucket
+            elif sql_template.source_type == TemplateSourceType.REDASH:
+                values[config_key.QUERY_ID] = sql_template.query_id
+                values[config_key.DATA_SOURCE_NAME] = sql_template.data_source_name
 
-            if params:
-                values["tables"][0]["params"] = params
+            # Tables
+            values[config_key.TABLES] = [OrderedDict({config_key.TABLE_NAME: None})]
+            if sql_template.source_type == TemplateSourceType.REDASH:
+                values[config_key.TABLES][0][config_key.TABLE_NAME] = sql_template.uri
 
-            values["tables"][0]["labels"] = OrderedDict({"key": "value"})
+            # Parameters
+            parameters = None
+            if map_key.PARAMETERS in unmapped_template:
+                undefined_params = unmapped_template.get(map_key.PARAMETERS)
+                parameters = OrderedDict()
+                for undefined_param in undefined_params:
+                    splitted_params = undefined_param.split(".")
+                    create_nested_dict(keys=splitted_params, results=parameters)
 
-            if sql_template.source_type in [SourceType.GCS]:
-                values["uri"] = sql_template.uri
-                values["bucket"] = sql_template.bucket
+            if parameters:
+                values[config_key.TABLES][0][config_key.PARAMETERS] = parameters
 
-            template["mapping"].append(values)
+            # Labels
+            values[config_key.TABLES][0][config_key.LABELS] = OrderedDict(
+                {"key": "value"}
+            )
 
-        template["metadata"] = [
-            OrderedDict({"table": None, "labels": OrderedDict({"key": "value"})})
+            mapping_config_dict[config_key.MAPPING_CONFIG_MAPPING_SECTION].append(
+                values
+            )
+
+        mapping_config_dict[config_key.MAPPING_CONFIG_METADATA_SECTION] = [
+            OrderedDict(
+                {
+                    config_key.TABLE_NAME: None,
+                    config_key.LABELS: OrderedDict({"key": "value"}),
+                }
+            )
         ]
 
-        return template
+        return mapping_config_dict
+
+
+def create_nested_dict(keys, results, density=0, default_value=None):
+    key = keys[density]
+    if density < len(keys) - 1:
+        if key not in results:
+            results[key] = {}
+        create_nested_dict(keys=keys, results=results[key], density=density + 1)
+    else:
+        results[key] = default_value
