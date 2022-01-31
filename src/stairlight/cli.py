@@ -42,7 +42,7 @@ def command_check(stairlight: StairLight, args: argparse.Namespace) -> str:
         message = (
             f"'{mapping_template_file}' has created.\n"
             "Please map undefined tables and parameters, "
-            "and append to your latest file."
+            "and append to your latest configuration file."
         )
     return message
 
@@ -132,7 +132,7 @@ def set_config_parser(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "-c",
         "--config",
-        help="set a Stairlight configuration directory",
+        help="set Stairlight configuration directory",
         type=str,
         default=".",
     )
@@ -147,13 +147,13 @@ def set_save_load_parser(parser: argparse.ArgumentParser) -> None:
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
         "--save",
-        help="a file path where results will be saved(File system or GCS)",
+        help="file path where results will be saved(File system or GCS)",
         type=str,
         default=None,
     )
     group.add_argument(
         "--load",
-        help="a file path in which results are saved(File system or GCS)",
+        help="file path in which results are saved(File system or GCS)",
         type=str,
         default=None,
     )
@@ -222,7 +222,7 @@ def create_parser() -> argparse.ArgumentParser:
     """
     description = (
         "A table-level data lineage tool, "
-        "detects table dependencies from 'Transform' SQL files. "
+        "detects table dependencies by SELECT queries. "
         "Without positional arguments, "
         "return a table dependency map as JSON format."
     )
@@ -234,14 +234,14 @@ def create_parser() -> argparse.ArgumentParser:
 
     # init
     parser_init = subparsers.add_parser(
-        "init", help="create a new Stairlight configuration file"
+        "init", help="create new Stairlight configuration file"
     )
     parser_init.set_defaults(handler=command_init)
     set_config_parser(parser=parser_init)
 
     # check
     parser_check = subparsers.add_parser(
-        "check", help="create a new configuration file about undefined mappings"
+        "check", help="create new configuration file about undefined mappings"
     )
     parser_check.set_defaults(handler=command_check)
     set_config_parser(parser=parser_check)

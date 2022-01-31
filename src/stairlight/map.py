@@ -120,6 +120,10 @@ class Map:
                 }
                 if sql_template.source_type == TemplateSourceType.GCS:
                     upstairs_values[map_key.BUCKET_NAME] = sql_template.bucket
+                elif sql_template.source_type == TemplateSourceType.REDASH:
+                    upstairs_values[
+                        map_key.DATA_SOURCE_NAME
+                    ] = sql_template.data_source_name
 
                 metadata_labels = [
                     m.get(config_key.LABELS)

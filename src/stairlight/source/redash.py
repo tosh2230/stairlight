@@ -26,7 +26,7 @@ class RedashTemplate(Template):
     ):
         super().__init__(
             mapping_config=mapping_config,
-            key=key,
+            key=query_id,
             source_type=source_type,
             bucket=bucket,
             project=project,

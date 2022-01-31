@@ -7,6 +7,7 @@ LINE_NUMBER = "LineNumber"
 LINE_STRING = "LineString"
 BUCKET_NAME = "BucketName"
 LABELS = "Labels"
+DATA_SOURCE_NAME = "DataSourceName"
 
 TEMPLATE = "Template"
 PARAMETERS = "Parameters"
