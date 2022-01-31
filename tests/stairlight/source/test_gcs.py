@@ -5,6 +5,67 @@ from src.stairlight import config_key
 from src.stairlight.source.gcs import GcsTemplate, GcsTemplateSource, TemplateSourceType
 
 
+class TestSQLTemplate:
+    configurator = config.Configurator(dir="./config")
+    mapping_config = configurator.read(prefix=config_key.MAPPING_CONFIG_FILE_PREFIX)
+    sql_template = GcsTemplate(
+        mapping_config=mapping_config,
+        source_type=TemplateSourceType.GCS,
+        key="sql/test_b/test_b.sql",
+        bucket="stairlight",
+    )
+
+    def test_is_mapped(self):
+        assert self.sql_template.is_mapped()
+
+    def test_get_jinja_params(self):
+        template_str = self.sql_template.get_template_str()
+        assert len(self.sql_template.get_jinja_params(template_str)) > 0
+
+    def test_get_uri(self):
+        assert self.sql_template.uri == "gs://stairlight/sql/test_b/test_b.sql"
+
+    def test_render(self):
+        params = {
+            "params": {
+                "PROJECT": "PROJECT_g",
+                "DATASET": "DATASET_h",
+                "TABLE": "TABLE_i",
+            }
+        }
+        expected = """WITH c AS (
+    SELECT
+        test_id,
+        col_c
+    FROM
+        PROJECT_C.DATASET_C.TABLE_C
+    WHERE
+        0 = 0
+),
+d AS (
+    SELECT
+        test_id,
+        col_d
+    FROM
+        PROJECT_d.DATASET_d.TABLE_d
+    WHERE
+        0 = 0
+)
+
+SELECT
+    *
+FROM
+    PROJECT_g.DATASET_h.TABLE_i AS b
+    INNER JOIN c
+        ON b.test_id = c.test_id
+    INNER JOIN d
+        ON b.test_id = d.test_id
+WHERE
+    1 = 1"""
+        actual = self.sql_template.render(params=params)
+        assert actual == expected
+
+
 class TestGcsTemplateSource:
     configurator = config.Configurator(dir="./config")
     stairlight_config = configurator.read(
@@ -29,33 +90,3 @@ class TestGcsTemplateSource:
         for file in self.template_source.search_templates_iter():
             result.append(file)
         assert len(result) > 0
-
-
-@pytest.mark.parametrize(
-    "key, bucket",
-    [
-        ("sql/test_b/test_b.sql", "stairlight"),
-    ],
-)
-class TestSQLTemplateMapped:
-    configurator = config.Configurator(dir="./config")
-    mapping_config = configurator.read(prefix=config_key.MAPPING_CONFIG_FILE_PREFIX)
-
-    def test_is_mapped(self, key, bucket):
-        sql_template = GcsTemplate(
-            mapping_config=self.mapping_config,
-            source_type=TemplateSourceType.GCS,
-            key=key,
-            bucket=bucket,
-        )
-        assert sql_template.is_mapped()
-
-    def test_get_jinja_params(self, key, bucket):
-        sql_template = GcsTemplate(
-            mapping_config=self.mapping_config,
-            source_type=TemplateSourceType.GCS,
-            key=key,
-            bucket=bucket,
-        )
-        template_str = sql_template.get_template_str()
-        assert len(sql_template.get_jinja_params(template_str)) > 0

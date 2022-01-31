@@ -1,4 +1,4 @@
-from io import open_code
+from logging import getLogger
 import os
 from typing import Iterator, Optional
 
@@ -8,11 +8,14 @@ from .base import Template, TemplateSource, TemplateSourceType
 from .. import config_key
 
 
+logger = getLogger(__name__)
+
+
 class RedashTemplate(Template):
     def __init__(
         self,
         mapping_config: dict,
-        query_id: str,
+        query_id: int,
         query_name: str,
         query_str: str = None,
         data_source_name: str = None,
@@ -121,9 +124,7 @@ class RedashTemplateSource(TemplateSource):
             self.build_query_string(path=f"{current_dir}/{sql_file_name}")
         )
 
-        connection_str = os.environ.get(
-            self.source_attributes.get(config_key.DATABASE_URL_ENVIRONMENT_VARIABLE)
-        )
+        connection_str = self.get_connection_str()
         engine = create_engine(connection_str)
         queries = engine.execute(
             query_text,
@@ -133,16 +134,22 @@ class RedashTemplateSource(TemplateSource):
 
         return queries
 
-    def build_query_string(self, path) -> str:
+    def build_query_string(self, path: str) -> str:
         base_query_string = self.read_query_from_file(path=path)
         for condition in self.conditions.values():
-            self.update_where_clause(key=condition["key"], condition=condition["query"])
+            if self.source_attributes.get(condition["key"]):
+                self.where_clause.append(condition["query"])
         return base_query_string + "WHERE " + " AND ".join(self.where_clause)
 
-    def read_query_from_file(self, path) -> str:
+    def read_query_from_file(self, path: str) -> str:
         with open(path, "r", encoding="utf-8") as f:
             return f.read()
 
-    def update_where_clause(self, key, condition) -> None:
-        if self.source_attributes.get(key):
-            self.where_clause.append(condition)
+    def get_connection_str(self) -> str:
+        environment_variable_name = self.source_attributes.get(
+            config_key.DATABASE_URL_ENVIRONMENT_VARIABLE
+        )
+        connection_str = os.environ.get(environment_variable_name)
+        if not connection_str:
+            logger.error(f"{environment_variable_name} is not found.")
+        return connection_str

@@ -154,7 +154,7 @@ class TestFileTemplateRender:
             source_type=TemplateSourceType.FILE,
             key="tests/sql/main/test_c.sql",
         )
-        query_str = sql_template.render(params=params)
+        actual = sql_template.render(params=params)
         expected = """WITH c AS (
     SELECT
         test_id,
@@ -184,4 +184,4 @@ FROM
         ON b.test_id = d.test_id
 WHERE
     1 = 1"""
-        assert query_str == expected
+        assert actual == expected

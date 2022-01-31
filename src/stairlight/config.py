@@ -73,7 +73,7 @@ class Configurator:
             str: Mapping template file
         """
         now = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
-        template_file_name = f"{self.dir}/{prefix}_{now}.yaml"
+        template_file_name = f"{self.dir}/{prefix}_checked_{now}.yaml"
         with open(template_file_name, "w") as f:
             yaml.add_representer(
                 data_type=OrderedDict, representer=self.represent_odict

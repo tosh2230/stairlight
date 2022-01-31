@@ -75,6 +75,15 @@ Mapping:
     FileSuffix: "tests/sql/main/test_union_same_table.sql"
     Tables:
       - TableName: "test_project.beam_streaming.taxirides_aggregation"
+  - TemplateSourceType: Redash
+    QueryId: 5
+    DataSourceName: metadata
+    Tables:
+      - TableName: Copy of (#4) New Query
+        Parameters:
+          table: dashboards
+        Labels:
+          Category: Redash test
 Metadata:
   - TableName: "PROJECT_A.DATASET_A.TABLE_A"
     Labels:
