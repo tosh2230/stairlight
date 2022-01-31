@@ -1,4 +1,3 @@
-from re import S
 from typing import Iterator
 
 from . import config_key, map_key

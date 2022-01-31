@@ -1,5 +1,4 @@
 import os
-from re import M
 
 import src.stairlight.config as config
 from src.stairlight import config_key

@@ -1,5 +1,3 @@
-import pytest
-
 import src.stairlight.config as config
 from src.stairlight import config_key
 from src.stairlight.source.gcs import GcsTemplate, GcsTemplateSource, TemplateSourceType

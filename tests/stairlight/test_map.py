@@ -7,7 +7,6 @@ from src.stairlight.config_key import (
     STAIRLIGHT_CONFIG_FILE_PREFIX,
 )
 from src.stairlight.map import Map
-from src.stairlight.source.file import FileTemplate, TemplateSourceType
 
 
 class TestSuccess:

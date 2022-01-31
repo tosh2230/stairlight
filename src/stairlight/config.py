@@ -97,26 +97,28 @@ class Configurator:
         Returns:
             OrderedDict: stairlight.config template
         """
+        include_section_file = OrderedDict(
+            {
+                config_key.TEMPLATE_SOURCE_TYPE: TemplateSourceType.FILE.value,
+                config_key.FILE_SYSTEM_PATH: None,
+                config_key.REGEX: None,
+                config_key.DEFAULT_TABLE_PREFIX: None,
+            }
+        )
+        include_section_gcs = OrderedDict(
+            {
+                config_key.TEMPLATE_SOURCE_TYPE: TemplateSourceType.GCS.value,
+                config_key.PROJECT_ID: None,
+                config_key.BUCKET_NAME: None,
+                config_key.REGEX: None,
+                config_key.DEFAULT_TABLE_PREFIX: None,
+            }
+        )
         return OrderedDict(
             {
                 config_key.STAIRLIGHT_CONFIG_INCLUDE_SECTION: [
-                    OrderedDict(
-                        {
-                            config_key.TEMPLATE_SOURCE_TYPE: TemplateSourceType.FILE.value,
-                            config_key.FILE_SYSTEM_PATH: None,
-                            config_key.REGEX: None,
-                            config_key.DEFAULT_TABLE_PREFIX: None,
-                        }
-                    ),
-                    OrderedDict(
-                        {
-                            config_key.TEMPLATE_SOURCE_TYPE: TemplateSourceType.GCS.value,
-                            config_key.PROJECT_ID: None,
-                            config_key.BUCKET_NAME: None,
-                            config_key.REGEX: None,
-                            config_key.DEFAULT_TABLE_PREFIX: None,
-                        }
-                    ),
+                    include_section_file,
+                    include_section_gcs,
                 ],
                 config_key.STAIRLIGHT_CONFIG_EXCLUDE_SECTION: [
                     OrderedDict(

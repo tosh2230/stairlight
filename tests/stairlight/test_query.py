@@ -88,6 +88,7 @@ class TestSuccess:
         results = []
         for result in query.get_upstairs_attributes_iter():
             results.append(result)
+        lines_str_21 = "            LEFT OUTER JOIN PROJECT_e.DATASET_e.TABLE_e"
         assert results == [
             {
                 map_key.TABLE_NAME: "PROJECT_B.DATASET_B.TABLE_B",
@@ -107,7 +108,7 @@ class TestSuccess:
             {
                 map_key.TABLE_NAME: "PROJECT_e.DATASET_e.TABLE_e",
                 map_key.LINE_NUMBER: 21,
-                map_key.LINE_STRING: "            LEFT OUTER JOIN PROJECT_e.DATASET_e.TABLE_e",
+                map_key.LINE_STRING: lines_str_21,
             },
         ]
 
@@ -118,16 +119,18 @@ class TestSuccess:
         results = []
         for result in query.get_upstairs_attributes_iter():
             results.append(result)
+        line_str_6 = "    test_project.beam_streaming.taxirides_realtime"
+        line_str_15 = "    test_project.beam_streaming.taxirides_realtime"
         assert results == [
             {
                 map_key.TABLE_NAME: "test_project.beam_streaming.taxirides_realtime",
                 map_key.LINE_NUMBER: 6,
-                map_key.LINE_STRING: "    test_project.beam_streaming.taxirides_realtime",
+                map_key.LINE_STRING: line_str_6,
             },
             {
                 map_key.TABLE_NAME: "test_project.beam_streaming.taxirides_realtime",
                 map_key.LINE_NUMBER: 15,
-                map_key.LINE_STRING: "    test_project.beam_streaming.taxirides_realtime",
+                map_key.LINE_STRING: line_str_15,
             },
         ]
 

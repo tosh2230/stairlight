@@ -2,7 +2,6 @@ import os
 import pathlib
 import re
 from typing import Iterator, Optional
-from unittest import result
 
 from jinja2 import Environment, FileSystemLoader
 

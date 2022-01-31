@@ -22,12 +22,12 @@ PARAMETERS = "Parameters"
 TABLE_NAME = "TableName"
 TABLES = "Tables"
 
-## GCS
+# GCS
 BUCKET_NAME = "BucketName"
 PROJECT_ID = "ProjectId"
 URI = "Uri"
 
-## Redash
+# Redash
 DATABASE_URL_ENVIRONMENT_VARIABLE = "DatabaseUrlEnvironmentVariable"
 DATA_SOURCE_NAME = "DataSourceName"
 QUERY_IDS = "QueryIds"
