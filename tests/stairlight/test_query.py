@@ -1,5 +1,5 @@
-from src.stairlight.query import Query, solve_table_prefix
 from src.stairlight import map_key
+from src.stairlight.query import Query, solve_table_prefix
 
 
 class TestSuccess:

@@ -6,8 +6,7 @@ from datetime import datetime, timezone
 
 import yaml
 
-from . import config_key
-from . import map_key
+from . import config_key, map_key
 from .source.base import Template, TemplateSourceType
 
 logger = logging.getLogger()

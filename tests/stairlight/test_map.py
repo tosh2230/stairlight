@@ -1,16 +1,13 @@
 import pytest
 
-from src.stairlight import map_key
 import src.stairlight.config as config
+from src.stairlight import map_key
 from src.stairlight.config_key import (
     MAPPING_CONFIG_FILE_PREFIX,
     STAIRLIGHT_CONFIG_FILE_PREFIX,
 )
 from src.stairlight.map import Map
-from src.stairlight.source.file import (
-    FileTemplate,
-    TemplateSourceType,
-)
+from src.stairlight.source.file import FileTemplate, TemplateSourceType
 
 
 class TestSuccess:

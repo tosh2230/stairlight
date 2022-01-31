@@ -1,12 +1,11 @@
-from logging import getLogger
 import os
+from logging import getLogger
 from typing import Iterator, Optional
 
 from sqlalchemy import create_engine, text
 
-from .base import Template, TemplateSource, TemplateSourceType
 from .. import config_key
-
+from .base import Template, TemplateSource, TemplateSourceType
 
 logger = getLogger(__name__)
 

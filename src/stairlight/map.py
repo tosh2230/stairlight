@@ -1,8 +1,7 @@
 from re import S
 from typing import Iterator
 
-from . import config_key
-from . import map_key
+from . import config_key, map_key
 from .query import Query
 from .source.base import Template, TemplateSource, TemplateSourceType
 from .source.file import FileTemplateSource
