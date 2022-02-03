@@ -1,4 +1,4 @@
-from src.stairlight.stairlight import (
+from src.stairlight import (
     ResponseType,
     SearchDirection,
     StairLight,
