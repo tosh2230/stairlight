@@ -31,7 +31,7 @@ $ stairlight init
 './stairlight.yaml' has created.
 Please edit it to set your data sources.
 
-# Step 2: Map SQL files and tables, and add metadata
+# Step 2: Map SQL queries and tables, and add metadata
 $ stairlight check
 './mapping_checked_yyyyMMddhhmmss.yaml' has created.
 Please map undefined tables and parameters, and append to your latest configuration file.
