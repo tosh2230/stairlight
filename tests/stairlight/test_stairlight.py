@@ -1,9 +1,4 @@
-from src.stairlight.stairlight import (
-    ResponseType,
-    SearchDirection,
-    StairLight,
-    is_cyclic,
-)
+from src.stairlight import ResponseType, SearchDirection, StairLight, is_cyclic
 
 
 class TestResponseType:

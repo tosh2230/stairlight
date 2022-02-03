@@ -3,7 +3,7 @@ import os
 
 import pytest
 
-from src.stairlight.stairlight import StairLight
+from src.stairlight import StairLight
 
 
 @pytest.fixture(scope="session")
