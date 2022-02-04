@@ -111,38 +111,12 @@ class Map:
             upstairs = upstairs_attributes[map_key.TABLE_NAME]
 
             if not self.mapped[downstairs].get(upstairs):
-                upstairs_values = {
-                    map_key.TEMPLATE_SOURCE_TYPE: sql_template.source_type.value,
-                    map_key.KEY: sql_template.key,
-                    map_key.URI: sql_template.uri,
-                    map_key.LINES: [],
-                }
-                if sql_template.source_type == TemplateSourceType.GCS:
-                    upstairs_values[map_key.BUCKET_NAME] = sql_template.bucket
-                elif sql_template.source_type == TemplateSourceType.REDASH:
-                    upstairs_values[
-                        map_key.DATA_SOURCE_NAME
-                    ] = sql_template.data_source_name
-
-                metadata_labels = [
-                    m.get(config_key.LABELS)
-                    for m in metadata
-                    if m.get(config_key.TABLE_NAME) == upstairs
-                ]
-                if mapping_labels or metadata_labels:
-                    upstairs_values[map_key.LABELS] = {}
-                if mapping_labels:
-                    upstairs_values[map_key.LABELS] = {
-                        **upstairs_values[map_key.LABELS],
-                        **mapping_labels,
-                    }
-                if metadata_labels:
-                    upstairs_values[map_key.LABELS] = {
-                        **upstairs_values[map_key.LABELS],
-                        **metadata_labels[0],
-                    }
-
-                self.mapped[downstairs][upstairs] = upstairs_values
+                self.mapped[downstairs][upstairs] = self.create_upstairs_value(
+                    sql_template=sql_template,
+                    mapping_labels=mapping_labels,
+                    metadata=metadata,
+                    upstairs=upstairs,
+                )
 
             self.mapped[downstairs][upstairs][map_key.LINES].append(
                 {
@@ -150,6 +124,48 @@ class Map:
                     map_key.LINE_STRING: upstairs_attributes[map_key.LINE_STRING],
                 }
             )
+
+    def create_upstairs_value(
+        self,
+        sql_template: Template,
+        mapping_labels: dict,
+        metadata: list,
+        upstairs: str,
+    ) -> dict:
+        metadata_labels = []
+        upstairs_values = {
+            map_key.TEMPLATE_SOURCE_TYPE: sql_template.source_type.value,
+            map_key.KEY: sql_template.key,
+            map_key.URI: sql_template.uri,
+            map_key.LINES: [],
+        }
+
+        if sql_template.source_type == TemplateSourceType.GCS:
+            upstairs_values[map_key.BUCKET_NAME] = sql_template.bucket
+        elif sql_template.source_type == TemplateSourceType.REDASH:
+            upstairs_values[map_key.DATA_SOURCE_NAME] = sql_template.data_source_name
+
+        if metadata:
+            metadata_labels = [
+                m.get(config_key.LABELS)
+                for m in metadata
+                if m.get(config_key.TABLE_NAME) == upstairs
+            ]
+        if mapping_labels or metadata_labels:
+            upstairs_values[map_key.LABELS] = {}
+
+        if mapping_labels:
+            upstairs_values[map_key.LABELS] = {
+                **upstairs_values[map_key.LABELS],
+                **mapping_labels,
+            }
+
+        if metadata_labels:
+            upstairs_values[map_key.LABELS] = {
+                **upstairs_values[map_key.LABELS],
+                **metadata_labels[0],
+            }
+        return upstairs_values
 
     def add_unmapped_params(self, sql_template: Template, params: dict) -> None:
         """add to the list of unmapped params

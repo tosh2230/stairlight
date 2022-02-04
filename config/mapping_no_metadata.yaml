@@ -1,0 +1,14 @@
+Mapping:
+  - TemplateSourceType: GCS
+    Uri: gs://stairlight/sql/test_a/test_a.sql
+    Tables:
+      - TableName: PROJECT_A.DATASET_1.TABLE_1
+  - TemplateSourceType: GCS
+    Uri: gs://stairlight/sql/test_b/test_b.sql
+    Tables:
+      - TableName: Organization.Repository.AppName
+        Parameters:
+          params:
+            PROJECT: "PROJECT_A"
+            DATASET: DATASET_1
+            TABLE: TABLE_1
