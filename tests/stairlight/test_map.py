@@ -52,3 +52,16 @@ class TestSuccess:
                 actual = sorted(a.get(map_key.PARAMETERS))
                 break
         assert actual == expected
+
+
+class TestSuccessNoMetadata:
+    configurator = config.Configurator(dir="./config")
+    stairlight_config = configurator.read(prefix=STAIRLIGHT_CONFIG_FILE_PREFIX)
+    mapping_config = configurator.read(prefix="mapping_no_metadata")
+    dependency_map = Map(
+        stairlight_config=stairlight_config, mapping_config=mapping_config
+    )
+    dependency_map.write()
+
+    def test_find_unmapped_params(self):
+        assert self.dependency_map.unmapped
