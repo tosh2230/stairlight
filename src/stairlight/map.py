@@ -125,8 +125,8 @@ class Map:
                 }
             )
 
+    @staticmethod
     def create_upstairs_value(
-        self,
         sql_template: Template,
         mapping_labels: dict,
         metadata: list,
