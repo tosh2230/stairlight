@@ -42,7 +42,7 @@ class TestSuccess:
 
     def test_check_on_load(self, stairlight):
         stairlight_load = StairLight(
-            config_dir="./config", load_file=stairlight.save_file
+            config_dir="./config", load_files=[stairlight.save_file]
         )
         assert stairlight_load.check() is None
 

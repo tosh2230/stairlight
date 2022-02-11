@@ -4,12 +4,10 @@ import os
 from logging import getLogger
 from typing import Union
 
-from google.cloud import storage
-
 from . import config_key, map_key
 from .config import Configurator
 from .map import Map
-from .source.gcs import GCS_URI_PREFIX
+from .source.gcs import GCS_URI_SCHEME, get_gcs_blob
 
 logger = getLogger(__name__)
 
@@ -46,19 +44,19 @@ class StairLight:
     """Table dependency detector"""
 
     def __init__(
-        self, config_dir: str = ".", load_file: str = None, save_file: str = None
+        self, config_dir: str = ".", load_files: list = None, save_file: str = None
     ) -> None:
         """Table dependency detector
 
         Args:
             config_dir (str, optional):
                 Stairlight configuration directory. Defaults to ".".
-            load_file (str, optional):
-                A file name of loading results if load option set. Defaults to None.
+            load_files (list, optional):
+                file names of loading results if load option set. Defaults to None.
             save_file (str, optional):
                 A file name of saving results if save option set. Defaults to None.
         """
-        self.load_file = load_file
+        self.load_files = load_files
         self.save_file = save_file
         self._configurator = Configurator(dir=config_dir)
         self._mapped = {}
@@ -67,14 +65,19 @@ class StairLight:
         self._stairlight_config = self._configurator.read(
             prefix=config_key.STAIRLIGHT_CONFIG_FILE_PREFIX
         )
-        if self._stairlight_config:
-            if self.load_file:
-                self.load_map()
-            else:
-                self._set_config()
-                self._get_map()
-                if self.save_file:
-                    self.save_map()
+
+    def create_map(self) -> None:
+        if not self._stairlight_config:
+            return
+
+        if self.load_files:
+            self.load_map()
+        else:
+            self._set_config()
+            self._write_map()
+
+        if self.save_file:
+            self.save_map()
 
     @property
     def mapped(self) -> dict:
@@ -119,8 +122,8 @@ class StairLight:
                 mapping_config_prefix = settings[config_key.MAPPING_PREFIX]
         self._mapping_config = self._configurator.read(prefix=mapping_config_prefix)
 
-    def _get_map(self) -> None:
-        """get a dependency map"""
+    def _write_map(self) -> None:
+        """write a dependency map"""
         dependency_map = Map(
             stairlight_config=self._stairlight_config,
             mapping_config=self._mapping_config,
@@ -154,7 +157,7 @@ class StairLight:
         Returns:
             str: Template file name
         """
-        if self.load_file:
+        if self.load_files:
             logger.warning("Load option is used, skip checking.")
             return None
         elif not self._unmapped:
@@ -166,7 +169,7 @@ class StairLight:
 
     def save_map(self) -> None:
         """Save mapped results"""
-        if self.save_file.startswith(GCS_URI_PREFIX):
+        if self.save_file.startswith(GCS_URI_SCHEME):
             self.save_map_gcs()
         else:
             self.save_map_fs()
@@ -186,35 +189,29 @@ class StairLight:
 
     def load_map(self) -> None:
         """Load mapped results"""
-        if self.load_file.startswith(GCS_URI_PREFIX):
-            self.load_map_gcs()
-        else:
-            self.load_map_fs()
+        for load_file in self.load_files:
+            loaded_map = {}
+            if load_file.startswith(GCS_URI_SCHEME):
+                loaded_map = self.load_map_gcs(load_file=load_file)
+            else:
+                loaded_map = self.load_map_fs(load_file=load_file)
+            self._mapped = {**self._mapped, **loaded_map}
 
-    def load_map_gcs(self) -> None:
+    def load_map_gcs(self, load_file: str) -> dict:
         """Load mapped results from Google Cloud Storage"""
-        blob = self.get_gcs_blob(self.load_file)
+        blob = get_gcs_blob(load_file)
         if not blob.exists():
-            logger.error(f"{self.load_file} is not found.")
+            logger.error(f"{load_file} is not found.")
             exit()
-        self._mapped = json.loads(blob.download_as_string())
+        return json.loads(blob.download_as_string())
 
-    def load_map_fs(self) -> None:
+    def load_map_fs(self, load_file: str) -> dict:
         """Load mapped results from file system"""
-        if not os.path.exists(self.load_file):
-            logger.error(f"{self.load_file} is not found.")
+        if not os.path.exists(load_file):
+            logger.error(f"{load_file} is not found.")
             exit()
-        with open(self.load_file) as f:
-            self._mapped = json.load(f)
-
-    @staticmethod
-    def get_gcs_blob(gcs_uri: str) -> storage.Blob:
-        bucket_name = gcs_uri.replace(GCS_URI_PREFIX, "").split("/")[0]
-        key = gcs_uri.replace(f"{GCS_URI_PREFIX}{bucket_name}/", "")
-
-        client = storage.Client(credentials=None, project=None)
-        bucket = client.get_bucket(bucket_name)
-        return bucket.blob(key)
+        with open(load_file) as f:
+            return json.load(f)
 
     def up(
         self,
