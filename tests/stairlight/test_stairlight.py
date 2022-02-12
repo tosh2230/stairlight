@@ -1,4 +1,10 @@
-from src.stairlight import ResponseType, SearchDirection, StairLight, is_cyclic
+from src.stairlight import map_key
+from src.stairlight.stairlight import (
+    ResponseType,
+    SearchDirection,
+    StairLight,
+    is_cyclic,
+)
 
 
 class TestResponseType:
@@ -17,18 +23,23 @@ class TestSearchDirection:
         assert SearchDirection.DOWN.value == "Downstairs"
 
 
-class TestProperty:
-    def test_mapped(self, stairlight):
-        assert len(stairlight.mapped) > 0
+class TestStairLight:
+    stairlight = StairLight(config_dir="./config")
+    stairlight.create_map()
 
-    def test_unmapped(self, stairlight):
+    def test_has_stairlight_config(self):
+        assert self.stairlight.has_stairlight_config()
+
+    def test_mapped(self):
+        assert len(self.stairlight.mapped) > 0
+
+    def test_unmapped(self):
         file_keys = [
-            unmapped_file.get("template_file") for unmapped_file in stairlight.unmapped
+            unmapped_file.get(map_key.TEMPLATE)
+            for unmapped_file in self.stairlight.unmapped
         ]
         assert len(file_keys) > 0
 
-
-class TestSuccess:
     def test_init(self, stairlight, stairlight_template):
         assert (
             stairlight.init(prefix=stairlight_template)
