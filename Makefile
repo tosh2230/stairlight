@@ -1,3 +1,5 @@
+version = 0.3.1
+
 lint:
 	poetry run flake8 ./src ./tests
 	poetry run isort --check --diff ./src ./tests
@@ -7,18 +9,20 @@ format:
 	poetry run black ./src ./tests
 exec:
 	@poetry build
-	@pip install ./dist/stairlight-0.2.0.tar.gz
+	@poetry run pip install ./dist/stairlight-${version}.tar.gz
 	@poetry run python -m stairlight -c config
 check:
 	@poetry build
-	@pip install ./dist/stairlight-0.2.0.tar.gz
+	@poetry run pip install ./dist/stairlight-${version}.tar.gz
 	@poetry run python -m stairlight check -c config
 test:
-	@poetry install
+	@poetry build
+	@poetry run pip install ./dist/stairlight-${version}.tar.gz
 	@poetry run pytest -v --cov=src
 test-report:
 	@rm -r ./htmlcov
-	@poetry install
+	@poetry build
+	@poetry run pip install ./dist/stairlight-${version}.tar.gz
 	@poetry run pytest -v --cov=src --cov-report=html
 setup-gcs:
 	@poetry run python ./scripts/setup_test.py

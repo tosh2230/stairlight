@@ -1,4 +1,10 @@
-from src.stairlight import ResponseType, SearchDirection, StairLight, is_cyclic
+from src.stairlight import map_key
+from src.stairlight.stairlight import (
+    ResponseType,
+    SearchDirection,
+    StairLight,
+    is_cyclic,
+)
 
 
 class TestResponseType:
@@ -17,47 +23,48 @@ class TestSearchDirection:
         assert SearchDirection.DOWN.value == "Downstairs"
 
 
-class TestProperty:
-    def test_mapped(self, stairlight):
-        assert len(stairlight.mapped) > 0
+class TestStairLight:
+    stairlight = StairLight(config_dir="./config")
+    stairlight.create_map()
 
-    def test_unmapped(self, stairlight):
+    def test_has_stairlight_config(self):
+        assert self.stairlight.has_stairlight_config()
+
+    def test_mapped(self):
+        assert self.stairlight.mapped
+
+    def test_unmapped(self):
         file_keys = [
-            unmapped_file.get("template_file") for unmapped_file in stairlight.unmapped
+            unmapped_file.get(map_key.TEMPLATE)
+            for unmapped_file in self.stairlight.unmapped
         ]
-        assert len(file_keys) > 0
+        assert file_keys
 
-
-class TestSuccess:
-    def test_init(self, stairlight, stairlight_template):
+    def test_init(self, stairlight_template):
         assert (
-            stairlight.init(prefix=stairlight_template)
+            self.stairlight.init(prefix=stairlight_template)
             == f"./config/{stairlight_template}.yaml"
         )
 
-    def test_check(self, stairlight, mapping_template):
-        assert stairlight.check(prefix=mapping_template).startswith(
+    def test_check(self, mapping_template):
+        assert self.stairlight.check(prefix=mapping_template).startswith(
             f"./config/{mapping_template}"
         )
 
-    def test_check_on_load(self, stairlight):
-        stairlight_load = StairLight(
-            config_dir="./config", load_file=stairlight.save_file
-        )
-        assert stairlight_load.check() is None
-
-    def test_up_next(self, stairlight):
+    def test_up_next(self):
         table_name = "PROJECT_D.DATASET_E.TABLE_F"
-        result = stairlight.up(table_name=table_name, recursive=False, verbose=False)
+        result = self.stairlight.up(
+            table_name=table_name, recursive=False, verbose=False
+        )
         assert sorted(result) == [
             "PROJECT_C.DATASET_C.TABLE_C",
             "PROJECT_J.DATASET_K.TABLE_L",
             "PROJECT_d.DATASET_d.TABLE_d",
         ]
 
-    def test_up_recursive_verbose(self, stairlight):
+    def test_up_recursive_verbose(self):
         table_name = "PROJECT_D.DATASET_E.TABLE_F"
-        result = stairlight.up(table_name=table_name, recursive=True, verbose=True)
+        result = self.stairlight.up(table_name=table_name, recursive=True, verbose=True)
         assert sorted(
             result[table_name][SearchDirection.UP.value]["PROJECT_J.DATASET_K.TABLE_L"][
                 SearchDirection.UP.value
@@ -68,9 +75,9 @@ class TestSuccess:
             "PROJECT_V.DATASET_W.TABLE_X",
         ]
 
-    def test_up_recursive_plain_table(self, stairlight):
+    def test_up_recursive_plain_table(self):
         table_name = "PROJECT_D.DATASET_E.TABLE_F"
-        result = stairlight.up(
+        result = self.stairlight.up(
             table_name=table_name,
             recursive=True,
             verbose=False,
@@ -86,9 +93,9 @@ class TestSuccess:
             "PROJECT_e.DATASET_e.TABLE_e",
         ]
 
-    def test_up_recursive_plain_file(self, stairlight, tests_dir):
+    def test_up_recursive_plain_file(self, tests_dir: str):
         table_name = "PROJECT_D.DATASET_E.TABLE_F"
-        result = stairlight.up(
+        result = self.stairlight.up(
             table_name=table_name,
             recursive=True,
             verbose=False,
@@ -100,18 +107,22 @@ class TestSuccess:
             f"{tests_dir}/sql/main/test_f.sql",
         ]
 
-    def test_down_next(self, stairlight):
+    def test_down_next(self):
         table_name = "PROJECT_C.DATASET_C.TABLE_C"
-        result = stairlight.down(table_name=table_name, recursive=False, verbose=False)
+        result = self.stairlight.down(
+            table_name=table_name, recursive=False, verbose=False
+        )
         assert sorted(result) == [
             "PROJECT_D.DATASET_E.TABLE_F",
             "PROJECT_G.DATASET_H.TABLE_I",
             "PROJECT_d.DATASET_e.TABLE_f",
         ]
 
-    def test_down_recursive_verbose(self, stairlight):
+    def test_down_recursive_verbose(self):
         table_name = "PROJECT_C.DATASET_C.TABLE_C"
-        result = stairlight.down(table_name=table_name, recursive=True, verbose=True)
+        result = self.stairlight.down(
+            table_name=table_name, recursive=True, verbose=True
+        )
         assert sorted(
             result[table_name][SearchDirection.DOWN.value][
                 "PROJECT_d.DATASET_e.TABLE_f"
@@ -120,9 +131,9 @@ class TestSuccess:
             "PROJECT_j.DATASET_k.TABLE_l",
         ]
 
-    def test_down_recursive_plain_table(self, stairlight):
+    def test_down_recursive_plain_table(self):
         table_name = "PROJECT_C.DATASET_C.TABLE_C"
-        result = stairlight.down(
+        result = self.stairlight.down(
             table_name=table_name,
             recursive=True,
             verbose=False,
@@ -135,9 +146,9 @@ class TestSuccess:
             "PROJECT_j.DATASET_k.TABLE_l",
         ]
 
-    def test_down_recursive_plain_file(self, stairlight, tests_dir):
+    def test_down_recursive_plain_file(self, tests_dir: str):
         table_name = "PROJECT_C.DATASET_C.TABLE_C"
-        result = stairlight.down(
+        result = self.stairlight.down(
             table_name=table_name,
             recursive=True,
             verbose=False,
@@ -149,43 +160,59 @@ class TestSuccess:
             "gs://stairlight/sql/test_b/test_b.sql",
         ]
 
-    def test_get_relative_map_up(self, stairlight):
+    def test_get_relative_map_up(self):
         table_name = "PROJECT_d.DATASET_d.TABLE_d"
-        result = stairlight.get_relative_map(
+        result = self.stairlight.get_relative_map(
             table_name=table_name, direction=SearchDirection.UP
         )
         assert "PROJECT_e.DATASET_e.TABLE_e" in result
 
-    def test_get_relative_map_down(self, stairlight):
+    def test_get_relative_map_down(self):
         table_name = "PROJECT_A.DATASET_A.TABLE_A"
-        result = stairlight.get_relative_map(
+        result = self.stairlight.get_relative_map(
             table_name=table_name, direction=SearchDirection.DOWN
         )
         assert "PROJECT_A.DATASET_B.TABLE_C" in result
 
-    def test_get_tables_by_labels_single(self, stairlight):
+    def test_get_tables_by_labels_single(self):
         targets = ["Test:b"]
-        result = stairlight.get_tables_by_labels(targets=targets)
+        result = self.stairlight.get_tables_by_labels(targets=targets)
         assert result == [
             "PROJECT_D.DATASET_E.TABLE_F",
             "PROJECT_G.DATASET_H.TABLE_I",
             "PROJECT_d.DATASET_e.TABLE_f",
         ]
 
-    def test_get_tables_by_labels_double(self, stairlight):
+    def test_get_tables_by_labels_double(self):
         targets = ["Test:b", "Source:gcs"]
-        result = stairlight.get_tables_by_labels(targets=targets)
+        result = self.stairlight.get_tables_by_labels(targets=targets)
         assert result == ["PROJECT_d.DATASET_e.TABLE_f"]
 
-    def test_is_target_found_true(self, stairlight):
+    def test_is_target_found_true(self):
         targets = ["test:a", "group:c"]
         labels = {"test": "a", "category": "b", "group": "c"}
-        assert stairlight.is_target_found(targets=targets, labels=labels)
+        assert self.stairlight.is_target_found(targets=targets, labels=labels)
 
-    def test_is_target_found_false(self, stairlight):
+    def test_is_target_found_false(self):
         targets = ["test:a", "category:b", "group:c", "app:d"]
         labels = {"test": "a", "category": "b", "group": "c"}
-        assert not stairlight.is_target_found(targets=targets, labels=labels)
+        assert not self.stairlight.is_target_found(targets=targets, labels=labels)
+
+    def test_check_on_load(self, stairlight_save: StairLight):
+        stairlight_load = StairLight(
+            config_dir="./config", load_files=[stairlight_save.save_file]
+        )
+        assert stairlight_load.check() is None
+
+    def test_multiple_load_and_save(self, stairlight_load_and_save: StairLight):
+        actual: dict = stairlight_load_and_save.load_map_fs(
+            stairlight_load_and_save.save_file
+        )
+        expected: dict = stairlight_load_and_save.load_map_fs(
+            "tests/results/merged.json"
+        )
+
+        assert actual == expected
 
 
 class TestIsCyclic:

@@ -76,7 +76,7 @@ def command_down(stairlight: StairLight, args: argparse.Namespace) -> Union[dict
 
 
 def execute_up_or_down(
-    up_or_down: Callable, args: argparse.Namespace, tables: Union[str, list]
+    up_or_down: Callable, args: argparse.Namespace, tables: list
 ) -> Union[dict, list]:
     """Execute a command, up or down
 
@@ -144,18 +144,21 @@ def set_save_load_parser(parser: argparse.ArgumentParser) -> None:
     Args:
         parser (argparse.ArgumentParser): ArgumentParser
     """
-    group = parser.add_mutually_exclusive_group()
-    group.add_argument(
+    parser.add_argument(
         "--save",
         help="file path where results will be saved(File system or GCS)",
         type=str,
         default=None,
     )
-    group.add_argument(
+    parser.add_argument(
         "--load",
-        help="file path in which results are saved(File system or GCS)",
-        type=str,
-        default=None,
+        help=textwrap.dedent(
+            """\
+            file path in which results are saved(File system or GCS),
+            can be specified multiple times
+        """
+        ),
+        action="append",
     )
 
 
@@ -272,8 +275,9 @@ def main() -> None:
     parser = create_parser()
     args = parser.parse_args()
     stairlight = StairLight(
-        config_dir=args.config, load_file=args.load, save_file=args.save
+        config_dir=args.config, load_files=args.load, save_file=args.save
     )
+    stairlight.create_map()
 
     result = None
     if hasattr(args, "handler"):

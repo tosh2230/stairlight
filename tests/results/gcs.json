@@ -1,0 +1,70 @@
+{
+  "PROJECT_d.DATASET_e.TABLE_f": {
+    "PROJECT_C.DATASET_C.TABLE_C": {
+      "TemplateSourceType": "GCS",
+      "Key": "sql/test_b/test_b.sql",
+      "Uri": "gs://stairlight/sql/test_b/test_b.sql",
+      "Lines": [
+        {
+          "LineNumber": 6,
+          "LineString": "        PROJECT_C.DATASET_C.TABLE_C"
+        }
+      ],
+      "BucketName": "stairlight",
+      "Labels": {
+        "Source": "gcs",
+        "Test": "b"
+      }
+    },
+    "PROJECT_d.DATASET_d.TABLE_d": {
+      "TemplateSourceType": "GCS",
+      "Key": "sql/test_b/test_b.sql",
+      "Uri": "gs://stairlight/sql/test_b/test_b.sql",
+      "Lines": [
+        {
+          "LineNumber": 15,
+          "LineString": "        PROJECT_d.DATASET_d.TABLE_d"
+        }
+      ],
+      "BucketName": "stairlight",
+      "Labels": {
+        "Source": "gcs",
+        "Test": "b"
+      }
+    },
+    "PROJECT_g.DATASET_h.TABLE_i": {
+      "TemplateSourceType": "GCS",
+      "Key": "sql/test_b/test_b.sql",
+      "Uri": "gs://stairlight/sql/test_b/test_b.sql",
+      "Lines": [
+        {
+          "LineNumber": 23,
+          "LineString": "    PROJECT_g.DATASET_h.TABLE_i AS b"
+        }
+      ],
+      "BucketName": "stairlight",
+      "Labels": {
+        "Source": "gcs",
+        "Test": "b"
+      }
+    }
+  },
+  "PROJECT_a.DATASET_b.TABLE_c": {
+    "PROJECT_A.DATASET_A.TABLE_A": {
+      "TemplateSourceType": "GCS",
+      "Key": "sql/test_a/test_a.sql",
+      "Uri": "gs://stairlight/sql/test_a/test_a.sql",
+      "Lines": [
+        {
+          "LineNumber": 1,
+          "LineString": "SELECT * FROM PROJECT_A.DATASET_A.TABLE_A WHERE 1 = 1"
+        }
+      ],
+      "BucketName": "stairlight",
+      "Labels": {
+        "Source": null,
+        "Test": "a"
+      }
+    }
+  }
+}

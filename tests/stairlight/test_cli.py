@@ -1,20 +1,21 @@
 # from pytest import monkeypatch
 
 import src.stairlight.cli as cli_main
+from stairlight import StairLight
 
 
 class TestSuccess:
     parser = cli_main.create_parser()
 
-    def test_command_init(self, stairlight_init):
+    def test_command_init(self, stairlight_init: StairLight):
         message = cli_main.command_init(stairlight=stairlight_init, args=None)
         assert len(message) > 0
 
-    def test_command_check(self, stairlight):
-        message = cli_main.command_check(stairlight=stairlight, args=None)
+    def test_command_check(self, stairlight_save: StairLight):
+        message = cli_main.command_check(stairlight=stairlight_save, args=None)
         assert len(message) > 0
 
-    def test_command_up_table(self, stairlight):
+    def test_command_up_table(self, stairlight_save: StairLight):
         args = self.parser.parse_args(
             [
                 "up",
@@ -26,10 +27,10 @@ class TestSuccess:
                 "-v",
             ]
         )
-        results = cli_main.command_up(stairlight=stairlight, args=args)
+        results = cli_main.command_up(stairlight=stairlight_save, args=args)
         assert len(results) > 0
 
-    def test_command_up_label(self, stairlight):
+    def test_command_up_label(self, stairlight_save: StairLight):
         args = self.parser.parse_args(
             [
                 "up",
@@ -41,10 +42,10 @@ class TestSuccess:
                 "-v",
             ]
         )
-        results = cli_main.command_up(stairlight=stairlight, args=args)
+        results = cli_main.command_up(stairlight=stairlight_save, args=args)
         assert len(results) > 0
 
-    def test_command_down_table(self, stairlight):
+    def test_command_down_table(self, stairlight_save: StairLight):
         args = self.parser.parse_args(
             [
                 "down",
@@ -52,10 +53,10 @@ class TestSuccess:
                 "PROJECT_C.DATASET_C.TABLE_C",
             ]
         )
-        results = cli_main.command_down(stairlight=stairlight, args=args)
+        results = cli_main.command_down(stairlight=stairlight_save, args=args)
         assert len(results) > 0
 
-    def test_command_down_label(self, stairlight):
+    def test_command_down_label(self, stairlight_save: StairLight):
         args = self.parser.parse_args(
             [
                 "down",
@@ -65,7 +66,7 @@ class TestSuccess:
                 "-v",
             ]
         )
-        results = cli_main.command_down(stairlight=stairlight, args=args)
+        results = cli_main.command_down(stairlight=stairlight_save, args=args)
         assert results.get("PROJECT_J.DATASET_K.TABLE_L") != {}
 
     def test_main(self, monkeypatch, capfd):

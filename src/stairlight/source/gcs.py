@@ -6,7 +6,7 @@ from google.cloud import storage
 from .. import config_key
 from .base import Template, TemplateSource, TemplateSourceType
 
-GCS_URI_PREFIX = "gs://"
+GCS_URI_SCHEME = "gs://"
 
 
 class GcsTemplate(Template):
@@ -35,7 +35,7 @@ class GcsTemplate(Template):
         Returns:
             str: uri
         """
-        return f"{GCS_URI_PREFIX}{self.bucket}/{self.key}"
+        return f"{GCS_URI_SCHEME}{self.bucket}/{self.key}"
 
     def get_template_str(self) -> str:
         """Get template string that read from a file in GCS
@@ -109,3 +109,12 @@ class GcsTemplateSource(TemplateSource):
                     config_key.DEFAULT_TABLE_PREFIX
                 ),
             )
+
+
+def get_gcs_blob(gcs_uri: str) -> storage.Blob:
+    bucket_name = gcs_uri.replace(GCS_URI_SCHEME, "").split("/")[0]
+    key = gcs_uri.replace(f"{GCS_URI_SCHEME}{bucket_name}/", "")
+
+    client = storage.Client(credentials=None, project=None)
+    bucket = client.get_bucket(bucket_name)
+    return bucket.blob(key)

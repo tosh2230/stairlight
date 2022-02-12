@@ -1,0 +1,248 @@
+{
+  "test_project.beam_streaming.taxirides_aggregation": {
+    "test_project.beam_streaming.taxirides_realtime": {
+      "TemplateSourceType": "File",
+      "Key": "tests/sql/main/test_union_same_table.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/test_union_same_table.sql",
+      "Lines": [
+        {
+          "LineNumber": 6,
+          "LineString": "    test_project.beam_streaming.taxirides_realtime"
+        },
+        {
+          "LineNumber": 15,
+          "LineString": "    test_project.beam_streaming.taxirides_realtime"
+        }
+      ]
+    }
+  },
+  "PROJECT_d.DATASET_e.TABLE_f": {
+    "PROJECT_j.DATASET_k.TABLE_l": {
+      "TemplateSourceType": "File",
+      "Key": "tests/sql/main/test_e.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/test_e.sql",
+      "Lines": [
+        {
+          "LineNumber": 1,
+          "LineString": "SELECT * FROM PROJECT_j.DATASET_k.TABLE_l WHERE 1 = 1"
+        }
+      ]
+    }
+  },
+  "PROJECT_j.DATASET_k.TABLE_l": {
+    "PROJECT_d.DATASET_e.TABLE_f": {
+      "TemplateSourceType": "File",
+      "Key": "tests/sql/main/test_d.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/test_d.sql",
+      "Lines": [
+        {
+          "LineNumber": 1,
+          "LineString": "SELECT * FROM PROJECT_d.DATASET_e.TABLE_f WHERE 1 = 1"
+        }
+      ]
+    }
+  },
+  "PROJECT_d.DATASET_d.TABLE_d": {
+    "PROJECT_e.DATASET_e.TABLE_e": {
+      "TemplateSourceType": "File",
+      "Key": "tests/sql/main/test_f.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/test_f.sql",
+      "Lines": [
+        {
+          "LineNumber": 1,
+          "LineString": "SELECT * FROM PROJECT_e.DATASET_e.TABLE_e WHERE 1 = 1"
+        }
+      ]
+    }
+  },
+  "PROJECT_u.DATASET_u.TABLE_u": {
+    "PROJECT_t.DATASET_t.TABLE_t": {
+      "TemplateSourceType": "File",
+      "Key": "tests/sql/main/test_undefined_part.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/test_undefined_part.sql",
+      "Lines": [
+        {
+          "LineNumber": 23,
+          "LineString": "    PROJECT_t.DATASET_t.TABLE_t AS b"
+        }
+      ]
+    },
+    "PROJECT_A.WHERE": {
+      "TemplateSourceType": "File",
+      "Key": "tests/sql/main/test_undefined_part.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/test_undefined_part.sql",
+      "Lines": [
+        {
+          "LineNumber": 7,
+          "LineString": "    WHERE"
+        },
+        {
+          "LineNumber": 16,
+          "LineString": "    WHERE"
+        },
+        {
+          "LineNumber": 28,
+          "LineString": "WHERE"
+        }
+      ]
+    }
+  },
+  "PROJECT_J.DATASET_K.TABLE_L": {
+    "PROJECT_P.DATASET_Q.TABLE_R": {
+      "TemplateSourceType": "File",
+      "Key": "tests/sql/main/test_c.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/test_c.sql",
+      "Lines": [
+        {
+          "LineNumber": 23,
+          "LineString": "    PROJECT_P.DATASET_Q.TABLE_R AS b"
+        }
+      ],
+      "Labels": {
+        "Source": "file",
+        "Test": "c"
+      }
+    },
+    "PROJECT_S.DATASET_T.TABLE_U": {
+      "TemplateSourceType": "File",
+      "Key": "tests/sql/main/test_c.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/test_c.sql",
+      "Lines": [
+        {
+          "LineNumber": 6,
+          "LineString": "        PROJECT_S.DATASET_T.TABLE_U"
+        }
+      ],
+      "Labels": {
+        "Source": "file",
+        "Test": "c"
+      }
+    },
+    "PROJECT_V.DATASET_W.TABLE_X": {
+      "TemplateSourceType": "File",
+      "Key": "tests/sql/main/test_c.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/test_c.sql",
+      "Lines": [
+        {
+          "LineNumber": 15,
+          "LineString": "        PROJECT_V.DATASET_W.TABLE_X"
+        }
+      ],
+      "Labels": {
+        "Source": "file",
+        "Test": "c"
+      }
+    }
+  },
+  "PROJECT_D.DATASET_E.TABLE_F": {
+    "PROJECT_C.DATASET_C.TABLE_C": {
+      "TemplateSourceType": "File",
+      "Key": "tests/sql/main/test_b.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/test_b.sql",
+      "Lines": [
+        {
+          "LineNumber": 6,
+          "LineString": "        PROJECT_C.DATASET_C.TABLE_C"
+        }
+      ],
+      "Labels": {
+        "Source": "file",
+        "Test": "b"
+      }
+    },
+    "PROJECT_J.DATASET_K.TABLE_L": {
+      "TemplateSourceType": "File",
+      "Key": "tests/sql/main/test_b.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/test_b.sql",
+      "Lines": [
+        {
+          "LineNumber": 23,
+          "LineString": "    PROJECT_J.DATASET_K.TABLE_L AS b"
+        }
+      ],
+      "Labels": {
+        "Source": "file",
+        "Test": "b"
+      }
+    },
+    "PROJECT_d.DATASET_d.TABLE_d": {
+      "TemplateSourceType": "File",
+      "Key": "tests/sql/main/test_b.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/test_b.sql",
+      "Lines": [
+        {
+          "LineNumber": 15,
+          "LineString": "        PROJECT_d.DATASET_d.TABLE_d"
+        }
+      ],
+      "Labels": {
+        "Source": "file",
+        "Test": "b"
+      }
+    }
+  },
+  "PROJECT_G.DATASET_H.TABLE_I": {
+    "PROJECT_C.DATASET_C.TABLE_C": {
+      "TemplateSourceType": "File",
+      "Key": "tests/sql/main/test_b.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/test_b.sql",
+      "Lines": [
+        {
+          "LineNumber": 6,
+          "LineString": "        PROJECT_C.DATASET_C.TABLE_C"
+        }
+      ],
+      "Labels": {
+        "Source": "file",
+        "Test": "b"
+      }
+    },
+    "PROJECT_M.DATASET_N.TABLE_O": {
+      "TemplateSourceType": "File",
+      "Key": "tests/sql/main/test_b.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/test_b.sql",
+      "Lines": [
+        {
+          "LineNumber": 23,
+          "LineString": "    PROJECT_M.DATASET_N.TABLE_O AS b"
+        }
+      ],
+      "Labels": {
+        "Source": "file",
+        "Test": "b"
+      }
+    },
+    "PROJECT_d.DATASET_d.TABLE_d": {
+      "TemplateSourceType": "File",
+      "Key": "tests/sql/main/test_b.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/test_b.sql",
+      "Lines": [
+        {
+          "LineNumber": 15,
+          "LineString": "        PROJECT_d.DATASET_d.TABLE_d"
+        }
+      ],
+      "Labels": {
+        "Source": "file",
+        "Test": "b"
+      }
+    }
+  },
+  "PROJECT_A.DATASET_B.TABLE_C": {
+    "PROJECT_A.DATASET_A.TABLE_A": {
+      "TemplateSourceType": "File",
+      "Key": "tests/sql/main/test_a.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/test_a.sql",
+      "Lines": [
+        {
+          "LineNumber": 1,
+          "LineString": "SELECT * FROM DATASET_A.TABLE_A WHERE 1 = 1"
+        }
+      ],
+      "Labels": {
+        "Source": null,
+        "Test": "a"
+      }
+    }
+  }
+}

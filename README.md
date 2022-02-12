@@ -191,7 +191,7 @@ This section is mainly used to set metadata to tables appears only in queries.
 
 ```txt
 $ stairlight --help
-usage: stairlight [-h] [-c CONFIG] [--save SAVE | --load LOAD] {init,check,up,down} ...
+usage: stairlight [-h] [-c CONFIG] [--save SAVE] [--load LOAD] {init,check,up,down} ...
 
 A table-level data lineage tool, detects table dependencies by SELECT queries.
 Without positional arguments, return a table dependency map as JSON format.
@@ -208,7 +208,7 @@ optional arguments:
   -c CONFIG, --config CONFIG
                         set Stairlight configuration directory
   --save SAVE           file path where results will be saved(File system or GCS)
-  --load LOAD           file path in which results are saved(File system or GCS)
+  --load LOAD           file path in which results are saved(File system or GCS), can be specified multiple times
 ```
 
 ### init
@@ -217,7 +217,7 @@ optional arguments:
 
 ```txt
 $ stairlight init --help
-usage: stairlight init [-h] [-c CONFIG] [-s SAVE | -l LOAD]
+usage: stairlight init [-h] [-c CONFIG]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -240,15 +240,15 @@ The option specification is the same as `init`.
 
 ```txt
 $ stairlight up --help
-usage: stairlight up [-h] [-c CONFIG] [--save SAVE | --load LOAD] (-t TABLE | -l LABEL)
-                  [-o {table,file}] [-v] [-r]
+usage: stairlight up [-h] [-c CONFIG] [--save SAVE] [--load LOAD] (-t TABLE | -l LABEL) [-o {table,file}]
+                     [-v] [-r]
 
 optional arguments:
   -h, --help            show this help message and exit
   -c CONFIG, --config CONFIG
                         set Stairlight configuration directory
   --save SAVE           file path where results will be saved(File system or GCS)
-  --load LOAD           file path in which results are saved(File system or GCS)
+  --load LOAD           file path in which results are saved(File system or GCS), can be specified multiple times
   -t TABLE, --table TABLE
                         table names that Stairlight searches for, can be specified
                         multiple times. e.g. -t PROJECT_a.DATASET_b.TABLE_c -t

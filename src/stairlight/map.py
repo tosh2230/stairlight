@@ -12,7 +12,7 @@ class Map:
     """Manages functions related to dependency map objects"""
 
     def __init__(
-        self, stairlight_config: dict, mapping_config: dict, mapped: dict = {}
+        self, stairlight_config: dict, mapping_config: dict, mapped: dict = None
     ) -> None:
         """Manages functions related to dependency map objects
 
@@ -23,7 +23,10 @@ class Map:
                 Mapped file attributes when a mapping configuration file loaded.
                 Defaults to {}.
         """
-        self.mapped = mapped
+        if mapped:
+            self.mapped = mapped
+        else:
+            self.mapped = {}
         self.unmapped = []
         self.stairlight_config = stairlight_config
         self.mapping_config = mapping_config
