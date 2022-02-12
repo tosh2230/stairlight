@@ -3,7 +3,7 @@
     "test_project.beam_streaming.taxirides_realtime": {
       "TemplateSourceType": "File",
       "Key": "tests/sql/main/test_union_same_table.sql",
-      "Uri": "/Users/tosh2230/project/stairlight/tests/sql/main/test_union_same_table.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/test_union_same_table.sql",
       "Lines": [
         {
           "LineNumber": 6,
@@ -20,7 +20,7 @@
     "PROJECT_j.DATASET_k.TABLE_l": {
       "TemplateSourceType": "File",
       "Key": "tests/sql/main/test_e.sql",
-      "Uri": "/Users/tosh2230/project/stairlight/tests/sql/main/test_e.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/test_e.sql",
       "Lines": [
         {
           "LineNumber": 1,
@@ -33,7 +33,7 @@
     "PROJECT_d.DATASET_e.TABLE_f": {
       "TemplateSourceType": "File",
       "Key": "tests/sql/main/test_d.sql",
-      "Uri": "/Users/tosh2230/project/stairlight/tests/sql/main/test_d.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/test_d.sql",
       "Lines": [
         {
           "LineNumber": 1,
@@ -46,7 +46,7 @@
     "PROJECT_e.DATASET_e.TABLE_e": {
       "TemplateSourceType": "File",
       "Key": "tests/sql/main/test_f.sql",
-      "Uri": "/Users/tosh2230/project/stairlight/tests/sql/main/test_f.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/test_f.sql",
       "Lines": [
         {
           "LineNumber": 1,
@@ -59,7 +59,7 @@
     "PROJECT_t.DATASET_t.TABLE_t": {
       "TemplateSourceType": "File",
       "Key": "tests/sql/main/test_undefined_part.sql",
-      "Uri": "/Users/tosh2230/project/stairlight/tests/sql/main/test_undefined_part.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/test_undefined_part.sql",
       "Lines": [
         {
           "LineNumber": 23,
@@ -70,7 +70,7 @@
     "PROJECT_A.WHERE": {
       "TemplateSourceType": "File",
       "Key": "tests/sql/main/test_undefined_part.sql",
-      "Uri": "/Users/tosh2230/project/stairlight/tests/sql/main/test_undefined_part.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/test_undefined_part.sql",
       "Lines": [
         {
           "LineNumber": 7,
@@ -91,7 +91,7 @@
     "PROJECT_P.DATASET_Q.TABLE_R": {
       "TemplateSourceType": "File",
       "Key": "tests/sql/main/test_c.sql",
-      "Uri": "/Users/tosh2230/project/stairlight/tests/sql/main/test_c.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/test_c.sql",
       "Lines": [
         {
           "LineNumber": 23,
@@ -106,7 +106,7 @@
     "PROJECT_S.DATASET_T.TABLE_U": {
       "TemplateSourceType": "File",
       "Key": "tests/sql/main/test_c.sql",
-      "Uri": "/Users/tosh2230/project/stairlight/tests/sql/main/test_c.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/test_c.sql",
       "Lines": [
         {
           "LineNumber": 6,
@@ -121,7 +121,7 @@
     "PROJECT_V.DATASET_W.TABLE_X": {
       "TemplateSourceType": "File",
       "Key": "tests/sql/main/test_c.sql",
-      "Uri": "/Users/tosh2230/project/stairlight/tests/sql/main/test_c.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/test_c.sql",
       "Lines": [
         {
           "LineNumber": 15,
@@ -138,7 +138,7 @@
     "PROJECT_C.DATASET_C.TABLE_C": {
       "TemplateSourceType": "File",
       "Key": "tests/sql/main/test_b.sql",
-      "Uri": "/Users/tosh2230/project/stairlight/tests/sql/main/test_b.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/test_b.sql",
       "Lines": [
         {
           "LineNumber": 6,
@@ -153,7 +153,7 @@
     "PROJECT_J.DATASET_K.TABLE_L": {
       "TemplateSourceType": "File",
       "Key": "tests/sql/main/test_b.sql",
-      "Uri": "/Users/tosh2230/project/stairlight/tests/sql/main/test_b.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/test_b.sql",
       "Lines": [
         {
           "LineNumber": 23,
@@ -168,7 +168,7 @@
     "PROJECT_d.DATASET_d.TABLE_d": {
       "TemplateSourceType": "File",
       "Key": "tests/sql/main/test_b.sql",
-      "Uri": "/Users/tosh2230/project/stairlight/tests/sql/main/test_b.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/test_b.sql",
       "Lines": [
         {
           "LineNumber": 15,
@@ -185,7 +185,7 @@
     "PROJECT_C.DATASET_C.TABLE_C": {
       "TemplateSourceType": "File",
       "Key": "tests/sql/main/test_b.sql",
-      "Uri": "/Users/tosh2230/project/stairlight/tests/sql/main/test_b.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/test_b.sql",
       "Lines": [
         {
           "LineNumber": 6,
@@ -200,7 +200,7 @@
     "PROJECT_M.DATASET_N.TABLE_O": {
       "TemplateSourceType": "File",
       "Key": "tests/sql/main/test_b.sql",
-      "Uri": "/Users/tosh2230/project/stairlight/tests/sql/main/test_b.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/test_b.sql",
       "Lines": [
         {
           "LineNumber": 23,
@@ -215,7 +215,7 @@
     "PROJECT_d.DATASET_d.TABLE_d": {
       "TemplateSourceType": "File",
       "Key": "tests/sql/main/test_b.sql",
-      "Uri": "/Users/tosh2230/project/stairlight/tests/sql/main/test_b.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/test_b.sql",
       "Lines": [
         {
           "LineNumber": 15,
@@ -232,7 +232,7 @@
     "PROJECT_A.DATASET_A.TABLE_A": {
       "TemplateSourceType": "File",
       "Key": "tests/sql/main/test_a.sql",
-      "Uri": "/Users/tosh2230/project/stairlight/tests/sql/main/test_a.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/test_a.sql",
       "Lines": [
         {
           "LineNumber": 1,
