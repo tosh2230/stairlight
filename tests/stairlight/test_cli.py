@@ -1,7 +1,7 @@
 # from pytest import monkeypatch
 
-from stairlight import StairLight
 import src.stairlight.cli as cli_main
+from stairlight import StairLight
 
 
 class TestSuccess:
