@@ -93,7 +93,7 @@ class TestStairLight:
             "PROJECT_e.DATASET_e.TABLE_e",
         ]
 
-    def test_up_recursive_plain_file(self, tests_dir):
+    def test_up_recursive_plain_file(self, tests_dir: str):
         table_name = "PROJECT_D.DATASET_E.TABLE_F"
         result = self.stairlight.up(
             table_name=table_name,
@@ -146,7 +146,7 @@ class TestStairLight:
             "PROJECT_j.DATASET_k.TABLE_l",
         ]
 
-    def test_down_recursive_plain_file(self, tests_dir):
+    def test_down_recursive_plain_file(self, tests_dir: str):
         table_name = "PROJECT_C.DATASET_C.TABLE_C"
         result = self.stairlight.down(
             table_name=table_name,
@@ -198,11 +198,21 @@ class TestStairLight:
         labels = {"test": "a", "category": "b", "group": "c"}
         assert not self.stairlight.is_target_found(targets=targets, labels=labels)
 
-    def test_check_on_load(self, stairlight_save):
+    def test_check_on_load(self, stairlight_save: StairLight):
         stairlight_load = StairLight(
             config_dir="./config", load_files=[stairlight_save.save_file]
         )
         assert stairlight_load.check() is None
+
+    def test_multiple_load_and_save(self, stairlight_load_and_save: StairLight):
+        actual: dict = stairlight_load_and_save.load_map_fs(
+            stairlight_load_and_save.save_file
+        )
+        expected: dict = stairlight_load_and_save.load_map_fs(
+            "tests/results/merged.json"
+        )
+
+        assert actual == expected
 
 
 class TestIsCyclic:

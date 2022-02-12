@@ -195,7 +195,11 @@ class StairLight:
                 loaded_map = self.load_map_gcs(load_file=load_file)
             else:
                 loaded_map = self.load_map_fs(load_file=load_file)
-            self._mapped = {**self._mapped, **loaded_map}
+
+            if self._mapped:
+                self._mapped = deep_merge(org=self._mapped, add=loaded_map)
+            else:
+                self._mapped = loaded_map
 
     def load_map_gcs(self, load_file: str) -> dict:
         """Load mapped results from Google Cloud Storage"""
@@ -521,3 +525,14 @@ def is_cyclic(tables: list) -> bool:
         if slow == fast:
             return True
     return False
+
+
+def deep_merge(org: dict, add: dict) -> dict:
+    new: dict = org
+    for add_key, add_value in add.items():
+        org_value = org.get(add_key)
+        if add_key not in org:
+            new[add_key] = add_value
+        elif isinstance(add_value, dict):
+            new[add_key] = deep_merge(org=org_value, add=add_value)
+    return new
