@@ -10,6 +10,6 @@ Include:
     DefaultTablePrefix: "PROJECT_A"
 Exclude:
   - TemplateSourceType: File
-    Regex: "main/test_exclude.sql$"
+    Regex: "main/exclude.sql$"
 Settings:
   MappingPrefix: "mapping"

@@ -1,10 +1,10 @@
 Mapping:
   - TemplateSourceType: File
-    FileSuffix: "tests/sql/main/test_a.sql"
+    FileSuffix: "tests/sql/main/one_line_no_project.sql"
     Tables:
       - TableName: "PROJECT_A.DATASET_B.TABLE_C"
   - TemplateSourceType: File
-    FileSuffix: "tests/sql/main/test_b.sql"
+    FileSuffix: "tests/sql/main/cte_multi_line.sql"
     Tables:
       - TableName: "PROJECT_D.DATASET_E.TABLE_F"
         Parameters:
@@ -25,7 +25,7 @@ Mapping:
           Source: file
           Test: b
   - TemplateSourceType: File
-    FileSuffix: "tests/sql/main/test_c.sql"
+    FileSuffix: "tests/sql/main/cte_multi_line_params.sql"
     Tables:
       - TableName: "PROJECT_J.DATASET_K.TABLE_L"
         Parameters:
@@ -37,11 +37,11 @@ Mapping:
           Source: file
           Test: c
   - TemplateSourceType: GCS
-    Uri: "gs://stairlight/sql/test_a/test_a.sql"
+    Uri: "gs://stairlight/sql/one_line/one_line.sql"
     Tables:
       - TableName: "PROJECT_a.DATASET_b.TABLE_c"
   - TemplateSourceType: GCS
-    Uri: "gs://stairlight/sql/test_b/test_b.sql"
+    Uri: "gs://stairlight/sql/cte/cte_multi_line.sql"
     Tables:
       - TableName: "PROJECT_d.DATASET_e.TABLE_f"
         Parameters:
@@ -53,26 +53,26 @@ Mapping:
           Source: gcs
           Test: b
   - TemplateSourceType: File
-    FileSuffix: "tests/sql/main/test_d.sql"
+    FileSuffix: "tests/sql/main/one_line_1.sql"
     Tables:
       - TableName: "PROJECT_j.DATASET_k.TABLE_l"
   - TemplateSourceType: File
-    FileSuffix: "tests/sql/main/test_e.sql"
+    FileSuffix: "tests/sql/main/one_line_2.sql"
     Tables:
       - TableName: "PROJECT_d.DATASET_e.TABLE_f"
   - TemplateSourceType: File
-    FileSuffix: "tests/sql/main/test_f.sql"
+    FileSuffix: "tests/sql/main/one_line_3.sql"
     Tables:
       - TableName: "PROJECT_d.DATASET_d.TABLE_d"
   - TemplateSourceType: File
-    FileSuffix: "tests/sql/main/test_undefined_part.sql"
+    FileSuffix: "tests/sql/main/undefined_part.sql"
     Tables:
       - TableName: "PROJECT_u.DATASET_u.TABLE_u"
         Parameters:
           params:
             main_table: "PROJECT_t.DATASET_t.TABLE_t"
   - TemplateSourceType: File
-    FileSuffix: "tests/sql/main/test_union_same_table.sql"
+    FileSuffix: "tests/sql/main/union_same_table.sql"
     Tables:
       - TableName: "test_project.beam_streaming.taxirides_aggregation"
 Metadata:

@@ -102,9 +102,9 @@ class TestStairLight:
             response_type=ResponseType.FILE.value,
         )
         assert sorted(result) == [
-            f"{tests_dir}/sql/main/test_b.sql",
-            f"{tests_dir}/sql/main/test_c.sql",
-            f"{tests_dir}/sql/main/test_f.sql",
+            f"{tests_dir}/sql/main/cte_multi_line.sql",
+            f"{tests_dir}/sql/main/cte_multi_line_params.sql",
+            f"{tests_dir}/sql/main/one_line_3.sql",
         ]
 
     def test_down_next(self):
@@ -155,9 +155,9 @@ class TestStairLight:
             response_type=ResponseType.FILE.value,
         )
         assert sorted(result) == [
-            f"{tests_dir}/sql/main/test_b.sql",
-            f"{tests_dir}/sql/main/test_d.sql",
-            "gs://stairlight/sql/test_b/test_b.sql",
+            f"{tests_dir}/sql/main/cte_multi_line.sql",
+            f"{tests_dir}/sql/main/one_line_1.sql",
+            "gs://stairlight/sql/cte/cte_multi_line.sql",
         ]
 
     def test_get_relative_map_up(self):

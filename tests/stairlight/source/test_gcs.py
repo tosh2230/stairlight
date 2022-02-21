@@ -9,7 +9,7 @@ class TestSQLTemplate:
     sql_template = GcsTemplate(
         mapping_config=mapping_config,
         source_type=TemplateSourceType.GCS,
-        key="sql/test_b/test_b.sql",
+        key="sql/cte/cte_multi_line.sql",
         bucket="stairlight",
     )
 
@@ -21,7 +21,7 @@ class TestSQLTemplate:
         assert len(self.sql_template.get_jinja_params(template_str)) > 0
 
     def test_get_uri(self):
-        assert self.sql_template.uri == "gs://stairlight/sql/test_b/test_b.sql"
+        assert self.sql_template.uri == "gs://stairlight/sql/cte/cte_multi_line.sql"
 
     def test_render(self):
         params = {
