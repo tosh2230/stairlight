@@ -33,24 +33,24 @@ class TestFileTemplateSource:
             result.append(file)
         assert len(result) > 0
 
-    def test_is_excluded_test_a(self):
+    def test_is_excluded_one_line(self):
         assert not self.template_source.is_excluded(
             source_type=TemplateSourceType.FILE,
-            key="tests/sql/main/test_a.sql",
+            key="tests/sql/main/one_line_no_project.sql",
         )
 
     def test_is_excluded_test_exclude(self):
         assert self.template_source.is_excluded(
             source_type=TemplateSourceType.FILE,
-            key="tests/sql/main/test_exclude.sql",
+            key="tests/sql/main/exclude.sql",
         )
 
 
 @pytest.mark.parametrize(
     "key",
     [
-        "tests/sql/main/test_a.sql",
-        "tests/sql/main/test_exclude.sql",
+        "tests/sql/main/one_line_no_project.sql",
+        "tests/sql/main/exclude.sql",
     ],
 )
 class TestFileTemplateSourceNoExclude:
@@ -79,7 +79,7 @@ class TestFileTemplateSourceNoExclude:
 @pytest.mark.parametrize(
     "key, bucket",
     [
-        ("tests/sql/main/test_c.sql", None),
+        ("tests/sql/main/cte_multi_line_params.sql", None),
     ],
 )
 class TestFileTemplateMapped:
@@ -109,8 +109,8 @@ class TestFileTemplateMapped:
 @pytest.mark.parametrize(
     "key",
     [
-        "tests/sql/main/test_undefined.sql",
-        "tests/sql/gcs/test_b/test_b.sql",
+        "tests/sql/main/undefined.sql",
+        "tests/sql/gcs/cte/cte_multi_line.sql",
     ],
 )
 class TestFileTemplateNotMapped:
@@ -152,7 +152,7 @@ class TestFileTemplateRender:
         sql_template = FileTemplate(
             mapping_config=self.mapping_config,
             source_type=TemplateSourceType.FILE,
-            key="tests/sql/main/test_c.sql",
+            key="tests/sql/main/cte_multi_line_params.sql",
         )
         actual = sql_template.render(params=params)
         expected = """WITH c AS (

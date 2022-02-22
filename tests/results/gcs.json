@@ -2,8 +2,8 @@
   "PROJECT_d.DATASET_e.TABLE_f": {
     "PROJECT_C.DATASET_C.TABLE_C": {
       "TemplateSourceType": "GCS",
-      "Key": "sql/test_b/test_b.sql",
-      "Uri": "gs://stairlight/sql/test_b/test_b.sql",
+      "Key": "sql/cte/cte_multi_line.sql",
+      "Uri": "gs://stairlight/sql/cte/cte_multi_line.sql",
       "Lines": [
         {
           "LineNumber": 6,
@@ -18,8 +18,8 @@
     },
     "PROJECT_d.DATASET_d.TABLE_d": {
       "TemplateSourceType": "GCS",
-      "Key": "sql/test_b/test_b.sql",
-      "Uri": "gs://stairlight/sql/test_b/test_b.sql",
+      "Key": "sql/cte/cte_multi_line.sql",
+      "Uri": "gs://stairlight/sql/cte/cte_multi_line.sql",
       "Lines": [
         {
           "LineNumber": 15,
@@ -34,8 +34,8 @@
     },
     "PROJECT_g.DATASET_h.TABLE_i": {
       "TemplateSourceType": "GCS",
-      "Key": "sql/test_b/test_b.sql",
-      "Uri": "gs://stairlight/sql/test_b/test_b.sql",
+      "Key": "sql/cte/cte_multi_line.sql",
+      "Uri": "gs://stairlight/sql/cte/cte_multi_line.sql",
       "Lines": [
         {
           "LineNumber": 23,
@@ -52,8 +52,8 @@
   "PROJECT_a.DATASET_b.TABLE_c": {
     "PROJECT_A.DATASET_A.TABLE_A": {
       "TemplateSourceType": "GCS",
-      "Key": "sql/test_a/test_a.sql",
-      "Uri": "gs://stairlight/sql/test_a/test_a.sql",
+      "Key": "sql/one_line/one_line.sql",
+      "Uri": "gs://stairlight/sql/one_line/one_line.sql",
       "Lines": [
         {
           "LineNumber": 1,

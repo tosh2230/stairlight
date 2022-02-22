@@ -2,8 +2,8 @@
   "test_project.beam_streaming.taxirides_aggregation": {
     "test_project.beam_streaming.taxirides_realtime": {
       "TemplateSourceType": "File",
-      "Key": "tests/sql/main/test_union_same_table.sql",
-      "Uri": "/foo/bar/stairlight/tests/sql/main/test_union_same_table.sql",
+      "Key": "tests/sql/main/union_same_table.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/union_same_table.sql",
       "Lines": [
         {
           "LineNumber": 6,
@@ -19,8 +19,8 @@
   "PROJECT_d.DATASET_e.TABLE_f": {
     "PROJECT_j.DATASET_k.TABLE_l": {
       "TemplateSourceType": "File",
-      "Key": "tests/sql/main/test_e.sql",
-      "Uri": "/foo/bar/stairlight/tests/sql/main/test_e.sql",
+      "Key": "tests/sql/main/one_line_2.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/one_line_2.sql",
       "Lines": [
         {
           "LineNumber": 1,
@@ -30,8 +30,8 @@
     },
     "PROJECT_C.DATASET_C.TABLE_C": {
       "TemplateSourceType": "GCS",
-      "Key": "sql/test_b/test_b.sql",
-      "Uri": "gs://stairlight/sql/test_b/test_b.sql",
+      "Key": "sql/cte/cte_multi_line.sql",
+      "Uri": "gs://stairlight/sql/cte/cte_multi_line.sql",
       "Lines": [
         {
           "LineNumber": 6,
@@ -46,8 +46,8 @@
     },
     "PROJECT_d.DATASET_d.TABLE_d": {
       "TemplateSourceType": "GCS",
-      "Key": "sql/test_b/test_b.sql",
-      "Uri": "gs://stairlight/sql/test_b/test_b.sql",
+      "Key": "sql/cte/cte_multi_line.sql",
+      "Uri": "gs://stairlight/sql/cte/cte_multi_line.sql",
       "Lines": [
         {
           "LineNumber": 15,
@@ -62,8 +62,8 @@
     },
     "PROJECT_g.DATASET_h.TABLE_i": {
       "TemplateSourceType": "GCS",
-      "Key": "sql/test_b/test_b.sql",
-      "Uri": "gs://stairlight/sql/test_b/test_b.sql",
+      "Key": "sql/cte/cte_multi_line.sql",
+      "Uri": "gs://stairlight/sql/cte/cte_multi_line.sql",
       "Lines": [
         {
           "LineNumber": 23,
@@ -80,8 +80,8 @@
   "PROJECT_j.DATASET_k.TABLE_l": {
     "PROJECT_d.DATASET_e.TABLE_f": {
       "TemplateSourceType": "File",
-      "Key": "tests/sql/main/test_d.sql",
-      "Uri": "/foo/bar/stairlight/tests/sql/main/test_d.sql",
+      "Key": "tests/sql/main/one_line_1.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/one_line_1.sql",
       "Lines": [
         {
           "LineNumber": 1,
@@ -93,8 +93,8 @@
   "PROJECT_d.DATASET_d.TABLE_d": {
     "PROJECT_e.DATASET_e.TABLE_e": {
       "TemplateSourceType": "File",
-      "Key": "tests/sql/main/test_f.sql",
-      "Uri": "/foo/bar/stairlight/tests/sql/main/test_f.sql",
+      "Key": "tests/sql/main/one_line_3.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/one_line_3.sql",
       "Lines": [
         {
           "LineNumber": 1,
@@ -106,8 +106,8 @@
   "PROJECT_u.DATASET_u.TABLE_u": {
     "PROJECT_t.DATASET_t.TABLE_t": {
       "TemplateSourceType": "File",
-      "Key": "tests/sql/main/test_undefined_part.sql",
-      "Uri": "/foo/bar/stairlight/tests/sql/main/test_undefined_part.sql",
+      "Key": "tests/sql/main/undefined_part.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/undefined_part.sql",
       "Lines": [
         {
           "LineNumber": 23,
@@ -117,8 +117,8 @@
     },
     "PROJECT_A.WHERE": {
       "TemplateSourceType": "File",
-      "Key": "tests/sql/main/test_undefined_part.sql",
-      "Uri": "/foo/bar/stairlight/tests/sql/main/test_undefined_part.sql",
+      "Key": "tests/sql/main/undefined_part.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/undefined_part.sql",
       "Lines": [
         {
           "LineNumber": 7,
@@ -138,8 +138,8 @@
   "PROJECT_J.DATASET_K.TABLE_L": {
     "PROJECT_P.DATASET_Q.TABLE_R": {
       "TemplateSourceType": "File",
-      "Key": "tests/sql/main/test_c.sql",
-      "Uri": "/foo/bar/stairlight/tests/sql/main/test_c.sql",
+      "Key": "tests/sql/main/cte_multi_line_params.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/cte_multi_line_params.sql",
       "Lines": [
         {
           "LineNumber": 23,
@@ -153,8 +153,8 @@
     },
     "PROJECT_S.DATASET_T.TABLE_U": {
       "TemplateSourceType": "File",
-      "Key": "tests/sql/main/test_c.sql",
-      "Uri": "/foo/bar/stairlight/tests/sql/main/test_c.sql",
+      "Key": "tests/sql/main/cte_multi_line_params.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/cte_multi_line_params.sql",
       "Lines": [
         {
           "LineNumber": 6,
@@ -168,8 +168,8 @@
     },
     "PROJECT_V.DATASET_W.TABLE_X": {
       "TemplateSourceType": "File",
-      "Key": "tests/sql/main/test_c.sql",
-      "Uri": "/foo/bar/stairlight/tests/sql/main/test_c.sql",
+      "Key": "tests/sql/main/cte_multi_line_params.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/cte_multi_line_params.sql",
       "Lines": [
         {
           "LineNumber": 15,
@@ -185,8 +185,8 @@
   "PROJECT_D.DATASET_E.TABLE_F": {
     "PROJECT_C.DATASET_C.TABLE_C": {
       "TemplateSourceType": "File",
-      "Key": "tests/sql/main/test_b.sql",
-      "Uri": "/foo/bar/stairlight/tests/sql/main/test_b.sql",
+      "Key": "tests/sql/main/cte_multi_line.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/cte_multi_line.sql",
       "Lines": [
         {
           "LineNumber": 6,
@@ -200,8 +200,8 @@
     },
     "PROJECT_J.DATASET_K.TABLE_L": {
       "TemplateSourceType": "File",
-      "Key": "tests/sql/main/test_b.sql",
-      "Uri": "/foo/bar/stairlight/tests/sql/main/test_b.sql",
+      "Key": "tests/sql/main/cte_multi_line.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/cte_multi_line.sql",
       "Lines": [
         {
           "LineNumber": 23,
@@ -215,8 +215,8 @@
     },
     "PROJECT_d.DATASET_d.TABLE_d": {
       "TemplateSourceType": "File",
-      "Key": "tests/sql/main/test_b.sql",
-      "Uri": "/foo/bar/stairlight/tests/sql/main/test_b.sql",
+      "Key": "tests/sql/main/cte_multi_line.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/cte_multi_line.sql",
       "Lines": [
         {
           "LineNumber": 15,
@@ -232,8 +232,8 @@
   "PROJECT_G.DATASET_H.TABLE_I": {
     "PROJECT_C.DATASET_C.TABLE_C": {
       "TemplateSourceType": "File",
-      "Key": "tests/sql/main/test_b.sql",
-      "Uri": "/foo/bar/stairlight/tests/sql/main/test_b.sql",
+      "Key": "tests/sql/main/cte_multi_line.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/cte_multi_line.sql",
       "Lines": [
         {
           "LineNumber": 6,
@@ -247,8 +247,8 @@
     },
     "PROJECT_M.DATASET_N.TABLE_O": {
       "TemplateSourceType": "File",
-      "Key": "tests/sql/main/test_b.sql",
-      "Uri": "/foo/bar/stairlight/tests/sql/main/test_b.sql",
+      "Key": "tests/sql/main/cte_multi_line.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/cte_multi_line.sql",
       "Lines": [
         {
           "LineNumber": 23,
@@ -262,8 +262,8 @@
     },
     "PROJECT_d.DATASET_d.TABLE_d": {
       "TemplateSourceType": "File",
-      "Key": "tests/sql/main/test_b.sql",
-      "Uri": "/foo/bar/stairlight/tests/sql/main/test_b.sql",
+      "Key": "tests/sql/main/cte_multi_line.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/cte_multi_line.sql",
       "Lines": [
         {
           "LineNumber": 15,
@@ -279,8 +279,8 @@
   "PROJECT_A.DATASET_B.TABLE_C": {
     "PROJECT_A.DATASET_A.TABLE_A": {
       "TemplateSourceType": "File",
-      "Key": "tests/sql/main/test_a.sql",
-      "Uri": "/foo/bar/stairlight/tests/sql/main/test_a.sql",
+      "Key": "tests/sql/main/one_line_no_project.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/one_line_no_project.sql",
       "Lines": [
         {
           "LineNumber": 1,
@@ -296,8 +296,8 @@
   "PROJECT_a.DATASET_b.TABLE_c": {
     "PROJECT_A.DATASET_A.TABLE_A": {
       "TemplateSourceType": "GCS",
-      "Key": "sql/test_a/test_a.sql",
-      "Uri": "gs://stairlight/sql/test_a/test_a.sql",
+      "Key": "sql/one_line/one_line.sql",
+      "Uri": "gs://stairlight/sql/one_line/one_line.sql",
       "Lines": [
         {
           "LineNumber": 1,

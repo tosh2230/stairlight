@@ -62,8 +62,8 @@ $ stairlight
         "PROJECT_d.DATASET_e.TABLE_f": {
             "PROJECT_j.DATASET_k.TABLE_l": {
                 "TemplateSourceType": "File",
-                "Key": "tests/sql/main/test_e.sql",
-                "Uri": "/foo/bar/stairlight/tests/sql/main/test_e.sql",
+                "Key": "tests/sql/main/one_line_2.sql",
+                "Uri": "/foo/bar/stairlight/tests/sql/main/one_line_2.sql",
                 "Lines": [
                     {
                         "LineNumber": 1,
@@ -73,8 +73,8 @@ $ stairlight
             },
             "PROJECT_C.DATASET_C.TABLE_C": {
                 "TemplateSourceType": "GCS",
-                "Key": "sql/test_b/test_b.sql",
-                "Uri": "gs://stairlight/sql/test_b/test_b.sql",
+                "Key": "sql/cte/cte_multi_line.sql",
+                "Uri": "gs://stairlight/sql/cte/cte_multi_line.sql",
                 "Lines": [
                     {
                         "LineNumber": 6,
@@ -140,7 +140,7 @@ Include:
       - 5
 Exclude:
   - TemplateSourceType: File
-    Regex: "main/test_exclude.sql$"
+    Regex: "main/exclude.sql$"
 Settings:
   MappingPrefix: "mapping"
 ```
@@ -154,11 +154,11 @@ A template of this file can be created by `check` command, based on the configur
 ```yaml
 Mapping:
   - TemplateSourceType: File
-    FileSuffix: "tests/sql/main/test_union_same_table.sql"
+    FileSuffix: "tests/sql/main/union_same_table.sql"
     Tables:
       - TableName: "test_project.beam_streaming.taxirides_aggregation"
   - TemplateSourceType: GCS
-    Uri: "gs://stairlight/sql/test_a/test_a.sql"
+    Uri: "gs://stairlight/sql/one_line/one_line.sql"
     Tables:
       - TableName: "PROJECT_a.DATASET_b.TABLE_c"
   - TemplateSourceType: Redash

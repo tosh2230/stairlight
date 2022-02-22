@@ -17,6 +17,6 @@ Include:
       - 5
 Exclude:
   - TemplateSourceType: File
-    Regex: "main/test_exclude.sql$"
+    Regex: "main/exclude.sql$"
 Settings:
   MappingPrefix: "mapping"

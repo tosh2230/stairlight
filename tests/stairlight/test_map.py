@@ -28,7 +28,7 @@ class TestSuccess:
         "key, expected",
         [
             (
-                "tests/sql/main/test_undefined.sql",
+                "tests/sql/main/undefined.sql",
                 [
                     "params.main_table",
                     "params.sub_table_01",
@@ -36,7 +36,7 @@ class TestSuccess:
                 ],
             ),
             (
-                "tests/sql/main/test_undefined_part.sql",
+                "tests/sql/main/undefined_part.sql",
                 [
                     "params.sub_table_01",
                     "params.sub_table_02",
