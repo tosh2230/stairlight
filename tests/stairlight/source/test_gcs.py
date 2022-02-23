@@ -2,10 +2,10 @@ import pytest
 
 from src.stairlight import config_key
 from src.stairlight.source.gcs import (
+    GCS_URI_SCHEME,
     GcsTemplate,
     GcsTemplateSource,
     TemplateSourceType,
-    GCS_URI_SCHEME,
 )
 
 

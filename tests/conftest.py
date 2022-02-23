@@ -1,7 +1,8 @@
 import glob
 import os
-import pytest
 from typing import Iterator
+
+import pytest
 
 from src.stairlight import config_key
 from src.stairlight.config import Configurator

@@ -1,4 +1,5 @@
 import os
+
 import pytest
 
 from src.stairlight import config_key
