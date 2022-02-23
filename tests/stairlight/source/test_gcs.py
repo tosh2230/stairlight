@@ -11,7 +11,11 @@ from src.stairlight.source.gcs import (
 
 class TestGcsTemplateSource:
     @pytest.fixture(scope="class")
-    def gcs_template_source(self, stairlight_config, mapping_config):
+    def gcs_template_source(
+        self,
+        stairlight_config: dict,
+        mapping_config: dict,
+    ) -> GcsTemplateSource:
         source_attributes = {
             config_key.TEMPLATE_SOURCE_TYPE: TemplateSourceType.GCS.value,
             config_key.PROJECT_ID: None,
@@ -24,7 +28,7 @@ class TestGcsTemplateSource:
             source_attributes=source_attributes,
         )
 
-    def test_search_templates_iter(self, gcs_template_source):
+    def test_search_templates_iter(self, gcs_template_source: GcsTemplateSource):
         result = []
         for file in gcs_template_source.search_templates_iter():
             result.append(file)
@@ -50,7 +54,14 @@ class TestGcsTemplateSource:
 )
 class TestGcsTemplate:
     @pytest.fixture(scope="function")
-    def gcs_template(self, mapping_config, bucket, key, params, expected):
+    def gcs_template(
+        self,
+        mapping_config: dict,
+        bucket: str,
+        key: str,
+        params: dict,
+        expected: str,
+    ) -> GcsTemplate:
         return GcsTemplate(
             mapping_config=mapping_config,
             source_type=TemplateSourceType.GCS,
@@ -65,9 +76,9 @@ class TestGcsTemplate:
         template_str = gcs_template.get_template_str()
         assert len(gcs_template.get_jinja_params(template_str)) > 0
 
-    def test_get_uri(self, gcs_template: GcsTemplate, bucket, key):
+    def test_get_uri(self, gcs_template: GcsTemplate, bucket: str, key: str):
         assert gcs_template.uri == f"{GCS_URI_SCHEME}{bucket}/{key}"
 
-    def test_render(self, gcs_template: GcsTemplate, params, expected):
+    def test_render(self, gcs_template: GcsTemplate, params: dict, expected: str):
         actual = gcs_template.render(params=params)
         assert expected in actual

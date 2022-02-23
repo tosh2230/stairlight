@@ -1,6 +1,7 @@
 import pytest
 
 from src.stairlight import config_key
+from src.stairlight.config import Configurator
 from src.stairlight.source.file import (
     FileTemplate,
     FileTemplateSource,
@@ -18,8 +19,12 @@ from src.stairlight.source.file import (
 class TestFileTemplateSource:
     @pytest.fixture(scope="function")
     def file_template_source(
-        self, stairlight_config, mapping_config, key, expected_is_excluded
-    ):
+        self,
+        stairlight_config: dict,
+        mapping_config: dict,
+        key: str,
+        expected_is_excluded: bool,
+    ) -> FileTemplateSource:
         source_attributes = {
             config_key.TEMPLATE_SOURCE_TYPE: TemplateSourceType.FILE.value,
             config_key.FILE_SYSTEM_PATH: "./tests/sql",
@@ -31,13 +36,21 @@ class TestFileTemplateSource:
             source_attributes=source_attributes,
         )
 
-    def test_search_templates_iter(self, file_template_source):
+    def test_search_templates_iter(
+        self,
+        file_template_source: FileTemplateSource,
+    ):
         result = []
         for file in file_template_source.search_templates_iter():
             result.append(file)
         assert len(result) > 0
 
-    def test_is_excluded(self, file_template_source, key, expected_is_excluded):
+    def test_is_excluded(
+        self,
+        file_template_source: FileTemplateSource,
+        key: str,
+        expected_is_excluded: bool,
+    ):
         actual = file_template_source.is_excluded(
             source_type=TemplateSourceType.FILE,
             key=key,
@@ -46,15 +59,19 @@ class TestFileTemplateSource:
 
 
 @pytest.mark.parametrize(
-    "key",
+    "key, expected_is_excluded",
     [
-        "tests/sql/main/one_line_no_project.sql",
-        "tests/sql/main/exclude.sql",
+        ("tests/sql/main/one_line_no_project.sql", False),
+        ("tests/sql/main/exclude.sql", False),
     ],
 )
 class TestFileTemplateSourceNoExclude:
     @pytest.fixture(scope="class")
-    def template_source_no_exclude(self, configurator, mapping_config):
+    def template_source_no_exclude(
+        self,
+        configurator: Configurator,
+        mapping_config: dict,
+    ) -> FileTemplateSource:
         stairlight_config = configurator.read(prefix="stairlight_no_exclude")
         source_attributes = {
             config_key.TEMPLATE_SOURCE_TYPE: TemplateSourceType.FILE.value,
@@ -67,11 +84,17 @@ class TestFileTemplateSourceNoExclude:
             source_attributes=source_attributes,
         )
 
-    def test_is_excluded(self, template_source_no_exclude, key):
-        assert not template_source_no_exclude.is_excluded(
+    def test_is_excluded(
+        self,
+        template_source_no_exclude: FileTemplateSource,
+        key: str,
+        expected_is_excluded: bool,
+    ):
+        actual = template_source_no_exclude.is_excluded(
             source_type=TemplateSourceType.FILE,
             key=key,
         )
+        assert actual == expected_is_excluded
 
 
 @pytest.mark.parametrize(
@@ -82,7 +105,11 @@ class TestFileTemplateSourceNoExclude:
 )
 class TestFileTemplateMapped:
     @pytest.fixture(scope="function")
-    def file_template(self, mapping_config, key):
+    def file_template(
+        self,
+        mapping_config: dict,
+        key: str,
+    ):
         return FileTemplate(
             mapping_config=mapping_config,
             source_type=TemplateSourceType.FILE,
@@ -90,10 +117,10 @@ class TestFileTemplateMapped:
             bucket=None,
         )
 
-    def test_is_mapped(self, file_template):
+    def test_is_mapped(self, file_template: FileTemplate):
         assert file_template.is_mapped()
 
-    def test_get_jinja_params(self, file_template):
+    def test_get_jinja_params(self, file_template: FileTemplate):
         template_str = file_template.get_template_str()
         assert len(file_template.get_jinja_params(template_str)) > 0
 
