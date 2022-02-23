@@ -24,7 +24,7 @@ class TestSearchDirection:
 
 
 class TestStairLight:
-    stairlight = StairLight(config_dir="./config")
+    stairlight = StairLight(config_dir="tests/config")
     stairlight.create_map()
 
     def test_has_stairlight_config(self):
@@ -43,12 +43,12 @@ class TestStairLight:
     def test_init(self, stairlight_template):
         assert (
             self.stairlight.init(prefix=stairlight_template)
-            == f"./config/{stairlight_template}.yaml"
+            == f"tests/config/{stairlight_template}.yaml"
         )
 
     def test_check(self, mapping_template):
         assert self.stairlight.check(prefix=mapping_template).startswith(
-            f"./config/{mapping_template}"
+            f"tests/config/{mapping_template}"
         )
 
     def test_up_next(self):
@@ -200,7 +200,7 @@ class TestStairLight:
 
     def test_check_on_load(self, stairlight_save: StairLight):
         stairlight_load = StairLight(
-            config_dir="./config", load_files=[stairlight_save.save_file]
+            config_dir="tests/config", load_files=[stairlight_save.save_file]
         )
         assert stairlight_load.check() is None
 

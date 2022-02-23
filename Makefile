@@ -10,11 +10,11 @@ format:
 exec:
 	@poetry build
 	@poetry run pip install ./dist/stairlight-${version}.tar.gz
-	@poetry run python -m stairlight -c config
+	@poetry run python -m stairlight -c tests/config
 check:
 	@poetry build
 	@poetry run pip install ./dist/stairlight-${version}.tar.gz
-	@poetry run python -m stairlight check -c config
+	@poetry run python -m stairlight check -c tests/config
 test:
 	@poetry build
 	@poetry run pip install ./dist/stairlight-${version}.tar.gz
