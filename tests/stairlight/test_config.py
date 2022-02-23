@@ -1,44 +1,41 @@
 import os
 from collections import OrderedDict
 
-import src.stairlight.config as config
 import src.stairlight.source.base as base
 from src.stairlight import config_key, map_key
 from src.stairlight.source.file import FileTemplate
 
 
 class TestSuccess:
-    configurator = config.Configurator(dir="./config")
+    def test_read_map(self, configurator):
+        assert configurator.read(prefix=config_key.MAPPING_CONFIG_FILE_PREFIX)
 
-    def test_read_map(self):
-        assert self.configurator.read(prefix=config_key.MAPPING_CONFIG_FILE_PREFIX)
+    def test_read_sql(self, configurator):
+        assert configurator.read(prefix=config_key.STAIRLIGHT_CONFIG_FILE_PREFIX)
 
-    def test_read_sql(self):
-        assert self.configurator.read(prefix=config_key.STAIRLIGHT_CONFIG_FILE_PREFIX)
-
-    def test_create_stairlight_template_file(self, stairlight_template):
-        file_name = self.configurator.create_stairlight_template_file(
+    def test_create_stairlight_template_file(self, configurator, stairlight_template):
+        file_name = configurator.create_stairlight_template_file(
             prefix=stairlight_template
         )
         assert os.path.exists(file_name)
 
-    def test_create_mapping_template_file(self, mapping_template):
-        file_name = self.configurator.create_mapping_template_file(
+    def test_create_mapping_template_file(self, configurator, mapping_template):
+        file_name = configurator.create_mapping_template_file(
             unmapped=[], prefix=mapping_template
         )
         assert os.path.exists(file_name)
 
-    def test_build_stairlight_template(self):
-        stairlight_template = self.configurator.build_stairlight_config()
+    def test_build_stairlight_template(self, configurator):
+        stairlight_template = configurator.build_stairlight_config()
         assert list(stairlight_template.keys()) == [
             config_key.STAIRLIGHT_CONFIG_INCLUDE_SECTION,
             config_key.STAIRLIGHT_CONFIG_EXCLUDE_SECTION,
             config_key.STAIRLIGHT_CONFIG_SETTING_SECTION,
         ]
 
-    def test_build_mapping_template(self):
+    def test_build_mapping_template(self, configurator):
         sql_template = FileTemplate(
-            mapping_config=self.configurator.read(
+            mapping_config=configurator.read(
                 prefix=config_key.MAPPING_CONFIG_FILE_PREFIX
             ),
             source_type=base.TemplateSourceType.FILE,
@@ -92,7 +89,7 @@ class TestSuccess:
                 config_key.MAPPING_CONFIG_METADATA_SECTION: [metadata_value],
             }
         )
-        actual = self.configurator.build_mapping_config(
+        actual = configurator.build_mapping_config(
             unmapped_templates=unmapped_templates
         )
         assert actual == expected

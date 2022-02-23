@@ -10,7 +10,7 @@ from src.stairlight.source.redash import (
 
 
 class TestRedashTemplate:
-    configurator = config.Configurator(dir="./config")
+    configurator = config.Configurator(dir="tests/config")
     mapping_config = configurator.read(prefix="mapping_redash")
     sql_template = RedashTemplate(
         mapping_config=mapping_config,
@@ -41,7 +41,7 @@ class TestRedashTemplate:
 
 
 class TestRedashTemplateSource:
-    configurator = config.Configurator(dir="./config")
+    configurator = config.Configurator(dir="tests/config")
     stairlight_config = configurator.read(prefix="stairlight_redash")
     mapping_config = configurator.read(prefix="mapping_redash")
     env_key = "REDASH_DATABASE_URL"

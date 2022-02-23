@@ -4,7 +4,7 @@ from src.stairlight.source.gcs import GcsTemplate, GcsTemplateSource, TemplateSo
 
 
 class TestSQLTemplate:
-    configurator = config.Configurator(dir="./config")
+    configurator = config.Configurator(dir="tests/config")
     mapping_config = configurator.read(prefix=config_key.MAPPING_CONFIG_FILE_PREFIX)
     sql_template = GcsTemplate(
         mapping_config=mapping_config,
@@ -65,7 +65,7 @@ WHERE
 
 
 class TestGcsTemplateSource:
-    configurator = config.Configurator(dir="./config")
+    configurator = config.Configurator(dir="tests/config")
     stairlight_config = configurator.read(
         prefix=config_key.STAIRLIGHT_CONFIG_FILE_PREFIX
     )

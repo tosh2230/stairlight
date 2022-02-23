@@ -70,7 +70,7 @@ class TestSuccess:
         assert results.get("PROJECT_J.DATASET_K.TABLE_L") != {}
 
     def test_main(self, monkeypatch, capfd):
-        monkeypatch.setattr("sys.argv", ["", "-c", "config"])
+        monkeypatch.setattr("sys.argv", ["", "-c", "tests/config"])
         cli_main.main()
         out, _ = capfd.readouterr()
         assert len(out) > 0

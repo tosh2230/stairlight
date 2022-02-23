@@ -1,28 +1,14 @@
 import pytest
 
-import src.stairlight.config as config
 from src.stairlight import map_key
-from src.stairlight.config_key import (
-    MAPPING_CONFIG_FILE_PREFIX,
-    STAIRLIGHT_CONFIG_FILE_PREFIX,
-)
-from src.stairlight.map import Map
 
 
 class TestSuccess:
-    configurator = config.Configurator(dir="./config")
-    stairlight_config = configurator.read(prefix=STAIRLIGHT_CONFIG_FILE_PREFIX)
-    mapping_config = configurator.read(prefix=MAPPING_CONFIG_FILE_PREFIX)
-    dependency_map = Map(
-        stairlight_config=stairlight_config, mapping_config=mapping_config
-    )
-    dependency_map.write()
+    def test_mapped(self, dependency_map):
+        assert len(dependency_map.mapped) > 0
 
-    def test_mapped(self):
-        assert len(self.dependency_map.mapped) > 0
-
-    def test_unmapped(self):
-        assert len(self.dependency_map.unmapped) > 0
+    def test_unmapped(self, dependency_map):
+        assert len(dependency_map.unmapped) > 0
 
     @pytest.mark.parametrize(
         "key, expected",
@@ -44,9 +30,9 @@ class TestSuccess:
             ),
         ],
     )
-    def test_find_unmapped_params(self, key, expected):
+    def test_find_unmapped_params(self, dependency_map, key, expected):
         actual = None
-        for a in self.dependency_map.unmapped:
+        for a in dependency_map.unmapped:
             sql_template = a.get(map_key.TEMPLATE)
             if sql_template.key == key:
                 actual = sorted(a.get(map_key.PARAMETERS))
@@ -55,13 +41,5 @@ class TestSuccess:
 
 
 class TestSuccessNoMetadata:
-    configurator = config.Configurator(dir="./config")
-    stairlight_config = configurator.read(prefix=STAIRLIGHT_CONFIG_FILE_PREFIX)
-    mapping_config = configurator.read(prefix="mapping_no_metadata")
-    dependency_map = Map(
-        stairlight_config=stairlight_config, mapping_config=mapping_config
-    )
-    dependency_map.write()
-
-    def test_find_unmapped_params(self):
-        assert self.dependency_map.unmapped
+    def test_find_unmapped_params(self, dependency_map):
+        assert dependency_map.unmapped

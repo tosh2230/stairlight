@@ -112,7 +112,7 @@ $ stairlight
 
 ## Configuration
 
-Configuration files can be found [here](https://github.com/tosh2230/stairlight/tree/main/config), used for unit test in CI.
+Configuration files can be found [here](https://github.com/tosh2230/stairlight/tree/main/tests/config), used for unit test in CI.
 
 ### stairlight.yaml
 
