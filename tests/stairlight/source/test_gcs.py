@@ -1,7 +1,12 @@
 import pytest
 
 from src.stairlight import config_key
-from src.stairlight.source.gcs import GcsTemplate, GcsTemplateSource, TemplateSourceType
+from src.stairlight.source.gcs import (
+    GcsTemplate,
+    GcsTemplateSource,
+    TemplateSourceType,
+    GCS_URI_SCHEME,
+)
 
 
 class TestGcsTemplateSource:
@@ -27,14 +32,25 @@ class TestGcsTemplateSource:
 
 
 @pytest.mark.parametrize(
-    "bucket, key",
+    "bucket, key, params, expected",
     [
-        ("stairlight", "sql/cte/cte_multi_line.sql"),
+        (
+            "stairlight",
+            "sql/cte/cte_multi_line.sql",
+            {
+                "params": {
+                    "PROJECT": "PROJECT_g",
+                    "DATASET": "DATASET_h",
+                    "TABLE": "TABLE_i",
+                }
+            },
+            "PROJECT_g.DATASET_h.TABLE_i",
+        ),
     ],
 )
 class TestGcsTemplate:
     @pytest.fixture(scope="function")
-    def gcs_template(self, mapping_config, bucket, key):
+    def gcs_template(self, mapping_config, bucket, key, params, expected):
         return GcsTemplate(
             mapping_config=mapping_config,
             source_type=TemplateSourceType.GCS,
@@ -42,52 +58,16 @@ class TestGcsTemplate:
             key=key,
         )
 
-    def test_is_mapped(self, gcs_template):
+    def test_is_mapped(self, gcs_template: GcsTemplate):
         assert gcs_template.is_mapped()
 
-    def test_get_jinja_params(self, gcs_template):
+    def test_get_jinja_params(self, gcs_template: GcsTemplate):
         template_str = gcs_template.get_template_str()
         assert len(gcs_template.get_jinja_params(template_str)) > 0
 
-    def test_get_uri(self, gcs_template):
-        assert gcs_template.uri == "gs://stairlight/sql/cte/cte_multi_line.sql"
+    def test_get_uri(self, gcs_template: GcsTemplate, bucket, key):
+        assert gcs_template.uri == f"{GCS_URI_SCHEME}{bucket}/{key}"
 
-    def test_render(self, gcs_template):
-        params = {
-            "params": {
-                "PROJECT": "PROJECT_g",
-                "DATASET": "DATASET_h",
-                "TABLE": "TABLE_i",
-            }
-        }
-        expected = """WITH c AS (
-    SELECT
-        test_id,
-        col_c
-    FROM
-        PROJECT_C.DATASET_C.TABLE_C
-    WHERE
-        0 = 0
-),
-d AS (
-    SELECT
-        test_id,
-        col_d
-    FROM
-        PROJECT_d.DATASET_d.TABLE_d
-    WHERE
-        0 = 0
-)
-
-SELECT
-    *
-FROM
-    PROJECT_g.DATASET_h.TABLE_i AS b
-    INNER JOIN c
-        ON b.test_id = c.test_id
-    INNER JOIN d
-        ON b.test_id = d.test_id
-WHERE
-    1 = 1"""
+    def test_render(self, gcs_template: GcsTemplate, params, expected):
         actual = gcs_template.render(params=params)
-        assert actual == expected
+        assert expected in actual

@@ -8,9 +8,18 @@ from src.stairlight.source.file import (
 )
 
 
+@pytest.mark.parametrize(
+    "key, expected_is_excluded",
+    [
+        ("tests/sql/main/one_line_no_project.sql", False),
+        ("tests/sql/main/exclude.sql", True),
+    ],
+)
 class TestFileTemplateSource:
-    @pytest.fixture(scope="class")
-    def file_template_source(self, stairlight_config, mapping_config):
+    @pytest.fixture(scope="function")
+    def file_template_source(
+        self, stairlight_config, mapping_config, key, expected_is_excluded
+    ):
         source_attributes = {
             config_key.TEMPLATE_SOURCE_TYPE: TemplateSourceType.FILE.value,
             config_key.FILE_SYSTEM_PATH: "./tests/sql",
@@ -28,17 +37,12 @@ class TestFileTemplateSource:
             result.append(file)
         assert len(result) > 0
 
-    def test_is_excluded_one_line(self, file_template_source):
-        assert not file_template_source.is_excluded(
+    def test_is_excluded(self, file_template_source, key, expected_is_excluded):
+        actual = file_template_source.is_excluded(
             source_type=TemplateSourceType.FILE,
-            key="tests/sql/main/one_line_no_project.sql",
+            key=key,
         )
-
-    def test_is_excluded_test_exclude(self, file_template_source):
-        assert file_template_source.is_excluded(
-            source_type=TemplateSourceType.FILE,
-            key="tests/sql/main/exclude.sql",
-        )
+        assert actual == expected_is_excluded
 
 
 @pytest.mark.parametrize(
@@ -120,15 +124,18 @@ class TestFileTemplateNotMapped:
 
 
 @pytest.mark.parametrize(
-    "key, params",
+    "key, params, expected",
     [
         (
             "tests/sql/main/cte_multi_line_params.sql",
             {
-                "main_table": "PROJECT_P.DATASET_Q.TABLE_R",
-                "sub_table_01": "PROJECT_S.DATASET_T.TABLE_U",
-                "sub_table_02": "PROJECT_V.DATASET_W.TABLE_X",
+                "params": {
+                    "main_table": "PROJECT_P.DATASET_Q.TABLE_R",
+                    "sub_table_01": "PROJECT_S.DATASET_T.TABLE_U",
+                    "sub_table_02": "PROJECT_V.DATASET_W.TABLE_X",
+                }
             },
+            "PROJECT_P.DATASET_Q.TABLE_R",
         )
     ],
 )
@@ -142,36 +149,6 @@ class TestFileTemplateRender:
             bucket=None,
         )
 
-    def test_render(self, file_template, params):
-        params = {"params": params}
+    def test_render(self, file_template, params, expected):
         actual = file_template.render(params=params)
-        expected = """WITH c AS (
-    SELECT
-        test_id,
-        col_c
-    FROM
-        PROJECT_S.DATASET_T.TABLE_U
-    WHERE
-        0 = 0
-),
-d AS (
-    SELECT
-        test_id,
-        col_d
-    FROM
-        PROJECT_V.DATASET_W.TABLE_X
-    WHERE
-        0 = 0
-)
-
-SELECT
-    *
-FROM
-    PROJECT_P.DATASET_Q.TABLE_R AS b
-    INNER JOIN c
-        ON b.test_id = c.test_id
-    INNER JOIN d
-        ON b.test_id = d.test_id
-WHERE
-    1 = 1"""
-        assert actual == expected
+        assert expected in actual
