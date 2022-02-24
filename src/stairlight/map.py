@@ -176,6 +176,7 @@ class Map:
 
         Args:
             sql_template (Template): SQL template
+            params (dict, optional): Jinja parameters
         """
         if not params:
             template_str = sql_template.get_template_str()
