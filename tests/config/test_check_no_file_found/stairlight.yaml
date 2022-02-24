@@ -1,0 +1,7 @@
+Include:
+  - TemplateSourceType: File
+    FileSystemPath: "tests/config/test_check_no_file_found"
+    Regex: ".*/*.sql$"
+    DefaultTablePrefix: "PROJECT_A"
+Settings:
+  MappingPrefix: "mapping"

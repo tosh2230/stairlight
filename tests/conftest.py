@@ -56,6 +56,13 @@ def stairlight_check() -> Iterator[StairLight]:
 
 
 @pytest.fixture(scope="session")
+def stairlight_check_no_file_found() -> Iterator[StairLight]:
+    stairlight = StairLight(config_dir="tests/config/test_check_no_file_found")
+    stairlight.create_map()
+    yield stairlight
+
+
+@pytest.fixture(scope="session")
 def stairlight_save(save_file="./tests/test_save_map.json") -> Iterator[StairLight]:
     stairlight = StairLight(config_dir="tests/config", save_file=save_file)
     stairlight.create_map()
