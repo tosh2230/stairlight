@@ -1,0 +1,15 @@
+Include:
+  - TemplateSourceType: File
+    FileSystemPath: "./tests/sql"
+    Regex: ".*/*.sql$"
+    DefaultTablePrefix: "PROJECT_A"
+  - TemplateSourceType: GCS
+    ProjectId: null
+    BucketName: stairlight
+    Regex: "^sql/.*/*.sql$"
+    DefaultTablePrefix: "PROJECT_A"
+Exclude:
+  - TemplateSourceType: File
+    Regex: "main/exclude.sql$"
+Settings:
+  MappingPrefix: "mapping"

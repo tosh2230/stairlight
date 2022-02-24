@@ -41,10 +41,18 @@ def tests_dir() -> str:
 
 @pytest.fixture(scope="session")
 def stairlight_init() -> Iterator[StairLight]:
-    stairlight = StairLight(config_dir="./tests")
+    stairlight = StairLight(config_dir="tests/config/test_init")
     stairlight.create_map()
     yield stairlight
-    teardown_rm_file("./tests/stairlight.yaml")
+    teardown_rm_file(file="tests/config/test_init/stairlight.yaml")
+
+
+@pytest.fixture(scope="session")
+def stairlight_check() -> Iterator[StairLight]:
+    stairlight = StairLight(config_dir="tests/config/test_check")
+    stairlight.create_map()
+    yield stairlight
+    teardown_rm_config(pathname="tests/config/test_check/mapping_checked_*.yaml")
 
 
 @pytest.fixture(scope="session")
@@ -53,7 +61,7 @@ def stairlight_save(save_file="./tests/test_save_map.json") -> Iterator[StairLig
     stairlight.create_map()
     yield stairlight
     teardown_rm_file(save_file)
-    teardown_rm_config(prefix="mapping_checked_")
+    teardown_rm_config(pathname="tests/config/mapping_checked_*.yaml")
 
 
 @pytest.fixture(scope="session")
@@ -76,8 +84,8 @@ def teardown_rm_file(file: str) -> None:
         os.remove(file)
 
 
-def teardown_rm_config(prefix: str) -> None:
-    rm_files = glob.glob(f"tests/config/{prefix}*.yaml")
+def teardown_rm_config(pathname: str) -> None:
+    rm_files = glob.glob(pathname=pathname)
     for file in rm_files:
         os.remove(file)
 
@@ -86,11 +94,11 @@ def teardown_rm_config(prefix: str) -> None:
 def stairlight_template() -> Iterator[str]:
     prefix = "pytest_stairlight"
     yield prefix
-    teardown_rm_config(prefix=prefix)
+    teardown_rm_config(pathname="tests/config/pytest_stairlight*.yaml")
 
 
 @pytest.fixture
 def mapping_template() -> Iterator[str]:
     prefix = "pytest_mapping"
     yield prefix
-    teardown_rm_config(prefix=prefix)
+    teardown_rm_config(pathname="tests/config/pytest_mapping*.yaml")
