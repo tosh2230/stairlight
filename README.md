@@ -207,6 +207,7 @@ optional arguments:
   -h, --help            show this help message and exit
   -c CONFIG, --config CONFIG
                         set Stairlight configuration directory
+  -q, --quiet           keep silence
   --save SAVE           file path where results will be saved(File system or GCS)
   --load LOAD           file path in which results are saved(File system or GCS), can be specified multiple times
 ```
@@ -223,6 +224,7 @@ optional arguments:
   -h, --help            show this help message and exit
   -c CONFIG, --config CONFIG
                         set Stairlight configuration directory.
+  -q, --quiet           keep silence
 ```
 
 ### check
@@ -247,6 +249,7 @@ optional arguments:
   -h, --help            show this help message and exit
   -c CONFIG, --config CONFIG
                         set Stairlight configuration directory
+  -q, --quiet           keep silence
   --save SAVE           file path where results will be saved(File system or GCS)
   --load LOAD           file path in which results are saved(File system or GCS), can be specified multiple times
   -t TABLE, --table TABLE

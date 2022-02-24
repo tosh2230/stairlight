@@ -123,8 +123,8 @@ def get_tables_to_search(stairlight: StairLight, args: argparse.Namespace) -> li
     return tables_to_search
 
 
-def set_config_parser(parser: argparse.ArgumentParser) -> None:
-    """Set a '--config' argument
+def set_general_parser(parser: argparse.ArgumentParser) -> None:
+    """Set general arguments
 
     Args:
         parser (argparse.ArgumentParser): ArgumentParser
@@ -135,6 +135,13 @@ def set_config_parser(parser: argparse.ArgumentParser) -> None:
         help="set Stairlight configuration directory",
         type=str,
         default=".",
+    )
+    parser.add_argument(
+        "-q",
+        "--quiet",
+        help="keep silence",
+        action="store_true",
+        default=False,
     )
 
 
@@ -230,7 +237,7 @@ def create_parser() -> argparse.ArgumentParser:
         "return a table dependency map as JSON format."
     )
     parser = argparse.ArgumentParser(description=description)
-    set_config_parser(parser=parser)
+    set_general_parser(parser=parser)
     set_save_load_parser(parser=parser)
 
     subparsers = parser.add_subparsers()
@@ -240,21 +247,21 @@ def create_parser() -> argparse.ArgumentParser:
         "init", help="create new Stairlight configuration file"
     )
     parser_init.set_defaults(handler=command_init)
-    set_config_parser(parser=parser_init)
+    set_general_parser(parser=parser_init)
 
     # check
     parser_check = subparsers.add_parser(
         "check", help="create new configuration file about undefined mappings"
     )
     parser_check.set_defaults(handler=command_check)
-    set_config_parser(parser=parser_check)
+    set_general_parser(parser=parser_check)
 
     # up
     parser_up = subparsers.add_parser(
         "up", help="return upstairs ( table | SQL file ) list"
     )
     parser_up.set_defaults(handler=command_up)
-    set_config_parser(parser=parser_up)
+    set_general_parser(parser=parser_up)
     set_save_load_parser(parser=parser_up)
     set_up_down_parser(parser=parser_up)
 
@@ -263,7 +270,7 @@ def create_parser() -> argparse.ArgumentParser:
         "down", help="return downstairs ( table | SQL file ) list"
     )
     parser_down.set_defaults(handler=command_down)
-    set_config_parser(parser=parser_down)
+    set_general_parser(parser=parser_down)
     set_save_load_parser(parser=parser_down)
     set_up_down_parser(parser=parser_down)
 
@@ -290,6 +297,9 @@ def main() -> None:
         if not stairlight.has_stairlight_config():
             exit(f"'{args.config}/stairlight.y(a)ml' is not found.")
         result = stairlight.mapped
+
+    if args.quiet:
+        return
 
     if result and isinstance(result, str):
         exit(result)

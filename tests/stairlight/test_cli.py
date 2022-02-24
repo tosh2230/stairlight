@@ -1,5 +1,3 @@
-# from pytest import monkeypatch
-
 import src.stairlight.cli as cli_main
 from stairlight import StairLight
 
@@ -74,3 +72,9 @@ class TestSuccess:
         cli_main.main()
         out, _ = capfd.readouterr()
         assert len(out) > 0
+
+    def test_main_quiet(self, monkeypatch, capfd):
+        monkeypatch.setattr("sys.argv", ["", "-c", "tests/config", "-q"])
+        cli_main.main()
+        out, _ = capfd.readouterr()
+        assert len(out) == 0
