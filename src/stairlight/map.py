@@ -32,6 +32,7 @@ class Map:
         self.mapping_config = mapping_config
 
     def write(self) -> None:
+        """Write a dependency map"""
         for template_source in self.find_template_source(
             stairlight_config=self.stairlight_config,
             mapping_config=self.mapping_config,
@@ -75,7 +76,9 @@ class Map:
     def write_by_template_source(self, template_source: TemplateSource) -> None:
         """Write a dependency map"""
         for sql_template in template_source.search_templates_iter():
-            if sql_template.is_mapped():
+            if not self.mapping_config:
+                self.add_unmapped_params(sql_template=sql_template)
+            elif sql_template.is_mapped():
                 for table_attributes in sql_template.get_mapped_table_attributes_iter():
                     self.find_unmapped_params(
                         sql_template=sql_template, table_attributes=table_attributes
@@ -84,9 +87,7 @@ class Map:
                         sql_template=sql_template, table_attributes=table_attributes
                     )
             else:
-                template_str = sql_template.get_template_str()
-                params = sql_template.get_jinja_params(template_str)
-                self.add_unmapped_params(sql_template=sql_template, params=params)
+                self.add_unmapped_params(sql_template=sql_template)
 
     def remap(self, sql_template: Template, table_attributes: dict) -> None:
         """Remap a dependency map
@@ -170,13 +171,16 @@ class Map:
             }
         return upstairs_values
 
-    def add_unmapped_params(self, sql_template: Template, params: dict) -> None:
+    def add_unmapped_params(self, sql_template: Template, params: dict = None) -> None:
         """add to the list of unmapped params
 
         Args:
             sql_template (Template): SQL template
-            params (dict): Jinja parameters
+            params (dict, optional): Jinja parameters
         """
+        if not params:
+            template_str = sql_template.get_template_str()
+            params = sql_template.get_jinja_params(template_str)
         self.unmapped.append(
             {
                 map_key.TEMPLATE: sql_template,

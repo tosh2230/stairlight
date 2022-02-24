@@ -13,6 +13,18 @@ class TestSuccess:
         message = cli_main.command_check(stairlight=stairlight_save, args=None)
         assert len(message) > 0
 
+    def test_command_check_at_first(self, stairlight_check: StairLight):
+        message = cli_main.command_check(stairlight=stairlight_check, args=None)
+        assert len(message) > 0
+
+    def test_command_check_no_file_found(
+        self, stairlight_check_no_file_found: StairLight
+    ):
+        message = cli_main.command_check(
+            stairlight=stairlight_check_no_file_found, args=None
+        )
+        assert message == "Templates are not found."
+
     def test_command_up_table(self, stairlight_save: StairLight):
         args = self.parser.parse_args(
             [

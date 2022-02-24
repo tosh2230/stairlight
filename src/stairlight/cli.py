@@ -44,6 +44,9 @@ def command_check(stairlight: StairLight, args: argparse.Namespace) -> str:
             "Please map undefined tables and parameters, "
             "and append to your latest configuration file."
         )
+    elif not stairlight.unmapped:
+        message = "Templates are not found."
+
     return message
 
 
