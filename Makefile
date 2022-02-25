@@ -1,4 +1,4 @@
-version = 0.3.1
+version = 0.3.2
 
 lint:
 	poetry run flake8 ./src ./tests
