@@ -52,6 +52,7 @@ class TestSuccess:
             }
         ]
 
+        global_value = OrderedDict({config_key.PARAMETERS: {}})
         mapping_value = OrderedDict(
             {
                 config_key.TEMPLATE_SOURCE_TYPE: sql_template.source_type.value,
@@ -85,6 +86,7 @@ class TestSuccess:
 
         expected = OrderedDict(
             {
+                config_key.MAPPING_CONFIG_GLOBAL_SECTION: global_value,
                 config_key.MAPPING_CONFIG_MAPPING_SECTION: [mapping_value],
                 config_key.MAPPING_CONFIG_METADATA_SECTION: [metadata_value],
             }

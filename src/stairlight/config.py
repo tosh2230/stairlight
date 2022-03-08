@@ -197,7 +197,6 @@ class Configurator:
                 values[config_key.TABLES][0][config_key.PARAMETERS] = parameters
                 if parameters in all_parameters:
                     global_parameters.update(parameters)
-                    print(global_parameters)
                 else:
                     all_parameters.append(parameters)
 
@@ -229,15 +228,15 @@ class Configurator:
 
 
 def create_nested_dict(
-    keys: "list[str]", results: OrderedDict, density: int = 0, default_value: any = None
+    keys: list, results: OrderedDict, density: int = 0, default_value: any = None
 ) -> None:
-    """_summary_
+    """create nested dict from list
 
     Args:
-        keys (list[str]): _description_
-        results (OrderedDict): _description_
-        density (int, optional): _description_. Defaults to 0.
-        default_value (any, optional): _description_. Defaults to None.
+        keys (list): Dict keys
+        results (OrderedDict): Nested dict
+        density (int, optional): Density. Defaults to 0.
+        default_value (any, optional): Default dict value. Defaults to None.
     """
     key = keys[density]
     if density < len(keys) - 1:
