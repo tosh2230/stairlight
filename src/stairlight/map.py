@@ -27,7 +27,7 @@ class Map:
             self.mapped = mapped
         else:
             self.mapped = {}
-        self.unmapped = []
+        self.unmapped: list[dict] = []
         self.stairlight_config = stairlight_config
         self.mapping_config = mapping_config
 
@@ -171,7 +171,7 @@ class Map:
             }
         return upstairs_values
 
-    def add_unmapped_params(self, sql_template: Template, params: dict = None) -> None:
+    def add_unmapped_params(self, sql_template: Template, params: list = None) -> None:
         """add to the list of unmapped params
 
         Args:

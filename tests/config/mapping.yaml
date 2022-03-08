@@ -1,3 +1,11 @@
+Global:
+  Parameters:
+    DESTINATION_PROJECT: PROJECT_GLOBAL
+    params:
+      PROJECT: PROJECT_GLOBAL
+      DATASET: DATASET_GLOBAL
+      TABLE: TABLE_GLOBAL
+
 Mapping:
   - TemplateSourceType: File
     FileSuffix: "tests/sql/main/one_line_no_project.sql"

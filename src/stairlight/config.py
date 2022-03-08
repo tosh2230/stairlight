@@ -1,3 +1,4 @@
+from copy import deepcopy
 import glob
 import logging
 import re
@@ -60,12 +61,14 @@ class Configurator:
         return template_file_name
 
     def create_mapping_template_file(
-        self, unmapped: list, prefix: str = config_key.MAPPING_CONFIG_FILE_PREFIX
+        self,
+        unmapped: "list[dict]",
+        prefix: str = config_key.MAPPING_CONFIG_FILE_PREFIX,
     ) -> str:
         """Create a mapping template file
 
         Args:
-            unmapped (list): Unmapped results
+            unmapped (list[dict]): Unmapped results
             prefix (str, optional): File prefix. Defaults to MAPPING_CONFIG_PREFIX.
 
         Returns:
@@ -73,11 +76,15 @@ class Configurator:
         """
         now = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
         template_file_name = f"{self.dir}/{prefix}_checked_{now}.yaml"
+
         with open(template_file_name, "w") as f:
             yaml.add_representer(
                 data_type=OrderedDict, representer=self.represent_odict
             )
-            yaml.dump(self.build_mapping_config(unmapped), f)
+            yaml.dump(
+                self.build_mapping_config(unmapped_templates=unmapped),
+                stream=f,
+            )
         return template_file_name
 
     @staticmethod
@@ -134,18 +141,27 @@ class Configurator:
             }
         )
 
-    def build_mapping_config(self, unmapped_templates: list) -> OrderedDict:
+    def build_mapping_config(self, unmapped_templates: "list[dict]") -> OrderedDict:
         """Create a OrderedDict for mapping.config
 
         Args:
-            unmapped (list): unmapped settings that Stairlight detects
+            unmapped (list[dict]): unmapped settings that Stairlight detects
 
         Returns:
             OrderedDict: mapping.config template
         """
         mapping_config_dict = OrderedDict(
-            {config_key.MAPPING_CONFIG_MAPPING_SECTION: []}
+            {
+                config_key.MAPPING_CONFIG_GLOBAL_SECTION: [],
+                config_key.MAPPING_CONFIG_MAPPING_SECTION: [],
+            }
         )
+
+        all_parameters: list[OrderedDict] = []
+        global_parameters: dict = {}
+
+        # Mapping section
+        unmapped_template: dict
         for unmapped_template in unmapped_templates:
             sql_template: Template = unmapped_template[map_key.TEMPLATE]
             values = OrderedDict(
@@ -169,9 +185,9 @@ class Configurator:
                 values[config_key.TABLES][0][config_key.TABLE_NAME] = sql_template.uri
 
             # Parameters
-            parameters = None
+            parameters: OrderedDict = None
             if map_key.PARAMETERS in unmapped_template:
-                undefined_params = unmapped_template.get(map_key.PARAMETERS)
+                undefined_params: list[str] = unmapped_template.get(map_key.PARAMETERS)
                 parameters = OrderedDict()
                 for undefined_param in undefined_params:
                     splitted_params = undefined_param.split(".")
@@ -179,6 +195,11 @@ class Configurator:
 
             if parameters:
                 values[config_key.TABLES][0][config_key.PARAMETERS] = parameters
+                if parameters in all_parameters:
+                    global_parameters.update(parameters)
+                    print(global_parameters)
+                else:
+                    all_parameters.append(parameters)
 
             # Labels
             values[config_key.TABLES][0][config_key.LABELS] = OrderedDict(
@@ -189,6 +210,12 @@ class Configurator:
                 values
             )
 
+        # Global section
+        mapping_config_dict[config_key.MAPPING_CONFIG_GLOBAL_SECTION] = OrderedDict(
+            deepcopy({config_key.PARAMETERS: global_parameters})
+        )
+
+        # Metadata section
         mapping_config_dict[config_key.MAPPING_CONFIG_METADATA_SECTION] = [
             OrderedDict(
                 {
@@ -201,7 +228,17 @@ class Configurator:
         return mapping_config_dict
 
 
-def create_nested_dict(keys, results, density=0, default_value=None):
+def create_nested_dict(
+    keys: "list[str]", results: OrderedDict, density: int = 0, default_value: any = None
+) -> None:
+    """_summary_
+
+    Args:
+        keys (list[str]): _description_
+        results (OrderedDict): _description_
+        density (int, optional): _description_. Defaults to 0.
+        default_value (any, optional): _description_. Defaults to None.
+    """
     key = keys[density]
     if density < len(keys) - 1:
         if key not in results:
