@@ -1,0 +1,86 @@
+Mapping:
+- TemplateSourceType: File
+  FileSuffix: tests/sql/query/nested_join.sql
+  Tables:
+  - TableName: null
+    Labels:
+      key: value
+- TemplateSourceType: File
+  FileSuffix: tests/sql/query/union_same_table.sql
+  Tables:
+  - TableName: null
+    Labels:
+      key: value
+- TemplateSourceType: File
+  FileSuffix: tests/sql/query/cte_one_line.sql
+  Tables:
+  - TableName: null
+    Labels:
+      key: value
+- TemplateSourceType: File
+  FileSuffix: tests/sql/query/cte_multi_line.sql
+  Tables:
+  - TableName: null
+    Labels:
+      key: value
+- TemplateSourceType: File
+  FileSuffix: tests/sql/main/undefined.sql
+  Tables:
+  - TableName: null
+    Parameters:
+      params:
+        main_table: null
+        sub_table_01: null
+        sub_table_02: null
+    Labels:
+      key: value
+- TemplateSourceType: File
+  FileSuffix: tests/sql/main/undefined_part.sql
+  Tables:
+  - TableName: null
+    Parameters:
+      params:
+        sub_table_01: null
+        sub_table_02: null
+    Labels:
+      key: value
+- TemplateSourceType: File
+  FileSuffix: tests/sql/gcs/one_line/one_line.sql
+  Tables:
+  - TableName: null
+    Labels:
+      key: value
+- TemplateSourceType: File
+  FileSuffix: tests/sql/gcs/cte/cte_multi_line.sql
+  Tables:
+  - TableName: null
+    Parameters:
+      params:
+        DATASET: null
+        PROJECT: null
+        TABLE: null
+    Labels:
+      key: value
+- TemplateSourceType: GCS
+  Uri: gs://stairlight/sql/test_a/test_a.sql
+  BucketName: stairlight
+  Tables:
+  - TableName: null
+    Labels:
+      key: value
+- TemplateSourceType: GCS
+  Uri: gs://stairlight/sql/test_b/test_b.sql
+  BucketName: stairlight
+  Tables:
+  - TableName: null
+    Parameters:
+      params:
+        DATASET: null
+        PROJECT: null
+        TABLE: null
+    Labels:
+      key: value
+Metadata:
+- TableName: null
+  Labels:
+    key: value

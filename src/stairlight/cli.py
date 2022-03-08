@@ -305,7 +305,7 @@ def main() -> None:
         return
 
     if result and isinstance(result, str):
-        exit(result)
+        print(result)
     else:
         print(json.dumps(result, indent=2))
 
