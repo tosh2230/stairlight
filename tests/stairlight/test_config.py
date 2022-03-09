@@ -34,7 +34,7 @@ class TestSuccess:
         ]
 
     def test_build_mapping_template(self, configurator):
-        sql_template = FileTemplate(
+        template = FileTemplate(
             mapping_config=configurator.read(
                 prefix=config_key.MAPPING_CONFIG_FILE_PREFIX
             ),
@@ -43,7 +43,7 @@ class TestSuccess:
         )
         unmapped_templates = [
             {
-                map_key.TEMPLATE: sql_template,
+                map_key.TEMPLATE: template,
                 map_key.PARAMETERS: [
                     "params.main_table",
                     "params.sub_table_01",
@@ -55,8 +55,8 @@ class TestSuccess:
         global_value = OrderedDict({config_key.PARAMETERS: {}})
         mapping_value = OrderedDict(
             {
-                config_key.TEMPLATE_SOURCE_TYPE: sql_template.source_type.value,
-                config_key.FILE_SUFFIX: sql_template.key,
+                config_key.TEMPLATE_SOURCE_TYPE: template.source_type.value,
+                config_key.FILE_SUFFIX: template.key,
                 config_key.TABLES: [
                     OrderedDict(
                         {

@@ -32,10 +32,10 @@ class TestSuccess:
     )
     def test_find_unmapped_params(self, dependency_map, key, expected):
         actual = None
-        for a in dependency_map.unmapped:
-            sql_template = a.get(map_key.TEMPLATE)
-            if sql_template.key == key:
-                actual = sorted(a.get(map_key.PARAMETERS))
+        for unmapped_attributes in dependency_map.unmapped:
+            template = unmapped_attributes.get(map_key.TEMPLATE)
+            if template.key == key:
+                actual = sorted(unmapped_attributes.get(map_key.PARAMETERS))
                 break
         assert actual == expected
 

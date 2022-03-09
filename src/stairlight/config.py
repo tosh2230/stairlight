@@ -163,26 +163,26 @@ class Configurator:
         # Mapping section
         unmapped_template: dict
         for unmapped_template in unmapped_templates:
-            sql_template: Template = unmapped_template[map_key.TEMPLATE]
+            template: Template = unmapped_template[map_key.TEMPLATE]
             values = OrderedDict(
                 {
-                    config_key.TEMPLATE_SOURCE_TYPE: sql_template.source_type.value,
+                    config_key.TEMPLATE_SOURCE_TYPE: template.source_type.value,
                 }
             )
 
-            if sql_template.source_type == TemplateSourceType.FILE:
-                values[config_key.FILE_SUFFIX] = sql_template.key
-            elif sql_template.source_type == TemplateSourceType.GCS:
-                values[config_key.URI] = sql_template.uri
-                values[config_key.BUCKET_NAME] = sql_template.bucket
-            elif sql_template.source_type == TemplateSourceType.REDASH:
-                values[config_key.QUERY_ID] = sql_template.query_id
-                values[config_key.DATA_SOURCE_NAME] = sql_template.data_source_name
+            if template.source_type == TemplateSourceType.FILE:
+                values[config_key.FILE_SUFFIX] = template.key
+            elif template.source_type == TemplateSourceType.GCS:
+                values[config_key.URI] = template.uri
+                values[config_key.BUCKET_NAME] = template.bucket
+            elif template.source_type == TemplateSourceType.REDASH:
+                values[config_key.QUERY_ID] = template.query_id
+                values[config_key.DATA_SOURCE_NAME] = template.data_source_name
 
             # Tables
             values[config_key.TABLES] = [OrderedDict({config_key.TABLE_NAME: None})]
-            if sql_template.source_type == TemplateSourceType.REDASH:
-                values[config_key.TABLES][0][config_key.TABLE_NAME] = sql_template.uri
+            if template.source_type == TemplateSourceType.REDASH:
+                values[config_key.TABLES][0][config_key.TABLE_NAME] = template.uri
 
             # Parameters
             parameters: OrderedDict = None
