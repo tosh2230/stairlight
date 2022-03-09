@@ -51,27 +51,19 @@ class Map:
                 config_key.TEMPLATE_SOURCE_TYPE
             )
             if template_source_type == TemplateSourceType.FILE.value:
-                template_source = FileTemplateSource(
-                    stairlight_config=stairlight_config,
-                    mapping_config=mapping_config,
-                    source_attributes=source_attributes,
-                )
+                template_source = FileTemplateSource
             elif template_source_type == TemplateSourceType.GCS.value:
-                template_source = GcsTemplateSource(
-                    stairlight_config=stairlight_config,
-                    mapping_config=mapping_config,
-                    source_attributes=source_attributes,
-                )
+                template_source = GcsTemplateSource
             elif template_source_type == TemplateSourceType.REDASH.value:
-                template_source = RedashTemplateSource(
-                    stairlight_config=stairlight_config,
-                    mapping_config=mapping_config,
-                    source_attributes=source_attributes,
-                )
+                template_source = RedashTemplateSource
             else:
                 print(f"Template source is not found: {type}")
                 continue
-            yield template_source
+            yield template_source(
+                stairlight_config=stairlight_config,
+                mapping_config=mapping_config,
+                source_attributes=source_attributes,
+            )
 
     def write_by_template_source(self, template_source: TemplateSource) -> None:
         """Write a dependency map"""
