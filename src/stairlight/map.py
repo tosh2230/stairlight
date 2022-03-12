@@ -43,6 +43,15 @@ class Map:
     def find_template_source(
         stairlight_config: dict, mapping_config: dict
     ) -> Iterator[TemplateSource]:
+        """find template source
+
+        Args:
+            stairlight_config (dict): Stairlight configuration
+            mapping_config (dict): Mapping configuration
+
+        Yields:
+            Iterator[TemplateSource]: Template source class
+        """
         for source_attributes in stairlight_config.get(
             config_key.STAIRLIGHT_CONFIG_INCLUDE_SECTION
         ):
@@ -87,7 +96,7 @@ class Map:
             table_attributes (dict): Table attributes from mapping configuration
         """
         query_str: str = template.render(
-            params=table_attributes.get(config_key.PARAMETERS)
+            params=self.get_combined_params(table_attributes)
         )
         query = Query(
             query_str=query_str,
@@ -121,6 +130,26 @@ class Map:
                 }
             )
 
+    def get_combined_params(self, table_attributes: dict) -> dict:
+        """return a combination of parameters by table and global
+
+        Args:
+            table_attributes (dict): table attributes
+
+        Returns:
+            dict: combined parameters
+        """
+        global_params: dict = {}
+        table_params: dict = table_attributes.get(config_key.PARAMETERS, {})
+        global_section: dict = self.mapping_config.get(
+            config_key.MAPPING_CONFIG_GLOBAL_SECTION
+        )
+        if config_key.PARAMETERS in global_section:
+            global_params = global_section.get(config_key.PARAMETERS)
+
+        # Table parameters are prioritized over global parameters
+        return {**global_params, **table_params}
+
     @staticmethod
     def create_upstairs_value(
         template: Template,
@@ -128,6 +157,17 @@ class Map:
         metadata: "list[str]",
         upstairs: str,
     ) -> dict:
+        """create upstairs table information
+
+        Args:
+            template (Template): Template class
+            mapping_labels (dict): labels in mapping section
+            metadata (list[str]): metadata
+            upstairs (str): upstairs table name
+
+        Returns:
+            dict: upstairs table information
+        """
         metadata_labels = []
         upstairs_values = {
             map_key.TEMPLATE_SOURCE_TYPE: template.source_type.value,
@@ -192,7 +232,7 @@ class Map:
         if not template_params:
             return
 
-        mapped_params_dict = table_attributes.get(config_key.PARAMETERS)
+        mapped_params_dict = self.get_combined_params(table_attributes)
         mapped_params = concat_dict_to_list(mapped_params_dict)
         diff_params = list(set(template_params) - set(mapped_params))
 
@@ -200,7 +240,15 @@ class Map:
             self.add_unmapped_params(template=template, params=diff_params)
 
 
-def concat_dict_to_list(d):
+def concat_dict_to_list(d: dict) -> list:
+    """_summary_
+
+    Args:
+        d (dict): dict
+
+    Returns:
+        list: results
+    """
     results = []
     for key, value in d.items():
         if isinstance(value, dict):
