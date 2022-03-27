@@ -130,8 +130,23 @@ class Map:
                 }
             )
 
+    def get_global_params(self) -> dict:
+        """get global parameters in mapping.yaml
+
+        Returns:
+            dict: global parameters
+        """
+        global_params: dict = {}
+        global_section: dict = self.mapping_config.get(
+            config_key.MAPPING_CONFIG_GLOBAL_SECTION
+        )
+        if config_key.PARAMETERS in global_section:
+            global_params = global_section.get(config_key.PARAMETERS)
+
+        return global_params
+
     def get_combined_params(self, table_attributes: dict) -> dict:
-        """return a combination of parameters by table and global
+        """return a combination of global parameters and table parameters
 
         Args:
             table_attributes (dict): table attributes
@@ -139,13 +154,8 @@ class Map:
         Returns:
             dict: combined parameters
         """
-        global_params: dict = {}
+        global_params: dict = self.get_global_params()
         table_params: dict = table_attributes.get(config_key.PARAMETERS, {})
-        global_section: dict = self.mapping_config.get(
-            config_key.MAPPING_CONFIG_GLOBAL_SECTION
-        )
-        if config_key.PARAMETERS in global_section:
-            global_params = global_section.get(config_key.PARAMETERS)
 
         # Table parameters are prioritized over global parameters
         return {**global_params, **table_params}
