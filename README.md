@@ -152,6 +152,13 @@ Settings:
 A template of this file can be created by `check` command, based on the configuration of 'stairlight.yaml'.
 
 ```yaml
+Global:
+  Parameters:
+    DESTINATION_PROJECT: stairlight
+    params:
+      PROJECT: 1234567890
+      DATASET: public
+      TABLE: taxirides
 Mapping:
   - TemplateSourceType: File
     FileSuffix: "tests/sql/main/union_same_table.sql"
@@ -177,17 +184,23 @@ Metadata:
       Test: a
 ```
 
-#### mapping section
+#### Global Section
 
-This section is used to define relationships between queries and tables that created as a result of query execution.
+This section is for global configurations.
+
+`Parameters` attribute is used to set common parameters. If conflicts has occurred with `Parameters` attributes in mapping section, mapping section's parameters will be used in preference to global.
+
+#### Mapping Section
+
+Mapping section is used to define relationships between queries and tables that created as a result of query execution.
 
 `Parameters` attribute allows you to reflect settings in [jinja](https://jinja.palletsprojects.com/) template variables embedded in queries. If multiple settings are applied to a query using jinja template, the query will be read as if there were the same number of queries as the number of settings.
 
-#### metadata section
+#### Metadata Section
 
 This section is mainly used to set metadata to tables appears only in queries.
 
-## Command and option
+## Command and Option
 
 ```txt
 $ stairlight --help
