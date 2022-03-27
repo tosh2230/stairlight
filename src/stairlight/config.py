@@ -1,8 +1,8 @@
-from copy import deepcopy
 import glob
 import logging
 import re
 from collections import OrderedDict
+from copy import deepcopy
 from datetime import datetime, timezone
 
 import yaml
