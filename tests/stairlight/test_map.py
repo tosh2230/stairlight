@@ -1,6 +1,7 @@
 import pytest
 
 from src.stairlight import config_key, map_key
+from src.stairlight.map import combine_nested_dict_keys
 
 
 class TestSuccess:
@@ -85,3 +86,16 @@ class TestSuccess:
 class TestSuccessNoMetadata:
     def test_find_unmapped_params(self, dependency_map):
         assert dependency_map.unmapped
+
+
+def test_combine_nested_dict_keys():
+    d = {
+        "params": {
+            "PROJECT": "PROJECT_BY_TABLE",
+            "DATASET": "DATASET_BY_TABLE",
+            "TABLE": "TABLE_BY_TABLE",
+        }
+    }
+    actual = combine_nested_dict_keys(d=d)
+    expected = ["params.PROJECT", "params.DATASET", "params.TABLE"]
+    assert actual == expected

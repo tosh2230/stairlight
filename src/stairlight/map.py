@@ -237,21 +237,21 @@ class Map:
             template (Template): SQL template
             table_attributes (dict): Table attributes from mapping configuration
         """
-        template_str = template.get_template_str()
-        template_params = template.get_jinja_params(template_str)
+        template_str: str = template.get_template_str()
+        template_params: list = template.get_jinja_params(template_str)
         if not template_params:
             return
 
-        mapped_params_dict = self.get_combined_params(table_attributes)
-        mapped_params = concat_dict_to_list(mapped_params_dict)
-        diff_params = list(set(template_params) - set(mapped_params))
+        mapped_params_dict: dict = self.get_combined_params(table_attributes)
+        mapped_params: list = combine_nested_dict_keys(d=mapped_params_dict)
+        diff_params: list = list(set(template_params) - set(mapped_params))
 
         if diff_params:
             self.add_unmapped_params(template=template, params=diff_params)
 
 
-def concat_dict_to_list(d: dict) -> list:
-    """_summary_
+def combine_nested_dict_keys(d: dict, delimiter: str = ".") -> list:
+    """combine nested dictionary keys and converts to a list
 
     Args:
         d (dict): dict
@@ -262,9 +262,9 @@ def concat_dict_to_list(d: dict) -> list:
     results = []
     for key, value in d.items():
         if isinstance(value, dict):
-            recursive_results = concat_dict_to_list(d=value)
+            recursive_results = combine_nested_dict_keys(d=value)
             for recursive_result in recursive_results:
-                concat = key + "." + recursive_result
+                concat = key + delimiter + recursive_result
                 results.append(concat)
         else:
             results.append(key)
