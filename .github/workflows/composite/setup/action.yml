@@ -21,7 +21,7 @@ runs:
         poetry install
       shell: bash
     - name: Setup Google Cloud
-      uses: "google-github-actions/setup-gcloud@master"
+      uses: "google-github-actions/setup-gcloud@v0"
       with:
         project_id: ${{ inputs.GCP_PROJECT_ID }}
     - id: auth
