@@ -60,7 +60,7 @@ class StairLight:
         self.save_file = save_file
         self._configurator = Configurator(dir=config_dir)
         self._mapped = {}
-        self._unmapped = []
+        self._unmapped: list[dict] = []
         self.mapping_config = None
         self._stairlight_config = self._configurator.read(
             prefix=config_key.STAIRLIGHT_CONFIG_FILE_PREFIX
@@ -89,11 +89,11 @@ class StairLight:
         return self._mapped
 
     @property
-    def unmapped(self) -> list:
+    def unmapped(self) -> "list[dict]":
         """Return unmapped
 
         Returns:
-            list: Unmapped results
+            list[dict]: Unmapped results
         """
         return self._unmapped
 

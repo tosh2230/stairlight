@@ -110,7 +110,7 @@ class Template:
         """Get template strings that read from template source"""
         return ""
 
-    def render(self) -> str:
+    def render(self, params: dict) -> str:
         """Render SQL query string from a jinja template"""
         return ""
 

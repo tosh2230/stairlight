@@ -2,6 +2,7 @@ import glob
 import logging
 import re
 from collections import OrderedDict
+from copy import deepcopy
 from datetime import datetime, timezone
 
 import yaml
@@ -60,12 +61,14 @@ class Configurator:
         return template_file_name
 
     def create_mapping_template_file(
-        self, unmapped: list, prefix: str = config_key.MAPPING_CONFIG_FILE_PREFIX
+        self,
+        unmapped: "list[dict]",
+        prefix: str = config_key.MAPPING_CONFIG_FILE_PREFIX,
     ) -> str:
         """Create a mapping template file
 
         Args:
-            unmapped (list): Unmapped results
+            unmapped (list[dict]): Unmapped results
             prefix (str, optional): File prefix. Defaults to MAPPING_CONFIG_PREFIX.
 
         Returns:
@@ -73,11 +76,15 @@ class Configurator:
         """
         now = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
         template_file_name = f"{self.dir}/{prefix}_checked_{now}.yaml"
+
         with open(template_file_name, "w") as f:
             yaml.add_representer(
                 data_type=OrderedDict, representer=self.represent_odict
             )
-            yaml.dump(self.build_mapping_config(unmapped), f)
+            yaml.dump(
+                self.build_mapping_config(unmapped_templates=unmapped),
+                stream=f,
+            )
         return template_file_name
 
     @staticmethod
@@ -134,44 +141,53 @@ class Configurator:
             }
         )
 
-    def build_mapping_config(self, unmapped_templates: list) -> OrderedDict:
+    def build_mapping_config(self, unmapped_templates: "list[dict]") -> OrderedDict:
         """Create a OrderedDict for mapping.config
 
         Args:
-            unmapped (list): unmapped settings that Stairlight detects
+            unmapped (list[dict]): unmapped settings that Stairlight detects
 
         Returns:
             OrderedDict: mapping.config template
         """
         mapping_config_dict = OrderedDict(
-            {config_key.MAPPING_CONFIG_MAPPING_SECTION: []}
+            {
+                config_key.MAPPING_CONFIG_GLOBAL_SECTION: [],
+                config_key.MAPPING_CONFIG_MAPPING_SECTION: [],
+            }
         )
+
+        all_parameters: list[OrderedDict] = []
+        global_parameters: dict = {}
+
+        # Mapping section
+        unmapped_template: dict
         for unmapped_template in unmapped_templates:
-            sql_template: Template = unmapped_template[map_key.TEMPLATE]
+            template: Template = unmapped_template[map_key.TEMPLATE]
             values = OrderedDict(
                 {
-                    config_key.TEMPLATE_SOURCE_TYPE: sql_template.source_type.value,
+                    config_key.TEMPLATE_SOURCE_TYPE: template.source_type.value,
                 }
             )
 
-            if sql_template.source_type == TemplateSourceType.FILE:
-                values[config_key.FILE_SUFFIX] = sql_template.key
-            elif sql_template.source_type == TemplateSourceType.GCS:
-                values[config_key.URI] = sql_template.uri
-                values[config_key.BUCKET_NAME] = sql_template.bucket
-            elif sql_template.source_type == TemplateSourceType.REDASH:
-                values[config_key.QUERY_ID] = sql_template.query_id
-                values[config_key.DATA_SOURCE_NAME] = sql_template.data_source_name
+            if template.source_type == TemplateSourceType.FILE:
+                values[config_key.FILE_SUFFIX] = template.key
+            elif template.source_type == TemplateSourceType.GCS:
+                values[config_key.URI] = template.uri
+                values[config_key.BUCKET_NAME] = template.bucket
+            elif template.source_type == TemplateSourceType.REDASH:
+                values[config_key.QUERY_ID] = template.query_id
+                values[config_key.DATA_SOURCE_NAME] = template.data_source_name
 
             # Tables
             values[config_key.TABLES] = [OrderedDict({config_key.TABLE_NAME: None})]
-            if sql_template.source_type == TemplateSourceType.REDASH:
-                values[config_key.TABLES][0][config_key.TABLE_NAME] = sql_template.uri
+            if template.source_type == TemplateSourceType.REDASH:
+                values[config_key.TABLES][0][config_key.TABLE_NAME] = template.uri
 
             # Parameters
-            parameters = None
+            parameters: OrderedDict = None
             if map_key.PARAMETERS in unmapped_template:
-                undefined_params = unmapped_template.get(map_key.PARAMETERS)
+                undefined_params: list[str] = unmapped_template.get(map_key.PARAMETERS)
                 parameters = OrderedDict()
                 for undefined_param in undefined_params:
                     splitted_params = undefined_param.split(".")
@@ -179,6 +195,10 @@ class Configurator:
 
             if parameters:
                 values[config_key.TABLES][0][config_key.PARAMETERS] = parameters
+                if parameters in all_parameters:
+                    global_parameters.update(parameters)
+                else:
+                    all_parameters.append(parameters)
 
             # Labels
             values[config_key.TABLES][0][config_key.LABELS] = OrderedDict(
@@ -189,6 +209,12 @@ class Configurator:
                 values
             )
 
+        # Global section
+        mapping_config_dict[config_key.MAPPING_CONFIG_GLOBAL_SECTION] = OrderedDict(
+            deepcopy({config_key.PARAMETERS: global_parameters})
+        )
+
+        # Metadata section
         mapping_config_dict[config_key.MAPPING_CONFIG_METADATA_SECTION] = [
             OrderedDict(
                 {
@@ -201,7 +227,17 @@ class Configurator:
         return mapping_config_dict
 
 
-def create_nested_dict(keys, results, density=0, default_value=None):
+def create_nested_dict(
+    keys: list, results: OrderedDict, density: int = 0, default_value: any = None
+) -> None:
+    """create nested dict from list
+
+    Args:
+        keys (list): Dict keys
+        results (OrderedDict): Nested dict
+        density (int, optional): Density. Defaults to 0.
+        default_value (any, optional): Default dict value. Defaults to None.
+    """
     key = keys[density]
     if density < len(keys) - 1:
         if key not in results:

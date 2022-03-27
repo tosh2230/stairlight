@@ -27,7 +27,7 @@ class Map:
             self.mapped = mapped
         else:
             self.mapped = {}
-        self.unmapped = []
+        self.unmapped: list[dict] = []
         self.stairlight_config = stairlight_config
         self.mapping_config = mapping_config
 
@@ -43,6 +43,15 @@ class Map:
     def find_template_source(
         stairlight_config: dict, mapping_config: dict
     ) -> Iterator[TemplateSource]:
+        """find template source
+
+        Args:
+            stairlight_config (dict): Stairlight configuration
+            mapping_config (dict): Mapping configuration
+
+        Yields:
+            Iterator[TemplateSource]: Template source class
+        """
         for source_attributes in stairlight_config.get(
             config_key.STAIRLIGHT_CONFIG_INCLUDE_SECTION
         ):
@@ -51,62 +60,54 @@ class Map:
                 config_key.TEMPLATE_SOURCE_TYPE
             )
             if template_source_type == TemplateSourceType.FILE.value:
-                template_source = FileTemplateSource(
-                    stairlight_config=stairlight_config,
-                    mapping_config=mapping_config,
-                    source_attributes=source_attributes,
-                )
+                template_source = FileTemplateSource
             elif template_source_type == TemplateSourceType.GCS.value:
-                template_source = GcsTemplateSource(
-                    stairlight_config=stairlight_config,
-                    mapping_config=mapping_config,
-                    source_attributes=source_attributes,
-                )
+                template_source = GcsTemplateSource
             elif template_source_type == TemplateSourceType.REDASH.value:
-                template_source = RedashTemplateSource(
-                    stairlight_config=stairlight_config,
-                    mapping_config=mapping_config,
-                    source_attributes=source_attributes,
-                )
+                template_source = RedashTemplateSource
             else:
                 print(f"Template source is not found: {type}")
                 continue
-            yield template_source
+            yield template_source(
+                stairlight_config=stairlight_config,
+                mapping_config=mapping_config,
+                source_attributes=source_attributes,
+            )
 
     def write_by_template_source(self, template_source: TemplateSource) -> None:
         """Write a dependency map"""
-        for sql_template in template_source.search_templates_iter():
+        for template in template_source.search_templates_iter():
             if not self.mapping_config:
-                self.add_unmapped_params(sql_template=sql_template)
-            elif sql_template.is_mapped():
-                for table_attributes in sql_template.get_mapped_table_attributes_iter():
+                self.add_unmapped_params(template=template)
+            elif template.is_mapped():
+                for table_attributes in template.get_mapped_table_attributes_iter():
                     self.find_unmapped_params(
-                        sql_template=sql_template, table_attributes=table_attributes
+                        template=template, table_attributes=table_attributes
                     )
-                    self.remap(
-                        sql_template=sql_template, table_attributes=table_attributes
-                    )
+                    self.remap(template=template, table_attributes=table_attributes)
             else:
-                self.add_unmapped_params(sql_template=sql_template)
+                self.add_unmapped_params(template=template)
 
-    def remap(self, sql_template: Template, table_attributes: dict) -> None:
+    def remap(self, template: Template, table_attributes: dict) -> None:
         """Remap a dependency map
 
         Args:
-            sql_template (Template): SQL template
+            template (Template): SQL template
             table_attributes (dict): Table attributes from mapping configuration
         """
-        query_str = sql_template.render(
-            params=table_attributes.get(config_key.PARAMETERS)
+        query_str: str = template.render(
+            params=self.get_combined_params(table_attributes)
         )
         query = Query(
             query_str=query_str,
-            default_table_prefix=sql_template.default_table_prefix,
+            default_table_prefix=template.default_table_prefix,
         )
 
-        downstairs = table_attributes.get(config_key.TABLE_NAME)
-        mapping_labels = table_attributes.get(config_key.LABELS)
-        metadata = self.mapping_config.get(config_key.MAPPING_CONFIG_METADATA_SECTION)
+        downstairs: str = table_attributes.get(config_key.TABLE_NAME)
+        mapping_labels: dict = table_attributes.get(config_key.LABELS)
+        metadata: list[str] = self.mapping_config.get(
+            config_key.MAPPING_CONFIG_METADATA_SECTION
+        )
 
         if downstairs not in self.mapped:
             self.mapped[downstairs] = {}
@@ -116,7 +117,7 @@ class Map:
 
             if not self.mapped[downstairs].get(upstairs):
                 self.mapped[downstairs][upstairs] = self.create_upstairs_value(
-                    sql_template=sql_template,
+                    template=template,
                     mapping_labels=mapping_labels,
                     metadata=metadata,
                     upstairs=upstairs,
@@ -129,25 +130,66 @@ class Map:
                 }
             )
 
+    def get_global_params(self) -> dict:
+        """get global parameters in mapping.yaml
+
+        Returns:
+            dict: global parameters
+        """
+        global_params: dict = {}
+        global_section: dict = self.mapping_config.get(
+            config_key.MAPPING_CONFIG_GLOBAL_SECTION
+        )
+        if config_key.PARAMETERS in global_section:
+            global_params = global_section.get(config_key.PARAMETERS)
+
+        return global_params
+
+    def get_combined_params(self, table_attributes: dict) -> dict:
+        """return a combination of global parameters and table parameters
+
+        Args:
+            table_attributes (dict): table attributes
+
+        Returns:
+            dict: combined parameters
+        """
+        global_params: dict = self.get_global_params()
+        table_params: dict = table_attributes.get(config_key.PARAMETERS, {})
+
+        # Table parameters are prioritized over global parameters
+        return {**global_params, **table_params}
+
     @staticmethod
     def create_upstairs_value(
-        sql_template: Template,
+        template: Template,
         mapping_labels: dict,
-        metadata: list,
+        metadata: "list[str]",
         upstairs: str,
     ) -> dict:
+        """create upstairs table information
+
+        Args:
+            template (Template): Template class
+            mapping_labels (dict): labels in mapping section
+            metadata (list[str]): metadata
+            upstairs (str): upstairs table name
+
+        Returns:
+            dict: upstairs table information
+        """
         metadata_labels = []
         upstairs_values = {
-            map_key.TEMPLATE_SOURCE_TYPE: sql_template.source_type.value,
-            map_key.KEY: sql_template.key,
-            map_key.URI: sql_template.uri,
+            map_key.TEMPLATE_SOURCE_TYPE: template.source_type.value,
+            map_key.KEY: template.key,
+            map_key.URI: template.uri,
             map_key.LINES: [],
         }
 
-        if sql_template.source_type == TemplateSourceType.GCS:
-            upstairs_values[map_key.BUCKET_NAME] = sql_template.bucket
-        elif sql_template.source_type == TemplateSourceType.REDASH:
-            upstairs_values[map_key.DATA_SOURCE_NAME] = sql_template.data_source_name
+        if template.source_type == TemplateSourceType.GCS:
+            upstairs_values[map_key.BUCKET_NAME] = template.bucket
+        elif template.source_type == TemplateSourceType.REDASH:
+            upstairs_values[map_key.DATA_SOURCE_NAME] = template.data_source_name
 
         if metadata:
             metadata_labels = [
@@ -171,52 +213,58 @@ class Map:
             }
         return upstairs_values
 
-    def add_unmapped_params(self, sql_template: Template, params: dict = None) -> None:
+    def add_unmapped_params(self, template: Template, params: list = None) -> None:
         """add to the list of unmapped params
 
         Args:
-            sql_template (Template): SQL template
+            template (Template): SQL template
             params (dict, optional): Jinja parameters
         """
         if not params:
-            template_str = sql_template.get_template_str()
-            params = sql_template.get_jinja_params(template_str)
+            template_str = template.get_template_str()
+            params = template.get_jinja_params(template_str)
         self.unmapped.append(
             {
-                map_key.TEMPLATE: sql_template,
+                map_key.TEMPLATE: template,
                 map_key.PARAMETERS: params,
             }
         )
 
-    def find_unmapped_params(
-        self, sql_template: Template, table_attributes: dict
-    ) -> None:
+    def find_unmapped_params(self, template: Template, table_attributes: dict) -> None:
         """find unmapped parameters in mapped files
 
         Args:
-            sql_template (Template): SQL template
+            template (Template): SQL template
             table_attributes (dict): Table attributes from mapping configuration
         """
-        template_str = sql_template.get_template_str()
-        template_params = sql_template.get_jinja_params(template_str)
+        template_str: str = template.get_template_str()
+        template_params: list = template.get_jinja_params(template_str)
         if not template_params:
             return
 
-        mapped_params_dict = table_attributes.get(config_key.PARAMETERS)
-        mapped_params = concat_dict_to_list(mapped_params_dict)
-        diff_params = list(set(template_params) - set(mapped_params))
+        mapped_params_dict: dict = self.get_combined_params(table_attributes)
+        mapped_params: list = combine_nested_dict_keys(d=mapped_params_dict)
+        diff_params: list = list(set(template_params) - set(mapped_params))
 
         if diff_params:
-            self.add_unmapped_params(sql_template=sql_template, params=diff_params)
+            self.add_unmapped_params(template=template, params=diff_params)
 
 
-def concat_dict_to_list(d):
+def combine_nested_dict_keys(d: dict, delimiter: str = ".") -> list:
+    """combine nested dictionary keys and converts to a list
+
+    Args:
+        d (dict): dict
+
+    Returns:
+        list: results
+    """
     results = []
     for key, value in d.items():
         if isinstance(value, dict):
-            recursive_results = concat_dict_to_list(d=value)
+            recursive_results = combine_nested_dict_keys(d=value)
             for recursive_result in recursive_results:
-                concat = key + "." + recursive_result
+                concat = key + delimiter + recursive_result
                 results.append(concat)
         else:
             results.append(key)
