@@ -10,9 +10,15 @@ readme = "README.md"
 python = "^3.6.2"
 PyYAML = ">=5.0"
 Jinja2 = ">=2.10.3"
-google-cloud-storage = "^1.28.1"
-SQLAlchemy = "^1.4.31"
-psycopg2 = "^2.9.3"
+
+# optional dependencies
+google-cloud-storage = { version = "^1.28.1", optional = true }
+psycopg2 = { version = "^2.9.3", optional = true }
+SQLAlchemy = { version = "^1.4.31", optional = true }
+
+[tool.poetry.extras]
+gcs = ["google-cloud-storage"]
+redash = ["psycopg2", "SQLAlchemy"]
 
 [tool.poetry.dev-dependencies]
 flake8 = "^4.0.1"

@@ -1,28 +1,28 @@
-version = 0.3.2
+VERSION := $(shell grep -E '^version = *.' pyproject.toml | sed -e 's/version = //g')
+EXTRAS = gcs,redash
 
 lint:
-	poetry run flake8 ./src ./tests
-	poetry run isort --check --diff ./src ./tests
-	poetry run black --check ./src ./tests
+	poetry run flake8 src tests
+	poetry run isort --check --diff src tests
+	poetry run black --check src tests
 format:
-	poetry run isort ./src ./tests
-	poetry run black ./src ./tests
-exec:
+	poetry run isort src tests
+	poetry run black src tests
+install:
 	@poetry build
-	@poetry run pip install ./dist/stairlight-${version}.tar.gz
+	@poetry run pip install "dist/stairlight-$(VERSION).tar.gz[$(EXTRAS)]"
+exec:
+	@make install
 	@poetry run python -m stairlight -c tests/config
 check:
-	@poetry build
-	@poetry run pip install ./dist/stairlight-${version}.tar.gz
+	@make install
 	@poetry run python -m stairlight check -c tests/config
 test:
-	@poetry build
-	@poetry run pip install ./dist/stairlight-${version}.tar.gz
+	@make install
 	@poetry run pytest -v --cov=src
 test-report:
-	@rm -r ./htmlcov
-	@poetry build
-	@poetry run pip install ./dist/stairlight-${version}.tar.gz
+	@rm -r htmlcov
+	@make install
 	@poetry run pytest -v --cov=src --cov-report=html
 setup-gcs:
-	@poetry run python ./scripts/setup_test.py
+	@poetry run python scripts/setup_test.py

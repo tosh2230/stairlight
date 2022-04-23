@@ -10,15 +10,23 @@ Stairlight is a table-level data lineage tool, detects table dependencies by SEL
 
 Queries can be read from following systems.
 
+- Local file system(with Python Pathlib module)
 - [Google Cloud Storage](https://cloud.google.com/storage)
     - Mainly designed for use with [Google Cloud Composer](https://cloud.google.com/composer)
 - [Redash](https://redash.io/)
-- Local file system(with Python Pathlib module)
 
 ## Installation
 
+This package is distributed on PyPI.
+
 ```sh
 $ pip install stairlight
+```
+
+(v0.4+) The base package is for Local file system only. Please set extras when reading from other data sources.
+
+```sh
+$ pip install "stairlight[gcs,redash]"
 ```
 
 ## Getting Started
