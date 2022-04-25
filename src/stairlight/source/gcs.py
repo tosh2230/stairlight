@@ -5,8 +5,7 @@ from google.cloud import storage
 
 from .. import config_key
 from .base import Template, TemplateSource, TemplateSourceType
-
-GCS_URI_SCHEME = "gs://"
+from .controller import GCS_URI_SCHEME
 
 
 class GcsTemplate(Template):
