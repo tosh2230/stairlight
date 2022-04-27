@@ -3,9 +3,7 @@ from typing import Iterator
 from . import config_key, map_key
 from .query import Query
 from .source.base import Template, TemplateSource, TemplateSourceType
-from .source.file import FileTemplateSource
-from .source.gcs import GcsTemplateSource
-from .source.redash import RedashTemplateSource
+from .source.controller import get_template_source_class
 
 
 class Map:
@@ -50,22 +48,18 @@ class Map:
             mapping_config (dict): Mapping configuration
 
         Yields:
-            Iterator[TemplateSource]: Template source class
+            Iterator[TemplateSource]: Template source instance
         """
         for source_attributes in stairlight_config.get(
             config_key.STAIRLIGHT_CONFIG_INCLUDE_SECTION
         ):
-            template_source: TemplateSource = None
             template_source_type = source_attributes.get(
                 config_key.TEMPLATE_SOURCE_TYPE
             )
-            if template_source_type == TemplateSourceType.FILE.value:
-                template_source = FileTemplateSource
-            elif template_source_type == TemplateSourceType.GCS.value:
-                template_source = GcsTemplateSource
-            elif template_source_type == TemplateSourceType.REDASH.value:
-                template_source = RedashTemplateSource
-            else:
+            template_source: TemplateSource = get_template_source_class(
+                template_source_type=template_source_type
+            )
+            if not template_source:
                 print(f"Template source is not found: {type}")
                 continue
             yield template_source(

@@ -1,3 +1,5 @@
+import json
+
 from src.stairlight import map_key
 from src.stairlight.stairlight import (
     ResponseType,
@@ -205,13 +207,10 @@ class TestStairLight:
         assert stairlight_load.check() is None
 
     def test_multiple_load_and_save(self, stairlight_load_and_save: StairLight):
-        actual: dict = stairlight_load_and_save.load_map_fs(
-            stairlight_load_and_save.save_file
-        )
-        expected: dict = stairlight_load_and_save.load_map_fs(
-            "tests/results/merged.json"
-        )
-
+        stairlight_load_and_save.load_map()
+        actual: dict = stairlight_load_and_save.mapped
+        with open("tests/results/merged.json", "r") as f:
+            expected: dict = json.load(f)
         assert actual == expected
 
 

@@ -1,13 +1,12 @@
 import enum
 import json
-import os
 from logging import getLogger
 from typing import Union
 
 from . import config_key, map_key
 from .config import Configurator
 from .map import Map
-from .source.gcs import GCS_URI_SCHEME, get_gcs_blob
+from .source.controller import LoadMapController, SaveMapController
 
 logger = getLogger(__name__)
 
@@ -44,7 +43,10 @@ class StairLight:
     """Table dependency detector"""
 
     def __init__(
-        self, config_dir: str = ".", load_files: list = None, save_file: str = None
+        self,
+        config_dir: str = ".",
+        load_files: "list[str]" = None,
+        save_file: str = None,
     ) -> None:
         """Table dependency detector
 
@@ -169,53 +171,21 @@ class StairLight:
 
     def save_map(self) -> None:
         """Save mapped results"""
-        if self.save_file.startswith(GCS_URI_SCHEME):
-            self.save_map_gcs()
-        else:
-            self.save_map_fs()
-
-    def save_map_gcs(self) -> None:
-        """Save mapped results to Google Cloud Storage"""
-        blob = self.get_gcs_blob(self.save_file)
-        blob.upload_from_string(
-            data=json.dumps(obj=self._mapped, indent=2),
-            content_type="application/json",
+        save_map_controller = SaveMapController(
+            save_file=self.save_file, mapped=self._mapped
         )
-
-    def save_map_fs(self) -> None:
-        """Save mapped results to file system"""
-        with open(self.save_file, "w") as f:
-            json.dump(self._mapped, f, indent=2)
+        save_map_controller.save()
 
     def load_map(self) -> None:
         """Load mapped results"""
         for load_file in self.load_files:
-            loaded_map = {}
-            if load_file.startswith(GCS_URI_SCHEME):
-                loaded_map = self.load_map_gcs(load_file=load_file)
-            else:
-                loaded_map = self.load_map_fs(load_file=load_file)
+            load_map_controller = LoadMapController(load_file=load_file)
+            loaded_map = load_map_controller.load()
 
             if self._mapped:
                 self._mapped = deep_merge(org=self._mapped, add=loaded_map)
             else:
                 self._mapped = loaded_map
-
-    def load_map_gcs(self, load_file: str) -> dict:
-        """Load mapped results from Google Cloud Storage"""
-        blob = get_gcs_blob(load_file)
-        if not blob.exists():
-            logger.error(f"{load_file} is not found.")
-            exit()
-        return json.loads(blob.download_as_string())
-
-    def load_map_fs(self, load_file: str) -> dict:
-        """Load mapped results from file system"""
-        if not os.path.exists(load_file):
-            logger.error(f"{load_file} is not found.")
-            exit()
-        with open(load_file) as f:
-            return json.load(f)
 
     def up(
         self,
