@@ -5,6 +5,7 @@ from typing import Iterator, Optional
 from sqlalchemy import create_engine, text
 
 from .. import config_key
+from ..config import get_config_value
 from .base import Template, TemplateSource, TemplateSourceType
 
 logger = getLogger(__name__)
@@ -145,8 +146,10 @@ class RedashTemplateSource(TemplateSource):
             return f.read()
 
     def get_connection_str(self) -> str:
-        environment_variable_name = self.source_attributes.get(
-            config_key.DATABASE_URL_ENVIRONMENT_VARIABLE
+        environment_variable_name = get_config_value(
+            key=config_key.DATABASE_URL_ENVIRONMENT_VARIABLE,
+            target=self.source_attributes,
+            fail_if_not_found=True,
         )
         connection_str = os.environ.get(environment_variable_name)
         if not connection_str:
