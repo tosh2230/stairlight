@@ -4,6 +4,7 @@ from typing import Iterator, Optional
 from google.cloud import storage
 
 from .. import config_key
+from ..config import get_config_value
 from .base import Template, TemplateSource, TemplateSourceType
 from .controller import GCS_URI_SCHEME
 
@@ -85,28 +86,44 @@ class GcsTemplateSource(TemplateSource):
         Yields:
             Iterator[SQLTemplate]: SQL template file attributes
         """
-        project = self.source_attributes.get(config_key.PROJECT_ID)
+        project = get_config_value(
+            key=config_key.PROJECT_ID,
+            target=self.source_attributes,
+            fail_if_not_found=False,
+        )
         client = storage.Client(credentials=None, project=project)
-        bucket = self.source_attributes.get(config_key.BUCKET_NAME)
+        bucket = get_config_value(
+            key=config_key.BUCKET_NAME,
+            target=self.source_attributes,
+            fail_if_not_found=True,
+        )
         blobs = client.list_blobs(bucket)
         for blob in blobs:
+            regex = get_config_value(
+                key=config_key.REGEX,
+                target=self.source_attributes,
+                fail_if_not_found=True,
+            )
             if (
                 not re.fullmatch(
-                    rf"{self.source_attributes.get(config_key.REGEX)}",
+                    rf"{regex}",
                     blob.name,
                 )
             ) or self.is_excluded(source_type=self.source_type, key=blob.name):
                 self.logger.debug(f"{blob.name} is skipped.")
                 continue
+            default_table_prefix = get_config_value(
+                key=config_key.DEFAULT_TABLE_PREFIX,
+                target=self.source_attributes,
+                fail_if_not_found=False,
+            )
             yield GcsTemplate(
                 mapping_config=self._mapping_config,
                 key=blob.name,
                 source_type=self.source_type,
                 project=project,
                 bucket=bucket,
-                default_table_prefix=self.source_attributes.get(
-                    config_key.DEFAULT_TABLE_PREFIX
-                ),
+                default_table_prefix=default_table_prefix,
             )
 
 
