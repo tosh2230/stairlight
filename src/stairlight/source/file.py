@@ -88,6 +88,7 @@ class FileTemplateSource(TemplateSource):
             key=config_key.FILE_SYSTEM_PATH,
             target=self.source_attributes,
             fail_if_not_found=True,
+            enable_logging=False,
         )
         path_obj = pathlib.Path(path)
         for p in path_obj.glob("**/*"):
@@ -95,6 +96,7 @@ class FileTemplateSource(TemplateSource):
                 key=config_key.REGEX,
                 target=self.source_attributes,
                 fail_if_not_found=True,
+                enable_logging=False,
             )
             if (
                 not re.fullmatch(
@@ -108,6 +110,7 @@ class FileTemplateSource(TemplateSource):
                 key=config_key.DEFAULT_TABLE_PREFIX,
                 target=self.source_attributes,
                 fail_if_not_found=False,
+                enable_logging=False,
             )
             yield FileTemplate(
                 mapping_config=self._mapping_config,

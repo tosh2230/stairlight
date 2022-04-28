@@ -150,6 +150,7 @@ class RedashTemplateSource(TemplateSource):
             key=config_key.DATABASE_URL_ENVIRONMENT_VARIABLE,
             target=self.source_attributes,
             fail_if_not_found=True,
+            enable_logging=False,
         )
         connection_str = os.environ.get(environment_variable_name)
         if not connection_str:

@@ -108,4 +108,4 @@ class TestSuccess:
 class TestFailure:
     def test_get_config_value(self):
         with pytest.raises(ConfigKeyNotFoundException):
-            _ = get_config_value(key="a", target={"b": "c"})
+            _ = get_config_value(key="a", target={"b": "c"}, fail_if_not_found=True)

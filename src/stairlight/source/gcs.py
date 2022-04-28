@@ -90,12 +90,14 @@ class GcsTemplateSource(TemplateSource):
             key=config_key.PROJECT_ID,
             target=self.source_attributes,
             fail_if_not_found=False,
+            enable_logging=False,
         )
         client = storage.Client(credentials=None, project=project)
         bucket = get_config_value(
             key=config_key.BUCKET_NAME,
             target=self.source_attributes,
             fail_if_not_found=True,
+            enable_logging=False,
         )
         blobs = client.list_blobs(bucket)
         for blob in blobs:
@@ -103,6 +105,7 @@ class GcsTemplateSource(TemplateSource):
                 key=config_key.REGEX,
                 target=self.source_attributes,
                 fail_if_not_found=True,
+                enable_logging=False,
             )
             if (
                 not re.fullmatch(
@@ -116,6 +119,7 @@ class GcsTemplateSource(TemplateSource):
                 key=config_key.DEFAULT_TABLE_PREFIX,
                 target=self.source_attributes,
                 fail_if_not_found=False,
+                enable_logging=False,
             )
             yield GcsTemplate(
                 mapping_config=self._mapping_config,
