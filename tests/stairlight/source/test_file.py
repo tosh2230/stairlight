@@ -1,7 +1,7 @@
 import pytest
 
 from src.stairlight import config_key
-from src.stairlight.config import Configurator
+from src.stairlight.config import Configurator, ConfigKeyNotFoundException
 from src.stairlight.source.file import (
     FileTemplate,
     FileTemplateSource,
@@ -67,7 +67,7 @@ class TestFileTemplateSource:
 )
 class TestFileTemplateSourceNoExclude:
     @pytest.fixture(scope="class")
-    def template_source_no_exclude(
+    def template_source(
         self,
         configurator: Configurator,
         mapping_config: dict,
@@ -86,15 +86,42 @@ class TestFileTemplateSourceNoExclude:
 
     def test_is_excluded(
         self,
-        template_source_no_exclude: FileTemplateSource,
+        template_source: FileTemplateSource,
         key: str,
         expected_is_excluded: bool,
     ):
-        actual = template_source_no_exclude.is_excluded(
+        actual = template_source.is_excluded(
             source_type=TemplateSourceType.FILE,
             key=key,
         )
         assert actual == expected_is_excluded
+
+
+class TestFileTemplateKeyNotFound:
+    @pytest.fixture(scope="class")
+    def template_source(
+        self,
+        configurator: Configurator,
+        mapping_config: dict,
+    ) -> FileTemplateSource:
+        stairlight_config = configurator.read(prefix="stairlight_key_not_found")
+        source_attributes = {
+            config_key.TEMPLATE_SOURCE_TYPE: TemplateSourceType.FILE.value,
+            config_key.REGEX: ".*/*.sql",
+        }
+        return FileTemplateSource(
+            stairlight_config=stairlight_config,
+            mapping_config=mapping_config,
+            source_attributes=source_attributes,
+        )
+
+    def test_search_templates_iter(
+        self,
+        template_source: FileTemplateSource,
+    ):
+        iter = template_source.search_templates_iter()
+        with pytest.raises(ConfigKeyNotFoundException):
+            next(iter)
 
 
 @pytest.mark.parametrize(
