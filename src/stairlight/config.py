@@ -13,6 +13,18 @@ from .source.base import Template, TemplateSourceType
 logger = logging.getLogger()
 
 
+class ConfigKeyNotFoundException(Exception):
+    def __init__(self, key: str, target: dict = None) -> None:
+        self.key = key
+        self.target = target
+
+    def __str__(self) -> str:
+        msg = f"{self.key} is not found"
+        if self.target:
+            msg += f" in {self.target}"
+        return msg
+
+
 class Configurator:
     def __init__(self, dir: str) -> None:
         """Configuration class
@@ -245,3 +257,10 @@ def create_nested_dict(
         create_nested_dict(keys=keys, results=results[key], density=density + 1)
     else:
         results[key] = default_value
+
+
+def get_config_value(key: str, target: dict, fail_if_not_found: bool = True) -> any:
+    value = target.get(key)
+    if not value and fail_if_not_found:
+        raise ConfigKeyNotFoundException(key=key, target=target)
+    return value
