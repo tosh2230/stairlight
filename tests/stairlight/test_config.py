@@ -1,10 +1,11 @@
 import os
-import pytest
 from collections import OrderedDict
+
+import pytest
 
 import src.stairlight.source.base as base
 from src.stairlight import config_key, map_key
-from src.stairlight.config import get_config_value, ConfigKeyNotFoundException
+from src.stairlight.config import ConfigKeyNotFoundException, get_config_value
 from src.stairlight.source.file import FileTemplate
 
 

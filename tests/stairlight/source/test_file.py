@@ -1,7 +1,7 @@
 import pytest
 
 from src.stairlight import config_key
-from src.stairlight.config import Configurator, ConfigKeyNotFoundException
+from src.stairlight.config import ConfigKeyNotFoundException, Configurator
 from src.stairlight.source.file import (
     FileTemplate,
     FileTemplateSource,
