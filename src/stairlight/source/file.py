@@ -6,6 +6,7 @@ from typing import Iterator, Optional
 from jinja2 import Environment, FileSystemLoader
 
 from .. import config_key
+from ..config import get_config_value
 from .base import Template, TemplateSource, TemplateSourceType
 
 
@@ -68,7 +69,9 @@ class FileTemplateSource(TemplateSource):
     def __init__(
         self, stairlight_config: dict, mapping_config: dict, source_attributes: dict
     ) -> None:
-        super().__init__(stairlight_config, mapping_config)
+        super().__init__(
+            stairlight_config=stairlight_config, mapping_config=mapping_config
+        )
         self.source_attributes = source_attributes
         self.source_type = TemplateSourceType.FILE
 
@@ -81,21 +84,34 @@ class FileTemplateSource(TemplateSource):
         Yields:
             Iterator[SQLTemplate]: SQL template file attributes
         """
-        path_obj = pathlib.Path(self.source_attributes.get(config_key.FILE_SYSTEM_PATH))
+        path = get_config_value(
+            key=config_key.FILE_SYSTEM_PATH,
+            target=self.source_attributes,
+            fail_if_not_found=True,
+        )
+        path_obj = pathlib.Path(path)
         for p in path_obj.glob("**/*"):
+            regex = get_config_value(
+                key=config_key.REGEX,
+                target=self.source_attributes,
+                fail_if_not_found=True,
+            )
             if (
                 not re.fullmatch(
-                    rf"{self.source_attributes.get(config_key.REGEX)}",
+                    rf"{regex}",
                     str(p),
                 )
             ) or self.is_excluded(source_type=self.source_type, key=str(p)):
                 self.logger.debug(f"{str(p)} is skipped.")
                 continue
+            default_table_prefix = get_config_value(
+                key=config_key.DEFAULT_TABLE_PREFIX,
+                target=self.source_attributes,
+                fail_if_not_found=False,
+            )
             yield FileTemplate(
                 mapping_config=self._mapping_config,
                 key=str(p),
                 source_type=self.source_type,
-                default_table_prefix=self.source_attributes.get(
-                    config_key.DEFAULT_TABLE_PREFIX
-                ),
+                default_table_prefix=default_table_prefix,
             )
