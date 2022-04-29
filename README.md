@@ -1,3 +1,9 @@
+<div align="center">
+  <img src="img/stairlight_white.png" width="400" alt="Stairlight">
+</div>
+
+-----------------
+
 # Stairlight
 
 [![PyPi Version](https://img.shields.io/pypi/v/stairlight.svg?style=flat-square&logo=PyPi)](https://pypi.org/project/stairlight/)
