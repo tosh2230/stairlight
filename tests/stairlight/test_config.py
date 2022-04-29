@@ -1,8 +1,11 @@
 import os
 from collections import OrderedDict
 
+import pytest
+
 import src.stairlight.source.base as base
 from src.stairlight import config_key, map_key
+from src.stairlight.config import ConfigKeyNotFoundException, get_config_value
 from src.stairlight.source.file import FileTemplate
 
 
@@ -95,3 +98,14 @@ class TestSuccess:
             unmapped_templates=unmapped_templates
         )
         assert actual == expected
+
+    def test_get_config_value(self):
+        actual = get_config_value(key="a", target={"a": "c"})
+        expected = "c"
+        assert actual == expected
+
+
+class TestFailure:
+    def test_get_config_value(self):
+        with pytest.raises(ConfigKeyNotFoundException):
+            _ = get_config_value(key="a", target={"b": "c"}, fail_if_not_found=True)

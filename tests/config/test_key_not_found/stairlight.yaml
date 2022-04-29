@@ -1,0 +1,5 @@
+Include:
+  - TemplateSourceType: File
+  - TemplateSourceType: GCS
+Settings:
+  MappingPrefix: "mapping"

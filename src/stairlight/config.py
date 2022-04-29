@@ -245,3 +245,27 @@ def create_nested_dict(
         create_nested_dict(keys=keys, results=results[key], density=density + 1)
     else:
         results[key] = default_value
+
+
+class ConfigKeyNotFoundException(Exception):
+    def __init__(self, msg: str) -> None:
+        self.msg = msg
+
+    def __str__(self) -> str:
+        return self.msg
+
+
+def get_config_value(
+    key: str,
+    target: dict,
+    fail_if_not_found: bool = False,
+    enable_logging: bool = False,
+) -> any:
+    value = target.get(key)
+    if not value:
+        msg = f"{key} is not found in the configuration: {target}"
+        if fail_if_not_found:
+            raise ConfigKeyNotFoundException(msg=msg)
+        if enable_logging:
+            logger.warning(msg=msg)
+    return value
