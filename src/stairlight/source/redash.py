@@ -89,20 +89,31 @@ class RedashTemplateSource(TemplateSource):
         self.source_type = TemplateSourceType.REDASH
         self.source_attributes = source_attributes
         self.where_clause = []
-        self.conditions = {
-            "data_source": {
+        self.conditions = self.make_conditions()
+
+    def make_conditions(self) -> dict:
+        data_source_name = get_config_value(
+            key=config_key.DATA_SOURCE_NAME,
+            target=self.source_attributes,
+            fail_if_not_found=True,
+            enable_logging=False,
+        )
+        query_ids = get_config_value(
+            key=config_key.QUERY_IDS,
+            target=self.source_attributes,
+            fail_if_not_found=True,
+            enable_logging=False,
+        )
+        return {
+            config_key.DATA_SOURCE_NAME: {
                 "key": config_key.DATA_SOURCE_NAME,
                 "query": "data_sources.name = :data_source",
-                "parameters": self.source_attributes.get(config_key.DATA_SOURCE_NAME),
+                "parameters": data_source_name,
             },
-            "query_ids": {
+            config_key.QUERY_IDS: {
                 "key": config_key.QUERY_IDS,
                 "query": "queries.id IN :query_ids",
-                "parameters": (
-                    tuple(self.source_attributes.get(config_key.QUERY_IDS))
-                    if self.source_attributes.get(config_key.QUERY_IDS)
-                    else None
-                ),
+                "parameters": (tuple(query_ids) if query_ids else None),
             },
         }
 
@@ -124,12 +135,14 @@ class RedashTemplateSource(TemplateSource):
             self.build_query_string(path=f"{current_dir}/{sql_file_name}")
         )
 
+        data_source_condition = self.conditions.get(config_key.DATA_SOURCE_NAME)
+        query_ids_condition = self.conditions.get(config_key.QUERY_IDS)
         connection_str = self.get_connection_str()
         engine = create_engine(connection_str)
         queries = engine.execute(
             query_text,
-            data_source=self.conditions.get("data_source").get("parameters"),
-            query_ids=self.conditions.get("query_ids").get("parameters"),
+            data_source=data_source_condition.get("parameters"),
+            query_ids=query_ids_condition.get("parameters"),
         ).fetchall()
 
         return queries
