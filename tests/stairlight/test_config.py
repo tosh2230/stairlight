@@ -164,6 +164,21 @@ class TestSuccess:
         }
         assert actual == expected
 
+    def test_get_default_table_name_file(self, configurator, file_template):
+        actual = configurator.get_default_table_name(template=file_template)
+        expected = "test_undefined"
+        assert actual == expected
+
+    def test_get_default_table_name_gcs(self, configurator, gcs_template):
+        actual = configurator.get_default_table_name(template=gcs_template)
+        expected = "one_line"
+        assert actual == expected
+
+    def test_get_default_table_name_redash(self, configurator, redash_template):
+        actual = configurator.get_default_table_name(template=redash_template)
+        expected = "Copy of (#4) New Query"
+        assert actual == expected
+
 
 class TestFailure:
     def test_get_config_value(self):
