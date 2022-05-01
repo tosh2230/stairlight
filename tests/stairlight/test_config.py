@@ -3,13 +3,48 @@ from collections import OrderedDict
 
 import pytest
 
-import src.stairlight.source.base as base
 from src.stairlight import config_key, map_key
 from src.stairlight.config import ConfigKeyNotFoundException, get_config_value
+from src.stairlight.source.base import TemplateSourceType
 from src.stairlight.source.file import FileTemplate
+from src.stairlight.source.gcs import GcsTemplate
+from src.stairlight.source.redash import RedashTemplate
 
 
 class TestSuccess:
+    @pytest.fixture(scope="class")
+    def file_template(self, configurator) -> FileTemplate:
+        return FileTemplate(
+            mapping_config=configurator.read(
+                prefix=config_key.MAPPING_CONFIG_FILE_PREFIX
+            ),
+            source_type=TemplateSourceType.FILE,
+            key="tests/sql/main/test_undefined.sql",
+        )
+
+    @pytest.fixture(scope="class")
+    def gcs_template(self, configurator) -> GcsTemplate:
+        return GcsTemplate(
+            mapping_config=configurator.read(
+                prefix=config_key.MAPPING_CONFIG_FILE_PREFIX
+            ),
+            source_type=TemplateSourceType.GCS,
+            bucket="stairlight",
+            key="sql/one_line/one_line.sql",
+        )
+
+    @pytest.fixture(scope="class")
+    def redash_template(self, configurator) -> RedashTemplate:
+        return RedashTemplate(
+            mapping_config=configurator.read(
+                prefix=config_key.MAPPING_CONFIG_FILE_PREFIX
+            ),
+            query_id=5,
+            query_name="Copy of (#4) New Query",
+            query_str="SELECT * FROM {{ table }}",
+            data_source_name="metadata",
+        )
+
     def test_read_map(self, configurator):
         assert configurator.read(prefix=config_key.MAPPING_CONFIG_FILE_PREFIX)
 
@@ -36,17 +71,10 @@ class TestSuccess:
             config_key.STAIRLIGHT_CONFIG_SETTING_SECTION,
         ]
 
-    def test_build_mapping_template(self, configurator):
-        template = FileTemplate(
-            mapping_config=configurator.read(
-                prefix=config_key.MAPPING_CONFIG_FILE_PREFIX
-            ),
-            source_type=base.TemplateSourceType.FILE,
-            key="tests/sql/main/test_undefined.sql",
-        )
+    def test_build_mapping_template(self, configurator, file_template):
         unmapped_templates = [
             {
-                map_key.TEMPLATE: template,
+                map_key.TEMPLATE: file_template,
                 map_key.PARAMETERS: [
                     "params.main_table",
                     "params.sub_table_01",
@@ -58,12 +86,12 @@ class TestSuccess:
         global_value = OrderedDict({config_key.PARAMETERS: {}})
         mapping_value = OrderedDict(
             {
-                config_key.TEMPLATE_SOURCE_TYPE: template.source_type.value,
-                config_key.FILE_SUFFIX: template.key,
+                config_key.TEMPLATE_SOURCE_TYPE: file_template.source_type.value,
+                config_key.FILE_SUFFIX: file_template.key,
                 config_key.TABLES: [
                     OrderedDict(
                         {
-                            config_key.TABLE_NAME: None,
+                            config_key.TABLE_NAME: "test_undefined",
                             config_key.PARAMETERS: OrderedDict(
                                 {
                                     "params": {
@@ -102,6 +130,50 @@ class TestSuccess:
     def test_get_config_value(self):
         actual = get_config_value(key="a", target={"a": "c"})
         expected = "c"
+        assert actual == expected
+
+    def test_get_mapping_values_by_template_type_file(
+        self, configurator, file_template
+    ):
+        actual = configurator.get_mapping_values_by_template_type(
+            template=file_template
+        )
+        expected = {config_key.FILE_SUFFIX: "tests/sql/main/test_undefined.sql"}
+        assert actual == expected
+
+    def test_get_mapping_values_by_template_type_gcs(self, configurator, gcs_template):
+        actual = configurator.get_mapping_values_by_template_type(template=gcs_template)
+        expected = {
+            config_key.URI: "gs://stairlight/sql/one_line/one_line.sql",
+            config_key.BUCKET_NAME: "stairlight",
+        }
+        assert actual == expected
+
+    def test_get_mapping_values_by_template_type_redash(
+        self, configurator, redash_template
+    ):
+        actual = configurator.get_mapping_values_by_template_type(
+            template=redash_template
+        )
+        expected = {
+            config_key.QUERY_ID: 5,
+            config_key.DATA_SOURCE_NAME: "metadata",
+        }
+        assert actual == expected
+
+    def test_get_default_table_name_file(self, configurator, file_template):
+        actual = configurator.get_default_table_name(template=file_template)
+        expected = "test_undefined"
+        assert actual == expected
+
+    def test_get_default_table_name_gcs(self, configurator, gcs_template):
+        actual = configurator.get_default_table_name(template=gcs_template)
+        expected = "one_line"
+        assert actual == expected
+
+    def test_get_default_table_name_redash(self, configurator, redash_template):
+        actual = configurator.get_default_table_name(template=redash_template)
+        expected = "Copy of (#4) New Query"
         assert actual == expected
 
 
