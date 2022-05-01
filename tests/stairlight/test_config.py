@@ -4,10 +4,7 @@ from collections import OrderedDict
 import pytest
 
 from src.stairlight import config_key, map_key
-from src.stairlight.config import (
-    ConfigKeyNotFoundException,
-    get_config_value,
-)
+from src.stairlight.config import ConfigKeyNotFoundException, get_config_value
 from src.stairlight.source.base import TemplateSourceType
 from src.stairlight.source.file import FileTemplate
 from src.stairlight.source.gcs import GcsTemplate
