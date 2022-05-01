@@ -173,7 +173,15 @@ class Configurator:
             values.update(self.get_mapping_values(template=template))
 
             # Tables
-            values[config_key.TABLES] = [OrderedDict({config_key.TABLE_NAME: None})]
+            values[config_key.TABLES] = [
+                OrderedDict(
+                    {
+                        config_key.TABLE_NAME: self.get_default_table_name(
+                            template=template
+                        )
+                    }
+                )
+            ]
             if template.source_type == TemplateSourceType.REDASH:
                 values[config_key.TABLES][0][config_key.TABLE_NAME] = template.uri
 
@@ -231,6 +239,15 @@ class Configurator:
             mapping_values[config_key.QUERY_ID] = template.query_id
             mapping_values[config_key.DATA_SOURCE_NAME] = template.data_source_name
         return mapping_values
+
+    @staticmethod
+    def get_default_table_name(template: Template) -> str:
+        default_table_name: str = None
+        if template.source_type == TemplateSourceType.REDASH:
+            default_table_name = template.uri
+        else:
+            default_table_name = Path(template.key).stem
+        return default_table_name
 
 
 def create_nested_dict(
