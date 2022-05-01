@@ -10,6 +10,16 @@ from src.stairlight.source.file import FileTemplate
 
 
 class TestSuccess:
+    @pytest.fixture(scope="class")
+    def file_template(self, configurator) -> FileTemplate:
+        return FileTemplate(
+            mapping_config=configurator.read(
+                prefix=config_key.MAPPING_CONFIG_FILE_PREFIX
+            ),
+            source_type=base.TemplateSourceType.FILE,
+            key="tests/sql/main/test_undefined.sql",
+        )
+
     def test_read_map(self, configurator):
         assert configurator.read(prefix=config_key.MAPPING_CONFIG_FILE_PREFIX)
 
@@ -36,17 +46,10 @@ class TestSuccess:
             config_key.STAIRLIGHT_CONFIG_SETTING_SECTION,
         ]
 
-    def test_build_mapping_template(self, configurator):
-        template = FileTemplate(
-            mapping_config=configurator.read(
-                prefix=config_key.MAPPING_CONFIG_FILE_PREFIX
-            ),
-            source_type=base.TemplateSourceType.FILE,
-            key="tests/sql/main/test_undefined.sql",
-        )
+    def test_build_mapping_template(self, configurator, file_template):
         unmapped_templates = [
             {
-                map_key.TEMPLATE: template,
+                map_key.TEMPLATE: file_template,
                 map_key.PARAMETERS: [
                     "params.main_table",
                     "params.sub_table_01",
@@ -58,12 +61,12 @@ class TestSuccess:
         global_value = OrderedDict({config_key.PARAMETERS: {}})
         mapping_value = OrderedDict(
             {
-                config_key.TEMPLATE_SOURCE_TYPE: template.source_type.value,
-                config_key.FILE_SUFFIX: template.key,
+                config_key.TEMPLATE_SOURCE_TYPE: file_template.source_type.value,
+                config_key.FILE_SUFFIX: file_template.key,
                 config_key.TABLES: [
                     OrderedDict(
                         {
-                            config_key.TABLE_NAME: None,
+                            config_key.TABLE_NAME: "test_undefined",
                             config_key.PARAMETERS: OrderedDict(
                                 {
                                     "params": {
