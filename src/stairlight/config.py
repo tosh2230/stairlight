@@ -186,7 +186,6 @@ class Configurator:
             ]
 
             # Parameters
-            parameters: OrderedDict = None
             if map_key.PARAMETERS in unmapped_template:
                 undefined_params: list[str] = unmapped_template.get(map_key.PARAMETERS)
                 parameters = OrderedDict()
@@ -194,7 +193,6 @@ class Configurator:
                     splitted_params = undefined_param.split(".")
                     create_nested_dict(keys=splitted_params, results=parameters)
 
-            if parameters:
                 mapping_values[config_key.TABLES][0][config_key.PARAMETERS] = parameters
                 if parameters in all_parameters:
                     global_parameters.update(parameters)
