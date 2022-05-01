@@ -184,10 +184,6 @@ class Configurator:
                     }
                 )
             ]
-            if template.source_type == TemplateSourceType.REDASH:
-                mapping_values[config_key.TABLES][0][
-                    config_key.TABLE_NAME
-                ] = template.uri
 
             # Parameters
             parameters: OrderedDict = None
