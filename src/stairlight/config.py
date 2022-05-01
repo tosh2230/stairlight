@@ -165,15 +165,17 @@ class Configurator:
         unmapped_template: dict
         for unmapped_template in unmapped_templates:
             template: Template = unmapped_template[map_key.TEMPLATE]
-            values = OrderedDict(
+            mapping_values = OrderedDict(
                 {
                     config_key.TEMPLATE_SOURCE_TYPE: template.source_type.value,
                 }
             )
-            values.update(self.get_mapping_values(template=template))
+            mapping_values.update(
+                self.get_mapping_values_by_template_type(template=template)
+            )
 
             # Tables
-            values[config_key.TABLES] = [
+            mapping_values[config_key.TABLES] = [
                 OrderedDict(
                     {
                         config_key.TABLE_NAME: self.get_default_table_name(
@@ -183,7 +185,9 @@ class Configurator:
                 )
             ]
             if template.source_type == TemplateSourceType.REDASH:
-                values[config_key.TABLES][0][config_key.TABLE_NAME] = template.uri
+                mapping_values[config_key.TABLES][0][
+                    config_key.TABLE_NAME
+                ] = template.uri
 
             # Parameters
             parameters: OrderedDict = None
@@ -195,19 +199,19 @@ class Configurator:
                     create_nested_dict(keys=splitted_params, results=parameters)
 
             if parameters:
-                values[config_key.TABLES][0][config_key.PARAMETERS] = parameters
+                mapping_values[config_key.TABLES][0][config_key.PARAMETERS] = parameters
                 if parameters in all_parameters:
                     global_parameters.update(parameters)
                 else:
                     all_parameters.append(parameters)
 
             # Labels
-            values[config_key.TABLES][0][config_key.LABELS] = OrderedDict(
+            mapping_values[config_key.TABLES][0][config_key.LABELS] = OrderedDict(
                 {"key": "value"}
             )
 
             mapping_config_dict[config_key.MAPPING_CONFIG_MAPPING_SECTION].append(
-                values
+                mapping_values
             )
 
         # Global section
@@ -228,7 +232,7 @@ class Configurator:
         return mapping_config_dict
 
     @staticmethod
-    def get_mapping_values(template: Template) -> dict:
+    def get_mapping_values_by_template_type(template: Template) -> dict:
         mapping_values: dict = {}
         if template.source_type == TemplateSourceType.FILE:
             mapping_values[config_key.FILE_SUFFIX] = template.key
