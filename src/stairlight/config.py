@@ -4,6 +4,7 @@ import re
 from collections import OrderedDict
 from copy import deepcopy
 from datetime import datetime, timezone
+from pathlib import Path
 
 import yaml
 
@@ -169,15 +170,7 @@ class Configurator:
                     config_key.TEMPLATE_SOURCE_TYPE: template.source_type.value,
                 }
             )
-
-            if template.source_type == TemplateSourceType.FILE:
-                values[config_key.FILE_SUFFIX] = template.key
-            elif template.source_type == TemplateSourceType.GCS:
-                values[config_key.URI] = template.uri
-                values[config_key.BUCKET_NAME] = template.bucket
-            elif template.source_type == TemplateSourceType.REDASH:
-                values[config_key.QUERY_ID] = template.query_id
-                values[config_key.DATA_SOURCE_NAME] = template.data_source_name
+            values.update(self.get_mapping_values(template=template))
 
             # Tables
             values[config_key.TABLES] = [OrderedDict({config_key.TABLE_NAME: None})]
@@ -225,6 +218,19 @@ class Configurator:
         ]
 
         return mapping_config_dict
+
+    @staticmethod
+    def get_mapping_values(template: Template) -> dict:
+        mapping_values: dict = {}
+        if template.source_type == TemplateSourceType.FILE:
+            mapping_values[config_key.FILE_SUFFIX] = template.key
+        elif template.source_type == TemplateSourceType.GCS:
+            mapping_values[config_key.URI] = template.uri
+            mapping_values[config_key.BUCKET_NAME] = template.bucket
+        elif template.source_type == TemplateSourceType.REDASH:
+            mapping_values[config_key.QUERY_ID] = template.query_id
+            mapping_values[config_key.DATA_SOURCE_NAME] = template.data_source_name
+        return mapping_values
 
 
 def create_nested_dict(
