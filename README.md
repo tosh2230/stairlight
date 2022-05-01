@@ -12,7 +12,7 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square)](https://github.com/psf/black)
 [![CI](https://github.com/tosh2230/stairlight/actions/workflows/ci.yml/badge.svg)](https://github.com/tosh2230/stairlight/actions/workflows/ci.yml)
 
-Stairlight is a table-level data lineage tool, detects table dependencies by SELECT queries.
+A table-level data lineage tool, detects table dependencies by SELECT queries.
 
 Queries can be read from following systems.
 
