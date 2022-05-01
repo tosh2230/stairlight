@@ -1,9 +1,12 @@
+from logging import getLogger
 from typing import Iterator
 
 from . import config_key, map_key
 from .query import Query
 from .source.base import Template, TemplateSource, TemplateSourceType
 from .source.controller import get_template_source_class
+
+logger = getLogger(__name__)
 
 
 class Map:
@@ -60,7 +63,7 @@ class Map:
                 template_source_type=template_source_type
             )
             if not template_source:
-                print(f"Template source is not found: {type}")
+                logger.warning(msg=f"Template source is not found: {type}")
                 continue
             yield template_source(
                 stairlight_config=stairlight_config,
