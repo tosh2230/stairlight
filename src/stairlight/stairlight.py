@@ -498,6 +498,15 @@ def is_cyclic(tables: list) -> bool:
 
 
 def deep_merge(org: dict, add: dict) -> dict:
+    """Merge nested dicts
+
+    Args:
+        org (dict): original dict
+        add (dict): dict to add
+
+    Returns:
+        dict: merged dict
+    """
     new: dict = org
     for add_key, add_value in add.items():
         org_value = org.get(add_key)
