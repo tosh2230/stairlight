@@ -158,7 +158,8 @@ class Configurator:
             }
         )
 
-        all_parameters: list[OrderedDict] = []
+        # List(instead of Set) because OrderedDict is not hashable
+        parameters_set: list[OrderedDict] = []
         global_parameters: dict = {}
 
         # Mapping section
@@ -194,10 +195,10 @@ class Configurator:
                     create_nested_dict(keys=splitted_params, results=parameters)
 
                 mapping_values[config_key.TABLES][0][config_key.PARAMETERS] = parameters
-                if parameters in all_parameters:
+                if parameters in parameters_set:
                     global_parameters.update(parameters)
                 else:
-                    all_parameters.append(parameters)
+                    parameters_set.append(parameters)
 
             # Labels
             mapping_values[config_key.TABLES][0][config_key.LABELS] = OrderedDict(
