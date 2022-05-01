@@ -142,13 +142,13 @@ class Configurator:
         )
 
     def build_mapping_config(self, unmapped_templates: "list[dict]") -> OrderedDict:
-        """Create a OrderedDict for mapping.config
+        """Create a OrderedDict for mapping.yaml
 
         Args:
-            unmapped (list[dict]): unmapped settings that Stairlight detects
+            unmapped_templates (list[dict]): unmapped settings that Stairlight detects
 
         Returns:
-            OrderedDict: mapping.config template
+            OrderedDict: mapping.yaml template
         """
         mapping_config_dict = OrderedDict(
             {
