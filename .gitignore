@@ -128,4 +128,4 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-mapping_checked_*
+mapping_[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]

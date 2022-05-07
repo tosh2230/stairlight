@@ -47,7 +47,7 @@ Please edit it to set your data sources.
 
 # Step 2: Map SQL queries and tables, and add metadata
 $ stairlight map
-'./mapping_checked_yyyyMMddhhmmss.yaml' has created.
+'./mapping_yyyyMMddhhmmss.yaml' has created.
 Please map undefined tables and parameters, and append to your latest configuration file.
 
 # Step 3: Get a table dependency map
