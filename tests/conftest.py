@@ -52,7 +52,7 @@ def stairlight_check() -> Iterator[StairLight]:
     stairlight = StairLight(config_dir="tests/config/test_check")
     stairlight.create_map()
     yield stairlight
-    teardown_rm_config(pathname="tests/config/test_check/mapping_checked_*.yaml")
+    teardown_rm_config(pathname="tests/config/test_check/mapping_*.yaml")
 
 
 @pytest.fixture(scope="session")
@@ -68,7 +68,12 @@ def stairlight_save(save_file="./tests/test_save_map.json") -> Iterator[StairLig
     stairlight.create_map()
     yield stairlight
     teardown_rm_file(save_file)
-    teardown_rm_config(pathname="tests/config/mapping_checked_*.yaml")
+    teardown_rm_config(
+        pathname=(
+            "tests/config/mapping_[0-9][0-9][0-9][0-9]"
+            "[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].yaml"
+        )
+    )
 
 
 @pytest.fixture(scope="session")

@@ -46,8 +46,8 @@ $ stairlight init
 Please edit it to set your data sources.
 
 # Step 2: Map SQL queries and tables, and add metadata
-$ stairlight check
-'./mapping_checked_yyyyMMddhhmmss.yaml' has created.
+$ stairlight map
+'./mapping_yyyyMMddhhmmss.yaml' has created.
 Please map undefined tables and parameters, and append to your latest configuration file.
 
 # Step 3: Get a table dependency map
@@ -163,7 +163,7 @@ Settings:
 
 'mapping.yaml' is used to define relationships between input queries and tables.
 
-A template of this file can be created by `check` command, based on the configuration of 'stairlight.yaml'.
+A template of this file can be created by `map` command, based on the configuration of 'stairlight.yaml'.
 
 ```yaml
 Global:
@@ -224,9 +224,9 @@ A table-level data lineage tool, detects table dependencies by SELECT queries.
 Without positional arguments, return a table dependency map as JSON format.
 
 positional arguments:
-  {init,check,up,down}
+  {init,map,check,up,down}
     init                create new Stairlight configuration file
-    check               create new configuration file about undefined mappings
+    map (check)         create new configuration file about undefined mappings
     up                  return upstairs ( table | SQL file ) list
     down                return downstairs ( table | SQL file ) list
 
@@ -254,9 +254,9 @@ optional arguments:
   -q, --quiet           keep silence
 ```
 
-### check
+### map(check)
 
-`check` creates new configuration file about undefined mappings.
+`map` creates new configuration file about undefined mappings.`check` is an alias.
 The option specification is the same as `init`.
 
 ### up
