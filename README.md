@@ -256,7 +256,7 @@ optional arguments:
 
 ### map(check)
 
-`map` creates new configuration file about undefined mappings.`check` is a alias.
+`map` creates new configuration file about undefined mappings.`check` is an alias.
 The option specification is the same as `init`.
 
 ### up
