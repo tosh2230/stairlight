@@ -122,11 +122,29 @@ class Configurator:
                 config_key.DEFAULT_TABLE_PREFIX: None,
             }
         )
+        include_section_redash = OrderedDict(
+            {
+                config_key.TEMPLATE_SOURCE_TYPE: TemplateSourceType.REDASH.value,
+                config_key.DATABASE_URL_ENVIRONMENT_VARIABLE: "REDASH_DATABASE_URL",
+                config_key.DATA_SOURCE_NAME: None,
+                config_key.QUERY_IDS: {},
+            }
+        )
+        include_section_dbt = OrderedDict(
+            {
+                config_key.TEMPLATE_SOURCE_TYPE: TemplateSourceType.DBT.value,
+                config_key.PROJECT_DIR: None,
+                config_key.PROFILE_DIR: None,
+                config_key.PROFILE: None,
+            }
+        )
         return OrderedDict(
             {
                 config_key.STAIRLIGHT_CONFIG_INCLUDE_SECTION: [
                     include_section_file,
                     include_section_gcs,
+                    include_section_redash,
+                    include_section_dbt,
                 ],
                 config_key.STAIRLIGHT_CONFIG_EXCLUDE_SECTION: [
                     OrderedDict(

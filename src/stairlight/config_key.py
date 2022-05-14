@@ -33,3 +33,9 @@ DATABASE_URL_ENVIRONMENT_VARIABLE = "DatabaseUrlEnvironmentVariable"
 DATA_SOURCE_NAME = "DataSourceName"
 QUERY_IDS = "QueryIds"
 QUERY_ID = "QueryId"
+
+# dbt
+PROJECT_DIR = "ProjectDir"
+PROFILE_DIR = "ProfilesDir"
+PROFILE = "Profile"
+TARGET = "Target"

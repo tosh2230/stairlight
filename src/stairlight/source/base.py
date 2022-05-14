@@ -14,6 +14,7 @@ class TemplateSourceType(enum.Enum):
     FILE = "File"
     GCS = "GCS"
     REDASH = "Redash"
+    DBT = "dbt"
 
     def __str__(self):
         return self.name
