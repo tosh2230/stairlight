@@ -51,19 +51,19 @@ class TestSuccess:
     def test_read_sql(self, configurator):
         assert configurator.read(prefix=config_key.STAIRLIGHT_CONFIG_FILE_PREFIX)
 
-    def test_create_stairlight_template_file(self, configurator, stairlight_template):
-        file_name = configurator.create_stairlight_template_file(
+    def test_create_stairlight_file(self, configurator, stairlight_template):
+        file_name = configurator.create_stairlight_file(
             prefix=stairlight_template
         )
         assert os.path.exists(file_name)
 
-    def test_create_mapping_template_file(self, configurator, mapping_template):
-        file_name = configurator.create_mapping_template_file(
+    def test_create_mapping_file(self, configurator, mapping_template):
+        file_name = configurator.create_mapping_file(
             unmapped=[], prefix=mapping_template
         )
         assert os.path.exists(file_name)
 
-    def test_build_stairlight_template(self, configurator):
+    def test_build_stairlight_config(self, configurator):
         stairlight_template = configurator.build_stairlight_config()
         assert list(stairlight_template.keys()) == [
             config_key.STAIRLIGHT_CONFIG_INCLUDE_SECTION,
@@ -71,7 +71,7 @@ class TestSuccess:
             config_key.STAIRLIGHT_CONFIG_SETTING_SECTION,
         ]
 
-    def test_build_mapping_template(self, configurator, file_template):
+    def test_build_mapping_config(self, configurator, file_template):
         unmapped_templates = [
             {
                 map_key.TEMPLATE: file_template,
