@@ -1,5 +1,7 @@
 import enum
 import re
+
+from abc import ABC
 from logging import getLogger
 from typing import Iterator, Optional
 
@@ -20,7 +22,7 @@ class TemplateSourceType(enum.Enum):
         return self.name
 
 
-class Template:
+class Template(ABC):
     """Base SQL template"""
 
     def __init__(
@@ -116,7 +118,7 @@ class Template:
         return ""
 
 
-class TemplateSource:
+class TemplateSource(ABC):
     """SQL template source"""
 
     logger = getLogger(__name__)
