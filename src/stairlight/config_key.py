@@ -10,6 +10,12 @@ DEFAULT_TABLE_PREFIX = "DefaultTablePrefix"
 FILE_SYSTEM_PATH = "FileSystemPath"
 REGEX = "Regex"
 
+DBT_PROJECT_DIR = "ProjectDir"
+DBT_PROFILES_DIR = "ProfilesDir"
+DBT_PROFILE = "Profile"
+DBT_TARGET = "Target"
+DBT_VARS = "Vars"
+
 # mapping.yaml
 MAPPING_CONFIG_FILE_PREFIX = "mapping"
 MAPPING_CONFIG_GLOBAL_SECTION = "Global"
@@ -35,7 +41,9 @@ QUERY_IDS = "QueryIds"
 QUERY_ID = "QueryId"
 
 # dbt
-PROJECT_DIR = "ProjectDir"
-PROFILE_DIR = "ProfilesDir"
-PROFILE = "Profile"
-TARGET = "Target"
+PROJECT_NAME = "ProjectName"
+
+# dbt_project.yml
+DBT_PROJECT_NAME = "name"
+DBT_MODEL_PATHS = "model-paths"
+DBT_TARGET_PATH = "target-path"

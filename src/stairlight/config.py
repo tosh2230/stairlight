@@ -44,7 +44,7 @@ class Configurator:
                 config = yaml.safe_load(file)
         return config
 
-    def create_stairlight_template_file(
+    def create_stairlight_file(
         self, prefix: str = config_key.STAIRLIGHT_CONFIG_FILE_PREFIX
     ) -> str:
         """Create a Stairlight template file
@@ -61,7 +61,7 @@ class Configurator:
             yaml.dump(self.build_stairlight_config(), f)
         return template_file_name
 
-    def create_mapping_template_file(
+    def create_mapping_file(
         self,
         unmapped: "list[dict]",
         prefix: str = config_key.MAPPING_CONFIG_FILE_PREFIX,
@@ -255,6 +255,8 @@ class Configurator:
         elif template.source_type == TemplateSourceType.REDASH:
             mapping_values[config_key.QUERY_ID] = template.query_id
             mapping_values[config_key.DATA_SOURCE_NAME] = template.data_source_name
+        elif template.source_type == TemplateSourceType.DBT:
+            mapping_values[config_key.PROJECT_NAME] = template.project_name
         return mapping_values
 
     @staticmethod
