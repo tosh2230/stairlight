@@ -1,4 +1,4 @@
-profile_bigquery:
+profile_01:
   target: dev
   outputs:
     dev:
