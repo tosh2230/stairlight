@@ -257,6 +257,7 @@ class Configurator:
             mapping_values[config_key.DATA_SOURCE_NAME] = template.data_source_name
         elif template.source_type == TemplateSourceType.DBT:
             mapping_values[config_key.PROJECT_NAME] = template.project_name
+            mapping_values[config_key.FILE_SUFFIX] = template.key
         return mapping_values
 
     @staticmethod
