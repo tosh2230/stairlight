@@ -133,9 +133,9 @@ class Configurator:
         include_section_dbt = OrderedDict(
             {
                 config_key.TEMPLATE_SOURCE_TYPE: TemplateSourceType.DBT.value,
-                config_key.PROJECT_DIR: None,
-                config_key.PROFILE_DIR: None,
-                config_key.PROFILE: None,
+                config_key.DBT_PROJECT_DIR: None,
+                config_key.DBT_PROFILES_DIR: None,
+                config_key.DBT_PROFILE: None,
             }
         )
         return OrderedDict(
