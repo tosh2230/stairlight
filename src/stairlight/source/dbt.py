@@ -63,13 +63,13 @@ class DbtTemplateSource(TemplateSource):
         self.source_type = TemplateSourceType.DBT
 
     def search_templates_iter(self) -> Iterator[Template]:
-        project_dir = self.source_attributes[config_key.DBT_PROJECT_DIR]
+        project_dir = self.source_attributes.get(config_key.DBT_PROJECT_DIR)
         _ = self.execute_dbt_compile(
             project_dir=project_dir,
-            profiles_dir=self.source_attributes[config_key.DBT_PROFILES_DIR],
-            profile=self.source_attributes[config_key.DBT_PROFILE],
-            target=self.source_attributes[config_key.DBT_TARGET],
-            vars=self.source_attributes[config_key.DBT_VARS],
+            profiles_dir=self.source_attributes.get(config_key.DBT_PROFILES_DIR),
+            profile=self.source_attributes.get(config_key.DBT_PROFILE),
+            target=self.source_attributes.get(config_key.DBT_TARGET),
+            vars=self.source_attributes.get(config_key.DBT_VARS),
         )
 
         dbt_project_config = self.read_dbt_project_yml(
@@ -86,6 +86,8 @@ class DbtTemplateSource(TemplateSource):
             path_obj = pathlib.Path(path)
             for p in path_obj.glob("**/*"):
                 if (
+                    p.is_dir()
+                ) or (
                     re.fullmatch(r"schema.yml/.*\.sql$", str(p))
                 ) or self.is_excluded(source_type=self.source_type, key=str(p)):
                     self.logger.debug(f"{str(p)} is skipped.")
