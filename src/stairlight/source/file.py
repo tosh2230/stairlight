@@ -99,6 +99,8 @@ class FileTemplateSource(TemplateSource):
                 enable_logging=False,
             )
             if (
+                p.is_dir()
+            ) or (
                 not re.fullmatch(
                     rf"{regex}",
                     str(p),
