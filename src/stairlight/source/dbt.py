@@ -8,7 +8,6 @@ from typing import Iterator
 import yaml
 
 from .. import config_key
-from ..config import get_config_value
 from .base import Template, TemplateSource, TemplateSourceType
 
 
@@ -64,27 +63,30 @@ class DbtTemplateSource(TemplateSource):
         self.source_type = TemplateSourceType.DBT
 
     def search_templates_iter(self) -> Iterator[Template]:
-        dbt_config = self.get_dbt_config()
-        self.execute_dbt_compile(
-            project_dir=dbt_config["project_dir"],
-            profiles_dir=dbt_config["profiles_dir"],
-            profile=dbt_config["profile"],
-            target=dbt_config["target"],
-            vars=dbt_config["vars"],
+        project_dir = self.source_attributes[config_key.DBT_PROJECT_DIR]
+        _ = self.execute_dbt_compile(
+            project_dir=project_dir,
+            profiles_dir=self.source_attributes[config_key.DBT_PROFILES_DIR],
+            profile=self.source_attributes[config_key.DBT_PROFILE],
+            target=self.source_attributes[config_key.DBT_TARGET],
+            vars=self.source_attributes[config_key.DBT_VARS],
         )
 
-        dbt_project_config = self.get_dbt_project_config(dbt_config=dbt_config)
+        dbt_project_config = self.read_dbt_project_yml(
+            project_dir=project_dir
+        )
         for model_path in dbt_project_config[config_key.DBT_MODEL_PATHS]:
             path = (
-                f"{dbt_project_config[config_key.DBT_PROJECT_NAME]}/"
+                f"{project_dir}/"
                 f"{dbt_project_config[config_key.DBT_TARGET_PATH]}/"
                 "compiled/"
+                f"{dbt_project_config[config_key.DBT_PROJECT_NAME]}/"
                 f"{model_path}/"
             )
             path_obj = pathlib.Path(path)
-            for p in path_obj.glob("**/*.sql"):
+            for p in path_obj.glob("**/*"):
                 if (
-                    not re.fullmatch(r"schema.yml/.*\.sql$", str(p))
+                    re.fullmatch(r"schema.yml/.*\.sql$", str(p))
                 ) or self.is_excluded(source_type=self.source_type, key=str(p)):
                     self.logger.debug(f"{str(p)} is skipped.")
                     continue
@@ -103,9 +105,7 @@ class DbtTemplateSource(TemplateSource):
         profile: str = None,
         target: str = None,
         vars: dict = None,
-    ) -> None:
-        if not target:
-            target = "default"
+    ) -> int:
         command = (
             "dbt compile "
             f"--project-dir {project_dir} "
@@ -123,45 +123,10 @@ class DbtTemplateSource(TemplateSource):
         )
         if proc.returncode != 0:
             raise Exception(proc.stderr)
+        return proc.returncode
 
-    def get_dbt_config(self) -> dict:
-        dbt_config = {}
-        dbt_attributes = [
-            {"key": config_key.DBT_PROJECT_DIR, "fail_if_not_found": True},
-            {"key": config_key.DBT_PROFILES_DIR, "fail_if_not_found": True},
-            {"key": config_key.DBT_PROFILE, "fail_if_not_found": True},
-            {"key": config_key.DBT_TARGET, "fail_if_not_found": True},
-            {"key": config_key.DBT_VARS, "fail_if_not_found": False},
-        ]
-        for dbt_attribute in dbt_attributes:
-            dbt_config[dbt_attribute['key']] = get_config_value(
-                key=dbt_attribute['key'],
-                target=self.source_attributes,
-                fail_if_not_found=dbt_attribute['fail_if_not_found'],
-                enable_logging=False,
-            )
-        return dbt_config
-
-    def get_dbt_project_config(self, dbt_config: dict) -> dict:
-        dbt_project_config = {}
-        project: dict = self.read_dbt_project_yml(
-            project_dir=dbt_config["project_dir"]
-        )
-        project_attributes = [
-            {"key": config_key.DBT_PROJECT_NAME},
-            {"key": config_key.DBT_TARGET_PATH},
-            {"key": config_key.DBT_MODEL_PATHS},
-        ]
-        for project_attribute in project_attributes:
-            dbt_project_config[project_attribute['key']] = get_config_value(
-                key=project_attribute['key'],
-                target=project,
-                fail_if_not_found=True,
-                enable_logging=False,
-            )
-        return dbt_project_config
-
-    def read_dbt_project_yml(self, project_dir: str) -> dict:
+    @staticmethod
+    def read_dbt_project_yml(project_dir: str) -> dict:
         """Read dbt_project.yml
 
         Args:
@@ -172,12 +137,14 @@ class DbtTemplateSource(TemplateSource):
         """
         project: dict = None
         pattern = f"^{project_dir}/dbt_project.yml$"
-        project_file = [
+        project_files = [
             p
-            for p in glob.glob(f"{self.dir}/**", recursive=False)
+            for p in glob.glob(f"{project_dir}/**", recursive=False)
             if re.fullmatch(pattern, p)
         ]
-        if project_file:
-            with open(project_file[0]) as file:
+        if project_files:
+            with open(project_files[0]) as file:
                 project = yaml.safe_load(file)
+        else:
+            raise Exception
         return project
