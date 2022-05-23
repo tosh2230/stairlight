@@ -9,6 +9,28 @@ from src.stairlight.source.dbt import (
 
 
 @pytest.mark.parametrize(
+    "key",
+    ["tests/dbt/project_01/target/compiled/project_01/a/example_a.sql"],
+)
+class TestDbtTemplate():
+    @pytest.fixture(scope="function")
+    def dbt_template(
+        self,
+        mapping_config: dict,
+        key: str,
+    ):
+        return DbtTemplate(
+            mapping_config=mapping_config,
+            key=key,
+            source_type=TemplateSourceType.DBT,
+            project_name="",
+        )
+
+    def test_get_uri(self, dbt_template, key):
+        assert dbt_template.uri.endswith(key)
+
+
+@pytest.mark.parametrize(
     "project_dir, project_name, profiles_dir, profile, target, vars",
     [
         (
