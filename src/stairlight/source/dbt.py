@@ -137,16 +137,11 @@ class DbtTemplateSource(TemplateSource):
         Returns:
             dict: dbt project settings
         """
-        project: dict = None
         pattern = f"^{project_dir}/dbt_project.yml$"
         project_files = [
             p
             for p in glob.glob(f"{project_dir}/**", recursive=False)
             if re.fullmatch(pattern, p)
         ]
-        if project_files:
-            with open(project_files[0]) as file:
-                project = yaml.safe_load(file)
-        else:
-            raise Exception
-        return project
+        with open(project_files[0]) as file:
+            return yaml.safe_load(file)
