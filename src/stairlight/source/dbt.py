@@ -122,9 +122,9 @@ class DbtTemplateSource(TemplateSource):
         proc = subprocess.run(
             args=shlex.split(command),
             shell=False,
+            check=True,
+            stdout=subprocess.DEVNULL,
         )
-        if proc.returncode != 0:
-            raise Exception(proc.stderr)
         return proc.returncode
 
     @staticmethod
