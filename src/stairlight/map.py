@@ -219,7 +219,7 @@ class Map:
         """
         if not params:
             template_str = template.get_template_str()
-            params = template.get_jinja_params(template_str)
+            params = template.get_jinja_params(template_str=template_str)
         self.unmapped.append(
             {
                 map_key.TEMPLATE: template,
