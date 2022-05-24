@@ -87,7 +87,7 @@ class DbtTemplateSource(TemplateSource):
                 if (
                     p.is_dir()
                 ) or (
-                    re.fullmatch(r"schema.yml/.*\.sql$", str(p))
+                    re.fullmatch(r".*/schema.yml/.*\.sql$", str(p))
                 ) or self.is_excluded(source_type=self.source_type, key=str(p)):
                     self.logger.debug(f"{str(p)} is skipped.")
                     continue

@@ -1,4 +1,7 @@
 import pytest
+import re
+
+from stairlight.source.base import Template
 
 from src.stairlight import config_key
 from src.stairlight.source.dbt import (
@@ -10,7 +13,9 @@ from src.stairlight.source.dbt import (
 
 @pytest.mark.parametrize(
     "key",
-    ["tests/dbt/project_01/target/compiled/project_01/a/example_a.sql"],
+    [
+        "tests/dbt/project_01/target/compiled/project_01/a/example_a.sql",
+    ],
 )
 class TestDbtTemplate():
     @pytest.fixture(scope="function")
@@ -84,10 +89,24 @@ class TestDbtTemplateSource:
         dbt_template_source: DbtTemplateSource,
         project_name: str,
     ):
-        result = []
+        results = []
         for template in dbt_template_source.search_templates_iter():
-            result.append(template)
-        assert len(result) > 0
+            results.append(template)
+        assert len(results) > 0
+
+    def test_search_templates_iter_schema(
+        self,
+        dbt_template_source: DbtTemplateSource,
+        project_name: str,
+    ):
+        results: list[Template] = []
+        for template in dbt_template_source.search_templates_iter():
+            results.append(template)
+        re_matched = [
+            result.key for result in results
+            if re.fullmatch(r".*/schema.yml/.*\.sql$", result.key)
+        ]
+        assert not re_matched
 
     def test_execute_dbt_compile(
         self,
