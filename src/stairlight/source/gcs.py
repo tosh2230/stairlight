@@ -14,7 +14,6 @@ class GcsTemplate(Template):
         self,
         mapping_config: dict,
         key: str,
-        source_type: Optional[TemplateSourceType] = TemplateSourceType.GCS,
         bucket: Optional[str] = None,
         project: Optional[str] = None,
         default_table_prefix: Optional[str] = None,
@@ -22,7 +21,7 @@ class GcsTemplate(Template):
         super().__init__(
             mapping_config=mapping_config,
             key=key,
-            source_type=source_type,
+            source_type=TemplateSourceType.GCS,
             bucket=bucket,
             project=project,
             default_table_prefix=default_table_prefix,
@@ -124,7 +123,6 @@ class GcsTemplateSource(TemplateSource):
             yield GcsTemplate(
                 mapping_config=self._mapping_config,
                 key=blob.name,
-                source_type=self.source_type,
                 project=project,
                 bucket=bucket,
                 default_table_prefix=default_table_prefix,

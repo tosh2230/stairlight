@@ -16,13 +16,12 @@ class DbtTemplate(Template):
         self,
         mapping_config: dict,
         key: str,
-        source_type: TemplateSourceType,
         project_name: str,
     ):
         super().__init__(
             mapping_config=mapping_config,
             key=key,
-            source_type=source_type,
+            source_type=TemplateSourceType.DBT,
         )
         self.uri = self.get_uri()
         self.project_name = project_name
@@ -96,7 +95,6 @@ class DbtTemplateSource(TemplateSource):
                 yield DbtTemplate(
                     mapping_config=self._mapping_config,
                     key=str(p),
-                    source_type=self.source_type,
                     project_name=dbt_project_config[config_key.DBT_PROJECT_NAME],
                 )
 

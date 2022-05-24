@@ -18,7 +18,6 @@ class TestSuccess:
             mapping_config=configurator.read(
                 prefix=config_key.MAPPING_CONFIG_FILE_PREFIX
             ),
-            source_type=TemplateSourceType.FILE,
             key="tests/sql/main/test_undefined.sql",
         )
 
@@ -28,7 +27,6 @@ class TestSuccess:
             mapping_config=configurator.read(
                 prefix=config_key.MAPPING_CONFIG_FILE_PREFIX
             ),
-            source_type=TemplateSourceType.GCS,
             bucket="stairlight",
             key="sql/one_line/one_line.sql",
         )

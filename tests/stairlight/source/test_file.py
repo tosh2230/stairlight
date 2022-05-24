@@ -67,7 +67,7 @@ class TestFileTemplateSource:
 )
 class TestFileTemplateSourceNoExclude:
     @pytest.fixture(scope="class")
-    def template_source(
+    def file_template_source(
         self,
         configurator: Configurator,
         mapping_config: dict,
@@ -86,11 +86,11 @@ class TestFileTemplateSourceNoExclude:
 
     def test_is_excluded(
         self,
-        template_source: FileTemplateSource,
+        file_template_source: FileTemplateSource,
         key: str,
         expected_is_excluded: bool,
     ):
-        actual = template_source.is_excluded(
+        actual = file_template_source.is_excluded(
             source_type=TemplateSourceType.FILE,
             key=key,
         )
@@ -99,7 +99,7 @@ class TestFileTemplateSourceNoExclude:
 
 class TestFileTemplateKeyNotFound:
     @pytest.fixture(scope="class")
-    def template_source(
+    def file_template_source(
         self,
         configurator: Configurator,
         mapping_config: dict,
@@ -117,9 +117,9 @@ class TestFileTemplateKeyNotFound:
 
     def test_search_templates_iter(
         self,
-        template_source: FileTemplateSource,
+        file_template_source: FileTemplateSource,
     ):
-        iter = template_source.search_templates_iter()
+        iter = file_template_source.search_templates_iter()
         with pytest.raises(ConfigKeyNotFoundException):
             next(iter)
 
@@ -139,9 +139,7 @@ class TestFileTemplateMapped:
     ):
         return FileTemplate(
             mapping_config=mapping_config,
-            source_type=TemplateSourceType.FILE,
             key=key,
-            bucket=None,
         )
 
     def test_is_mapped(self, file_template: FileTemplate):
@@ -164,9 +162,7 @@ class TestFileTemplateNotMapped:
     def file_template(self, mapping_config, key):
         return FileTemplate(
             mapping_config=mapping_config,
-            source_type=TemplateSourceType.FILE,
             key=key,
-            bucket=None,
         )
 
     def test_is_mapped(self, file_template):
@@ -198,9 +194,7 @@ class TestFileTemplateRender:
     def file_template(self, mapping_config, key):
         return FileTemplate(
             mapping_config=mapping_config,
-            source_type=TemplateSourceType.FILE,
             key=key,
-            bucket=None,
         )
 
     def test_render(self, file_template, params, expected):

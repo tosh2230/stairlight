@@ -22,7 +22,6 @@ class TestDbtTemplate():
         return DbtTemplate(
             mapping_config=mapping_config,
             key=key,
-            source_type=TemplateSourceType.DBT,
             project_name="",
         )
 
