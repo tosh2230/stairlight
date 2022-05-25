@@ -134,6 +134,61 @@ class TestSuccess:
             },
         ]
 
+    def test_parse_cte_multi_tables_01(self):
+        with open("tests/sql/query/cte_multi_tables_01.sql") as f:
+            query_str = f.read()
+        query = Query(query_str=query_str)
+        results = []
+        for result in query.get_upstairs_attributes_iter():
+            results.append(result)
+        assert results == [
+            {
+                map_key.TABLE_NAME: "project.dataset.table_test_A",
+                map_key.LINE_NUMBER: 6,
+                map_key.LINE_STRING: "		project.dataset.table_test_A",
+            },
+            {
+                map_key.TABLE_NAME: "project.dataset.table_test_B",
+                map_key.LINE_NUMBER: 13,
+                map_key.LINE_STRING: "		project.dataset.table_test_B AS test_B",
+            },
+            {
+                map_key.TABLE_NAME: "project.dataset.table_test_C",
+                map_key.LINE_NUMBER: 19,
+                map_key.LINE_STRING: "FROM project.dataset.table_test_C AS test_C",
+            },
+        ]
+
+    def test_parse_cte_multi_tables_02(self):
+        with open("tests/sql/query/cte_multi_tables_02.sql") as f:
+            query_str = f.read()
+        query = Query(query_str=query_str)
+        results = []
+        for result in query.get_upstairs_attributes_iter():
+            results.append(result)
+        assert results == [
+            {
+                map_key.TABLE_NAME: "project.dataset.table_test_A",
+                map_key.LINE_NUMBER: 6,
+                map_key.LINE_STRING: "		project.dataset.table_test_A -- table_test_B",
+            },
+            {
+                map_key.TABLE_NAME: "project.dataset.table_test_B",
+                map_key.LINE_NUMBER: 12,
+                map_key.LINE_STRING: "		project.dataset.table_test_B AS test_B",
+            },
+            {
+                map_key.TABLE_NAME: "project.dataset.table_test_C",
+                map_key.LINE_NUMBER: 19,
+                map_key.LINE_STRING: "		project.dataset.table_test_C AS test_C",
+            },
+            {
+                map_key.TABLE_NAME: "project.dataset.table_test_D",
+                map_key.LINE_NUMBER: 26,
+                map_key.LINE_STRING: "FROM project.dataset.table_test_D AS test_D",
+            },
+        ]
+
     def test_solve_table_prefix_one(self):
         table = "DATASET_d.TABLE_d"
         default_table_prefix = "PROJECT_A"
