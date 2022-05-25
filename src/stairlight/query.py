@@ -32,6 +32,7 @@ class Query:
                 i
                 for i, line in enumerate(self.query_str.splitlines())
                 if upstairs_table in line
+                and "--" not in line.split(upstairs_table)[0]  # exclude comments
             ]
 
             for line_index in line_indexes:
@@ -56,11 +57,11 @@ class Query:
         """
         # Get Common-Table-Expressions(CTE) from query string
         cte_pattern = r"(?:with|,)\s*(\w+)\s+as\s*"
-        ctes = re.findall(cte_pattern, self.query_str, re.IGNORECASE)
+        cte_alias = re.findall(cte_pattern, self.query_str, re.IGNORECASE)
 
         # Search a boundary line number that main query starts
         boundary_num = 0
-        main_pattern = r"\)[;\s]*select" if any(ctes) else r"select"
+        main_pattern = r"\)[;\s]*select" if any(cte_alias) else r"select"
         main_search_result = re.search(main_pattern, self.query_str, re.IGNORECASE)
         if main_search_result:
             boundary_num = main_search_result.start()
@@ -70,16 +71,24 @@ class Query:
         query_group["main"] = self.query_str[boundary_num:].strip()
         query_group["cte"] = self.query_str[:boundary_num].strip()
 
+        # Exclude table alias from main query
         table_pattern = r"(?:from|join)\s+([`.\-\w]+)"
-        main_tables_with_cte_alias = re.findall(
+        main_tables_with_alias = re.findall(
             table_pattern, query_group["main"], re.IGNORECASE
         )
-
-        # Exclude table alias in CTE from main tables
         main_tables = [
-            table for table in main_tables_with_cte_alias if table not in ctes
+            table for table in main_tables_with_alias if table not in cte_alias
         ]
-        cte_tables = re.findall(table_pattern, query_group["cte"], re.IGNORECASE)
+
+        # Exclude table alias from CTEs
+        cte_tables_with_alias = re.findall(
+            table_pattern, query_group["cte"], re.IGNORECASE
+        )
+        cte_tables = [
+            cte_table
+            for cte_table in cte_tables_with_alias
+            if cte_table not in cte_alias
+        ]
 
         return sorted(set(main_tables + cte_tables))
 
