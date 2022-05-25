@@ -32,7 +32,7 @@ class Query:
                 i
                 for i, line in enumerate(self.query_str.splitlines())
                 if upstairs_table in line
-                and '--' not in line.split(upstairs_table)[0]  # exclude comments
+                and "--" not in line.split(upstairs_table)[0]  # exclude comments
             ]
 
             for line_index in line_indexes:
@@ -82,12 +82,11 @@ class Query:
 
         # Exclude table alias from CTEs
         cte_tables_with_alias = re.findall(
-            table_pattern,
-            query_group["cte"],
-            re.IGNORECASE
+            table_pattern, query_group["cte"], re.IGNORECASE
         )
         cte_tables = [
-            cte_table for cte_table in cte_tables_with_alias
+            cte_table
+            for cte_table in cte_tables_with_alias
             if cte_table not in cte_alias
         ]
 
