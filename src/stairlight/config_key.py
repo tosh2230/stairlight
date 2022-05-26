@@ -17,6 +17,7 @@ MAPPING_CONFIG_MAPPING_SECTION = "Mapping"
 MAPPING_CONFIG_METADATA_SECTION = "Metadata"
 
 FILE_SUFFIX = "FileSuffix"
+IGNORE_PARAMETERS = "IgnoreParameters"
 LABELS = "Labels"
 MAPPING_PREFIX = "MappingPrefix"
 PARAMETERS = "Parameters"
