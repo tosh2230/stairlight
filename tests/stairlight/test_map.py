@@ -1,7 +1,7 @@
 import pytest
 
 from src.stairlight import config_key, map_key
-from src.stairlight.map import combine_nested_dict_keys, Map
+from src.stairlight.map import Map, combine_nested_dict_keys
 
 
 class TestSuccess:
