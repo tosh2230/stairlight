@@ -27,7 +27,6 @@ class Template:
         mapping_config: dict,
         key: str,
         source_type: TemplateSourceType,
-        ignore_params: Optional["list[str]"] = None,
         bucket: Optional[str] = None,
         project: Optional[str] = None,
         default_table_prefix: Optional[str] = None,

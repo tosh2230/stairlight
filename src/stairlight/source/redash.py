@@ -20,7 +20,6 @@ class RedashTemplate(Template):
         query_str: str = None,
         data_source_name: str = None,
         source_type: Optional[TemplateSourceType] = TemplateSourceType.REDASH,
-        ignore_params: Optional["list[str]"] = None,
         key: Optional[str] = None,
         bucket: Optional[str] = None,
         project: Optional[str] = None,
