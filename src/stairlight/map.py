@@ -93,7 +93,8 @@ class Map:
             table_attributes (dict): Table attributes from mapping configuration
         """
         query_str: str = template.render(
-            params=self.get_combined_params(table_attributes)
+            params=self.get_combined_params(table_attributes),
+            ignore_params=table_attributes.get(config_key.IGNORE_PARAMETERS),
         )
         query = Query(
             query_str=query_str,
@@ -127,7 +128,7 @@ class Map:
                 }
             )
 
-    def get_global_params(self) -> dict:
+    def get_global_params(self, key: str) -> dict:
         """get global parameters in mapping.yaml
 
         Returns:
@@ -138,7 +139,7 @@ class Map:
             config_key.MAPPING_CONFIG_GLOBAL_SECTION
         )
         if config_key.PARAMETERS in global_section:
-            global_params = global_section.get(config_key.PARAMETERS)
+            global_params = global_section.get(key)
 
         return global_params
 
@@ -151,7 +152,7 @@ class Map:
         Returns:
             dict: combined parameters
         """
-        global_params: dict = self.get_global_params()
+        global_params: dict = self.get_global_params(key=config_key.PARAMETERS)
         table_params: dict = table_attributes.get(config_key.PARAMETERS, {})
 
         # Table parameters are prioritized over global parameters
@@ -219,7 +220,7 @@ class Map:
         """
         if not params:
             template_str = template.get_template_str()
-            params = template.get_jinja_params(template_str)
+            params = template.get_jinja_params(template_str=template_str)
         self.unmapped.append(
             {
                 map_key.TEMPLATE: template,

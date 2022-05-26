@@ -194,7 +194,11 @@ class Configurator:
                     splitted_params = undefined_param.split(".")
                     create_nested_dict(keys=splitted_params, results=parameters)
 
-                mapping_values[config_key.TABLES][0][config_key.PARAMETERS] = parameters
+                if parameters:
+                    mapping_values[config_key.TABLES][0][
+                        config_key.PARAMETERS
+                    ] = parameters
+
                 if parameters in parameters_set:
                     global_parameters.update(parameters)
                 else:

@@ -1,14 +1,14 @@
 import pytest
 
 from src.stairlight import config_key, map_key
-from src.stairlight.map import combine_nested_dict_keys
+from src.stairlight.map import Map, combine_nested_dict_keys
 
 
 class TestSuccess:
-    def test_mapped(self, dependency_map):
+    def test_mapped(self, dependency_map: Map):
         assert len(dependency_map.mapped) > 0
 
-    def test_unmapped(self, dependency_map):
+    def test_unmapped(self, dependency_map: Map):
         assert len(dependency_map.unmapped) > 0
 
     @pytest.mark.parametrize(
@@ -31,7 +31,7 @@ class TestSuccess:
             ),
         ],
     )
-    def test_find_unmapped_params(self, dependency_map, key, expected):
+    def test_find_unmapped_params(self, dependency_map: Map, key, expected):
         actual = None
         for unmapped_attributes in dependency_map.unmapped:
             template = unmapped_attributes.get(map_key.TEMPLATE)
@@ -40,8 +40,8 @@ class TestSuccess:
                 break
         assert actual == expected
 
-    def test_get_global_params(self, dependency_map):
-        actual = dependency_map.get_global_params()
+    def test_get_global_params(self, dependency_map: Map):
+        actual = dependency_map.get_global_params(key=map_key.PARAMETERS)
         expected = {
             "DESTINATION_PROJECT": "PROJECT_GLOBAL",
             "params": {
@@ -52,15 +52,15 @@ class TestSuccess:
         }
         assert actual == expected
 
-    def test_get_combined_params_global_only(self, dependency_map):
+    def test_get_combined_params_global_only(self, dependency_map: Map):
         table_attributes = {
             config_key.TABLE_NAME: "PROJECT_g.DATASET_g.TABLE_g",
         }
-        actual = dependency_map.get_combined_params(table_attributes)
-        expected = dependency_map.get_global_params()
+        actual = dependency_map.get_combined_params(table_attributes=table_attributes)
+        expected = dependency_map.get_global_params(key=map_key.PARAMETERS)
         assert actual == expected
 
-    def test_get_combined_params_by_table(self, dependency_map):
+    def test_get_combined_params_by_table(self, dependency_map: Map):
         table_attributes = {
             config_key.TABLE_NAME: "PROJECT_g.DATASET_g.TABLE_g",
             config_key.PARAMETERS: {
@@ -71,7 +71,7 @@ class TestSuccess:
                 },
             },
         }
-        actual = dependency_map.get_combined_params(table_attributes)
+        actual = dependency_map.get_combined_params(table_attributes=table_attributes)
         expected = {
             "DESTINATION_PROJECT": "PROJECT_GLOBAL",
             "params": {
@@ -84,7 +84,7 @@ class TestSuccess:
 
 
 class TestSuccessNoMetadata:
-    def test_find_unmapped_params(self, dependency_map):
+    def test_find_unmapped_params(self, dependency_map: Map):
         assert dependency_map.unmapped
 
 

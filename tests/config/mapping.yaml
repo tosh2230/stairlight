@@ -15,6 +15,8 @@ Mapping:
     FileSuffix: "tests/sql/main/cte_multi_line.sql"
     Tables:
       - TableName: "PROJECT_D.DATASET_E.TABLE_F"
+        IgnoreParameters:
+          - execution_date.add(days=1).isoformat()
         Parameters:
           params:
             PROJECT: PROJECT_J
@@ -24,6 +26,8 @@ Mapping:
           Source: file
           Test: b
       - TableName: "PROJECT_G.DATASET_H.TABLE_I"
+        IgnoreParameters:
+          - execution_date.add(days=1).isoformat()
         Parameters:
           params:
             PROJECT: PROJECT_M
@@ -52,6 +56,8 @@ Mapping:
     Uri: "gs://stairlight/sql/cte/cte_multi_line.sql"
     Tables:
       - TableName: "PROJECT_d.DATASET_e.TABLE_f"
+        IgnoreParameters:
+          - execution_date.add(days=1).isoformat()
         Parameters:
           params:
             PROJECT: PROJECT_g

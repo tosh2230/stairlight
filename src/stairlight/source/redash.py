@@ -62,22 +62,6 @@ class RedashTemplate(Template):
         """
         return self.query_str
 
-    def render(self, params: dict) -> str:
-        """Render SQL query string from a jinja template on Redash queries
-        Args:
-            params (dict): Jinja paramters
-        Returns:
-            str: SQL query string
-        """
-        template_str = self.get_template_str()
-        if params:
-            results = self.render_by_base_loader(
-                template_str=template_str, params=params
-            )
-        else:
-            results = template_str
-        return results
-
 
 class RedashTemplateSource(TemplateSource):
     def __init__(
