@@ -48,24 +48,6 @@ class GcsTemplate(Template):
         blob = bucket.blob(self.key)
         return blob.download_as_bytes().decode("utf-8")
 
-    def render(self, params: dict) -> str:
-        """Render SQL query string from a jinja template on GCS
-
-        Args:
-            params (dict): Jinja paramters
-
-        Returns:
-            str: SQL query string
-        """
-        template_str = self.get_template_str()
-        if params:
-            results = self.render_by_base_loader(
-                template_str=template_str, params=params
-            )
-        else:
-            results = template_str
-        return results
-
 
 class GcsTemplateSource(TemplateSource):
     def __init__(
@@ -92,21 +74,28 @@ class GcsTemplateSource(TemplateSource):
             fail_if_not_found=False,
             enable_logging=False,
         )
-        client = storage.Client(credentials=None, project=project)
         bucket = get_config_value(
             key=config_key.BUCKET_NAME,
             target=self.source_attributes,
             fail_if_not_found=True,
             enable_logging=False,
         )
+        default_table_prefix = get_config_value(
+            key=config_key.DEFAULT_TABLE_PREFIX,
+            target=self.source_attributes,
+            fail_if_not_found=False,
+            enable_logging=False,
+        )
+        regex = get_config_value(
+            key=config_key.REGEX,
+            target=self.source_attributes,
+            fail_if_not_found=True,
+            enable_logging=False,
+        )
+
+        client = storage.Client(credentials=None, project=project)
         blobs = client.list_blobs(bucket)
         for blob in blobs:
-            regex = get_config_value(
-                key=config_key.REGEX,
-                target=self.source_attributes,
-                fail_if_not_found=True,
-                enable_logging=False,
-            )
             if (
                 not re.fullmatch(
                     rf"{regex}",
@@ -115,12 +104,7 @@ class GcsTemplateSource(TemplateSource):
             ) or self.is_excluded(source_type=self.source_type, key=blob.name):
                 self.logger.debug(f"{blob.name} is skipped.")
                 continue
-            default_table_prefix = get_config_value(
-                key=config_key.DEFAULT_TABLE_PREFIX,
-                target=self.source_attributes,
-                fail_if_not_found=False,
-                enable_logging=False,
-            )
+
             yield GcsTemplate(
                 mapping_config=self._mapping_config,
                 key=blob.name,

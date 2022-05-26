@@ -93,7 +93,8 @@ class Map:
             table_attributes (dict): Table attributes from mapping configuration
         """
         query_str: str = template.render(
-            params=self.get_combined_params(table_attributes)
+            params=self.get_combined_params(table_attributes),
+            ignore_params=table_attributes.get(config_key.IGNORE_PARAMETERS),
         )
         query = Query(
             query_str=query_str,
@@ -219,7 +220,7 @@ class Map:
         """
         if not params:
             template_str = template.get_template_str()
-            params = template.get_jinja_params(template_str)
+            params = template.get_jinja_params(template_str=template_str)
         self.unmapped.append(
             {
                 map_key.TEMPLATE: template,

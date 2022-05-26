@@ -27,6 +27,7 @@ class Template:
         mapping_config: dict,
         key: str,
         source_type: TemplateSourceType,
+        ignore_params: Optional["list[str]"] = None,
         bucket: Optional[str] = None,
         project: Optional[str] = None,
         default_table_prefix: Optional[str] = None,
@@ -102,6 +103,17 @@ class Template:
         jinja_template = Environment(loader=BaseLoader()).from_string(template_str)
         return jinja_template.render(params)
 
+    @staticmethod
+    def ignore_params_from_template_str(template_str: str, ignore_params: list) -> str:
+        if not ignore_params:
+            ignore_params = []
+        replaced_str = template_str
+        for ignore_param in ignore_params:
+            replaced_str = replaced_str.replace(
+                "{{{{ {} }}}}".format(ignore_param), "ignored"
+            )
+        return replaced_str
+
     def get_uri(self) -> str:
         """Get uri"""
         return ""
@@ -110,9 +122,26 @@ class Template:
         """Get template strings that read from template source"""
         return ""
 
-    def render(self, params: dict) -> str:
-        """Render SQL query string from a jinja template"""
-        return ""
+    def render(self, params: dict, ignore_params: list = None) -> str:
+        """Render SQL query string from a jinja template on Redash queries
+        Args:
+            params (dict): Jinja paramters
+        Returns:
+            str: SQL query string
+        """
+        template_str = self.get_template_str()
+        replaced_template_str = self.ignore_params_from_template_str(
+            template_str=template_str,
+            ignore_params=ignore_params,
+        )
+        if params:
+            results = self.render_by_base_loader(
+                template_str=replaced_template_str,
+                params=params,
+            )
+        else:
+            results = replaced_template_str
+        return results
 
 
 class TemplateSource:
