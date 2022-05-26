@@ -36,7 +36,7 @@ class TestGcsTemplateSource:
 
 
 @pytest.mark.parametrize(
-    "bucket, key, params, expected",
+    "bucket, key, params, ignore_params, expected",
     [
         (
             "stairlight",
@@ -48,6 +48,7 @@ class TestGcsTemplateSource:
                     "TABLE": "TABLE_i",
                 }
             },
+            ["execution_date.add(days=1).isoformat()"],
             "PROJECT_g.DATASET_h.TABLE_i",
         ),
     ],
@@ -69,16 +70,36 @@ class TestGcsTemplate:
             key=key,
         )
 
-    def test_is_mapped(self, gcs_template: GcsTemplate):
+    def test_is_mapped(
+        self,
+        gcs_template: GcsTemplate,
+        ignore_params: list,
+    ):
         assert gcs_template.is_mapped()
 
-    def test_get_jinja_params(self, gcs_template: GcsTemplate):
+    def test_get_jinja_params(
+        self,
+        gcs_template: GcsTemplate,
+        ignore_params: list,
+    ):
         template_str = gcs_template.get_template_str()
         assert len(gcs_template.get_jinja_params(template_str)) > 0
 
-    def test_get_uri(self, gcs_template: GcsTemplate, bucket: str, key: str):
+    def test_get_uri(
+        self,
+        gcs_template: GcsTemplate,
+        bucket: str,
+        key: str,
+        ignore_params: list,
+    ):
         assert gcs_template.uri == f"{GCS_URI_SCHEME}{bucket}/{key}"
 
-    def test_render(self, gcs_template: GcsTemplate, params: dict, expected: str):
-        actual = gcs_template.render(params=params)
+    def test_render(
+        self,
+        gcs_template: GcsTemplate,
+        params: dict,
+        ignore_params: list,
+        expected: str,
+    ):
+        actual = gcs_template.render(params=params, ignore_params=ignore_params)
         assert expected in actual
