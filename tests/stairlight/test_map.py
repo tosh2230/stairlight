@@ -15,6 +15,10 @@ class TestSuccess:
         "key, expected",
         [
             (
+                "tests/sql/main/cte_multi_line.sql",
+                [],
+            ),
+            (
                 "tests/sql/main/undefined.sql",
                 [
                     "params.main_table",
@@ -31,7 +35,7 @@ class TestSuccess:
             ),
         ],
     )
-    def test_find_unmapped_params(self, dependency_map: Map, key, expected):
+    def test_find_unmapped_params(self, dependency_map: Map, key: str, expected: list):
         actual = None
         for unmapped_attributes in dependency_map.unmapped:
             template = unmapped_attributes.get(map_key.TEMPLATE)
