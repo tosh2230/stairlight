@@ -2,6 +2,7 @@ import pytest
 
 from src.stairlight import config_key
 from src.stairlight.config import ConfigKeyNotFoundException, Configurator
+from src.stairlight.source.base import RenderingTemplateException
 from src.stairlight.source.file import (
     FileTemplate,
     FileTemplateSource,
@@ -206,3 +207,43 @@ class TestFileTemplateRender:
     def test_render(self, file_template, params, expected):
         actual = file_template.render(params=params)
         assert expected in actual
+
+
+@pytest.mark.parametrize(
+    "key, params",
+    [
+        (
+            "tests/sql/main/cte_multi_line.sql",
+            {
+                "params": {
+                    "PROJECT": "RENDERED_PROJECT",
+                    "DATASET": "RENDERED_DATASET",
+                    "TABLE": "RENDERED_TABLE",
+                }
+            },
+        ),
+    ],
+)
+class TestFileTemplateRenderException:
+    @pytest.fixture(scope="function")
+    def file_template(self, mapping_config, key):
+        return FileTemplate(
+            mapping_config=mapping_config,
+            source_type=TemplateSourceType.FILE,
+            key=key,
+            bucket=None,
+        )
+
+    def test_render(
+        self,
+        file_template: FileTemplate,
+        key: str,
+        params: dict,
+    ):
+        with pytest.raises(RenderingTemplateException) as exception:
+            _ = file_template.render(params=params)
+        assert exception.value.args[0] == (
+            f"'execution_date' is undefined, "
+            f"source_type: {file_template.source_type}, "
+            f"key: {key}"
+        )
