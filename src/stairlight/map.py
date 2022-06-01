@@ -242,7 +242,12 @@ class Map:
 
         mapped_params_dict: dict = self.get_combined_params(table_attributes)
         mapped_params: list = combine_nested_dict_keys(d=mapped_params_dict)
-        diff_params: list = list(set(template_params) - set(mapped_params))
+
+        ignore_params: list = table_attributes.get(config_key.IGNORE_PARAMETERS, [])
+
+        diff_params: list = list(
+            set(template_params) - set(mapped_params) - set(ignore_params)
+        )
 
         if diff_params:
             self.add_unmapped_params(template=template, params=diff_params)

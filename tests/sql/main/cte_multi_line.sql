@@ -5,7 +5,8 @@ WITH c AS (
     FROM
         PROJECT_C.DATASET_C.TABLE_C
     WHERE
-        updated_at = {{ execution_date.add(days=1).isoformat() }}
+        created_at = {{ execution_date.add(days=1).isoformat() }}
+        and updated_at = {{ execution_date.add(days=2).isoformat() }}
 ),
 d AS (
     SELECT

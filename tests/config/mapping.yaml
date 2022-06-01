@@ -17,6 +17,7 @@ Mapping:
       - TableName: "PROJECT_D.DATASET_E.TABLE_F"
         IgnoreParameters:
           - execution_date.add(days=1).isoformat()
+          - execution_date.add(days=2).isoformat()
         Parameters:
           params:
             PROJECT: PROJECT_J
@@ -28,6 +29,7 @@ Mapping:
       - TableName: "PROJECT_G.DATASET_H.TABLE_I"
         IgnoreParameters:
           - execution_date.add(days=1).isoformat()
+          - execution_date.add(days=2).isoformat()
         Parameters:
           params:
             PROJECT: PROJECT_M

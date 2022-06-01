@@ -14,6 +14,8 @@ class TestSuccess:
     @pytest.mark.parametrize(
         "key, expected",
         [
+            ("tests/sql/main/cte_multi_line.sql", []),
+            ("tests/sql/main/one_line_1.sql", []),
             (
                 "tests/sql/main/undefined.sql",
                 [
@@ -31,8 +33,8 @@ class TestSuccess:
             ),
         ],
     )
-    def test_find_unmapped_params(self, dependency_map: Map, key, expected):
-        actual = None
+    def test_find_unmapped_params(self, dependency_map: Map, key: str, expected: list):
+        actual = []
         for unmapped_attributes in dependency_map.unmapped:
             template = unmapped_attributes.get(map_key.TEMPLATE)
             if template.key == key:
