@@ -6,6 +6,7 @@ from logging import getLogger
 from typing import Iterator, Optional
 
 from jinja2 import BaseLoader, Environment
+from jinja2.exceptions import UndefinedError
 
 from .. import config_key
 
@@ -86,7 +87,7 @@ class Template(ABC):
         return result
 
     @staticmethod
-    def get_jinja_params(template_str) -> list:
+    def get_jinja_params(template_str: str) -> list:
         """Get jinja parameters
 
         Args:
@@ -101,9 +102,56 @@ class Template(ABC):
         return re.findall("[^{} ]+", jinja_expressions, re.IGNORECASE)
 
     @staticmethod
-    def render_by_base_loader(template_str: str, params: dict) -> str:
-        jinja_template = Environment(loader=BaseLoader()).from_string(template_str)
-        return jinja_template.render(params)
+    def render_by_base_loader(
+        source_type: str, key: str, template_str: str, params: dict
+    ) -> str:
+        """Render query string from template string
+
+        Args:
+            source_type (str): source type
+            key (str): key path
+            template_str (str): template string
+            params (dict): parameters
+
+        Raises:
+            RenderingTemplateException: class RenderingTemplateException
+
+        Returns:
+            str: rendered query string
+        """
+        try:
+            jinja_template = Environment(loader=BaseLoader()).from_string(template_str)
+            return jinja_template.render(params)
+        except UndefinedError as undefined_error:
+            raise RenderingTemplateException(
+                (
+                    f"{undefined_error.message}, "
+                    f"source_type: {source_type}, "
+                    f"key: {key}"
+                )
+            ) from None
+
+    @staticmethod
+    def ignore_params_from_template_str(
+        template_str: str, ignore_params: "list[str]"
+    ) -> str:
+        """ignore parameters from template string
+
+        Args:
+            template_str (str): template string
+            ignore_params (list[str]): ignore parameters
+
+        Returns:
+            str: replaced template string
+        """
+        if not ignore_params:
+            ignore_params = []
+        replaced_str = template_str
+        for ignore_param in ignore_params:
+            replaced_str = replaced_str.replace(
+                "{{{{ {} }}}}".format(ignore_param), "ignored"
+            )
+        return replaced_str
 
     def get_uri(self) -> str:
         """Get uri"""
@@ -113,9 +161,37 @@ class Template(ABC):
         """Get template strings that read from template source"""
         return ""
 
-    def render(self, params: dict) -> str:
-        """Render SQL query string from a jinja template"""
-        return ""
+    def render(self, params: dict, ignore_params: "list[str]" = None) -> str:
+        """Render SQL query string from a jinja template on Redash queries
+        Args:
+            params (dict): Jinja parameters
+            ignore_params (list[str]): Ignore parameters
+        Returns:
+            str: SQL query string
+        """
+        template_str = self.get_template_str()
+        replaced_template_str = self.ignore_params_from_template_str(
+            template_str=template_str,
+            ignore_params=ignore_params,
+        )
+        if params:
+            results = self.render_by_base_loader(
+                source_type=self.source_type,
+                key=self.key,
+                template_str=replaced_template_str,
+                params=params,
+            )
+        else:
+            results = replaced_template_str
+        return results
+
+
+class RenderingTemplateException(Exception):
+    def __init__(self, *args: object) -> None:
+        super().__init__(*args)
+
+    def __str__(self) -> str:
+        return super().__str__()
 
 
 class TemplateSource(ABC):

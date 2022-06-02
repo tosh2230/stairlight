@@ -1,9 +1,6 @@
-import os
 import pathlib
 import re
 from typing import Iterator, Optional
-
-from jinja2 import Environment, FileSystemLoader
 
 from .. import config_key
 from ..config import get_config_value
@@ -42,23 +39,6 @@ class FileTemplate(Template):
         with open(self.key) as f:
             return f.read()
 
-    def render(self, params: dict) -> str:
-        """Render SQL query string from a jinja template on local file system
-
-        Args:
-            params (dict): Jinja paramters
-
-        Returns:
-            str: SQL query string
-        """
-        if params:
-            env = Environment(loader=FileSystemLoader(os.path.dirname(self.key)))
-            jinja_template = env.get_template(os.path.basename(self.key))
-            results = jinja_template.render(params)
-        else:
-            results = self.get_template_str()
-        return results
-
 
 class FileTemplateSource(TemplateSource):
     def __init__(
@@ -85,14 +65,21 @@ class FileTemplateSource(TemplateSource):
             fail_if_not_found=True,
             enable_logging=False,
         )
+        default_table_prefix = get_config_value(
+            key=config_key.DEFAULT_TABLE_PREFIX,
+            target=self.source_attributes,
+            fail_if_not_found=False,
+            enable_logging=False,
+        )
+        regex = get_config_value(
+            key=config_key.REGEX,
+            target=self.source_attributes,
+            fail_if_not_found=True,
+            enable_logging=False,
+        )
+
         path_obj = pathlib.Path(path)
         for p in path_obj.glob("**/*"):
-            regex = get_config_value(
-                key=config_key.REGEX,
-                target=self.source_attributes,
-                fail_if_not_found=True,
-                enable_logging=False,
-            )
             if (
                 p.is_dir()
             ) or (
@@ -103,12 +90,7 @@ class FileTemplateSource(TemplateSource):
             ) or self.is_excluded(source_type=self.source_type, key=str(p)):
                 self.logger.debug(f"{str(p)} is skipped.")
                 continue
-            default_table_prefix = get_config_value(
-                key=config_key.DEFAULT_TABLE_PREFIX,
-                target=self.source_attributes,
-                fail_if_not_found=False,
-                enable_logging=False,
-            )
+
             yield FileTemplate(
                 mapping_config=self._mapping_config,
                 key=str(p),

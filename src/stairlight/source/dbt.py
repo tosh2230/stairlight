@@ -71,9 +71,7 @@ class DbtTemplateSource(TemplateSource):
             vars=self.source_attributes.get(config_key.DBT_VARS),
         )
 
-        dbt_project_config = self.read_dbt_project_yml(
-            project_dir=project_dir
-        )
+        dbt_project_config = self.read_dbt_project_yml(project_dir=project_dir)
         for model_path in dbt_project_config[config_key.DBT_MODEL_PATHS]:
             path = (
                 f"{project_dir}/"
@@ -85,10 +83,10 @@ class DbtTemplateSource(TemplateSource):
             path_obj = pathlib.Path(path)
             for p in path_obj.glob("**/*"):
                 if (
-                    p.is_dir()
-                ) or (
-                    re.fullmatch(r".*/schema.yml/.*\.sql$", str(p))
-                ) or self.is_excluded(source_type=self.source_type, key=str(p)):
+                    (p.is_dir())
+                    or (re.fullmatch(r".*/schema.yml/.*\.sql$", str(p)))
+                    or self.is_excluded(source_type=self.source_type, key=str(p))
+                ):
                     self.logger.debug(f"{str(p)} is skipped.")
                     continue
 

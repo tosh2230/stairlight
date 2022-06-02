@@ -12,7 +12,7 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square)](https://github.com/psf/black)
 [![CI](https://github.com/tosh2230/stairlight/actions/workflows/ci.yml/badge.svg)](https://github.com/tosh2230/stairlight/actions/workflows/ci.yml)
 
-A table-level data lineage tool, detects table dependencies by SELECT queries.
+An end-to-end data lineage tool, detects table dependencies by SELECT queries.
 
 Queries can be read from following systems.
 
@@ -178,6 +178,12 @@ Mapping:
     FileSuffix: "tests/sql/main/union_same_table.sql"
     Tables:
       - TableName: "test_project.beam_streaming.taxirides_aggregation"
+        Parameters:
+          params:
+            source_table: source
+            destination_table: destination
+        IgnoreParameters:
+          - execution_date.add(days=1).isoformat()
   - TemplateSourceType: GCS
     Uri: "gs://stairlight/sql/one_line/one_line.sql"
     Tables:
@@ -210,6 +216,8 @@ Mapping section is used to define relationships between queries and tables that 
 
 `Parameters` attribute allows you to reflect settings in [jinja](https://jinja.palletsprojects.com/) template variables embedded in queries. If multiple settings are applied to a query using jinja template, the query will be read as if there were the same number of queries as the number of settings.
 
+In contrast, `IgnoreParameters` attribute handles a list to ignore when rendering queries.
+
 #### Metadata Section
 
 This section is mainly used to set metadata to tables appears only in queries.
@@ -220,7 +228,7 @@ This section is mainly used to set metadata to tables appears only in queries.
 $ stairlight --help
 usage: stairlight [-h] [-c CONFIG] [--save SAVE] [--load LOAD] {init,check,up,down} ...
 
-A table-level data lineage tool, detects table dependencies by SELECT queries.
+An end-to-end data lineage tool, detects table dependencies by SELECT queries.
 Without positional arguments, return a table dependency map as JSON format.
 
 positional arguments:

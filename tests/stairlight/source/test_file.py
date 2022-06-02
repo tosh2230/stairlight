@@ -2,6 +2,7 @@ import pytest
 
 from src.stairlight import config_key
 from src.stairlight.config import ConfigKeyNotFoundException, Configurator
+from src.stairlight.source.base import RenderingTemplateException
 from src.stairlight.source.file import (
     FileTemplate,
     FileTemplateSource,
@@ -190,14 +191,9 @@ class TestFileTemplateNotMapped:
                 "params.sub_table_01",
                 "params.sub_table_02",
                 "params.main_table",
-            ]
+            ],
         ),
-        (
-            "tests/sql/query/nested_join.sql",
-            None,
-            "PROJECT_B.DATASET_B.TABLE_B",
-            []
-        )
+        ("tests/sql/query/nested_join.sql", None, "PROJECT_B.DATASET_B.TABLE_B", []),
     ],
 )
 class TestFileTemplateRender:
@@ -209,11 +205,7 @@ class TestFileTemplateRender:
         )
 
     def test_render(
-        self,
-        file_template: FileTemplate,
-        params,
-        expected_table,
-        expected_params
+        self, file_template: FileTemplate, params, expected_table, expected_params
     ):
         actual = file_template.render(params=params)
         assert expected_table in actual
@@ -228,3 +220,41 @@ class TestFileTemplateRender:
         template_str = file_template.get_template_str()
         actual = file_template.get_jinja_params(template_str=template_str)
         assert actual == expected_params
+
+
+@pytest.mark.parametrize(
+    "key, params",
+    [
+        (
+            "tests/sql/main/cte_multi_line.sql",
+            {
+                "params": {
+                    "PROJECT": "RENDERED_PROJECT",
+                    "DATASET": "RENDERED_DATASET",
+                    "TABLE": "RENDERED_TABLE",
+                }
+            },
+        ),
+    ],
+)
+class TestFileTemplateRenderException:
+    @pytest.fixture(scope="function")
+    def file_template(self, mapping_config, key):
+        return FileTemplate(
+            mapping_config=mapping_config,
+            key=key,
+        )
+
+    def test_render(
+        self,
+        file_template: FileTemplate,
+        key: str,
+        params: dict,
+    ):
+        with pytest.raises(RenderingTemplateException) as exception:
+            _ = file_template.render(params=params)
+        assert exception.value.args[0] == (
+            f"'execution_date' is undefined, "
+            f"source_type: {file_template.source_type}, "
+            f"key: {key}"
+        )
