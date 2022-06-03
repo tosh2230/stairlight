@@ -40,7 +40,7 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-      - uses: ./.github/workflows/composite/setup
+      - uses: ./.github/workflows/composite/setup-gcp
         with:
           GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
           GCP_WORKLOAD_IDP: ${{ secrets.GCP_WORKLOAD_IDP }}
