@@ -1,5 +1,5 @@
 VERSION := $(shell grep -E '^version = *.' pyproject.toml | sed -e 's/version = //g')
-EXTRAS = gcs,redash
+EXTRAS = gcs,redash,dbt-bigquery
 
 lint:
 	poetry run flake8 src tests
