@@ -8,6 +8,12 @@ Include:
     BucketName: stairlight
     Regex: "^sql/.*/*.sql$"
     DefaultTablePrefix: "PROJECT_A"
+  - TemplateSourceType: dbt
+    ProjectDir: tests/dbt/project_01
+    ProfilesDir: tests/dbt
+    Vars:
+      key_a: value_a
+      key_b: value_b
 Exclude:
   - TemplateSourceType: File
     Regex: "main/exclude.sql$"

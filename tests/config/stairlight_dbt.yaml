@@ -2,7 +2,6 @@ Include:
   - TemplateSourceType: dbt
     ProjectDir: tests/dbt/project_01
     ProfilesDir: tests/dbt
-    Profile: profile_01
     Target: prod
     Vars:
       key_a: value_a
@@ -10,7 +9,6 @@ Include:
   - TemplateSourceType: dbt
     ProjectDir: tests/dbt/project_02
     ProfilesDir: tests/dbt
-    Profile: profile_02
     Target: dev
 Exclude:
   - TemplateSourceType: dbt
