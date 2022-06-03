@@ -33,7 +33,7 @@ dbt-bigquery = ["dbt-core", "dbt-bigquery"]
 flake8 = "^4.0.1"
 isort = "^5.9.3"
 pytest = "^6.2.5"
-black = "^21.9b0"
+black = "^22.3.0"
 pytest-cov = "^3.0.0"
 
 [tool.black]
