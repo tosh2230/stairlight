@@ -17,7 +17,7 @@ from src.stairlight.source.dbt import (
         "tests/dbt/project_01/target/compiled/project_01/a/example_a.sql",
     ],
 )
-class TestDbtTemplate():
+class TestDbtTemplate:
     @pytest.fixture(scope="function")
     def dbt_template(
         self,
@@ -66,7 +66,6 @@ class TestDbtTemplateSource:
         mapping_config: dict,
         project_dir: str,
         profiles_dir: str,
-        profile: str,
         target: str,
         vars: dict,
     ) -> DbtTemplateSource:
@@ -74,9 +73,8 @@ class TestDbtTemplateSource:
             config_key.TEMPLATE_SOURCE_TYPE: TemplateSourceType.DBT.value,
             config_key.DBT_PROJECT_DIR: project_dir,
             config_key.DBT_PROFILES_DIR: profiles_dir,
-            config_key.DBT_PROFILE: profile,
-            config_key.DBT_TARGET : target,
-            config_key.DBT_VARS : vars,
+            config_key.DBT_TARGET: target,
+            config_key.DBT_VARS: vars,
         }
         return DbtTemplateSource(
             stairlight_config=stairlight_config,
@@ -88,6 +86,7 @@ class TestDbtTemplateSource:
         self,
         dbt_template_source: DbtTemplateSource,
         project_name: str,
+        profile: str,
     ):
         results = []
         for template in dbt_template_source.search_templates_iter():
@@ -98,12 +97,14 @@ class TestDbtTemplateSource:
         self,
         dbt_template_source: DbtTemplateSource,
         project_name: str,
+        profile: str,
     ):
         results: list[Template] = []
         for template in dbt_template_source.search_templates_iter():
             results.append(template)
         re_matched = [
-            result.key for result in results
+            result.key
+            for result in results
             if re.fullmatch(r".*/schema.yml/.*\.sql$", result.key)
         ]
         assert not re_matched
@@ -132,8 +133,7 @@ class TestDbtTemplateSource:
         dbt_template_source: DbtTemplateSource,
         project_dir: str,
         project_name: str,
+        profile: str,
     ):
-        actual = dbt_template_source.read_dbt_project_yml(
-            project_dir=project_dir
-        )
-        assert actual['name'] == project_name
+        actual = dbt_template_source.read_dbt_project_yml(project_dir=project_dir)
+        assert actual["name"] == project_name

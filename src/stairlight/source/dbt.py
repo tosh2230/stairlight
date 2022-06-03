@@ -43,7 +43,7 @@ class DbtTemplate(Template):
         with open(self.key) as f:
             return f.read()
 
-    def render(self, params: dict = None) -> str:
+    def render(self, params: dict = None, ignore_params: list = None) -> str:
         return self.get_template_str()
 
 
@@ -61,40 +61,57 @@ class DbtTemplateSource(TemplateSource):
         self.source_attributes = source_attributes
         self.source_type = TemplateSourceType.DBT
 
+        self.DBT_PROJECT_YAML = "dbt_project.yml"
+        self.REGEX_SCHEMA_TEST_FILE = re.compile(r".*/schema.yml/.*\.sql$")
+
     def search_templates_iter(self) -> Iterator[Template]:
-        project_dir = self.source_attributes.get(config_key.DBT_PROJECT_DIR)
+        project_dir: str = self.source_attributes.get(config_key.DBT_PROJECT_DIR)
+        profiles_dir: str = self.source_attributes.get(config_key.DBT_PROFILES_DIR)
+        dbt_project_config: dict = self.read_dbt_project_yml(project_dir=project_dir)
+
         _ = self.execute_dbt_compile(
             project_dir=project_dir,
-            profiles_dir=self.source_attributes.get(config_key.DBT_PROFILES_DIR),
-            profile=self.source_attributes.get(config_key.DBT_PROFILE),
+            profiles_dir=profiles_dir,
+            profile=dbt_project_config.get(config_key.DBT_PROFILE),
             target=self.source_attributes.get(config_key.DBT_TARGET),
             vars=self.source_attributes.get(config_key.DBT_VARS),
         )
 
-        dbt_project_config = self.read_dbt_project_yml(project_dir=project_dir)
         for model_path in dbt_project_config[config_key.DBT_MODEL_PATHS]:
-            path = (
-                f"{project_dir}/"
-                f"{dbt_project_config[config_key.DBT_TARGET_PATH]}/"
-                "compiled/"
-                f"{dbt_project_config[config_key.DBT_PROJECT_NAME]}/"
-                f"{model_path}/"
+            dbt_model_path_str = self.concat_dbt_model_path_str(
+                project_dir=project_dir,
+                dbt_project_config=dbt_project_config,
+                model_path=model_path,
             )
-            path_obj = pathlib.Path(path)
-            for p in path_obj.glob("**/*"):
+            dbt_model_path = pathlib.Path(dbt_model_path_str)
+            for obj in dbt_model_path.glob("**/*"):
                 if (
-                    (p.is_dir())
-                    or (re.fullmatch(r".*/schema.yml/.*\.sql$", str(p)))
-                    or self.is_excluded(source_type=self.source_type, key=str(p))
+                    (obj.is_dir())
+                    or (self.REGEX_SCHEMA_TEST_FILE.fullmatch(str(obj)))
+                    or self.is_excluded(source_type=self.source_type, key=str(obj))
                 ):
-                    self.logger.debug(f"{str(p)} is skipped.")
+                    self.logger.debug(f"{str(obj)} is skipped.")
                     continue
 
                 yield DbtTemplate(
                     mapping_config=self._mapping_config,
-                    key=str(p),
+                    key=str(obj),
                     project_name=dbt_project_config[config_key.DBT_PROJECT_NAME],
                 )
+
+    @staticmethod
+    def concat_dbt_model_path_str(
+        project_dir: str,
+        dbt_project_config: dict,
+        model_path: pathlib.Path,
+    ) -> str:
+        return (
+            f"{project_dir}/"
+            f"{dbt_project_config[config_key.DBT_TARGET_PATH]}/"
+            "compiled/"
+            f"{dbt_project_config[config_key.DBT_PROJECT_NAME]}/"
+            f"{model_path}/"
+        )
 
     @staticmethod
     def execute_dbt_compile(
@@ -115,6 +132,7 @@ class DbtTemplateSource(TemplateSource):
             command += f"--target {target} "
         if vars:
             command += f"--vars '{vars}' "
+
         proc = subprocess.run(
             args=shlex.split(command),
             shell=False,
@@ -123,8 +141,7 @@ class DbtTemplateSource(TemplateSource):
         )
         return proc.returncode
 
-    @staticmethod
-    def read_dbt_project_yml(project_dir: str) -> dict:
+    def read_dbt_project_yml(self, project_dir: str) -> dict:
         """Read dbt_project.yml
 
         Args:
@@ -133,11 +150,15 @@ class DbtTemplateSource(TemplateSource):
         Returns:
             dict: dbt project settings
         """
-        pattern = f"^{project_dir}/dbt_project.yml$"
-        project_files = [
-            p
-            for p in glob.glob(f"{project_dir}/**", recursive=False)
-            if re.fullmatch(pattern, p)
+        dbt_project_pattern = re.compile(f"^{project_dir}/{self.DBT_PROJECT_YAML}$")
+        return self.read_yml(dir=project_dir, re_pattern=dbt_project_pattern)
+
+    @staticmethod
+    def read_yml(dir: str, re_pattern: re.Pattern) -> dict:
+        files = [
+            obj
+            for obj in glob.glob(f"{dir}/**", recursive=False)
+            if re_pattern.fullmatch(obj)
         ]
-        with open(project_files[0]) as file:
+        with open(files[0]) as file:
             return yaml.safe_load(file)
