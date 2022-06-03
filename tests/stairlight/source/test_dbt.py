@@ -1,14 +1,10 @@
-import pytest
 import re
 
-from stairlight.source.base import Template
+import pytest
 
 from src.stairlight import config_key
-from src.stairlight.source.dbt import (
-    DbtTemplate,
-    DbtTemplateSource,
-    TemplateSourceType,
-)
+from src.stairlight.source.dbt import DbtTemplate, DbtTemplateSource, TemplateSourceType
+from stairlight.source.base import Template
 
 
 @pytest.mark.parametrize(
