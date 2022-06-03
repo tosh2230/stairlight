@@ -1,6 +1,5 @@
 import enum
 import re
-
 from abc import ABC
 from logging import getLogger
 from typing import Iterator, Optional

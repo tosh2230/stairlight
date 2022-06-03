@@ -81,13 +81,15 @@ class FileTemplateSource(TemplateSource):
         path_obj = pathlib.Path(path)
         for p in path_obj.glob("**/*"):
             if (
-                p.is_dir()
-            ) or (
-                not re.fullmatch(
-                    rf"{regex}",
-                    str(p),
+                (p.is_dir())
+                or (
+                    not re.fullmatch(
+                        rf"{regex}",
+                        str(p),
+                    )
                 )
-            ) or self.is_excluded(source_type=self.source_type, key=str(p)):
+                or self.is_excluded(source_type=self.source_type, key=str(p))
+            ):
                 self.logger.debug(f"{str(p)} is skipped.")
                 continue
 
