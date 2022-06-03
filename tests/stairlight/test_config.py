@@ -5,7 +5,6 @@ import pytest
 
 from src.stairlight import config_key, map_key
 from src.stairlight.config import ConfigKeyNotFoundException, get_config_value
-from src.stairlight.source.base import TemplateSourceType
 from src.stairlight.source.file import FileTemplate
 from src.stairlight.source.gcs import GcsTemplate
 from src.stairlight.source.redash import RedashTemplate
@@ -50,9 +49,7 @@ class TestSuccess:
         assert configurator.read(prefix=config_key.STAIRLIGHT_CONFIG_FILE_PREFIX)
 
     def test_create_stairlight_file(self, configurator, stairlight_template):
-        file_name = configurator.create_stairlight_file(
-            prefix=stairlight_template
-        )
+        file_name = configurator.create_stairlight_file(prefix=stairlight_template)
         assert os.path.exists(file_name)
 
     def test_create_mapping_file(self, configurator, mapping_template):
