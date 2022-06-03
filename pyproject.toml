@@ -32,7 +32,7 @@ dbt-bigquery = ["dbt-core", "dbt-bigquery"]
 [tool.poetry.dev-dependencies]
 flake8 = "^4.0.1"
 isort = "^5.9.3"
-pytest = "^6.2.5"
+pytest = "^7.0.0"
 black = "^22.3.0"
 pytest-cov = "^3.0.0"
 
