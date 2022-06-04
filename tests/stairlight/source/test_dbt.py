@@ -28,26 +28,23 @@ class TestDbtTemplate:
 
 
 @pytest.mark.parametrize(
-    "project_dir, project_name, profiles_dir, profile, target, vars",
+    "project_dir, profiles_dir, target, vars, profile, project_name",
     [
         (
             "tests/dbt/project_01",
-            "project_01",
             "tests/dbt",
-            "profile_01",
             "prod",
-            {
-                "key_a": "value_a",
-                "key_b": "value_b",
-            },
+            {"key_a": "value_a", "key_b": "value_b"},
+            "profile_01",
+            "project_01",
         ),
         (
             "tests/dbt/project_02",
-            "project_02",
             "tests/dbt",
-            "profile_02",
             "dev",
             {},
+            "profile_02",
+            "project_02",
         ),
     ],
 )
@@ -61,6 +58,8 @@ class TestDbtTemplateSource:
         profiles_dir: str,
         target: str,
         vars: dict,
+        profile: str,
+        project_name: str,
     ) -> DbtTemplateSource:
         source_attributes = {
             config_key.TEMPLATE_SOURCE_TYPE: TemplateSourceType.DBT.value,
@@ -78,8 +77,6 @@ class TestDbtTemplateSource:
     def test_search_templates_iter(
         self,
         dbt_template_source: DbtTemplateSource,
-        project_name: str,
-        profile: str,
     ):
         results = []
         for template in dbt_template_source.search_templates_iter():
@@ -89,8 +86,6 @@ class TestDbtTemplateSource:
     def test_search_templates_iter_schema(
         self,
         dbt_template_source: DbtTemplateSource,
-        project_name: str,
-        profile: str,
     ):
         results: list[DbtTemplate] = []
         for template in dbt_template_source.search_templates_iter():
@@ -106,7 +101,6 @@ class TestDbtTemplateSource:
         self,
         dbt_template_source: DbtTemplateSource,
         project_dir: str,
-        project_name: str,
         profiles_dir: str,
         profile: str,
         target: str,
@@ -126,7 +120,6 @@ class TestDbtTemplateSource:
         dbt_template_source: DbtTemplateSource,
         project_dir: str,
         project_name: str,
-        profile: str,
     ):
         actual = dbt_template_source.read_dbt_project_yml(project_dir=project_dir)
         assert actual["name"] == project_name
