@@ -19,10 +19,10 @@ check:
 	@poetry run python -m stairlight check -c tests/config
 test:
 	@make install
-	@poetry run pytest -v --cov=src
+	@poetry run pytest tests/stairlight -v --cov=src
 test-report:
 	@rm -r htmlcov
 	@make install
-	@poetry run pytest -v --cov=src --cov-report=html
+	@poetry run pytest tests/stairlight -v --cov=src --cov-report=html
 setup-gcs:
 	@poetry run python scripts/setup_test.py

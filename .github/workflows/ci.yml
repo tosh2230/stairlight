@@ -32,7 +32,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10.0", "3.10.1", "3.10.2", "3.10.3", "3.10.4"]
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -47,4 +47,4 @@ jobs:
           GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
       - name: Unit test
         run: |
-          poetry run pytest
+          poetry run pytest tests/stairlight
