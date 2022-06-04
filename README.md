@@ -21,10 +21,7 @@ An end-to-end data lineage tool, detects table dependencies by SELECT queries.
     - Also available for [Google Cloud Composer](https://cloud.google.com/composer)
 - [Redash](https://redash.io/)
 - [dbt](https://www.getdbt.com/) (using `dbt compile` command internally)
-    - Amazon Redshift
     - Google BigQuery
-    - PostgreSQL
-    - Snowflake
 
 ## Installation
 
@@ -41,10 +38,7 @@ $ pip install stairlight
 | File | Local file system | - |
 | GCS | Google Cloud Storage | gcs |
 | Redash | Redash | redash |
-| dbt | dbt(Amazon Redshift) | dbt-redshift |
 | dbt | dbt(Google Bigquery) | dbt-bigquery |
-| dbt | dbt(PostgreSQL) | dbt-postgres |
-| dbt | dbt(Snowflake) | dbt-snowflake |
 
 ```sh
 # e.g. Read from GCS and Redash

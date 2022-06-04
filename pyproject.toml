@@ -16,17 +16,11 @@ google-cloud-storage = { version = "^1.28.1", optional = true }
 psycopg2 = { version = "^2.9.3", optional = true }
 SQLAlchemy = { version = "^1.4.31", optional = true }
 dbt-core = { version = "^1.1", optional = true }
-dbt-postgres = { version = "^1.1", optional = true }
-dbt-redshift = { version = "^1.1", optional = true }
-dbt-snowflake = { version = "^1.1", optional = true }
 dbt-bigquery = { version = "^1.1", optional = true }
 
 [tool.poetry.extras]
 gcs = ["google-cloud-storage"]
 redash = ["psycopg2", "SQLAlchemy"]
-dbt-postgres = ["dbt-core", "dbt-postgres"]
-dbt-redshift = ["dbt-core", "dbt-redshift"]
-dbt-snowflake = ["dbt-core", "dbt-snowflake"]
 dbt-bigquery = ["dbt-core", "dbt-bigquery"]
 
 [tool.poetry.dev-dependencies]
