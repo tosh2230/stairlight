@@ -1,5 +1,3 @@
-import re
-
 import pytest
 
 from src.stairlight import config_key
@@ -100,7 +98,7 @@ class TestDbtTemplateSource:
         re_matched = [
             result.key
             for result in results
-            if re.fullmatch(r".*/schema.yml/.*\.sql$", result.key)
+            if dbt_template_source.REGEX_SCHEMA_TEST_FILE.fullmatch(result.key)
         ]
         assert not re_matched
 
