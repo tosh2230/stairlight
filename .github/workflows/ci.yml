@@ -47,4 +47,7 @@ jobs:
           GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
       - name: Unit test
         run: |
-          poetry run pytest tests/stairlight -v --cov=src
+          poetry run pytest tests/stairlight/test_gcs.py -v --cov=src
+          poetry run pytest tests/stairlight/test_config.py -v --cov=src
+          poetry run pytest tests/stairlight/test_file.py -v --cov=src
+          poetry run pytest tests/stairlight/test_dbt.py -v --cov=src
