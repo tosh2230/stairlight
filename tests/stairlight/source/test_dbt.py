@@ -4,7 +4,6 @@ import pytest
 
 from src.stairlight import config_key
 from src.stairlight.source.dbt import DbtTemplate, DbtTemplateSource, TemplateSourceType
-from stairlight.source.base import Template
 
 
 @pytest.mark.parametrize(
@@ -95,7 +94,7 @@ class TestDbtTemplateSource:
         project_name: str,
         profile: str,
     ):
-        results: list[Template] = []
+        results: list[DbtTemplate] = []
         for template in dbt_template_source.search_templates_iter():
             results.append(template)
         re_matched = [
