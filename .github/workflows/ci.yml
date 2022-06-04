@@ -45,6 +45,13 @@ jobs:
           GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
           GCP_WORKLOAD_IDP: ${{ secrets.GCP_WORKLOAD_IDP }}
           GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - name: dbt compile
+        run: |
+          poetry run dbt compile \
+            --project-dir "tests/dbt/project_01" \
+            --profiles-dir "tests/dbt" \
+            --profile "profile_01" \
+            --target "prod"
       - name: Stairlight
         run: |
           poetry run stairlight -c tests/config
