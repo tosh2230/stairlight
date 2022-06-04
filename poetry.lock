@@ -208,14 +208,14 @@ test = ["pytest (>=6.0)", "pytest-cov", "pytest-subtests", "pytest-xdist", "pret
 
 [[package]]
 name = "dbt-bigquery"
-version = "1.0.0"
+version = "1.1.0"
 description = "The BigQuery adapter plugin for dbt"
 category = "main"
 optional = true
 python-versions = ">=3.7"
 
 [package.dependencies]
-dbt-core = ">=1.0.0,<1.1.0"
+dbt-core = ">=1.1.0,<1.2.0"
 google-api-core = ">=1.16.0,<3"
 google-cloud-bigquery = ">=1.25.0,<3"
 google-cloud-core = ">=1.3.0,<3"
@@ -224,11 +224,11 @@ protobuf = ">=3.13.0,<4"
 
 [[package]]
 name = "dbt-core"
-version = "1.0.7"
+version = "1.1.0"
 description = "With dbt, data analysts and engineers can build analytics the way engineers build applications."
 category = "main"
 optional = true
-python-versions = ">=3.7"
+python-versions = ">=3.7.2"
 
 [package.dependencies]
 agate = ">=1.6,<1.6.4"
@@ -241,14 +241,14 @@ idna = ">=2.5,<4"
 isodate = ">=0.6,<0.7"
 Jinja2 = "2.11.3"
 logbook = ">=1.5,<1.6"
-MarkupSafe = ">=0.23,<2.1"
+MarkupSafe = "2.0.1"
 mashumaro = "2.9"
 minimal-snowplow-tracker = "0.0.2"
-networkx = ">=2.3,<2.8.1"
+networkx = ">=2.3,<3"
 packaging = ">=20.9,<22.0"
 requests = "<3.0.0"
 sqlparse = ">=0.2.3,<0.5"
-typing-extensions = ">=3.7.4,<3.11"
+typing-extensions = ">=3.7.4"
 werkzeug = ">=1,<3"
 
 [[package]]
@@ -261,19 +261,19 @@ python-versions = ">=3.6.1"
 
 [[package]]
 name = "dbt-postgres"
-version = "1.0.7"
+version = "1.1.0"
 description = "The postgres adpter plugin for dbt (data build tool)"
 category = "main"
 optional = true
 python-versions = ">=3.7"
 
 [package.dependencies]
-dbt-core = "1.0.7"
+dbt-core = "1.1.0"
 psycopg2-binary = ">=2.8,<3.0"
 
 [[package]]
 name = "dbt-redshift"
-version = "1.0.1"
+version = "1.1.0"
 description = "The Redshift adapter plugin for dbt"
 category = "main"
 optional = true
@@ -281,12 +281,12 @@ python-versions = ">=3.7"
 
 [package.dependencies]
 boto3 = ">=1.4.4,<2.0.0"
-dbt-core = ">=1.0.0,<1.1.0"
-dbt-postgres = ">=1.0.0,<1.1.0"
+dbt-core = ">=1.1.0,<1.2.0"
+dbt-postgres = ">=1.1.0,<1.2.0"
 
 [[package]]
 name = "dbt-snowflake"
-version = "1.0.1"
+version = "1.1.0"
 description = "The Snowflake adapter plugin for dbt"
 category = "main"
 optional = true
@@ -294,7 +294,7 @@ python-versions = ">=3.7"
 
 [package.dependencies]
 cryptography = ">=3.2,<4"
-dbt-core = ">=1.0.0,<1.1.0"
+dbt-core = ">=1.1.0,<1.2.0"
 requests = "<3.0.0"
 snowflake-connector-python = {version = ">=2.4.1,<2.8.0", extras = ["secure-local-storage"]}
 
@@ -1157,11 +1157,11 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "typing-extensions"
-version = "3.10.0.2"
-description = "Backported and Experimental Type Hints for Python 3.5+"
+version = "4.2.0"
+description = "Backported and Experimental Type Hints for Python 3.7+"
 category = "main"
 optional = false
-python-versions = "*"
+python-versions = ">=3.7"
 
 [[package]]
 name = "urllib3"
@@ -1209,8 +1209,8 @@ redash = ["psycopg2", "SQLAlchemy"]
 
 [metadata]
 lock-version = "1.1"
-python-versions = "^3.7.0"
-content-hash = "627de919163799ed6b5b11553c8780d8798a72b7aead2c30da321382cf438e6b"
+python-versions = "^3.7.2"
+content-hash = "920ec8f2a552e9260e04cff148495258ba29bf8fd0325b248bd38a343f2fe42f"
 
 [metadata.files]
 agate = [
@@ -1403,12 +1403,12 @@ cryptography = [
     {file = "cryptography-3.4.8.tar.gz", hash = "sha256:94cc5ed4ceaefcbe5bf38c8fba6a21fc1d365bb8fb826ea1688e3370b2e24a1c"},
 ]
 dbt-bigquery = [
-    {file = "dbt-bigquery-1.0.0.tar.gz", hash = "sha256:e22442f00fcec155dcbfe8be351a11c35913fb6edd11bd5e52fafc3218abd12e"},
-    {file = "dbt_bigquery-1.0.0-py3-none-any.whl", hash = "sha256:48778c89a37dd866ffd3718bf6b78e1139b7fb4cc0377f2feaa95e10dc3ce9c2"},
+    {file = "dbt-bigquery-1.1.0.tar.gz", hash = "sha256:ea82705dd497d635c730706fa6620fde2cb690a48e4b4659de95031aabebef66"},
+    {file = "dbt_bigquery-1.1.0-py3-none-any.whl", hash = "sha256:eef5954acf98686b7392a615089b684fd2683b8256bf42bd26606b0fbb573a48"},
 ]
 dbt-core = [
-    {file = "dbt-core-1.0.7.tar.gz", hash = "sha256:72780b0ba2d72ab1a5d0af259270e13017d38b1839f62439e8508af471b2f28d"},
-    {file = "dbt_core-1.0.7-py3-none-any.whl", hash = "sha256:7be56f336f30f426e7d4da004533b8f2de5951441acae280900a325bc5ebb379"},
+    {file = "dbt-core-1.1.0.tar.gz", hash = "sha256:3e33ce5be74e0d4f9f28ad76b4b1de55cb343d4c53c3a8f98c24551881aedf3e"},
+    {file = "dbt_core-1.1.0-py3-none-any.whl", hash = "sha256:4af9124e6ec188db2ce9a32d6b26757fd42c2e14238770ca0661d8963f1ba7ea"},
 ]
 dbt-extractor = [
     {file = "dbt_extractor-0.4.1-cp36-abi3-macosx_10_7_x86_64.whl", hash = "sha256:4dc715bd740e418d8dc1dd418fea508e79208a24cf5ab110b0092a3cbe96bf71"},
@@ -1429,16 +1429,16 @@ dbt-extractor = [
     {file = "dbt_extractor-0.4.1.tar.gz", hash = "sha256:75b1c665699ec0f1ffce1ba3d776f7dfce802156f22e70a7b9c8f0b4d7e80f42"},
 ]
 dbt-postgres = [
-    {file = "dbt-postgres-1.0.7.tar.gz", hash = "sha256:ed6d663784389f99c952afb5e8a5a05691c2c5974600eef98ed67136770e4aac"},
-    {file = "dbt_postgres-1.0.7-py3-none-any.whl", hash = "sha256:4c4218bd8888bb2c476eea1d8403ed5822ab1216da92a9faa439091dcde3690d"},
+    {file = "dbt-postgres-1.1.0.tar.gz", hash = "sha256:7f3d6e49d163bb91e95022ae4d2050ccfc626eb25531f0fe7abeb399fa7d0761"},
+    {file = "dbt_postgres-1.1.0-py3-none-any.whl", hash = "sha256:1c7cbd80040cb4f7a799f4562d5e12bb874d0e5b3b02d51e98bc0f50ea60f188"},
 ]
 dbt-redshift = [
-    {file = "dbt-redshift-1.0.1.tar.gz", hash = "sha256:1e45d2948313a588d54d7b59354e7850a969cf2aafb4d3581f3a733cb0170e68"},
-    {file = "dbt_redshift-1.0.1-py3-none-any.whl", hash = "sha256:1e5219d67c6c7a52235c46c7ca559b118ac7a5e1e62e6b3138eaa1cb67597751"},
+    {file = "dbt-redshift-1.1.0.tar.gz", hash = "sha256:08d902391095740b44d780b1286a6179790eab84324eafe1b91d08590cc75a62"},
+    {file = "dbt_redshift-1.1.0-py3-none-any.whl", hash = "sha256:960d7a0283e5566f02087ebc9e5b5ca3b0b16225e79c09db12f70e8cbe749f14"},
 ]
 dbt-snowflake = [
-    {file = "dbt-snowflake-1.0.1.tar.gz", hash = "sha256:8d286527f9bf3ced6196d509f249e6076adb79102712428699f3344a8b756558"},
-    {file = "dbt_snowflake-1.0.1-py3-none-any.whl", hash = "sha256:b3262f3f6ef434d8ac288eda91d96b139d75b665ed3ff8c60472826f24999e9d"},
+    {file = "dbt-snowflake-1.1.0.tar.gz", hash = "sha256:4d192795232c2d575602d8c7996f98e3f6a3500e4b8ad84a4dfab110294adede"},
+    {file = "dbt_snowflake-1.1.0-py3-none-any.whl", hash = "sha256:cd7a264f815f5a1a042e00866806768fab8eb2caaee4c542537c51e03b76146d"},
 ]
 flake8 = [
     {file = "flake8-4.0.1-py2.py3-none-any.whl", hash = "sha256:479b1304f72536a55948cb40a32dce8bb0ffe3501e26eaf292c7e60eb5e0428d"},
@@ -2188,9 +2188,8 @@ typed-ast = [
     {file = "typed_ast-1.5.4.tar.gz", hash = "sha256:39e21ceb7388e4bb37f4c679d72707ed46c2fbf2a5609b8b8ebc4b067d977df2"},
 ]
 typing-extensions = [
-    {file = "typing_extensions-3.10.0.2-py2-none-any.whl", hash = "sha256:d8226d10bc02a29bcc81df19a26e56a9647f8b0a6d4a83924139f4a8b01f17b7"},
-    {file = "typing_extensions-3.10.0.2-py3-none-any.whl", hash = "sha256:f1d25edafde516b146ecd0613dabcc61409817af4766fbbcfb8d1ad4ec441a34"},
-    {file = "typing_extensions-3.10.0.2.tar.gz", hash = "sha256:49f75d16ff11f1cd258e1b988ccff82a3ca5570217d7ad8c5f48205dd99a677e"},
+    {file = "typing_extensions-4.2.0-py3-none-any.whl", hash = "sha256:6657594ee297170d19f67d55c05852a874e7eb634f4f753dbd667855e07c1708"},
+    {file = "typing_extensions-4.2.0.tar.gz", hash = "sha256:f1c24655a0da0d1b67f07e17a5e6b2a105894e6824b92096378bb3668ef02376"},
 ]
 urllib3 = [
     {file = "urllib3-1.26.9-py2.py3-none-any.whl", hash = "sha256:44ece4d53fb1706f667c9bd1c648f5469a2ec925fcf3a776667042d645472c14"},
