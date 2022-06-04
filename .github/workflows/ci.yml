@@ -47,4 +47,4 @@ jobs:
           GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
       - name: Unit test
         run: |
-          make test
+          poetry run pytest tests/stairlight/source/test_dbt.py -v
