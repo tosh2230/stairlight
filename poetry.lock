@@ -1210,7 +1210,7 @@ redash = ["psycopg2", "SQLAlchemy"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7.2"
-content-hash = "920ec8f2a552e9260e04cff148495258ba29bf8fd0325b248bd38a343f2fe42f"
+content-hash = "7053e7b6952028f928f8fd2edfababb23df65a1a3b5dbe8a370656989c1510eb"
 
 [metadata.files]
 agate = [
