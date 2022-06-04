@@ -47,8 +47,7 @@ jobs:
           GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
       - name: Stairlight
         run: |
-          make install
-          stairlight -c tests/config
+          poetry run stairlight -c tests/config
       - name: Unit test
         run: |
           poetry run pytest tests/stairlight/source/test_dbt.py -v
