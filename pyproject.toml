@@ -7,7 +7,7 @@ license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.6.2"
+python = "^3.7.2"
 PyYAML = ">=5.0"
 Jinja2 = ">=2.10.3"
 
@@ -15,16 +15,19 @@ Jinja2 = ">=2.10.3"
 google-cloud-storage = { version = "^1.28.1", optional = true }
 psycopg2 = { version = "^2.9.3", optional = true }
 SQLAlchemy = { version = "^1.4.31", optional = true }
+dbt-core = { version = "^1.1", optional = true }
+dbt-bigquery = { version = "^1.1", optional = true }
 
 [tool.poetry.extras]
 gcs = ["google-cloud-storage"]
 redash = ["psycopg2", "SQLAlchemy"]
+dbt-bigquery = ["dbt-core", "dbt-bigquery"]
 
 [tool.poetry.dev-dependencies]
 flake8 = "^4.0.1"
 isort = "^5.9.3"
-pytest = "^6.2.5"
-black = "^21.9b0"
+pytest = "^7.0.0"
+black = "^22.3.0"
 pytest-cov = "^3.0.0"
 
 [tool.black]

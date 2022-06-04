@@ -1,0 +1,17 @@
+Include:
+  - TemplateSourceType: dbt
+    ProjectDir: tests/dbt/project_01
+    ProfilesDir: tests/dbt
+    Target: prod
+    Vars:
+      key_a: value_a
+      key_b: value_b
+  - TemplateSourceType: dbt
+    ProjectDir: tests/dbt/project_02
+    ProfilesDir: tests/dbt
+    Target: dev
+Exclude:
+  - TemplateSourceType: dbt
+    Regex: tests/dbt/project_02/models_a/a/example_a.sql$
+Settings:
+  MappingPrefix: mapping

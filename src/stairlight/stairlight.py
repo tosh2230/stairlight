@@ -147,7 +147,7 @@ class StairLight:
         Returns:
             str: Template file name
         """
-        return self._configurator.create_stairlight_template_file(prefix=prefix)
+        return self._configurator.create_stairlight_file(prefix=prefix)
 
     def check(self, prefix: str = config_key.MAPPING_CONFIG_FILE_PREFIX) -> str:
         """Check mapped results and create a mapping template file
@@ -165,7 +165,7 @@ class StairLight:
         elif not self._unmapped:
             return None
 
-        return self._configurator.create_mapping_template_file(
+        return self._configurator.create_mapping_file(
             unmapped=self._unmapped, prefix=prefix
         )
 

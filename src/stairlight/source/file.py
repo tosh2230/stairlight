@@ -12,17 +12,12 @@ class FileTemplate(Template):
         self,
         mapping_config: dict,
         key: str,
-        source_type: Optional[TemplateSourceType] = TemplateSourceType.FILE,
-        bucket: Optional[str] = None,
-        project: Optional[str] = None,
         default_table_prefix: Optional[str] = None,
     ):
         super().__init__(
             mapping_config=mapping_config,
             key=key,
-            source_type=source_type,
-            bucket=bucket,
-            project=project,
+            source_type=TemplateSourceType.FILE,
             default_table_prefix=default_table_prefix,
         )
         self.uri = self.get_uri()
@@ -86,17 +81,20 @@ class FileTemplateSource(TemplateSource):
         path_obj = pathlib.Path(path)
         for p in path_obj.glob("**/*"):
             if (
-                not re.fullmatch(
-                    rf"{regex}",
-                    str(p),
+                (p.is_dir())
+                or (
+                    not re.fullmatch(
+                        rf"{regex}",
+                        str(p),
+                    )
                 )
-            ) or self.is_excluded(source_type=self.source_type, key=str(p)):
+                or self.is_excluded(source_type=self.source_type, key=str(p))
+            ):
                 self.logger.debug(f"{str(p)} is skipped.")
                 continue
 
             yield FileTemplate(
                 mapping_config=self._mapping_config,
                 key=str(p),
-                source_type=self.source_type,
                 default_table_prefix=default_table_prefix,
             )

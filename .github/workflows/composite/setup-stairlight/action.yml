@@ -14,11 +14,18 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Install dependencies
+    - name: Update pip
       run: |
         python -m pip install --upgrade pip
-        python -m pip install poetry
-        poetry install --extras "gcs redash"
+      shell: bash
+    - name: Install poetry
+      run: |
+        curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
+        echo "$HOME/.poetry/bin" >> $GITHUB_PATH
+      shell: bash
+    - name: Install dependencies
+      run: |
+        poetry install --extras "gcs redash dbt-bigquery"
       shell: bash
     - name: Setup Google Cloud
       uses: "google-github-actions/setup-gcloud@v0"

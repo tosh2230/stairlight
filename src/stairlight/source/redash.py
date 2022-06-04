@@ -1,6 +1,6 @@
 import os
 from logging import getLogger
-from typing import Iterator, Optional
+from typing import Iterator
 
 from sqlalchemy import create_engine, text
 
@@ -19,19 +19,11 @@ class RedashTemplate(Template):
         query_name: str,
         query_str: str = None,
         data_source_name: str = None,
-        source_type: Optional[TemplateSourceType] = TemplateSourceType.REDASH,
-        key: Optional[str] = None,
-        bucket: Optional[str] = None,
-        project: Optional[str] = None,
-        default_table_prefix: Optional[str] = None,
     ):
         super().__init__(
             mapping_config=mapping_config,
             key=query_id,
-            source_type=source_type,
-            bucket=bucket,
-            project=project,
-            default_table_prefix=default_table_prefix,
+            source_type=TemplateSourceType.REDASH,
         )
         self.query_id = query_id
         self.query_str = query_str

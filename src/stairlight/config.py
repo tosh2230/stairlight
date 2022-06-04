@@ -44,7 +44,7 @@ class Configurator:
                 config = yaml.safe_load(file)
         return config
 
-    def create_stairlight_template_file(
+    def create_stairlight_file(
         self, prefix: str = config_key.STAIRLIGHT_CONFIG_FILE_PREFIX
     ) -> str:
         """Create a Stairlight template file
@@ -61,7 +61,7 @@ class Configurator:
             yaml.dump(self.build_stairlight_config(), f)
         return template_file_name
 
-    def create_mapping_template_file(
+    def create_mapping_file(
         self,
         unmapped: "list[dict]",
         prefix: str = config_key.MAPPING_CONFIG_FILE_PREFIX,
@@ -122,11 +122,29 @@ class Configurator:
                 config_key.DEFAULT_TABLE_PREFIX: None,
             }
         )
+        include_section_redash = OrderedDict(
+            {
+                config_key.TEMPLATE_SOURCE_TYPE: TemplateSourceType.REDASH.value,
+                config_key.DATABASE_URL_ENVIRONMENT_VARIABLE: "REDASH_DATABASE_URL",
+                config_key.DATA_SOURCE_NAME: None,
+                config_key.QUERY_IDS: {},
+            }
+        )
+        include_section_dbt = OrderedDict(
+            {
+                config_key.TEMPLATE_SOURCE_TYPE: TemplateSourceType.DBT.value,
+                config_key.DBT_PROJECT_DIR: None,
+                config_key.DBT_PROFILES_DIR: None,
+                config_key.DBT_PROFILE: None,
+            }
+        )
         return OrderedDict(
             {
                 config_key.STAIRLIGHT_CONFIG_INCLUDE_SECTION: [
                     include_section_file,
                     include_section_gcs,
+                    include_section_redash,
+                    include_section_dbt,
                 ],
                 config_key.STAIRLIGHT_CONFIG_EXCLUDE_SECTION: [
                     OrderedDict(
@@ -241,6 +259,9 @@ class Configurator:
         elif template.source_type == TemplateSourceType.REDASH:
             mapping_values[config_key.QUERY_ID] = template.query_id
             mapping_values[config_key.DATA_SOURCE_NAME] = template.data_source_name
+        elif template.source_type == TemplateSourceType.DBT:
+            mapping_values[config_key.PROJECT_NAME] = template.project_name
+            mapping_values[config_key.FILE_SUFFIX] = template.key
         return mapping_values
 
     @staticmethod

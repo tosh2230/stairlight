@@ -32,6 +32,10 @@ def get_template_source_class(template_source_type: str) -> TemplateSource:
         if not find_spec("RedashTemplateSource"):
             from .redash import RedashTemplateSource
         template_source = RedashTemplateSource
+    elif template_source_type == TemplateSourceType.DBT.value:
+        if not find_spec("DbtTemplateSource"):
+            from .dbt import DbtTemplateSource
+        template_source = DbtTemplateSource
     return template_source
 
 

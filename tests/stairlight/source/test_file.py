@@ -68,7 +68,7 @@ class TestFileTemplateSource:
 )
 class TestFileTemplateSourceNoExclude:
     @pytest.fixture(scope="class")
-    def template_source(
+    def file_template_source(
         self,
         configurator: Configurator,
         mapping_config: dict,
@@ -87,11 +87,11 @@ class TestFileTemplateSourceNoExclude:
 
     def test_is_excluded(
         self,
-        template_source: FileTemplateSource,
+        file_template_source: FileTemplateSource,
         key: str,
         expected_is_excluded: bool,
     ):
-        actual = template_source.is_excluded(
+        actual = file_template_source.is_excluded(
             source_type=TemplateSourceType.FILE,
             key=key,
         )
@@ -100,7 +100,7 @@ class TestFileTemplateSourceNoExclude:
 
 class TestFileTemplateKeyNotFound:
     @pytest.fixture(scope="class")
-    def template_source(
+    def file_template_source(
         self,
         configurator: Configurator,
         mapping_config: dict,
@@ -118,9 +118,9 @@ class TestFileTemplateKeyNotFound:
 
     def test_search_templates_iter(
         self,
-        template_source: FileTemplateSource,
+        file_template_source: FileTemplateSource,
     ):
-        iter = template_source.search_templates_iter()
+        iter = file_template_source.search_templates_iter()
         with pytest.raises(ConfigKeyNotFoundException):
             next(iter)
 
@@ -140,9 +140,7 @@ class TestFileTemplateMapped:
     ):
         return FileTemplate(
             mapping_config=mapping_config,
-            source_type=TemplateSourceType.FILE,
             key=key,
-            bucket=None,
         )
 
     def test_is_mapped(self, file_template: FileTemplate):
@@ -165,9 +163,7 @@ class TestFileTemplateNotMapped:
     def file_template(self, mapping_config, key):
         return FileTemplate(
             mapping_config=mapping_config,
-            source_type=TemplateSourceType.FILE,
             key=key,
-            bucket=None,
         )
 
     def test_is_mapped(self, file_template):
@@ -179,7 +175,7 @@ class TestFileTemplateNotMapped:
 
 
 @pytest.mark.parametrize(
-    "key, params, expected",
+    "key, params, expected_table, expected_params",
     [
         (
             "tests/sql/main/cte_multi_line_params.sql",
@@ -191,22 +187,39 @@ class TestFileTemplateNotMapped:
                 }
             },
             "PROJECT_P.DATASET_Q.TABLE_R",
-        )
+            [
+                "params.sub_table_01",
+                "params.sub_table_02",
+                "params.main_table",
+            ],
+        ),
+        ("tests/sql/query/nested_join.sql", None, "PROJECT_B.DATASET_B.TABLE_B", []),
     ],
 )
 class TestFileTemplateRender:
     @pytest.fixture(scope="function")
-    def file_template(self, mapping_config, key):
+    def file_template(self, mapping_config, key) -> FileTemplate:
         return FileTemplate(
             mapping_config=mapping_config,
-            source_type=TemplateSourceType.FILE,
             key=key,
-            bucket=None,
         )
 
-    def test_render(self, file_template, params, expected):
+    def test_render(
+        self, file_template: FileTemplate, params, expected_table, expected_params
+    ):
         actual = file_template.render(params=params)
-        assert expected in actual
+        assert expected_table in actual
+
+    def test_get_jinja_params(
+        self,
+        file_template: FileTemplate,
+        params,
+        expected_table,
+        expected_params,
+    ):
+        template_str = file_template.get_template_str()
+        actual = file_template.get_jinja_params(template_str=template_str)
+        assert actual == expected_params
 
 
 @pytest.mark.parametrize(
@@ -229,9 +242,7 @@ class TestFileTemplateRenderException:
     def file_template(self, mapping_config, key):
         return FileTemplate(
             mapping_config=mapping_config,
-            source_type=TemplateSourceType.FILE,
             key=key,
-            bucket=None,
         )
 
     def test_render(

@@ -14,7 +14,7 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: "3.10"
-      - uses: ./.github/workflows/composite/setup
+      - uses: ./.github/workflows/composite/setup-stairlight
         with:
           GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
           GCP_WORKLOAD_IDP: ${{ secrets.GCP_WORKLOAD_IDP }}
@@ -22,7 +22,7 @@ jobs:
       - name: Check linting
         run: |
           make lint
-      - name: Setup
+      - name: Put GCS objects
         run: |
           make setup-gcs
 
@@ -32,7 +32,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.6", "3.7", "3.8", "3.9", "3.10"]
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -40,11 +40,11 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-      - uses: ./.github/workflows/composite/setup
+      - uses: ./.github/workflows/composite/setup-stairlight
         with:
           GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
           GCP_WORKLOAD_IDP: ${{ secrets.GCP_WORKLOAD_IDP }}
           GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
       - name: Unit test
         run: |
-          poetry run pytest -v --cov=src
+          poetry run pytest tests/stairlight -v --cov=src

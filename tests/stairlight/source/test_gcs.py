@@ -65,7 +65,6 @@ class TestGcsTemplate:
     ) -> GcsTemplate:
         return GcsTemplate(
             mapping_config=mapping_config,
-            source_type=TemplateSourceType.GCS,
             bucket=bucket,
             key=key,
         )

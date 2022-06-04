@@ -14,12 +14,14 @@
 
 An end-to-end data lineage tool, detects table dependencies by SELECT queries.
 
-Queries can be read from following systems.
+## Supported Data Sources
 
 - Local file system(with Python Pathlib module)
-- [Google Cloud Storage](https://cloud.google.com/storage)
-    - Mainly designed for use with [Google Cloud Composer](https://cloud.google.com/composer)
+- [Google Cloud Storage(GCS)](https://cloud.google.com/storage)
+    - Also available for [Google Cloud Composer](https://cloud.google.com/composer)
 - [Redash](https://redash.io/)
+- [dbt](https://www.getdbt.com/) (using `dbt compile` command internally)
+    - Google BigQuery
 
 ## Installation
 
@@ -31,7 +33,15 @@ $ pip install stairlight
 
 (v0.4+) The base package is for Local file system only. Please set extras when reading from other data sources.
 
+| TemplateSourceType | DataSource | Extra |
+| --- | --- | --- |
+| File | Local file system | - |
+| GCS | Google Cloud Storage | gcs |
+| Redash | Redash | redash |
+| dbt | dbt(Google Bigquery) | dbt-bigquery |
+
 ```sh
+# e.g. Read from GCS and Redash
 $ pip install "stairlight[gcs,redash]"
 ```
 
@@ -73,52 +83,65 @@ $ stairlight
 
     ```json
     {
-        "PROJECT_d.DATASET_e.TABLE_f": {
-            "PROJECT_j.DATASET_k.TABLE_l": {
-                "TemplateSourceType": "File",
-                "Key": "tests/sql/main/one_line_2.sql",
-                "Uri": "/foo/bar/stairlight/tests/sql/main/one_line_2.sql",
-                "Lines": [
-                    {
-                        "LineNumber": 1,
-                        "LineString": "SELECT * FROM PROJECT_j.DATASET_k.TABLE_l WHERE 1 = 1"
-                    }
-                ]
-            },
-            "PROJECT_C.DATASET_C.TABLE_C": {
-                "TemplateSourceType": "GCS",
-                "Key": "sql/cte/cte_multi_line.sql",
-                "Uri": "gs://stairlight/sql/cte/cte_multi_line.sql",
-                "Lines": [
-                    {
-                        "LineNumber": 6,
-                        "LineString": "        PROJECT_C.DATASET_C.TABLE_C"
-                    }
-                ],
-                "BucketName": "stairlight",
-                "Labels": {
-                    "Source": "gcs",
-                    "Test": "b"
-                }
+      "PROJECT_d.DATASET_e.TABLE_f": {
+        "PROJECT_j.DATASET_k.TABLE_l": {
+          "TemplateSourceType": "File",
+          "Key": "tests/sql/main/one_line_2.sql",
+          "Uri": "/foo/bar/stairlight/tests/sql/main/one_line_2.sql",
+          "Lines": [
+            {
+              "LineNumber": 1,
+              "LineString": "SELECT * FROM PROJECT_j.DATASET_k.TABLE_l WHERE 1 = 1"
             }
+          ]
         },
-        "AggregateSales": {
-            "PROJECT_e.DATASET_e.TABLE_e": {
-                "TemplateSourceType": "Redash",
-                "Key": 5,
-                "Uri": "AggregateSales",
-                "Lines": [
-                    {
-                        "LineNumber": 1,
-                        "LineString": "SELECT service, SUM(total_amount) FROM PROJECT_e.DATASET_e.TABLE_e GROUP BY service"
-                    }
-                ],
-                "DataSourceName": "BigQuery",
-                "Labels": {
-                    "Category": "Sales"
-                }
+        "PROJECT_C.DATASET_C.TABLE_C": {
+          "TemplateSourceType": "GCS",
+          "Key": "sql/cte/cte_multi_line.sql",
+          "Uri": "gs://stairlight/sql/cte/cte_multi_line.sql",
+          "Lines": [
+            {
+              "LineNumber": 6,
+              "LineString": "        PROJECT_C.DATASET_C.TABLE_C"
             }
-        },
+          ],
+          "BucketName": "stairlight",
+          "Labels": {
+            "Source": "gcs",
+            "Test": "b"
+          }
+        }
+      },
+      "AggregateSales": {
+        "PROJECT_e.DATASET_e.TABLE_e": {
+          "TemplateSourceType": "Redash",
+          "Key": 5,
+          "Uri": "AggregateSales",
+          "Lines": [
+            {
+              "LineNumber": 1,
+              "LineString": "SELECT service, SUM(total_amount) FROM PROJECT_e.DATASET_e.TABLE_e GROUP BY service"
+            }
+          ],
+          "DataSourceName": "BigQuery",
+          "Labels": {
+            "Category": "Sales"
+          }
+        }
+      },
+      "dummy.dummy.example_b": {
+        "PROJECT_t.DATASET_t.TABLE_t": {
+          "TemplateSourceType": "dbt",
+          "Key": "tests/dbt/project_01/target/compiled/project_01/models/b/example_b.sql",
+          "Uri": "/foo/bar/stairlight/tests/dbt/project_01/target/compiled/project_01/models/b/example_b.sql",
+          "Lines": [
+            {
+              "LineNumber": 1,
+              "LineString": "select * from PROJECT_t.DATASET_t.TABLE_t where value_a = 0 and value_b = 0"
+            }
+          ]
+        }
+      }
     }
     ```
 
@@ -152,6 +175,12 @@ Include:
       - 1
       - 3
       - 5
+  - TemplateSourceType: dbt
+    ProjectDir: tests/dbt/project_01
+    ProfilesDir: tests/dbt
+    Vars:
+      key_a: value_a
+      key_b: value_b
 Exclude:
   - TemplateSourceType: File
     Regex: "main/exclude.sql$"
@@ -192,11 +221,16 @@ Mapping:
     QueryId: 5
     DataSourceName: metadata
     Tables:
-      - TableName: Copy of (#4) New Query
+      - TableName: New Query
         Parameters:
           table: dashboards
         Labels:
           Category: Redash test
+  - TemplateSourceType: dbt
+    ProjectName: project_01
+    FileSuffix: tests/dbt/project_01/target/compiled/project_01/models/example/my_first_dbt_model.sql
+    Tables:
+      - TableName: dummy.dummy.my_first_dbt_model
 Metadata:
   - TableName: "PROJECT_A.DATASET_A.TABLE_A"
     Labels:

@@ -1,0 +1,30 @@
+profile_01:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: oauth
+      project: dummy
+      dataset: dummy
+      threads: 1
+    prod:
+      type: bigquery
+      method: oauth
+      project: dummy
+      dataset: dummy
+      threads: 1
+profile_02:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: oauth
+      project: dummy
+      dataset: dummy
+      threads: 1
+    prod:
+      type: bigquery
+      method: oauth
+      project: dummy
+      dataset: dummy
+      threads: 1
