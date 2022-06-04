@@ -14,7 +14,7 @@
 
 An end-to-end data lineage tool, detects table dependencies by SELECT queries.
 
-## Supported Systems
+## Supported Data Sources
 
 - Local file system(with Python Pathlib module)
 - [Google Cloud Storage(GCS)](https://cloud.google.com/storage)
