@@ -61,7 +61,9 @@ def command_up(stairlight: StairLight, args: argparse.Namespace) -> Union[dict, 
         Union[dict, list]: Upstairs results
     """
     return search(
-        func=stairlight.up, args=args, tables=find_tables_to_search(stairlight, args)
+        func=stairlight.up,
+        args=args,
+        tables=find_tables_to_search(stairlight=stairlight, args=args),
     )
 
 
@@ -78,7 +80,9 @@ def command_down(
         Union[dict, list[dict]]: Downstairs results
     """
     return search(
-        func=stairlight.down, args=args, tables=find_tables_to_search(stairlight, args)
+        func=stairlight.down,
+        args=args,
+        tables=find_tables_to_search(stairlight=stairlight, args=args),
     )
 
 

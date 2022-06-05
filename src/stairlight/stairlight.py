@@ -193,7 +193,7 @@ class StairLight:
         recursive: bool = False,
         verbose: bool = False,
         response_type: str = ResponseType.TABLE.value,
-    ) -> Union[list, dict]:
+    ) -> Union["list[str]", dict]:
         """Search upstream nodes
 
         Args:
@@ -204,7 +204,7 @@ class StairLight:
                 Response type. Defaults to ResponseType.TABLE.value.
 
         Returns:
-            Union[list, dict]: [description]
+            Union[list[str], dict]: Search results
         """
         return self.search(
             table_name=table_name,
@@ -220,7 +220,7 @@ class StairLight:
         recursive=False,
         verbose=False,
         response_type=ResponseType.TABLE.value,
-    ) -> Union[list, dict]:
+    ) -> Union["list[str]", dict]:
         """Search downstream nodes
 
         Args:
@@ -231,7 +231,7 @@ class StairLight:
                 Response type. Defaults to ResponseType.TABLE.value.
 
         Returns:
-            Union[list, dict]: [description]
+            Union[list[str], dict]: Search results
         """
         return self.search(
             table_name=table_name,
@@ -248,7 +248,7 @@ class StairLight:
         verbose: bool,
         response_type: str,
         direction: SearchDirection,
-    ) -> Union[list, dict]:
+    ) -> Union["list[str]", dict]:
         """Search nodes
 
         Args:
@@ -259,7 +259,7 @@ class StairLight:
             direction (SearchDirection): Search direction
 
         Returns:
-            Union[list, dict]: [description]
+            Union[list[str], dict]: Search results
         """
         if verbose:
             return self.search_verbose(
@@ -296,7 +296,7 @@ class StairLight:
             table_name (str): Table name
             recursive (bool): Search recursively or not
             direction (SearchDirection): Search direction
-            searched_tables (list): a list of searched tables
+            searched_tables (list[str]): a list of searched tables
             head (bool): Current position is head or not
 
         Returns:
@@ -351,9 +351,9 @@ class StairLight:
         recursive: bool,
         response_type: str,
         direction: SearchDirection,
-        searched_tables: list,
+        searched_tables: "list[str]",
         head: bool,
-    ) -> list:
+    ) -> "list[str]":
         """Search nodes and return simple results
 
         Args:
@@ -361,11 +361,11 @@ class StairLight:
             recursive (bool): Search recursively or not
             response_type (str): Response type value
             direction (SearchDirection): Search direction
-            searched_tables (list): a list of searched tables
+            searched_tables (list[str]): a list of searched tables
             head (bool): Current position is head or not
 
         Returns:
-            list: Search results
+            list[str]: Search results
         """
         relative_map = self.create_relative_map(
             table_name=table_name, direction=direction
@@ -487,7 +487,7 @@ def is_cyclic(tables: "list[str]") -> bool:
     """Floyd's cycle-finding algorithm
 
     Args:
-        tables (list): Detected tables
+        tables (list[str]): Detected tables
 
     Returns:
         bool: Table dependencies are cyclic or not
