@@ -287,7 +287,7 @@ class StairLight:
         table_name: str,
         recursive: bool,
         direction: SearchDirection,
-        searched_tables: list,
+        searched_tables: "list[str]",
         head: bool,
     ) -> dict:
         """Search nodes and return verbose results
@@ -302,7 +302,9 @@ class StairLight:
         Returns:
             dict: Search results
         """
-        relative_map = self.create_relative_map(table_name, direction)
+        relative_map = self.create_relative_map(
+            table_name=table_name, direction=direction
+        )
         response = {table_name: {}}
         if not relative_map:
             return response
@@ -365,15 +367,18 @@ class StairLight:
         Returns:
             list: Search results
         """
-        relative_map = self.create_relative_map(table_name, direction)
-        response = []
+        relative_map = self.create_relative_map(
+            table_name=table_name, direction=direction
+        )
+        response: list[str] = []
         if not relative_map:
             return response
 
+        next_table_name: str
         for next_table_name in relative_map.keys():
             if recursive:
                 if head:
-                    searched_tables = []
+                    searched_tables: list[str] = []
                     searched_tables.append(table_name)
 
                 searched_tables.append(next_table_name)
@@ -432,7 +437,7 @@ class StairLight:
         Returns:
             list[str]: Tables to search
         """
-        tables_to_search = []
+        tables_to_search: list[str] = []
 
         # "mapping" section in mapping.yaml
         for configurations in self._mapping_config.get(
@@ -446,6 +451,7 @@ class StairLight:
                     tables_to_search.append(table_attributes[config_key.TABLE_NAME])
 
         # "metadata" section in mapping.yaml
+        table_attributes: dict
         for table_attributes in self._mapping_config.get(
             config_key.MAPPING_CONFIG_METADATA_SECTION
         ):
@@ -462,6 +468,8 @@ class StairLight:
         target_labels: "list[str]", configured_labels: dict
     ) -> bool:
         found_count: int = 0
+        configured_label_key: str
+        configured_label_value: str
         for configured_label_key, configured_label_value in configured_labels.items():
             for target_label in target_labels:
                 target_label_key = target_label.split(":")[0]
@@ -475,7 +483,7 @@ class StairLight:
         return found_count == len(target_labels)
 
 
-def is_cyclic(tables: list) -> bool:
+def is_cyclic(tables: "list[str]") -> bool:
     """Floyd's cycle-finding algorithm
 
     Args:

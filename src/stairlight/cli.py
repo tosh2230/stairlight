@@ -88,7 +88,7 @@ def search(
     """Search tables by executing stairlight.up() or stairlight.down()
 
     Args:
-        search (Callable): Either stairlight.up() or stairlight.down()
+        func (Callable): Either stairlight.up() or stairlight.down()
         args (argparse.Namespace): CLI arguments
         tables (Union[str, list[str]]): Tables to search
 
