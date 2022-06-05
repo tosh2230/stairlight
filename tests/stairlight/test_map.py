@@ -33,7 +33,9 @@ class TestSuccess:
             ),
         ],
     )
-    def test_find_unmapped_params(self, dependency_map: Map, key: str, expected: list):
+    def test_find_unmapped_params(
+        self, dependency_map: Map, key: str, expected: "list[str]"
+    ):
         actual = []
         for unmapped_attributes in dependency_map.unmapped:
             template = unmapped_attributes.get(map_key.TEMPLATE)

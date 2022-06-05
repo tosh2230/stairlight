@@ -275,7 +275,7 @@ class Configurator:
 
 
 def create_nested_dict(
-    keys: list, results: OrderedDict, density: int = 0, default_value: any = None
+    keys: "list[str]", results: OrderedDict, density: int = 0, default_value: any = None
 ) -> None:
     """create nested dict from list
 

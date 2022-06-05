@@ -43,7 +43,7 @@ class DbtTemplate(Template):
         with open(self.key) as f:
             return f.read()
 
-    def render(self, params: dict = None, ignore_params: list = None) -> str:
+    def render(self, params: dict = None, ignore_params: "list[str]" = None) -> str:
         return self.get_template_str()
 
 

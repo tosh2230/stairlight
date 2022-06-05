@@ -50,7 +50,9 @@ def command_check(stairlight: StairLight, args: argparse.Namespace) -> str:
     return message
 
 
-def command_up(stairlight: StairLight, args: argparse.Namespace) -> Union[dict, list]:
+def command_up(
+    stairlight: StairLight, args: argparse.Namespace
+) -> Union[dict, "list[dict]"]:
     """Execute up command
 
     Args:
