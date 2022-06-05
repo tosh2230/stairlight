@@ -162,43 +162,51 @@ class TestStairLight:
             "gs://stairlight/sql/cte/cte_multi_line.sql",
         ]
 
-    def test_get_relative_map_up(self):
+    def test_create_relative_map_up(self):
         table_name = "PROJECT_d.DATASET_d.TABLE_d"
-        result = self.stairlight.get_relative_map(
+        result = self.stairlight.create_relative_map(
             table_name=table_name, direction=SearchDirection.UP
         )
         assert "PROJECT_e.DATASET_e.TABLE_e" in result
 
-    def test_get_relative_map_down(self):
+    def test_create_relative_map_down(self):
         table_name = "PROJECT_A.DATASET_A.TABLE_A"
-        result = self.stairlight.get_relative_map(
+        result = self.stairlight.create_relative_map(
             table_name=table_name, direction=SearchDirection.DOWN
         )
         assert "PROJECT_A.DATASET_B.TABLE_C" in result
 
-    def test_get_tables_by_labels_single(self):
-        targets = ["Test:b"]
-        result = self.stairlight.get_tables_by_labels(targets=targets)
+    def test_find_tables_by_labels_single(self):
+        target_labels = ["Test:b"]
+        result = self.stairlight.find_tables_by_labels(target_labels=target_labels)
         assert result == [
             "PROJECT_D.DATASET_E.TABLE_F",
             "PROJECT_G.DATASET_H.TABLE_I",
             "PROJECT_d.DATASET_e.TABLE_f",
         ]
 
-    def test_get_tables_by_labels_double(self):
-        targets = ["Test:b", "Source:gcs"]
-        result = self.stairlight.get_tables_by_labels(targets=targets)
+    def test_find_tables_by_labels_double(self):
+        target_labels = ["Test:b", "Source:gcs"]
+        result = self.stairlight.find_tables_by_labels(target_labels=target_labels)
         assert result == ["PROJECT_d.DATASET_e.TABLE_f"]
 
-    def test_is_target_found_true(self):
-        targets = ["test:a", "group:c"]
-        labels = {"test": "a", "category": "b", "group": "c"}
-        assert self.stairlight.is_target_found(targets=targets, labels=labels)
+    def test_is_target_label_found_true(self):
+        target_labels = ["test:a", "group:c"]
+        configured_labels = {
+            "test": "a",
+            "category": "b",
+            "group": "c",
+        }
+        assert self.stairlight.is_target_label_found(
+            target_labels=target_labels, configured_labels=configured_labels
+        )
 
-    def test_is_target_found_false(self):
-        targets = ["test:a", "category:b", "group:c", "app:d"]
-        labels = {"test": "a", "category": "b", "group": "c"}
-        assert not self.stairlight.is_target_found(targets=targets, labels=labels)
+    def test_is_target_label_found_false(self):
+        target_labels = ["test:a", "category:b", "group:c", "app:d"]
+        configured_labels = {"test": "a", "category": "b", "group": "c"}
+        assert not self.stairlight.is_target_label_found(
+            target_labels=target_labels, configured_labels=configured_labels
+        )
 
     def test_check_on_load(self, stairlight_save: StairLight):
         stairlight_load = StairLight(

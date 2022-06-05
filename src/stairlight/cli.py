@@ -60,11 +60,14 @@ def command_up(stairlight: StairLight, args: argparse.Namespace) -> Union[dict, 
     Returns:
         Union[dict, list]: Upstairs results
     """
-    tables = get_tables_to_search(stairlight, args)
-    return execute_up_or_down(stairlight.up, args, tables)
+    return search(
+        func=stairlight.up, args=args, tables=find_tables_to_search(stairlight, args)
+    )
 
 
-def command_down(stairlight: StairLight, args: argparse.Namespace) -> Union[dict, list]:
+def command_down(
+    stairlight: StairLight, args: argparse.Namespace
+) -> Union[dict, "list[dict]"]:
     """Execute down command
 
     Args:
@@ -72,28 +75,29 @@ def command_down(stairlight: StairLight, args: argparse.Namespace) -> Union[dict
         args (argparse.Namespace): CLI arguments
 
     Returns:
-        Union[dict, list]: Downstairs results
+        Union[dict, list[dict]]: Downstairs results
     """
-    tables = get_tables_to_search(stairlight, args)
-    return execute_up_or_down(stairlight.down, args, tables)
+    return search(
+        func=stairlight.down, args=args, tables=find_tables_to_search(stairlight, args)
+    )
 
 
-def execute_up_or_down(
-    up_or_down: Callable, args: argparse.Namespace, tables: list
-) -> Union[dict, list]:
-    """Execute a command, up or down
+def search(
+    func: Callable, args: argparse.Namespace, tables: Union[str, "list[str]"]
+) -> Union[dict, "list[dict]"]:
+    """Search tables by executing stairlight.up() or stairlight.down()
 
     Args:
-        up_or_down (Callable): Either command_up() or command_down()
+        search (Callable): Either stairlight.up() or stairlight.down()
         args (argparse.Namespace): CLI arguments
-        tables (Union[str, list]): Tables to search
+        tables (Union[str, list[str]]): Tables to search
 
     Returns:
-        Union[dict, list]: Results
+        Union[dict, list[dict]]: Results
     """
     results = []
     for table_name in tables:
-        result = up_or_down(
+        result = func(
             table_name=table_name,
             recursive=args.recursive,
             verbose=args.verbose,
@@ -106,21 +110,23 @@ def execute_up_or_down(
     return results
 
 
-def get_tables_to_search(stairlight: StairLight, args: argparse.Namespace) -> list:
-    """Get tables to search
+def find_tables_to_search(
+    stairlight: StairLight, args: argparse.Namespace
+) -> "list[str]":
+    """Find tables to search
 
     Args:
         stairlight (StairLight): Stairlight class
         args (argparse.Namespace): CLI arguments
 
     Returns:
-        list: Tables to search
+        list[str]: Tables to search
     """
     tables_to_search = []
     if args.table:
         tables_to_search = args.table
     elif args.label:
-        tables_to_search = stairlight.get_tables_by_labels(args.label)
+        tables_to_search = stairlight.find_tables_by_labels(target_labels=args.label)
         if not tables_to_search:
             exit()
     return tables_to_search
@@ -172,7 +178,7 @@ def set_save_load_parser(parser: argparse.ArgumentParser) -> None:
     )
 
 
-def set_up_down_parser(parser: argparse.ArgumentParser) -> None:
+def set_search_parser(parser: argparse.ArgumentParser) -> None:
     """Set arguments used by up and down
 
     Args:
@@ -268,7 +274,7 @@ def create_parser() -> argparse.ArgumentParser:
     parser_up.set_defaults(handler=command_up)
     set_general_parser(parser=parser_up)
     set_save_load_parser(parser=parser_up)
-    set_up_down_parser(parser=parser_up)
+    set_search_parser(parser=parser_up)
 
     # down
     parser_down = subparsers.add_parser(
@@ -277,7 +283,7 @@ def create_parser() -> argparse.ArgumentParser:
     parser_down.set_defaults(handler=command_down)
     set_general_parser(parser=parser_down)
     set_save_load_parser(parser=parser_down)
-    set_up_down_parser(parser=parser_down)
+    set_search_parser(parser=parser_down)
 
     return parser
 

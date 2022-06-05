@@ -302,7 +302,7 @@ class StairLight:
         Returns:
             dict: Search results
         """
-        relative_map = self.get_relative_map(table_name, direction)
+        relative_map = self.create_relative_map(table_name, direction)
         response = {table_name: {}}
         if not relative_map:
             return response
@@ -365,7 +365,7 @@ class StairLight:
         Returns:
             list: Search results
         """
-        relative_map = self.get_relative_map(table_name, direction)
+        relative_map = self.create_relative_map(table_name, direction)
         response = []
         if not relative_map:
             return response
@@ -405,8 +405,8 @@ class StairLight:
 
         return sorted(list(set(response)))
 
-    def get_relative_map(self, table_name: str, direction: SearchDirection) -> dict:
-        """Get a relative map for the specified direction
+    def create_relative_map(self, table_name: str, direction: SearchDirection) -> dict:
+        """Create a relative map for the specified direction
 
         Args:
             table_name (str): Table name
@@ -423,14 +423,14 @@ class StairLight:
                 relative_map[key] = self._mapped[key][table_name]
         return relative_map
 
-    def get_tables_by_labels(self, targets: list) -> list:
-        """Get tables to search by labels
+    def find_tables_by_labels(self, target_labels: "list[str]") -> "list[str]":
+        """Find tables to search by labels
 
         Args:
-            targets (list): Target labels
+            target_labels (list[str]): Target labels
 
         Returns:
-            list: Tables to search
+            list[str]: Tables to search
         """
         tables_to_search = []
 
@@ -439,9 +439,9 @@ class StairLight:
             config_key.MAPPING_CONFIG_MAPPING_SECTION
         ):
             for table_attributes in configurations.get(config_key.TABLES):
-                if self.is_target_found(
-                    targets=targets,
-                    labels=table_attributes.get(config_key.LABELS, {}),
+                if self.is_target_label_found(
+                    target_labels=target_labels,
+                    configured_labels=table_attributes.get(config_key.LABELS, {}),
                 ):
                     tables_to_search.append(table_attributes[config_key.TABLE_NAME])
 
@@ -449,27 +449,30 @@ class StairLight:
         for table_attributes in self._mapping_config.get(
             config_key.MAPPING_CONFIG_METADATA_SECTION
         ):
-            if self.is_target_found(
-                targets=targets,
-                labels=table_attributes.get(config_key.LABELS, {}),
+            if self.is_target_label_found(
+                target_labels=target_labels,
+                configured_labels=table_attributes.get(config_key.LABELS, {}),
             ):
                 tables_to_search.append(table_attributes[config_key.TABLE_NAME])
 
         return tables_to_search
 
     @staticmethod
-    def is_target_found(targets: list, labels: dict) -> bool:
-        result = False
-        found = 0
-        for label_key, label_value in labels.items():
-            for target in targets:
-                target_key = target.split(":")[0]
-                target_value = target.split(":")[1]
-                if target_key == label_key and target_value == label_value:
-                    found += 1
-        if found == len(targets):
-            result = True
-        return result
+    def is_target_label_found(
+        target_labels: "list[str]", configured_labels: dict
+    ) -> bool:
+        found_count: int = 0
+        for configured_label_key, configured_label_value in configured_labels.items():
+            for target_label in target_labels:
+                target_label_key = target_label.split(":")[0]
+                target_label_value = target_label.split(":")[1]
+                if (
+                    target_label_key == configured_label_key
+                    and target_label_value == configured_label_value
+                ):
+                    found_count += 1
+
+        return found_count == len(target_labels)
 
 
 def is_cyclic(tables: list) -> bool:
