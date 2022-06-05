@@ -63,7 +63,7 @@ class StairLight:
         self._configurator = Configurator(dir=config_dir)
         self._mapped = {}
         self._unmapped: list[dict] = []
-        self.mapping_config = None
+        self._mapping_config: dict = None
         self._stairlight_config = self._configurator.read(
             prefix=config_key.STAIRLIGHT_CONFIG_FILE_PREFIX
         )
@@ -117,11 +117,11 @@ class StairLight:
 
         mapping_config_prefix = config_key.MAPPING_CONFIG_FILE_PREFIX
         if config_key.STAIRLIGHT_CONFIG_SETTING_SECTION in self._stairlight_config:
-            settings = self._stairlight_config[
+            settings: dict = self._stairlight_config[
                 config_key.STAIRLIGHT_CONFIG_SETTING_SECTION
             ]
             if config_key.MAPPING_PREFIX in settings:
-                mapping_config_prefix = settings[config_key.MAPPING_PREFIX]
+                mapping_config_prefix: str = settings[config_key.MAPPING_PREFIX]
         self._mapping_config = self._configurator.read(prefix=mapping_config_prefix)
 
     def _write_map(self) -> None:
@@ -193,7 +193,7 @@ class StairLight:
         recursive: bool = False,
         verbose: bool = False,
         response_type: str = ResponseType.TABLE.value,
-    ) -> Union[list, dict]:
+    ) -> Union["list[str]", dict]:
         """Search upstream nodes
 
         Args:
@@ -204,7 +204,7 @@ class StairLight:
                 Response type. Defaults to ResponseType.TABLE.value.
 
         Returns:
-            Union[list, dict]: [description]
+            Union[list[str], dict]: Search results
         """
         return self.search(
             table_name=table_name,
@@ -220,7 +220,7 @@ class StairLight:
         recursive=False,
         verbose=False,
         response_type=ResponseType.TABLE.value,
-    ) -> Union[list, dict]:
+    ) -> Union["list[str]", dict]:
         """Search downstream nodes
 
         Args:
@@ -231,7 +231,7 @@ class StairLight:
                 Response type. Defaults to ResponseType.TABLE.value.
 
         Returns:
-            Union[list, dict]: [description]
+            Union[list[str], dict]: Search results
         """
         return self.search(
             table_name=table_name,
@@ -248,7 +248,7 @@ class StairLight:
         verbose: bool,
         response_type: str,
         direction: SearchDirection,
-    ) -> Union[list, dict]:
+    ) -> Union["list[str]", dict]:
         """Search nodes
 
         Args:
@@ -259,7 +259,7 @@ class StairLight:
             direction (SearchDirection): Search direction
 
         Returns:
-            Union[list, dict]: [description]
+            Union[list[str], dict]: Search results
         """
         if verbose:
             return self.search_verbose(
@@ -287,7 +287,7 @@ class StairLight:
         table_name: str,
         recursive: bool,
         direction: SearchDirection,
-        searched_tables: list,
+        searched_tables: "list[str]",
         head: bool,
     ) -> dict:
         """Search nodes and return verbose results
@@ -296,13 +296,15 @@ class StairLight:
             table_name (str): Table name
             recursive (bool): Search recursively or not
             direction (SearchDirection): Search direction
-            searched_tables (list): a list of searched tables
+            searched_tables (list[str]): a list of searched tables
             head (bool): Current position is head or not
 
         Returns:
             dict: Search results
         """
-        relative_map = self.get_relative_map(table_name, direction)
+        relative_map = self.create_relative_map(
+            table_name=table_name, direction=direction
+        )
         response = {table_name: {}}
         if not relative_map:
             return response
@@ -349,9 +351,9 @@ class StairLight:
         recursive: bool,
         response_type: str,
         direction: SearchDirection,
-        searched_tables: list,
+        searched_tables: "list[str]",
         head: bool,
-    ) -> list:
+    ) -> "list[str]":
         """Search nodes and return simple results
 
         Args:
@@ -359,21 +361,24 @@ class StairLight:
             recursive (bool): Search recursively or not
             response_type (str): Response type value
             direction (SearchDirection): Search direction
-            searched_tables (list): a list of searched tables
+            searched_tables (list[str]): a list of searched tables
             head (bool): Current position is head or not
 
         Returns:
-            list: Search results
+            list[str]: Search results
         """
-        relative_map = self.get_relative_map(table_name, direction)
-        response = []
+        relative_map = self.create_relative_map(
+            table_name=table_name, direction=direction
+        )
+        response: list[str] = []
         if not relative_map:
             return response
 
+        next_table_name: str
         for next_table_name in relative_map.keys():
             if recursive:
                 if head:
-                    searched_tables = []
+                    searched_tables: list[str] = []
                     searched_tables.append(table_name)
 
                 searched_tables.append(next_table_name)
@@ -405,8 +410,8 @@ class StairLight:
 
         return sorted(list(set(response)))
 
-    def get_relative_map(self, table_name: str, direction: SearchDirection) -> dict:
-        """Get a relative map for the specified direction
+    def create_relative_map(self, table_name: str, direction: SearchDirection) -> dict:
+        """Create a relative map for the specified direction
 
         Args:
             table_name (str): Table name
@@ -423,60 +428,66 @@ class StairLight:
                 relative_map[key] = self._mapped[key][table_name]
         return relative_map
 
-    def get_tables_by_labels(self, targets: list) -> list:
-        """Get tables to search by labels
+    def find_tables_by_labels(self, target_labels: "list[str]") -> "list[str]":
+        """Find tables to search by labels
 
         Args:
-            targets (list): Target labels
+            target_labels (list[str]): Target labels
 
         Returns:
-            list: Tables to search
+            list[str]: Tables to search
         """
-        tables_to_search = []
+        tables_to_search: list[str] = []
 
         # "mapping" section in mapping.yaml
         for configurations in self._mapping_config.get(
             config_key.MAPPING_CONFIG_MAPPING_SECTION
         ):
             for table_attributes in configurations.get(config_key.TABLES):
-                if self.is_target_found(
-                    targets=targets,
-                    labels=table_attributes.get(config_key.LABELS, {}),
+                if self.is_target_label_found(
+                    target_labels=target_labels,
+                    configured_labels=table_attributes.get(config_key.LABELS, {}),
                 ):
                     tables_to_search.append(table_attributes[config_key.TABLE_NAME])
 
         # "metadata" section in mapping.yaml
+        table_attributes: dict
         for table_attributes in self._mapping_config.get(
             config_key.MAPPING_CONFIG_METADATA_SECTION
         ):
-            if self.is_target_found(
-                targets=targets,
-                labels=table_attributes.get(config_key.LABELS, {}),
+            if self.is_target_label_found(
+                target_labels=target_labels,
+                configured_labels=table_attributes.get(config_key.LABELS, {}),
             ):
                 tables_to_search.append(table_attributes[config_key.TABLE_NAME])
 
         return tables_to_search
 
     @staticmethod
-    def is_target_found(targets: list, labels: dict) -> bool:
-        result = False
-        found = 0
-        for label_key, label_value in labels.items():
-            for target in targets:
-                target_key = target.split(":")[0]
-                target_value = target.split(":")[1]
-                if target_key == label_key and target_value == label_value:
-                    found += 1
-        if found == len(targets):
-            result = True
-        return result
+    def is_target_label_found(
+        target_labels: "list[str]", configured_labels: dict
+    ) -> bool:
+        found_count: int = 0
+        configured_label_key: str
+        configured_label_value: str
+        for configured_label_key, configured_label_value in configured_labels.items():
+            for target_label in target_labels:
+                target_label_key = target_label.split(":")[0]
+                target_label_value = target_label.split(":")[1]
+                if (
+                    target_label_key == configured_label_key
+                    and target_label_value == configured_label_value
+                ):
+                    found_count += 1
+
+        return found_count == len(target_labels)
 
 
-def is_cyclic(tables: list) -> bool:
+def is_cyclic(tables: "list[str]") -> bool:
     """Floyd's cycle-finding algorithm
 
     Args:
-        tables (list): Detected tables
+        tables (list[str]): Detected tables
 
     Returns:
         bool: Table dependencies are cyclic or not

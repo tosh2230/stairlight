@@ -30,7 +30,7 @@ class RedashTemplate(Template):
         self.uri = query_name
         self.data_source_name = data_source_name
 
-    def get_mapped_table_attributes_iter(self) -> Iterator[dict]:
+    def find_mapped_table_attributes(self) -> Iterator[dict]:
         """Get mapped tables as iterator
 
         Yields:
@@ -93,7 +93,7 @@ class RedashTemplateSource(TemplateSource):
             },
         }
 
-    def search_templates_iter(self) -> Iterator[Template]:
+    def search_templates(self) -> Iterator[Template]:
         results = self.get_queries_from_redash()
         for result in results:
             yield RedashTemplate(

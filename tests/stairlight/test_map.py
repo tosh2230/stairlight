@@ -1,7 +1,7 @@
 import pytest
 
 from src.stairlight import config_key, map_key
-from src.stairlight.map import Map, combine_nested_dict_keys
+from src.stairlight.map import Map, create_dict_key_list
 
 
 class TestSuccess:
@@ -33,7 +33,9 @@ class TestSuccess:
             ),
         ],
     )
-    def test_find_unmapped_params(self, dependency_map: Map, key: str, expected: list):
+    def test_find_unmapped_params(
+        self, dependency_map: Map, key: str, expected: "list[str]"
+    ):
         actual = []
         for unmapped_attributes in dependency_map.unmapped:
             template = unmapped_attributes.get(map_key.TEMPLATE)
@@ -54,15 +56,15 @@ class TestSuccess:
         }
         assert actual == expected
 
-    def test_get_combined_params_global_only(self, dependency_map: Map):
+    def test_merge_global_params_global_only(self, dependency_map: Map):
         table_attributes = {
             config_key.TABLE_NAME: "PROJECT_g.DATASET_g.TABLE_g",
         }
-        actual = dependency_map.get_combined_params(table_attributes=table_attributes)
+        actual = dependency_map.merge_global_params(table_attributes=table_attributes)
         expected = dependency_map.get_global_params(key=map_key.PARAMETERS)
         assert actual == expected
 
-    def test_get_combined_params_by_table(self, dependency_map: Map):
+    def test_merge_global_params_by_table(self, dependency_map: Map):
         table_attributes = {
             config_key.TABLE_NAME: "PROJECT_g.DATASET_g.TABLE_g",
             config_key.PARAMETERS: {
@@ -73,7 +75,7 @@ class TestSuccess:
                 },
             },
         }
-        actual = dependency_map.get_combined_params(table_attributes=table_attributes)
+        actual = dependency_map.merge_global_params(table_attributes=table_attributes)
         expected = {
             "DESTINATION_PROJECT": "PROJECT_GLOBAL",
             "params": {
@@ -90,7 +92,7 @@ class TestSuccessNoMetadata:
         assert dependency_map.unmapped
 
 
-def test_combine_nested_dict_keys():
+def test_create_dict_key_list():
     d = {
         "params": {
             "PROJECT": "PROJECT_BY_TABLE",
@@ -98,6 +100,6 @@ def test_combine_nested_dict_keys():
             "TABLE": "TABLE_BY_TABLE",
         }
     }
-    actual = combine_nested_dict_keys(d=d)
+    actual = create_dict_key_list(d=d)
     expected = ["params.PROJECT", "params.DATASET", "params.TABLE"]
     assert actual == expected

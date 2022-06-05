@@ -53,10 +53,11 @@ class Map:
         Yields:
             Iterator[TemplateSource]: Template source instance
         """
+        source_attributes: dict
         for source_attributes in stairlight_config.get(
             config_key.STAIRLIGHT_CONFIG_INCLUDE_SECTION
         ):
-            template_source_type = source_attributes.get(
+            template_source_type: str = source_attributes.get(
                 config_key.TEMPLATE_SOURCE_TYPE
             )
             template_source: TemplateSource = get_template_source_class(
@@ -72,13 +73,13 @@ class Map:
             )
 
     def write_by_template_source(self, template_source: TemplateSource) -> None:
-        """Write a dependency map"""
-        for template in template_source.search_templates_iter():
+        """Write a dependency map by template source"""
+        for template in template_source.search_templates():
             if not self.mapping_config:
                 self.add_unmapped_params(template=template)
             elif template.is_mapped():
-                for table_attributes in template.get_mapped_table_attributes_iter():
-                    self.find_unmapped_params(
+                for table_attributes in template.find_mapped_table_attributes():
+                    self.detect_unmapped_params(
                         template=template, table_attributes=table_attributes
                     )
                     self.remap(template=template, table_attributes=table_attributes)
@@ -93,7 +94,7 @@ class Map:
             table_attributes (dict): Table attributes from mapping configuration
         """
         query_str: str = template.render(
-            params=self.get_combined_params(table_attributes),
+            params=self.merge_global_params(table_attributes=table_attributes),
             ignore_params=table_attributes.get(config_key.IGNORE_PARAMETERS),
         )
         query = Query(
@@ -110,8 +111,8 @@ class Map:
         if downstairs not in self.mapped:
             self.mapped[downstairs] = {}
 
-        for upstairs_attributes in query.get_upstairs_attributes_iter():
-            upstairs = upstairs_attributes[map_key.TABLE_NAME]
+        for upstairs_attributes in query.detect_upstairs_attributes():
+            upstairs: str = upstairs_attributes[map_key.TABLE_NAME]
 
             if not self.mapped[downstairs].get(upstairs):
                 self.mapped[downstairs][upstairs] = self.create_upstairs_value(
@@ -143,7 +144,7 @@ class Map:
 
         return global_params
 
-    def get_combined_params(self, table_attributes: dict) -> dict:
+    def merge_global_params(self, table_attributes: dict) -> dict:
         """return a combination of global parameters and table parameters
 
         Args:
@@ -211,7 +212,9 @@ class Map:
             }
         return upstairs_values
 
-    def add_unmapped_params(self, template: Template, params: list = None) -> None:
+    def add_unmapped_params(
+        self, template: Template, params: "list[str]" = None
+    ) -> None:
         """add to the list of unmapped params
 
         Args:
@@ -220,7 +223,7 @@ class Map:
         """
         if not params:
             template_str = template.get_template_str()
-            params = template.get_jinja_params(template_str=template_str)
+            params = template.detect_jinja_params(template_str=template_str)
         self.unmapped.append(
             {
                 map_key.TEMPLATE: template,
@@ -228,24 +231,28 @@ class Map:
             }
         )
 
-    def find_unmapped_params(self, template: Template, table_attributes: dict) -> None:
-        """find unmapped parameters in mapped files
+    def detect_unmapped_params(
+        self, template: Template, table_attributes: dict
+    ) -> None:
+        """detect unmapped parameters in mapped files
 
         Args:
             template (Template): SQL template
             table_attributes (dict): Table attributes from mapping configuration
         """
         template_str: str = template.get_template_str()
-        template_params: list = template.get_jinja_params(template_str)
+        template_params: list[str] = template.detect_jinja_params(template_str)
         if not template_params:
             return
 
-        mapped_params_dict: dict = self.get_combined_params(table_attributes)
-        mapped_params: list = combine_nested_dict_keys(d=mapped_params_dict)
-
-        ignore_params: list = table_attributes.get(config_key.IGNORE_PARAMETERS, [])
-
-        diff_params: list = list(
+        mapped_params_dict: dict = self.merge_global_params(
+            table_attributes=table_attributes
+        )
+        mapped_params: list[str] = create_dict_key_list(d=mapped_params_dict)
+        ignore_params: list[str] = table_attributes.get(
+            config_key.IGNORE_PARAMETERS, []
+        )
+        diff_params: list[str] = list(
             set(template_params) - set(mapped_params) - set(ignore_params)
         )
 
@@ -253,7 +260,7 @@ class Map:
             self.add_unmapped_params(template=template, params=diff_params)
 
 
-def combine_nested_dict_keys(d: dict, delimiter: str = ".") -> list:
+def create_dict_key_list(d: dict, delimiter: str = ".") -> "list[str]":
     """combine nested dictionary keys and converts to a list
 
     Args:
@@ -265,7 +272,7 @@ def combine_nested_dict_keys(d: dict, delimiter: str = ".") -> list:
     results = []
     for key, value in d.items():
         if isinstance(value, dict):
-            recursive_results = combine_nested_dict_keys(d=value)
+            recursive_results = create_dict_key_list(d=value)
             for recursive_result in recursive_results:
                 concat = key + delimiter + recursive_result
                 results.append(concat)

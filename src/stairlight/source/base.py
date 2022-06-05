@@ -56,7 +56,7 @@ class Template(ABC):
         self.default_table_prefix = default_table_prefix
         self.uri = ""
 
-    def get_mapped_table_attributes_iter(self) -> Iterator[dict]:
+    def find_mapped_table_attributes(self) -> Iterator[dict]:
         """Get mapped tables as iterator
 
         Yields:
@@ -80,13 +80,13 @@ class Template(ABC):
             bool: Is set or not
         """
         result = False
-        for _ in self.get_mapped_table_attributes_iter():
+        for _ in self.find_mapped_table_attributes():
             result = True
             break
         return result
 
     @staticmethod
-    def get_jinja_params(template_str: str) -> list:
+    def detect_jinja_params(template_str: str) -> list:
         """Get jinja parameters
 
         Args:
@@ -208,7 +208,7 @@ class TemplateSource(ABC):
         self._stairlight_config = stairlight_config
         self._mapping_config = mapping_config
 
-    def search_templates_iter(self) -> Iterator[Template]:
+    def search_templates(self) -> Iterator[Template]:
         """Search SQL template files
 
         Yields:
