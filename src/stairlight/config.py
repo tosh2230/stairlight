@@ -190,7 +190,7 @@ class Configurator:
                 }
             )
             mapping_values.update(
-                self.get_mapping_values_by_template_type(template=template)
+                self.select_mapping_values_by_template(template=template)
             )
 
             # Tables
@@ -249,7 +249,7 @@ class Configurator:
         return mapping_config_dict
 
     @staticmethod
-    def get_mapping_values_by_template_type(template: Template) -> dict:
+    def select_mapping_values_by_template(template: Template) -> dict:
         mapping_values: dict = {}
         if template.source_type == TemplateSourceType.FILE:
             mapping_values[config_key.FILE_SUFFIX] = template.key

@@ -28,9 +28,9 @@ class TestGcsTemplateSource:
             source_attributes=source_attributes,
         )
 
-    def test_search_templates_iter(self, gcs_template_source: GcsTemplateSource):
+    def test_search_templates(self, gcs_template_source: GcsTemplateSource):
         result = []
-        for file in gcs_template_source.search_templates_iter():
+        for file in gcs_template_source.search_templates():
             result.append(file)
         assert len(result) > 0
 
@@ -76,13 +76,13 @@ class TestGcsTemplate:
     ):
         assert gcs_template.is_mapped()
 
-    def test_get_jinja_params(
+    def test_detect_jinja_params(
         self,
         gcs_template: GcsTemplate,
         ignore_params: list,
     ):
         template_str = gcs_template.get_template_str()
-        assert len(gcs_template.get_jinja_params(template_str)) > 0
+        assert len(gcs_template.detect_jinja_params(template_str)) > 0
 
     def test_get_uri(
         self,

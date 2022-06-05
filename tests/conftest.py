@@ -103,14 +103,14 @@ def teardown_rm_config(pathname: str) -> None:
 
 
 @pytest.fixture
-def stairlight_template() -> Iterator[str]:
+def stairlight_template_prefix() -> Iterator[str]:
     prefix = "pytest_stairlight"
     yield prefix
-    teardown_rm_config(pathname="tests/config/pytest_stairlight*.yaml")
+    teardown_rm_config(pathname=f"tests/config/{prefix}*.yaml")
 
 
 @pytest.fixture
-def mapping_template() -> Iterator[str]:
+def mapping_template_prefix() -> Iterator[str]:
     prefix = "pytest_mapping"
     yield prefix
-    teardown_rm_config(pathname="tests/config/pytest_mapping*.yaml")
+    teardown_rm_config(pathname=f"tests/config/{prefix}*.yaml")

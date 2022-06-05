@@ -64,7 +64,7 @@ class DbtTemplateSource(TemplateSource):
         self.DBT_PROJECT_YAML = "dbt_project.yml"
         self.REGEX_SCHEMA_TEST_FILE = re.compile(r".*/schema.yml/.*\.sql$")
 
-    def search_templates_iter(self) -> Iterator[Template]:
+    def search_templates(self) -> Iterator[Template]:
         project_dir: str = self.source_attributes.get(config_key.DBT_PROJECT_DIR)
         profiles_dir: str = self.source_attributes.get(config_key.DBT_PROFILES_DIR)
         dbt_project_config: dict = self.read_dbt_project_yml(project_dir=project_dir)

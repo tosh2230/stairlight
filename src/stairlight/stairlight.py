@@ -63,7 +63,7 @@ class StairLight:
         self._configurator = Configurator(dir=config_dir)
         self._mapped = {}
         self._unmapped: list[dict] = []
-        self.mapping_config = None
+        self._mapping_config: dict = None
         self._stairlight_config = self._configurator.read(
             prefix=config_key.STAIRLIGHT_CONFIG_FILE_PREFIX
         )
@@ -117,11 +117,11 @@ class StairLight:
 
         mapping_config_prefix = config_key.MAPPING_CONFIG_FILE_PREFIX
         if config_key.STAIRLIGHT_CONFIG_SETTING_SECTION in self._stairlight_config:
-            settings = self._stairlight_config[
+            settings: dict = self._stairlight_config[
                 config_key.STAIRLIGHT_CONFIG_SETTING_SECTION
             ]
             if config_key.MAPPING_PREFIX in settings:
-                mapping_config_prefix = settings[config_key.MAPPING_PREFIX]
+                mapping_config_prefix: str = settings[config_key.MAPPING_PREFIX]
         self._mapping_config = self._configurator.read(prefix=mapping_config_prefix)
 
     def _write_map(self) -> None:

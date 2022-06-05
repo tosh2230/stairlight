@@ -58,7 +58,7 @@ class GcsTemplateSource(TemplateSource):
         self.source_attributes = source_attributes
         self.source_type = TemplateSourceType.GCS
 
-    def search_templates_iter(self) -> Iterator[Template]:
+    def search_templates(self) -> Iterator[Template]:
         """Search SQL template files from GCS
 
         Args:

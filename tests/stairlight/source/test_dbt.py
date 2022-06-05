@@ -107,11 +107,11 @@ class TestDbtTemplateSource:
         dbt_template_source: DbtTemplateSource,
     ) -> "list[DbtTemplate]":
         dbt_templates: list[DbtTemplate] = []
-        for dbt_template in dbt_template_source.search_templates_iter():
+        for dbt_template in dbt_template_source.search_templates():
             dbt_templates.append(dbt_template)
         return dbt_templates
 
-    def test_search_templates_iter(
+    def test_search_templates(
         self,
         dbt_template_source: DbtTemplateSource,
         dbt_templates: "list[DbtTemplate]",

@@ -131,14 +131,14 @@ class TestRedashTemplate:
             data_source_name=data_source_name,
         )
 
-    def test_get_mapped_table_attributes_iter(
+    def test_find_mapped_table_attributes(
         self,
         redash_template: RedashTemplate,
         mapped_table_attributes: dict,
     ):
         expected = mapped_table_attributes
         actual = {}
-        for attribute in redash_template.get_mapped_table_attributes_iter():
+        for attribute in redash_template.find_mapped_table_attributes():
             if attribute:
                 actual = attribute
         assert actual == expected

@@ -19,8 +19,8 @@ class Query:
         self.query_str = query_str
         self.default_table_prefix = default_table_prefix
 
-    def get_upstairs_attributes_iter(self) -> Iterator[dict]:
-        """Parse a SQL query string and get upstream table attributes
+    def detect_upstairs_attributes(self) -> Iterator[dict]:
+        """Parse a SQL query string and detect upstream table attributes
 
         Yields:
             Iterator[dict]: upstream table attributes

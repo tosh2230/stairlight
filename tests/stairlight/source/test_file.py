@@ -37,12 +37,12 @@ class TestFileTemplateSource:
             source_attributes=source_attributes,
         )
 
-    def test_search_templates_iter(
+    def test_search_templates(
         self,
         file_template_source: FileTemplateSource,
     ):
         result = []
-        for file in file_template_source.search_templates_iter():
+        for file in file_template_source.search_templates():
             result.append(file)
         assert len(result) > 0
 
@@ -116,11 +116,11 @@ class TestFileTemplateKeyNotFound:
             source_attributes=source_attributes,
         )
 
-    def test_search_templates_iter(
+    def test_search_templates(
         self,
         file_template_source: FileTemplateSource,
     ):
-        iter = file_template_source.search_templates_iter()
+        iter = file_template_source.search_templates()
         with pytest.raises(ConfigKeyNotFoundException):
             next(iter)
 
@@ -146,9 +146,9 @@ class TestFileTemplateMapped:
     def test_is_mapped(self, file_template: FileTemplate):
         assert file_template.is_mapped()
 
-    def test_get_jinja_params(self, file_template: FileTemplate):
+    def test_detect_jinja_params(self, file_template: FileTemplate):
         template_str = file_template.get_template_str()
-        assert len(file_template.get_jinja_params(template_str)) > 0
+        assert len(file_template.detect_jinja_params(template_str)) > 0
 
 
 @pytest.mark.parametrize(
@@ -169,9 +169,9 @@ class TestFileTemplateNotMapped:
     def test_is_mapped(self, file_template):
         assert not file_template.is_mapped()
 
-    def test_get_jinja_params(self, file_template):
+    def test_detect_jinja_params(self, file_template):
         template_str = file_template.get_template_str()
-        assert len(file_template.get_jinja_params(template_str)) > 0
+        assert len(file_template.detect_jinja_params(template_str)) > 0
 
 
 @pytest.mark.parametrize(
@@ -210,7 +210,7 @@ class TestFileTemplateRender:
         actual = file_template.render(params=params)
         assert expected_table in actual
 
-    def test_get_jinja_params(
+    def test_detect_jinja_params(
         self,
         file_template: FileTemplate,
         params,
@@ -218,7 +218,7 @@ class TestFileTemplateRender:
         expected_params,
     ):
         template_str = file_template.get_template_str()
-        actual = file_template.get_jinja_params(template_str=template_str)
+        actual = file_template.detect_jinja_params(template_str=template_str)
         assert actual == expected_params
 
 

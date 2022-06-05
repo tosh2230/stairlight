@@ -42,15 +42,15 @@ class TestStairLight:
         ]
         assert file_keys
 
-    def test_init(self, stairlight_template):
+    def test_init(self, stairlight_template_prefix: str):
         assert (
-            self.stairlight.init(prefix=stairlight_template)
-            == f"tests/config/{stairlight_template}.yaml"
+            self.stairlight.init(prefix=stairlight_template_prefix)
+            == f"tests/config/{stairlight_template_prefix}.yaml"
         )
 
-    def test_check(self, mapping_template):
-        assert self.stairlight.check(prefix=mapping_template).startswith(
-            f"tests/config/{mapping_template}"
+    def test_check(self, mapping_template_prefix: str):
+        assert self.stairlight.check(prefix=mapping_template_prefix).startswith(
+            f"tests/config/{mapping_template_prefix}"
         )
 
     def test_up_next(self):

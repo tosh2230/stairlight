@@ -10,7 +10,7 @@ class TestSuccess:
         )
         query = Query(query_str=query_str)
         results = []
-        for result in query.get_upstairs_attributes_iter():
+        for result in query.detect_upstairs_attributes():
             results.append(result)
         assert results == [
             {
@@ -36,7 +36,7 @@ class TestSuccess:
             query_str = f.read()
         query = Query(query_str=query_str)
         results = []
-        for result in query.get_upstairs_attributes_iter():
+        for result in query.detect_upstairs_attributes():
             results.append(result)
         assert results == [
             {
@@ -61,7 +61,7 @@ class TestSuccess:
             query_str = f.read()
         query = Query(query_str=query_str)
         results = []
-        for result in query.get_upstairs_attributes_iter():
+        for result in query.detect_upstairs_attributes():
             results.append(result)
         assert results == [
             {
@@ -86,7 +86,7 @@ class TestSuccess:
             query_str = f.read()
         query = Query(query_str=query_str)
         results = []
-        for result in query.get_upstairs_attributes_iter():
+        for result in query.detect_upstairs_attributes():
             results.append(result)
         lines_str_21 = "            LEFT OUTER JOIN PROJECT_e.DATASET_e.TABLE_e"
         assert results == [
@@ -117,7 +117,7 @@ class TestSuccess:
             query_str = f.read()
         query = Query(query_str=query_str)
         results = []
-        for result in query.get_upstairs_attributes_iter():
+        for result in query.detect_upstairs_attributes():
             results.append(result)
         line_str_6 = "    test_project.beam_streaming.taxirides_realtime"
         line_str_15 = "    test_project.beam_streaming.taxirides_realtime"
@@ -139,7 +139,7 @@ class TestSuccess:
             query_str = f.read()
         query = Query(query_str=query_str)
         results = []
-        for result in query.get_upstairs_attributes_iter():
+        for result in query.detect_upstairs_attributes():
             results.append(result)
         assert results == [
             {
@@ -164,7 +164,7 @@ class TestSuccess:
             query_str = f.read()
         query = Query(query_str=query_str)
         results = []
-        for result in query.get_upstairs_attributes_iter():
+        for result in query.detect_upstairs_attributes():
             results.append(result)
         assert results == [
             {
