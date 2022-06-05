@@ -44,12 +44,12 @@ class Query:
                 else:
                     table_name = upstairs_table
                 yield {
-                    map_key.TABLE_NAME: table_name,
+                    map_key.TABLE_NAME: table_name.replace("`", ""),  # for BigQuery
                     map_key.LINE_NUMBER: line_index + 1,
                     map_key.LINE_STRING: self.query_str.splitlines()[line_index],
                 }
 
-    def parse_and_get_upstairs_tables(self) -> set:
+    def parse_and_get_upstairs_tables(self) -> "list[str]":
         """Parse query and get upstairs tables
 
         Returns:
@@ -57,10 +57,10 @@ class Query:
         """
         # Get Common-Table-Expressions(CTE) from query string
         cte_pattern = r"(?:with|,)\s*(\w+)\s+as\s*"
-        cte_alias = re.findall(cte_pattern, self.query_str, re.IGNORECASE)
+        cte_alias: list[str] = re.findall(cte_pattern, self.query_str, re.IGNORECASE)
 
         # Search a boundary line number that main query starts
-        boundary_num = 0
+        boundary_num: int = 0
         main_pattern = r"\)[;\s]*select" if any(cte_alias) else r"select"
         main_search_result = re.search(main_pattern, self.query_str, re.IGNORECASE)
         if main_search_result:
@@ -73,7 +73,7 @@ class Query:
 
         # Exclude table alias from main query
         table_pattern = r"(?:from|join)\s+([`.\-\w]+)"
-        main_tables_with_alias = re.findall(
+        main_tables_with_alias: list[str] = re.findall(
             table_pattern, query_group["main"], re.IGNORECASE
         )
         main_tables = [
@@ -81,7 +81,7 @@ class Query:
         ]
 
         # Exclude table alias from CTEs
-        cte_tables_with_alias = re.findall(
+        cte_tables_with_alias: list[str] = re.findall(
             table_pattern, query_group["cte"], re.IGNORECASE
         )
         cte_tables = [

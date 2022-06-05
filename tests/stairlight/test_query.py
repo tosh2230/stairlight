@@ -205,6 +205,28 @@ class TestSuccess:
                     },
                 ],
             ),
+            (
+                "tests/sql/query/backtick_each_elements.sql",
+                [
+                    {
+                        map_key.TABLE_NAME: "dummy.dummy.my_first_dbt_model",
+                        map_key.LINE_NUMBER: 4,
+                        map_key.LINE_STRING: (
+                            "from `dummy`.`dummy`.`my_first_dbt_model`"
+                        ),
+                    },
+                ],
+            ),
+            (
+                "tests/sql/query/backtick_whole_element.sql",
+                [
+                    {
+                        map_key.TABLE_NAME: "dummy.dummy.my_first_dbt_model",
+                        map_key.LINE_NUMBER: 4,
+                        map_key.LINE_STRING: "from `dummy.dummy.my_first_dbt_model`",
+                    },
+                ],
+            ),
         ],
     )
     def test_detect_upstairs_attributes(self, file, expected):
