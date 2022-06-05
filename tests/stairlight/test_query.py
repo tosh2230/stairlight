@@ -5,9 +5,9 @@ from src.stairlight.query import Query, solve_table_prefix
 
 
 class TestSuccess:
-    def test_parse_query(self):
+    def test_parse_new_line(self):
         query_str = (
-            "SELECT * FROM PROJECT_X.DATASET_X.TABLE_X "
+            "SELECT * FROM PROJECT_X.DATASET_X.TABLE_X \n"
             "INNER JOIN PROJECT_X.DATASET_X.TABLE_Y USING(ID)"
         )
         query = Query(query_str=query_str)
@@ -18,16 +18,12 @@ class TestSuccess:
             {
                 map_key.TABLE_NAME: "PROJECT_X.DATASET_X.TABLE_X",
                 map_key.LINE_NUMBER: 1,
-                map_key.LINE_STRING: (
-                    "SELECT * FROM PROJECT_X.DATASET_X.TABLE_X "
-                    "INNER JOIN PROJECT_X.DATASET_X.TABLE_Y USING(ID)"
-                ),
+                map_key.LINE_STRING: "SELECT * FROM PROJECT_X.DATASET_X.TABLE_X ",
             },
             {
                 map_key.TABLE_NAME: "PROJECT_X.DATASET_X.TABLE_Y",
-                map_key.LINE_NUMBER: 1,
+                map_key.LINE_NUMBER: 2,
                 map_key.LINE_STRING: (
-                    "SELECT * FROM PROJECT_X.DATASET_X.TABLE_X "
                     "INNER JOIN PROJECT_X.DATASET_X.TABLE_Y USING(ID)"
                 ),
             },
