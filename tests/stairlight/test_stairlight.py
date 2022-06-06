@@ -1,4 +1,7 @@
 import json
+from typing import Iterator
+
+import pytest
 
 from src.stairlight import map_key
 from src.stairlight.stairlight import (
@@ -7,6 +10,23 @@ from src.stairlight.stairlight import (
     StairLight,
     is_cyclic,
 )
+from tests.conftest import teardown_rm_file
+
+
+@pytest.fixture(scope="session")
+def stairlight_load_and_save() -> Iterator[StairLight]:
+    load_files = [
+        "./tests/results/file_01.json",
+        "./tests/results/file_02.json",
+        "./tests/results/gcs.json",
+    ]
+    save_file = "./tests/results/actual.json"
+    stairlight = StairLight(
+        config_dir="tests/config", load_files=load_files, save_file=save_file
+    )
+    stairlight.create_map()
+    yield stairlight
+    teardown_rm_file(save_file)
 
 
 class TestResponseType:
@@ -95,7 +115,7 @@ class TestStairLight:
             "PROJECT_e.DATASET_e.TABLE_e",
         ]
 
-    def test_up_recursive_plain_file(self, tests_dir: str):
+    def test_up_recursive_plain_file(self, tests_abspath: str):
         table_name = "PROJECT_D.DATASET_E.TABLE_F"
         result = self.stairlight.up(
             table_name=table_name,
@@ -104,9 +124,9 @@ class TestStairLight:
             response_type=ResponseType.FILE.value,
         )
         assert sorted(result) == [
-            f"{tests_dir}/sql/main/cte_multi_line.sql",
-            f"{tests_dir}/sql/main/cte_multi_line_params.sql",
-            f"{tests_dir}/sql/main/one_line_3.sql",
+            f"{tests_abspath}/sql/main/cte_multi_line.sql",
+            f"{tests_abspath}/sql/main/cte_multi_line_params.sql",
+            f"{tests_abspath}/sql/main/one_line_3.sql",
         ]
 
     def test_down_next(self):
@@ -148,7 +168,7 @@ class TestStairLight:
             "PROJECT_j.DATASET_k.TABLE_l",
         ]
 
-    def test_down_recursive_plain_file(self, tests_dir: str):
+    def test_down_recursive_plain_file(self, tests_abspath: str):
         table_name = "PROJECT_C.DATASET_C.TABLE_C"
         result = self.stairlight.down(
             table_name=table_name,
@@ -157,8 +177,8 @@ class TestStairLight:
             response_type=ResponseType.FILE.value,
         )
         assert sorted(result) == [
-            f"{tests_dir}/sql/main/cte_multi_line.sql",
-            f"{tests_dir}/sql/main/one_line_1.sql",
+            f"{tests_abspath}/sql/main/cte_multi_line.sql",
+            f"{tests_abspath}/sql/main/one_line_1.sql",
             "gs://stairlight/sql/cte/cte_multi_line.sql",
         ]
 

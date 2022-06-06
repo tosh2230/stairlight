@@ -4,6 +4,15 @@ from src.stairlight import config_key, map_key
 from src.stairlight.map import Map, create_dict_key_list
 
 
+@pytest.fixture(scope="session")
+def dependency_map(stairlight_config: dict, mapping_config: dict) -> Map:
+    dependency_map = Map(
+        stairlight_config=stairlight_config, mapping_config=mapping_config
+    )
+    dependency_map.write()
+    return dependency_map
+
+
 class TestSuccess:
     def test_mapped(self, dependency_map: Map):
         assert len(dependency_map.mapped) > 0

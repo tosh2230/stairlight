@@ -1,5 +1,33 @@
+from typing import Iterator
+
+import pytest
+
 import src.stairlight.cli as cli_main
 from stairlight import StairLight
+from tests.conftest import teardown_rm_config, teardown_rm_file
+
+
+@pytest.fixture(scope="session")
+def stairlight_init() -> Iterator[StairLight]:
+    stairlight = StairLight(config_dir="tests/config/test_init")
+    stairlight.create_map()
+    yield stairlight
+    teardown_rm_file(file="tests/config/test_init/stairlight.yaml")
+
+
+@pytest.fixture(scope="session")
+def stairlight_check() -> Iterator[StairLight]:
+    stairlight = StairLight(config_dir="tests/config/test_check")
+    stairlight.create_map()
+    yield stairlight
+    teardown_rm_config(pathname="tests/config/test_check/mapping_*.yaml")
+
+
+@pytest.fixture(scope="session")
+def stairlight_check_no_file_found() -> Iterator[StairLight]:
+    stairlight = StairLight(config_dir="tests/config/test_check_no_file_found")
+    stairlight.create_map()
+    yield stairlight
 
 
 class TestSuccess:

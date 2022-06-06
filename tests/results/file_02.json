@@ -1,0 +1,34 @@
+{
+  "test_project.beam_streaming.taxirides_aggregation": {
+    "test_project.beam_streaming.taxirides_realtime": {
+      "TemplateSourceType": "File",
+      "Key": "tests/sql/main/union_same_table.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/union_same_table.sql",
+      "Lines": [
+        {
+          "LineNumber": 6,
+          "LineString": "    test_project.beam_streaming.taxirides_realtime"
+        },
+        {
+          "LineNumber": 15,
+          "LineString": "    test_project.beam_streaming.taxirides_realtime"
+        }
+      ]
+    },
+    "test_project.beam_streaming.taxirides_realtime_bak": {
+      "TemplateSourceType": "File",
+      "Key": "tests/sql/main/union_same_table_bak.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/union_same_table_bak.sql",
+      "Lines": [
+        {
+          "LineNumber": 6,
+          "LineString": "    test_project.beam_streaming.taxirides_realtime_bak"
+        },
+        {
+          "LineNumber": 15,
+          "LineString": "    test_project.beam_streaming.taxirides_realtime_bak"
+        }
+      ]
+    }
+  }
+}
