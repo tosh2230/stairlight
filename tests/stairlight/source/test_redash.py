@@ -2,8 +2,8 @@ import os
 
 import pytest
 
-from src.stairlight import config_key
 from src.stairlight.config import Configurator
+from src.stairlight.key import StairlightConfigKey
 from src.stairlight.source.redash import (
     RedashTemplate,
     RedashTemplateSource,
@@ -28,10 +28,10 @@ class TestRedashTemplateSource:
     ) -> RedashTemplateSource:
         stairlight_config = configurator.read(prefix="stairlight_redash")
         source_attributes = {
-            config_key.TEMPLATE_SOURCE_TYPE: TemplateSourceType.REDASH.value,
-            config_key.DATABASE_URL_ENVIRONMENT_VARIABLE: env_key,
-            config_key.DATA_SOURCE_NAME: "metadata",
-            config_key.QUERY_IDS: [1, 3, 5],
+            StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.REDASH.value,
+            StairlightConfigKey.Redash.DATABASE_URL_ENV_VAR: env_key,
+            StairlightConfigKey.Redash.DATA_SOURCE_NAME: "metadata",
+            StairlightConfigKey.Redash.QUERY_IDS: [1, 3, 5],
         }
         return RedashTemplateSource(
             stairlight_config=stairlight_config,

@@ -2,8 +2,8 @@ import pathlib
 import re
 from typing import Iterator, Optional
 
-from .. import config_key
 from ..config import get_config_value
+from ..key import StairlightConfigKey
 from .base import Template, TemplateSource, TemplateSourceType
 
 
@@ -60,19 +60,19 @@ class FileTemplateSource(TemplateSource):
             Iterator[SQLTemplate]: SQL template file attributes
         """
         path = get_config_value(
-            key=config_key.FILE_SYSTEM_PATH,
+            key=StairlightConfigKey.File.FILE_SYSTEM_PATH,
             target=self.source_attributes,
             fail_if_not_found=True,
             enable_logging=False,
         )
         default_table_prefix = get_config_value(
-            key=config_key.DEFAULT_TABLE_PREFIX,
+            key=StairlightConfigKey.DEFAULT_TABLE_PREFIX,
             target=self.source_attributes,
             fail_if_not_found=False,
             enable_logging=False,
         )
         regex = get_config_value(
-            key=config_key.REGEX,
+            key=StairlightConfigKey.REGEX,
             target=self.source_attributes,
             fail_if_not_found=True,
             enable_logging=False,

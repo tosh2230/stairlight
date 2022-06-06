@@ -1,7 +1,7 @@
 import pytest
 
-from src.stairlight import config_key
 from src.stairlight.config import ConfigKeyNotFoundException, Configurator
+from src.stairlight.key import StairlightConfigKey
 from src.stairlight.source.base import RenderingTemplateException
 from src.stairlight.source.file import (
     FileTemplate,
@@ -27,9 +27,9 @@ class TestFileTemplateSource:
         expected_is_excluded: bool,
     ) -> FileTemplateSource:
         source_attributes = {
-            config_key.TEMPLATE_SOURCE_TYPE: TemplateSourceType.FILE.value,
-            config_key.FILE_SYSTEM_PATH: "./tests/sql",
-            config_key.REGEX: ".*/*.sql",
+            StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.FILE.value,
+            StairlightConfigKey.File.FILE_SYSTEM_PATH: "./tests/sql",
+            StairlightConfigKey.REGEX: ".*/*.sql",
         }
         return FileTemplateSource(
             stairlight_config=stairlight_config,
@@ -75,9 +75,9 @@ class TestFileTemplateSourceNoExclude:
     ) -> FileTemplateSource:
         stairlight_config = configurator.read(prefix="stairlight_no_exclude")
         source_attributes = {
-            config_key.TEMPLATE_SOURCE_TYPE: TemplateSourceType.FILE.value,
-            config_key.FILE_SYSTEM_PATH: "./tests/sql",
-            config_key.REGEX: ".*/*.sql",
+            StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.FILE.value,
+            StairlightConfigKey.File.FILE_SYSTEM_PATH: "./tests/sql",
+            StairlightConfigKey.REGEX: ".*/*.sql",
         }
         return FileTemplateSource(
             stairlight_config=stairlight_config,
@@ -107,8 +107,8 @@ class TestFileTemplateKeyNotFound:
     ) -> FileTemplateSource:
         stairlight_config = configurator.read(prefix="stairlight_key_not_found")
         source_attributes = {
-            config_key.TEMPLATE_SOURCE_TYPE: TemplateSourceType.FILE.value,
-            config_key.REGEX: ".*/*.sql",
+            StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.FILE.value,
+            StairlightConfigKey.REGEX: ".*/*.sql",
         }
         return FileTemplateSource(
             stairlight_config=stairlight_config,

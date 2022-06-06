@@ -1,6 +1,6 @@
 import pytest
 
-from src.stairlight import config_key
+from src.stairlight.key import StairlightConfigKey
 from src.stairlight.source.dbt import DbtTemplate, DbtTemplateSource, TemplateSourceType
 
 
@@ -62,11 +62,11 @@ class TestDbtTemplateSource:
         project_name: str,
     ) -> DbtTemplateSource:
         source_attributes = {
-            config_key.TEMPLATE_SOURCE_TYPE: TemplateSourceType.DBT.value,
-            config_key.DBT_PROJECT_DIR: project_dir,
-            config_key.DBT_PROFILES_DIR: profiles_dir,
-            config_key.DBT_TARGET: target,
-            config_key.DBT_VARS: vars,
+            StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.DBT.value,
+            StairlightConfigKey.Dbt.PROJECT_DIR: project_dir,
+            StairlightConfigKey.Dbt.PROFILES_DIR: profiles_dir,
+            StairlightConfigKey.Dbt.TARGET: target,
+            StairlightConfigKey.Dbt.VARS: vars,
         }
         return DbtTemplateSource(
             stairlight_config=stairlight_config,

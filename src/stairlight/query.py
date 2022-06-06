@@ -1,7 +1,7 @@
 import re
 from typing import Iterator
 
-from . import map_key
+from .key import MapKey
 
 
 class Query:
@@ -44,9 +44,9 @@ class Query:
                 else:
                     table_name = upstairs_table
                 yield {
-                    map_key.TABLE_NAME: table_name.replace("`", ""),  # for BigQuery
-                    map_key.LINE_NUMBER: line_index + 1,
-                    map_key.LINE_STRING: self.query_str.splitlines()[line_index],
+                    MapKey.TABLE_NAME: table_name.replace("`", ""),  # for BigQuery
+                    MapKey.LINE_NUMBER: line_index + 1,
+                    MapKey.LINE_STRING: self.query_str.splitlines()[line_index],
                 }
 
     def parse_and_get_upstairs_tables(self) -> "list[str]":

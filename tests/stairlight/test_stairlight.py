@@ -3,7 +3,7 @@ from typing import Iterator
 
 import pytest
 
-from src.stairlight import map_key
+from src.stairlight.key import MapKey
 from src.stairlight.stairlight import (
     ResponseType,
     SearchDirection,
@@ -57,7 +57,7 @@ class TestStairLight:
 
     def test_unmapped(self):
         file_keys = [
-            unmapped_file.get(map_key.TEMPLATE)
+            unmapped_file.get(MapKey.TEMPLATE)
             for unmapped_file in self.stairlight.unmapped
         ]
         assert file_keys

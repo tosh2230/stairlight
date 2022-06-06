@@ -1,7 +1,7 @@
 from logging import getLogger
 from typing import Iterator
 
-from . import config_key, map_key
+from .key import MapKey, MappingConfigKey, StairlightConfigKey
 from .query import Query
 from .source.base import Template, TemplateSource, TemplateSourceType
 from .source.controller import get_template_source_class
@@ -55,10 +55,10 @@ class Map:
         """
         source_attributes: dict
         for source_attributes in stairlight_config.get(
-            config_key.STAIRLIGHT_CONFIG_INCLUDE_SECTION
+            StairlightConfigKey.INCLUDE_SECTION
         ):
             template_source_type: str = source_attributes.get(
-                config_key.TEMPLATE_SOURCE_TYPE
+                StairlightConfigKey.TEMPLATE_SOURCE_TYPE
             )
             template_source: TemplateSource = get_template_source_class(
                 template_source_type=template_source_type
@@ -95,24 +95,22 @@ class Map:
         """
         query_str: str = template.render(
             params=self.merge_global_params(table_attributes=table_attributes),
-            ignore_params=table_attributes.get(config_key.IGNORE_PARAMETERS),
+            ignore_params=table_attributes.get(MappingConfigKey.IGNORE_PARAMETERS),
         )
         query = Query(
             query_str=query_str,
             default_table_prefix=template.default_table_prefix,
         )
 
-        downstairs: str = table_attributes.get(config_key.TABLE_NAME)
-        mapping_labels: dict = table_attributes.get(config_key.LABELS)
-        metadata: list[str] = self.mapping_config.get(
-            config_key.MAPPING_CONFIG_METADATA_SECTION
-        )
+        downstairs: str = table_attributes.get(MappingConfigKey.TABLE_NAME)
+        mapping_labels: dict = table_attributes.get(MappingConfigKey.LABELS)
+        metadata: list[str] = self.mapping_config.get(MappingConfigKey.METADATA_SECTION)
 
         if downstairs not in self.mapped:
             self.mapped[downstairs] = {}
 
         for upstairs_attributes in query.detect_upstairs_attributes():
-            upstairs: str = upstairs_attributes[map_key.TABLE_NAME]
+            upstairs: str = upstairs_attributes[MapKey.TABLE_NAME]
 
             if not self.mapped[downstairs].get(upstairs):
                 self.mapped[downstairs][upstairs] = self.create_upstairs_value(
@@ -122,10 +120,10 @@ class Map:
                     upstairs=upstairs,
                 )
 
-            self.mapped[downstairs][upstairs][map_key.LINES].append(
+            self.mapped[downstairs][upstairs][MapKey.LINES].append(
                 {
-                    map_key.LINE_NUMBER: upstairs_attributes[map_key.LINE_NUMBER],
-                    map_key.LINE_STRING: upstairs_attributes[map_key.LINE_STRING],
+                    MapKey.LINE_NUMBER: upstairs_attributes[MapKey.LINE_NUMBER],
+                    MapKey.LINE_STRING: upstairs_attributes[MapKey.LINE_STRING],
                 }
             )
 
@@ -136,10 +134,8 @@ class Map:
             dict: global parameters
         """
         global_params: dict = {}
-        global_section: dict = self.mapping_config.get(
-            config_key.MAPPING_CONFIG_GLOBAL_SECTION
-        )
-        if config_key.PARAMETERS in global_section:
+        global_section: dict = self.mapping_config.get(MappingConfigKey.GLOBAL_SECTION)
+        if MappingConfigKey.PARAMETERS in global_section:
             global_params = global_section.get(key)
 
         return global_params
@@ -153,8 +149,8 @@ class Map:
         Returns:
             dict: combined parameters
         """
-        global_params: dict = self.get_global_params(key=config_key.PARAMETERS)
-        table_params: dict = table_attributes.get(config_key.PARAMETERS, {})
+        global_params: dict = self.get_global_params(key=MappingConfigKey.PARAMETERS)
+        table_params: dict = table_attributes.get(MappingConfigKey.PARAMETERS, {})
 
         # Table parameters are prioritized over global parameters
         return {**global_params, **table_params}
@@ -179,35 +175,35 @@ class Map:
         """
         metadata_labels = []
         upstairs_values = {
-            map_key.TEMPLATE_SOURCE_TYPE: template.source_type.value,
-            map_key.KEY: template.key,
-            map_key.URI: template.uri,
-            map_key.LINES: [],
+            MapKey.TEMPLATE_SOURCE_TYPE: template.source_type.value,
+            MapKey.KEY: template.key,
+            MapKey.URI: template.uri,
+            MapKey.LINES: [],
         }
 
         if template.source_type == TemplateSourceType.GCS:
-            upstairs_values[map_key.BUCKET_NAME] = template.bucket
+            upstairs_values[MapKey.BUCKET_NAME] = template.bucket
         elif template.source_type == TemplateSourceType.REDASH:
-            upstairs_values[map_key.DATA_SOURCE_NAME] = template.data_source_name
+            upstairs_values[MapKey.DATA_SOURCE_NAME] = template.data_source_name
 
         if metadata:
             metadata_labels = [
-                m.get(config_key.LABELS)
+                m.get(MappingConfigKey.LABELS)
                 for m in metadata
-                if m.get(config_key.TABLE_NAME) == upstairs
+                if m.get(MappingConfigKey.TABLE_NAME) == upstairs
             ]
         if mapping_labels or metadata_labels:
-            upstairs_values[map_key.LABELS] = {}
+            upstairs_values[MapKey.LABELS] = {}
 
         if mapping_labels:
-            upstairs_values[map_key.LABELS] = {
-                **upstairs_values[map_key.LABELS],
+            upstairs_values[MapKey.LABELS] = {
+                **upstairs_values[MapKey.LABELS],
                 **mapping_labels,
             }
 
         if metadata_labels:
-            upstairs_values[map_key.LABELS] = {
-                **upstairs_values[map_key.LABELS],
+            upstairs_values[MapKey.LABELS] = {
+                **upstairs_values[MapKey.LABELS],
                 **metadata_labels[0],
             }
         return upstairs_values
@@ -226,8 +222,8 @@ class Map:
             params = template.detect_jinja_params(template_str=template_str)
         self.unmapped.append(
             {
-                map_key.TEMPLATE: template,
-                map_key.PARAMETERS: params,
+                MapKey.TEMPLATE: template,
+                MapKey.PARAMETERS: params,
             }
         )
 
@@ -250,7 +246,7 @@ class Map:
         )
         mapped_params: list[str] = create_dict_key_list(d=mapped_params_dict)
         ignore_params: list[str] = table_attributes.get(
-            config_key.IGNORE_PARAMETERS, []
+            MappingConfigKey.IGNORE_PARAMETERS, []
         )
         diff_params: list[str] = list(
             set(template_params) - set(mapped_params) - set(ignore_params)

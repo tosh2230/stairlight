@@ -1,6 +1,6 @@
 import pytest
 
-from src.stairlight import config_key
+from src.stairlight.key import StairlightConfigKey
 from src.stairlight.source.gcs import (
     GCS_URI_SCHEME,
     GcsTemplate,
@@ -17,10 +17,10 @@ class TestGcsTemplateSource:
         mapping_config: dict,
     ) -> GcsTemplateSource:
         source_attributes = {
-            config_key.TEMPLATE_SOURCE_TYPE: TemplateSourceType.GCS.value,
-            config_key.PROJECT_ID: None,
-            config_key.BUCKET_NAME: "stairlight",
-            config_key.REGEX: "sql/.*/*.sql",
+            StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.GCS.value,
+            StairlightConfigKey.Gcs.PROJECT_ID: None,
+            StairlightConfigKey.Gcs.BUCKET_NAME: "stairlight",
+            StairlightConfigKey.REGEX: "sql/.*/*.sql",
         }
         return GcsTemplateSource(
             stairlight_config=stairlight_config,

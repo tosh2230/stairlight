@@ -1,6 +1,6 @@
 import pytest
 
-from src.stairlight import config_key, map_key
+from src.stairlight.key import MapKey, MappingConfigKey
 from src.stairlight.map import Map, create_dict_key_list
 
 
@@ -47,14 +47,14 @@ class TestSuccess:
     ):
         actual = []
         for unmapped_attributes in dependency_map.unmapped:
-            template = unmapped_attributes.get(map_key.TEMPLATE)
+            template = unmapped_attributes.get(MapKey.TEMPLATE)
             if template.key == key:
-                actual = sorted(unmapped_attributes.get(map_key.PARAMETERS))
+                actual = sorted(unmapped_attributes.get(MapKey.PARAMETERS))
                 break
         assert actual == expected
 
     def test_get_global_params(self, dependency_map: Map):
-        actual = dependency_map.get_global_params(key=map_key.PARAMETERS)
+        actual = dependency_map.get_global_params(key=MapKey.PARAMETERS)
         expected = {
             "DESTINATION_PROJECT": "PROJECT_GLOBAL",
             "params": {
@@ -67,16 +67,16 @@ class TestSuccess:
 
     def test_merge_global_params_global_only(self, dependency_map: Map):
         table_attributes = {
-            config_key.TABLE_NAME: "PROJECT_g.DATASET_g.TABLE_g",
+            MappingConfigKey.TABLE_NAME: "PROJECT_g.DATASET_g.TABLE_g",
         }
         actual = dependency_map.merge_global_params(table_attributes=table_attributes)
-        expected = dependency_map.get_global_params(key=map_key.PARAMETERS)
+        expected = dependency_map.get_global_params(key=MapKey.PARAMETERS)
         assert actual == expected
 
     def test_merge_global_params_by_table(self, dependency_map: Map):
         table_attributes = {
-            config_key.TABLE_NAME: "PROJECT_g.DATASET_g.TABLE_g",
-            config_key.PARAMETERS: {
+            MappingConfigKey.TABLE_NAME: "PROJECT_g.DATASET_g.TABLE_g",
+            MappingConfigKey.PARAMETERS: {
                 "params": {
                     "PROJECT": "PROJECT_BY_TABLE",
                     "DATASET": "DATASET_BY_TABLE",

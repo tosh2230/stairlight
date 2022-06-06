@@ -4,8 +4,8 @@ from typing import Iterator
 
 from sqlalchemy import create_engine, text
 
-from .. import config_key
 from ..config import get_config_value
+from ..key import MappingConfigKey, StairlightConfigKey
 from .base import Template, TemplateSource, TemplateSourceType
 
 logger = getLogger(__name__)
@@ -36,14 +36,13 @@ class RedashTemplate(Template):
         Yields:
             Iterator[dict]: Mapped table attributes
         """
-        for mapping in self._mapping_config.get(
-            config_key.MAPPING_CONFIG_MAPPING_SECTION
-        ):
+        for mapping in self._mapping_config.get(MappingConfigKey.MAPPING_SECTION):
             if (
-                mapping.get(config_key.QUERY_ID) == self.query_id
-                and mapping.get(config_key.DATA_SOURCE_NAME) == self.data_source_name
+                mapping.get(MappingConfigKey.Redash.QUERY_ID) == self.query_id
+                and mapping.get(MappingConfigKey.Redash.DATA_SOURCE_NAME)
+                == self.data_source_name
             ):
-                for table_attributes in mapping.get(config_key.TABLES):
+                for table_attributes in mapping.get(MappingConfigKey.TABLES):
                     yield table_attributes
                 break
 
@@ -69,25 +68,25 @@ class RedashTemplateSource(TemplateSource):
 
     def make_conditions(self) -> dict:
         data_source_name = get_config_value(
-            key=config_key.DATA_SOURCE_NAME,
+            key=StairlightConfigKey.Redash.DATA_SOURCE_NAME,
             target=self.source_attributes,
             fail_if_not_found=True,
             enable_logging=False,
         )
         query_ids = get_config_value(
-            key=config_key.QUERY_IDS,
+            key=StairlightConfigKey.Redash.QUERY_IDS,
             target=self.source_attributes,
             fail_if_not_found=True,
             enable_logging=False,
         )
         return {
-            config_key.DATA_SOURCE_NAME: {
-                "key": config_key.DATA_SOURCE_NAME,
+            StairlightConfigKey.Redash.DATA_SOURCE_NAME: {
+                "key": StairlightConfigKey.Redash.DATA_SOURCE_NAME,
                 "query": "data_sources.name = :data_source",
                 "parameters": data_source_name,
             },
-            config_key.QUERY_IDS: {
-                "key": config_key.QUERY_IDS,
+            StairlightConfigKey.Redash.QUERY_IDS: {
+                "key": StairlightConfigKey.Redash.QUERY_IDS,
                 "query": "queries.id IN :query_ids",
                 "parameters": (tuple(query_ids) if query_ids else None),
             },
@@ -111,8 +110,10 @@ class RedashTemplateSource(TemplateSource):
             self.build_query_string(path=f"{current_dir}/{sql_file_name}")
         )
 
-        data_source_condition = self.conditions.get(config_key.DATA_SOURCE_NAME)
-        query_ids_condition = self.conditions.get(config_key.QUERY_IDS)
+        data_source_condition = self.conditions.get(
+            StairlightConfigKey.Redash.DATA_SOURCE_NAME
+        )
+        query_ids_condition = self.conditions.get(StairlightConfigKey.Redash.QUERY_IDS)
         connection_str = self.get_connection_str()
         engine = create_engine(connection_str)
         queries = engine.execute(
@@ -136,7 +137,7 @@ class RedashTemplateSource(TemplateSource):
 
     def get_connection_str(self) -> str:
         environment_variable_name = get_config_value(
-            key=config_key.DATABASE_URL_ENVIRONMENT_VARIABLE,
+            key=StairlightConfigKey.Redash.DATABASE_URL_ENV_VAR,
             target=self.source_attributes,
             fail_if_not_found=True,
             enable_logging=False,

@@ -1,6 +1,6 @@
 import pytest
 
-from src.stairlight import map_key
+from src.stairlight.key import MapKey
 from src.stairlight.query import Query, solve_table_prefix
 
 
@@ -16,14 +16,14 @@ class TestSuccess:
             results.append(result)
         assert results == [
             {
-                map_key.TABLE_NAME: "PROJECT_X.DATASET_X.TABLE_X",
-                map_key.LINE_NUMBER: 1,
-                map_key.LINE_STRING: "SELECT * FROM PROJECT_X.DATASET_X.TABLE_X ",
+                MapKey.TABLE_NAME: "PROJECT_X.DATASET_X.TABLE_X",
+                MapKey.LINE_NUMBER: 1,
+                MapKey.LINE_STRING: "SELECT * FROM PROJECT_X.DATASET_X.TABLE_X ",
             },
             {
-                map_key.TABLE_NAME: "PROJECT_X.DATASET_X.TABLE_Y",
-                map_key.LINE_NUMBER: 2,
-                map_key.LINE_STRING: (
+                MapKey.TABLE_NAME: "PROJECT_X.DATASET_X.TABLE_Y",
+                MapKey.LINE_NUMBER: 2,
+                MapKey.LINE_STRING: (
                     "INNER JOIN PROJECT_X.DATASET_X.TABLE_Y USING(ID)"
                 ),
             },
@@ -36,9 +36,9 @@ class TestSuccess:
                 "tests/sql/query/cte_one_line.sql",
                 [
                     {
-                        map_key.TABLE_NAME: "PROJECT_B.DATASET_B.TABLE_B",
-                        map_key.LINE_NUMBER: 1,
-                        map_key.LINE_STRING: (
+                        MapKey.TABLE_NAME: "PROJECT_B.DATASET_B.TABLE_B",
+                        MapKey.LINE_NUMBER: 1,
+                        MapKey.LINE_STRING: (
                             "WITH c AS (SELECT test_id, col_c "
                             "FROM PROJECT_C.DATASET_C.TABLE_C WHERE 0 = 0),"
                             "d AS ("
@@ -51,9 +51,9 @@ class TestSuccess:
                         ),
                     },
                     {
-                        map_key.TABLE_NAME: "PROJECT_C.DATASET_C.TABLE_C",
-                        map_key.LINE_NUMBER: 1,
-                        map_key.LINE_STRING: (
+                        MapKey.TABLE_NAME: "PROJECT_C.DATASET_C.TABLE_C",
+                        MapKey.LINE_NUMBER: 1,
+                        MapKey.LINE_STRING: (
                             "WITH c AS (SELECT test_id, col_c "
                             "FROM PROJECT_C.DATASET_C.TABLE_C WHERE 0 = 0),"
                             "d AS ("
@@ -66,9 +66,9 @@ class TestSuccess:
                         ),
                     },
                     {
-                        map_key.TABLE_NAME: "PROJECT_d.DATASET_d.TABLE_d",
-                        map_key.LINE_NUMBER: 1,
-                        map_key.LINE_STRING: (
+                        MapKey.TABLE_NAME: "PROJECT_d.DATASET_d.TABLE_d",
+                        MapKey.LINE_NUMBER: 1,
+                        MapKey.LINE_STRING: (
                             "WITH c AS (SELECT test_id, col_c "
                             "FROM PROJECT_C.DATASET_C.TABLE_C WHERE 0 = 0),"
                             "d AS ("
@@ -86,19 +86,19 @@ class TestSuccess:
                 "tests/sql/query/cte_multi_line.sql",
                 [
                     {
-                        map_key.TABLE_NAME: "PROJECT_B.DATASET_B.TABLE_B",
-                        map_key.LINE_NUMBER: 23,
-                        map_key.LINE_STRING: "    PROJECT_B.DATASET_B.TABLE_B AS b",
+                        MapKey.TABLE_NAME: "PROJECT_B.DATASET_B.TABLE_B",
+                        MapKey.LINE_NUMBER: 23,
+                        MapKey.LINE_STRING: "    PROJECT_B.DATASET_B.TABLE_B AS b",
                     },
                     {
-                        map_key.TABLE_NAME: "PROJECT_C.DATASET_C.TABLE_C",
-                        map_key.LINE_NUMBER: 6,
-                        map_key.LINE_STRING: "        PROJECT_C.DATASET_C.TABLE_C",
+                        MapKey.TABLE_NAME: "PROJECT_C.DATASET_C.TABLE_C",
+                        MapKey.LINE_NUMBER: 6,
+                        MapKey.LINE_STRING: "        PROJECT_C.DATASET_C.TABLE_C",
                     },
                     {
-                        map_key.TABLE_NAME: "PROJECT_d.DATASET_d.TABLE_d",
-                        map_key.LINE_NUMBER: 15,
-                        map_key.LINE_STRING: "        PROJECT_d.DATASET_d.TABLE_d",
+                        MapKey.TABLE_NAME: "PROJECT_d.DATASET_d.TABLE_d",
+                        MapKey.LINE_NUMBER: 15,
+                        MapKey.LINE_STRING: "        PROJECT_d.DATASET_d.TABLE_d",
                     },
                 ],
             ),
@@ -106,26 +106,26 @@ class TestSuccess:
                 "tests/sql/query/nested_join.sql",
                 [
                     {
-                        map_key.TABLE_NAME: "PROJECT_B.DATASET_B.TABLE_B",
-                        map_key.LINE_NUMBER: 4,
-                        map_key.LINE_STRING: "    PROJECT_B.DATASET_B.TABLE_B AS b",
+                        MapKey.TABLE_NAME: "PROJECT_B.DATASET_B.TABLE_B",
+                        MapKey.LINE_NUMBER: 4,
+                        MapKey.LINE_STRING: "    PROJECT_B.DATASET_B.TABLE_B AS b",
                     },
                     {
-                        map_key.TABLE_NAME: "PROJECT_C.DATASET_C.TABLE_C",
-                        map_key.LINE_NUMBER: 10,
-                        map_key.LINE_STRING: "            PROJECT_C.DATASET_C.TABLE_C",
+                        MapKey.TABLE_NAME: "PROJECT_C.DATASET_C.TABLE_C",
+                        MapKey.LINE_NUMBER: 10,
+                        MapKey.LINE_STRING: "            PROJECT_C.DATASET_C.TABLE_C",
                     },
                     {
-                        map_key.TABLE_NAME: "PROJECT_d.DATASET_d.TABLE_d",
-                        map_key.LINE_NUMBER: 20,
-                        map_key.LINE_STRING: (
+                        MapKey.TABLE_NAME: "PROJECT_d.DATASET_d.TABLE_d",
+                        MapKey.LINE_NUMBER: 20,
+                        MapKey.LINE_STRING: (
                             "            PROJECT_d.DATASET_d.TABLE_d d"
                         ),
                     },
                     {
-                        map_key.TABLE_NAME: "PROJECT_e.DATASET_e.TABLE_e",
-                        map_key.LINE_NUMBER: 21,
-                        map_key.LINE_STRING: (
+                        MapKey.TABLE_NAME: "PROJECT_e.DATASET_e.TABLE_e",
+                        MapKey.LINE_NUMBER: 21,
+                        MapKey.LINE_STRING: (
                             "            LEFT OUTER JOIN PROJECT_e.DATASET_e.TABLE_e"
                         ),
                     },
@@ -135,20 +135,20 @@ class TestSuccess:
                 "tests/sql/query/union_same_table.sql",
                 [
                     {
-                        map_key.TABLE_NAME: (
+                        MapKey.TABLE_NAME: (
                             "test_project.beam_streaming.taxirides_realtime"
                         ),
-                        map_key.LINE_NUMBER: 6,
-                        map_key.LINE_STRING: (
+                        MapKey.LINE_NUMBER: 6,
+                        MapKey.LINE_STRING: (
                             "    test_project.beam_streaming.taxirides_realtime"
                         ),
                     },
                     {
-                        map_key.TABLE_NAME: (
+                        MapKey.TABLE_NAME: (
                             "test_project.beam_streaming.taxirides_realtime"
                         ),
-                        map_key.LINE_NUMBER: 15,
-                        map_key.LINE_STRING: (
+                        MapKey.LINE_NUMBER: 15,
+                        MapKey.LINE_STRING: (
                             "    test_project.beam_streaming.taxirides_realtime"
                         ),
                     },
@@ -158,19 +158,19 @@ class TestSuccess:
                 "tests/sql/query/cte_multi_tables_01.sql",
                 [
                     {
-                        map_key.TABLE_NAME: "project.dataset.table_test_A",
-                        map_key.LINE_NUMBER: 6,
-                        map_key.LINE_STRING: "		project.dataset.table_test_A",
+                        MapKey.TABLE_NAME: "project.dataset.table_test_A",
+                        MapKey.LINE_NUMBER: 6,
+                        MapKey.LINE_STRING: "		project.dataset.table_test_A",
                     },
                     {
-                        map_key.TABLE_NAME: "project.dataset.table_test_B",
-                        map_key.LINE_NUMBER: 13,
-                        map_key.LINE_STRING: "		project.dataset.table_test_B AS test_B",
+                        MapKey.TABLE_NAME: "project.dataset.table_test_B",
+                        MapKey.LINE_NUMBER: 13,
+                        MapKey.LINE_STRING: "		project.dataset.table_test_B AS test_B",
                     },
                     {
-                        map_key.TABLE_NAME: "project.dataset.table_test_C",
-                        map_key.LINE_NUMBER: 19,
-                        map_key.LINE_STRING: (
+                        MapKey.TABLE_NAME: "project.dataset.table_test_C",
+                        MapKey.LINE_NUMBER: 19,
+                        MapKey.LINE_STRING: (
                             "FROM project.dataset.table_test_C AS test_C"
                         ),
                     },
@@ -180,26 +180,26 @@ class TestSuccess:
                 "tests/sql/query/cte_multi_tables_02.sql",
                 [
                     {
-                        map_key.TABLE_NAME: "project.dataset.table_test_A",
-                        map_key.LINE_NUMBER: 6,
-                        map_key.LINE_STRING: (
+                        MapKey.TABLE_NAME: "project.dataset.table_test_A",
+                        MapKey.LINE_NUMBER: 6,
+                        MapKey.LINE_STRING: (
                             "		project.dataset.table_test_A -- table_test_B"
                         ),
                     },
                     {
-                        map_key.TABLE_NAME: "project.dataset.table_test_B",
-                        map_key.LINE_NUMBER: 12,
-                        map_key.LINE_STRING: "		project.dataset.table_test_B AS test_B",
+                        MapKey.TABLE_NAME: "project.dataset.table_test_B",
+                        MapKey.LINE_NUMBER: 12,
+                        MapKey.LINE_STRING: "		project.dataset.table_test_B AS test_B",
                     },
                     {
-                        map_key.TABLE_NAME: "project.dataset.table_test_C",
-                        map_key.LINE_NUMBER: 19,
-                        map_key.LINE_STRING: "		project.dataset.table_test_C AS test_C",
+                        MapKey.TABLE_NAME: "project.dataset.table_test_C",
+                        MapKey.LINE_NUMBER: 19,
+                        MapKey.LINE_STRING: "		project.dataset.table_test_C AS test_C",
                     },
                     {
-                        map_key.TABLE_NAME: "project.dataset.table_test_D",
-                        map_key.LINE_NUMBER: 26,
-                        map_key.LINE_STRING: (
+                        MapKey.TABLE_NAME: "project.dataset.table_test_D",
+                        MapKey.LINE_NUMBER: 26,
+                        MapKey.LINE_STRING: (
                             "FROM project.dataset.table_test_D AS test_D"
                         ),
                     },
@@ -209,9 +209,9 @@ class TestSuccess:
                 "tests/sql/query/backtick_each_elements.sql",
                 [
                     {
-                        map_key.TABLE_NAME: "dummy.dummy.my_first_dbt_model",
-                        map_key.LINE_NUMBER: 4,
-                        map_key.LINE_STRING: (
+                        MapKey.TABLE_NAME: "dummy.dummy.my_first_dbt_model",
+                        MapKey.LINE_NUMBER: 4,
+                        MapKey.LINE_STRING: (
                             "from `dummy`.`dummy`.`my_first_dbt_model`"
                         ),
                     },
@@ -221,9 +221,9 @@ class TestSuccess:
                 "tests/sql/query/backtick_whole_element.sql",
                 [
                     {
-                        map_key.TABLE_NAME: "dummy.dummy.my_first_dbt_model",
-                        map_key.LINE_NUMBER: 4,
-                        map_key.LINE_STRING: "from `dummy.dummy.my_first_dbt_model`",
+                        MapKey.TABLE_NAME: "dummy.dummy.my_first_dbt_model",
+                        MapKey.LINE_NUMBER: 4,
+                        MapKey.LINE_STRING: "from `dummy.dummy.my_first_dbt_model`",
                     },
                 ],
             ),

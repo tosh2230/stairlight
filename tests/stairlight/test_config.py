@@ -3,12 +3,14 @@ from collections import OrderedDict
 
 import pytest
 
-from src.stairlight import config_key, map_key
 from src.stairlight.config import (
+    MAPPING_CONFIG_PREFIX_DEFAULT,
+    STAIRLIGHT_CONFIG_PREFIX_DEFAULT,
     ConfigKeyNotFoundException,
     Configurator,
     get_config_value,
 )
+from src.stairlight.key import MapKey, MappingConfigKey, StairlightConfigKey
 from src.stairlight.source.dbt import DbtTemplate
 from src.stairlight.source.file import FileTemplate
 from src.stairlight.source.gcs import GcsTemplate
@@ -17,10 +19,10 @@ from src.stairlight.source.redash import RedashTemplate
 
 class TestSuccess:
     def test_read_map(self, configurator: Configurator):
-        assert configurator.read(prefix=config_key.MAPPING_CONFIG_FILE_PREFIX)
+        assert configurator.read(prefix=MAPPING_CONFIG_PREFIX_DEFAULT)
 
     def test_read_sql(self, configurator: Configurator):
-        assert configurator.read(prefix=config_key.STAIRLIGHT_CONFIG_FILE_PREFIX)
+        assert configurator.read(prefix=STAIRLIGHT_CONFIG_PREFIX_DEFAULT)
 
     def test_create_stairlight_file(
         self, configurator: Configurator, stairlight_template_prefix: str
@@ -41,9 +43,9 @@ class TestSuccess:
     def test_build_stairlight_config(self, configurator: Configurator):
         stairlight_template = configurator.build_stairlight_config()
         assert list(stairlight_template.keys()) == [
-            config_key.STAIRLIGHT_CONFIG_INCLUDE_SECTION,
-            config_key.STAIRLIGHT_CONFIG_EXCLUDE_SECTION,
-            config_key.STAIRLIGHT_CONFIG_SETTING_SECTION,
+            StairlightConfigKey.INCLUDE_SECTION,
+            StairlightConfigKey.EXCLUDE_SECTION,
+            StairlightConfigKey.SETTING_SECTION,
         ]
 
     def test_get_config_value(self):
@@ -53,11 +55,9 @@ class TestSuccess:
 
     # file
     @pytest.fixture(scope="class")
-    def file_template(self, configurator) -> FileTemplate:
+    def file_template(self, configurator: Configurator) -> FileTemplate:
         return FileTemplate(
-            mapping_config=configurator.read(
-                prefix=config_key.MAPPING_CONFIG_FILE_PREFIX
-            ),
+            mapping_config=configurator.read(prefix=MAPPING_CONFIG_PREFIX_DEFAULT),
             key="tests/sql/main/test_undefined.sql",
         )
 
@@ -65,7 +65,9 @@ class TestSuccess:
         self, configurator: Configurator, file_template: FileTemplate
     ):
         actual = configurator.select_mapping_values_by_template(template=file_template)
-        expected = {config_key.FILE_SUFFIX: "tests/sql/main/test_undefined.sql"}
+        expected = {
+            MappingConfigKey.File.FILE_SUFFIX: "tests/sql/main/test_undefined.sql"
+        }
         assert actual == expected
 
     def test_get_default_table_name_file(
@@ -80,8 +82,8 @@ class TestSuccess:
     ):
         unmapped_templates = [
             {
-                map_key.TEMPLATE: file_template,
-                map_key.PARAMETERS: [
+                MapKey.TEMPLATE: file_template,
+                MapKey.PARAMETERS: [
                     "params.main_table",
                     "params.sub_table_01",
                     "params.sub_table_02",
@@ -89,16 +91,16 @@ class TestSuccess:
             }
         ]
 
-        global_value = OrderedDict({config_key.PARAMETERS: {}})
+        global_value = OrderedDict({MappingConfigKey.PARAMETERS: {}})
         mapping_value = OrderedDict(
             {
-                config_key.TEMPLATE_SOURCE_TYPE: file_template.source_type.value,
-                config_key.FILE_SUFFIX: file_template.key,
-                config_key.TABLES: [
+                MappingConfigKey.TEMPLATE_SOURCE_TYPE: file_template.source_type.value,
+                MappingConfigKey.File.FILE_SUFFIX: file_template.key,
+                MappingConfigKey.TABLES: [
                     OrderedDict(
                         {
-                            config_key.TABLE_NAME: "test_undefined",
-                            config_key.PARAMETERS: OrderedDict(
+                            MappingConfigKey.TABLE_NAME: "test_undefined",
+                            MappingConfigKey.PARAMETERS: OrderedDict(
                                 {
                                     "params": {
                                         "main_table": None,
@@ -107,7 +109,7 @@ class TestSuccess:
                                     }
                                 }
                             ),
-                            config_key.LABELS: OrderedDict({"key": "value"}),
+                            MappingConfigKey.LABELS: OrderedDict({"key": "value"}),
                         }
                     )
                 ],
@@ -116,16 +118,16 @@ class TestSuccess:
 
         metadata_value = OrderedDict(
             {
-                config_key.TABLE_NAME: None,
-                config_key.LABELS: OrderedDict({"key": "value"}),
+                MappingConfigKey.TABLE_NAME: None,
+                MappingConfigKey.LABELS: OrderedDict({"key": "value"}),
             }
         )
 
         expected = OrderedDict(
             {
-                config_key.MAPPING_CONFIG_GLOBAL_SECTION: global_value,
-                config_key.MAPPING_CONFIG_MAPPING_SECTION: [mapping_value],
-                config_key.MAPPING_CONFIG_METADATA_SECTION: [metadata_value],
+                MappingConfigKey.GLOBAL_SECTION: global_value,
+                MappingConfigKey.MAPPING_SECTION: [mapping_value],
+                MappingConfigKey.METADATA_SECTION: [metadata_value],
             }
         )
         actual = configurator.build_mapping_config(
@@ -137,9 +139,7 @@ class TestSuccess:
     @pytest.fixture(scope="class")
     def gcs_template(self, configurator: Configurator) -> GcsTemplate:
         return GcsTemplate(
-            mapping_config=configurator.read(
-                prefix=config_key.MAPPING_CONFIG_FILE_PREFIX
-            ),
+            mapping_config=configurator.read(prefix=MAPPING_CONFIG_PREFIX_DEFAULT),
             bucket="stairlight",
             key="tests/sql/gcs/one_line/one_line.sql",
         )
@@ -149,8 +149,10 @@ class TestSuccess:
     ):
         actual = configurator.select_mapping_values_by_template(template=gcs_template)
         expected = {
-            config_key.URI: "gs://stairlight/tests/sql/gcs/one_line/one_line.sql",
-            config_key.BUCKET_NAME: "stairlight",
+            MappingConfigKey.Gcs.URI: (
+                "gs://stairlight/tests/sql/gcs/one_line/one_line.sql"
+            ),
+            MappingConfigKey.Gcs.BUCKET_NAME: "stairlight",
         }
         assert actual == expected
 
@@ -165,9 +167,7 @@ class TestSuccess:
     @pytest.fixture(scope="class")
     def redash_template(self, configurator: Configurator) -> RedashTemplate:
         return RedashTemplate(
-            mapping_config=configurator.read(
-                prefix=config_key.MAPPING_CONFIG_FILE_PREFIX
-            ),
+            mapping_config=configurator.read(prefix=MAPPING_CONFIG_PREFIX_DEFAULT),
             query_id=5,
             query_name="Copy of (#4) New Query",
             query_str="SELECT * FROM {{ table }}",
@@ -181,8 +181,8 @@ class TestSuccess:
             template=redash_template
         )
         expected = {
-            config_key.QUERY_ID: 5,
-            config_key.DATA_SOURCE_NAME: "metadata",
+            MappingConfigKey.Redash.QUERY_ID: 5,
+            MappingConfigKey.Redash.DATA_SOURCE_NAME: "metadata",
         }
         assert actual == expected
 
@@ -197,9 +197,7 @@ class TestSuccess:
     @pytest.fixture(scope="class")
     def dbt_template(self, configurator: Configurator) -> DbtTemplate:
         return DbtTemplate(
-            mapping_config=configurator.read(
-                prefix=config_key.MAPPING_CONFIG_FILE_PREFIX
-            ),
+            mapping_config=configurator.read(prefix=MAPPING_CONFIG_PREFIX_DEFAULT),
             key="tests/dbt/project_01/target/compiled/project_01/a/example_a.sql",
             project_name="project_01",
         )
@@ -209,10 +207,10 @@ class TestSuccess:
     ):
         actual = configurator.select_mapping_values_by_template(template=dbt_template)
         expected = {
-            config_key.FILE_SUFFIX: (
+            MappingConfigKey.Dbt.FILE_SUFFIX: (
                 "tests/dbt/project_01/target/compiled/project_01/a/example_a.sql"
             ),
-            config_key.PROJECT_NAME: "project_01",
+            MappingConfigKey.Dbt.PROJECT_NAME: "project_01",
         }
         assert actual == expected
 
