@@ -3,8 +3,8 @@ import re
 from typing import Iterator, Optional
 
 from ..config import get_config_value
-from .base import Template, TemplateSource, TemplateSourceType
 from ..key import StairlightConfigKey
+from .base import Template, TemplateSource, TemplateSourceType
 
 
 class FileTemplate(Template):

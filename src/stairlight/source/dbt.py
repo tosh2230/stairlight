@@ -7,8 +7,8 @@ from typing import Iterator
 
 import yaml
 
-from .base import Template, TemplateSource, TemplateSourceType
 from ..key import DbtProjectKey, StairlightConfigKey
+from .base import Template, TemplateSource, TemplateSourceType
 
 
 class DbtTemplate(Template):

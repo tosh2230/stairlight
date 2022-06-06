@@ -4,9 +4,9 @@ from logging import getLogger
 from typing import Union
 
 from .config import (
-    Configurator,
     MAPPING_CONFIG_PREFIX_DEFAULT,
     STAIRLIGHT_CONFIG_PREFIX_DEFAULT,
+    Configurator,
 )
 from .key import MapKey, MappingConfigKey, StairlightConfigKey
 from .map import Map

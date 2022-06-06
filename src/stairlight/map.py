@@ -1,10 +1,10 @@
 from logging import getLogger
 from typing import Iterator
 
+from .key import MapKey, MappingConfigKey, StairlightConfigKey
 from .query import Query
 from .source.base import Template, TemplateSource, TemplateSourceType
 from .source.controller import get_template_source_class
-from .key import MapKey, MappingConfigKey, StairlightConfigKey
 
 logger = getLogger(__name__)
 

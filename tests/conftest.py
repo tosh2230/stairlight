@@ -5,9 +5,9 @@ from typing import Iterator
 import pytest
 
 from src.stairlight.config import (
-    Configurator,
     MAPPING_CONFIG_PREFIX_DEFAULT,
     STAIRLIGHT_CONFIG_PREFIX_DEFAULT,
+    Configurator,
 )
 from src.stairlight.stairlight import StairLight
 

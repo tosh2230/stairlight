@@ -2,8 +2,8 @@ import os
 
 import pytest
 
-from src.stairlight.key import StairlightConfigKey
 from src.stairlight.config import Configurator
+from src.stairlight.key import StairlightConfigKey
 from src.stairlight.source.redash import (
     RedashTemplate,
     RedashTemplateSource,

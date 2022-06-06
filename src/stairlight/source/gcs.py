@@ -4,9 +4,9 @@ from typing import Iterator, Optional
 from google.cloud import storage
 
 from ..config import get_config_value
+from ..key import StairlightConfigKey
 from .base import Template, TemplateSource, TemplateSourceType
 from .controller import GCS_URI_SCHEME
-from ..key import StairlightConfigKey
 
 
 class GcsTemplate(Template):
