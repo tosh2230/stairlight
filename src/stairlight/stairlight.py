@@ -3,8 +3,9 @@ import json
 from logging import getLogger
 from typing import Union
 
-from . import config_key, map_key
+from . import config_key
 from .config import Configurator
+from .key import MapKey
 from .map import Map
 from .source.controller import LoadMapController, SaveMapController
 
@@ -405,7 +406,7 @@ class StairLight:
             if response_type == ResponseType.TABLE.value:
                 response.append(next_table_name)
             elif response_type == ResponseType.FILE.value:
-                response.append(relative_map[next_table_name].get(map_key.URI))
+                response.append(relative_map[next_table_name].get(MapKey.URI))
             logger.debug(json.dumps(response, indent=2))
 
         return sorted(list(set(response)))

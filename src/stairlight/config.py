@@ -8,7 +8,8 @@ from pathlib import Path
 
 import yaml
 
-from . import config_key, map_key
+from . import config_key
+from .key import MapKey
 from .source.base import Template, TemplateSourceType
 
 logger = logging.getLogger()
@@ -183,7 +184,7 @@ class Configurator:
         # Mapping section
         unmapped_template: dict
         for unmapped_template in unmapped_templates:
-            template: Template = unmapped_template[map_key.TEMPLATE]
+            template: Template = unmapped_template[MapKey.TEMPLATE]
             mapping_values = OrderedDict(
                 {
                     config_key.TEMPLATE_SOURCE_TYPE: template.source_type.value,
@@ -205,8 +206,8 @@ class Configurator:
             ]
 
             # Parameters
-            if map_key.PARAMETERS in unmapped_template:
-                undefined_params: list[str] = unmapped_template.get(map_key.PARAMETERS)
+            if MapKey.PARAMETERS in unmapped_template:
+                undefined_params: list[str] = unmapped_template.get(MapKey.PARAMETERS)
                 parameters = OrderedDict()
                 for undefined_param in undefined_params:
                     splitted_params = undefined_param.split(".")

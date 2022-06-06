@@ -3,12 +3,13 @@ from collections import OrderedDict
 
 import pytest
 
-from src.stairlight import config_key, map_key
+from src.stairlight import config_key
 from src.stairlight.config import (
     ConfigKeyNotFoundException,
     Configurator,
     get_config_value,
 )
+from src.stairlight.key import MapKey
 from src.stairlight.source.dbt import DbtTemplate
 from src.stairlight.source.file import FileTemplate
 from src.stairlight.source.gcs import GcsTemplate
@@ -80,8 +81,8 @@ class TestSuccess:
     ):
         unmapped_templates = [
             {
-                map_key.TEMPLATE: file_template,
-                map_key.PARAMETERS: [
+                MapKey.TEMPLATE: file_template,
+                MapKey.PARAMETERS: [
                     "params.main_table",
                     "params.sub_table_01",
                     "params.sub_table_02",

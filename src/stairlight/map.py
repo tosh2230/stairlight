@@ -1,10 +1,11 @@
 from logging import getLogger
 from typing import Iterator
 
-from . import config_key, map_key
+from . import config_key
 from .query import Query
 from .source.base import Template, TemplateSource, TemplateSourceType
 from .source.controller import get_template_source_class
+from .key import MapKey
 
 logger = getLogger(__name__)
 
@@ -112,7 +113,7 @@ class Map:
             self.mapped[downstairs] = {}
 
         for upstairs_attributes in query.detect_upstairs_attributes():
-            upstairs: str = upstairs_attributes[map_key.TABLE_NAME]
+            upstairs: str = upstairs_attributes[MapKey.TABLE_NAME]
 
             if not self.mapped[downstairs].get(upstairs):
                 self.mapped[downstairs][upstairs] = self.create_upstairs_value(
@@ -122,10 +123,10 @@ class Map:
                     upstairs=upstairs,
                 )
 
-            self.mapped[downstairs][upstairs][map_key.LINES].append(
+            self.mapped[downstairs][upstairs][MapKey.LINES].append(
                 {
-                    map_key.LINE_NUMBER: upstairs_attributes[map_key.LINE_NUMBER],
-                    map_key.LINE_STRING: upstairs_attributes[map_key.LINE_STRING],
+                    MapKey.LINE_NUMBER: upstairs_attributes[MapKey.LINE_NUMBER],
+                    MapKey.LINE_STRING: upstairs_attributes[MapKey.LINE_STRING],
                 }
             )
 
@@ -179,16 +180,16 @@ class Map:
         """
         metadata_labels = []
         upstairs_values = {
-            map_key.TEMPLATE_SOURCE_TYPE: template.source_type.value,
-            map_key.KEY: template.key,
-            map_key.URI: template.uri,
-            map_key.LINES: [],
+            MapKey.TEMPLATE_SOURCE_TYPE: template.source_type.value,
+            MapKey.KEY: template.key,
+            MapKey.URI: template.uri,
+            MapKey.LINES: [],
         }
 
         if template.source_type == TemplateSourceType.GCS:
-            upstairs_values[map_key.BUCKET_NAME] = template.bucket
+            upstairs_values[MapKey.BUCKET_NAME] = template.bucket
         elif template.source_type == TemplateSourceType.REDASH:
-            upstairs_values[map_key.DATA_SOURCE_NAME] = template.data_source_name
+            upstairs_values[MapKey.DATA_SOURCE_NAME] = template.data_source_name
 
         if metadata:
             metadata_labels = [
@@ -197,17 +198,17 @@ class Map:
                 if m.get(config_key.TABLE_NAME) == upstairs
             ]
         if mapping_labels or metadata_labels:
-            upstairs_values[map_key.LABELS] = {}
+            upstairs_values[MapKey.LABELS] = {}
 
         if mapping_labels:
-            upstairs_values[map_key.LABELS] = {
-                **upstairs_values[map_key.LABELS],
+            upstairs_values[MapKey.LABELS] = {
+                **upstairs_values[MapKey.LABELS],
                 **mapping_labels,
             }
 
         if metadata_labels:
-            upstairs_values[map_key.LABELS] = {
-                **upstairs_values[map_key.LABELS],
+            upstairs_values[MapKey.LABELS] = {
+                **upstairs_values[MapKey.LABELS],
                 **metadata_labels[0],
             }
         return upstairs_values
@@ -226,8 +227,8 @@ class Map:
             params = template.detect_jinja_params(template_str=template_str)
         self.unmapped.append(
             {
-                map_key.TEMPLATE: template,
-                map_key.PARAMETERS: params,
+                MapKey.TEMPLATE: template,
+                MapKey.PARAMETERS: params,
             }
         )
 
