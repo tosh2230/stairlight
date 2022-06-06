@@ -1,6 +1,7 @@
 import json
-import pytest
 from typing import Iterator
+
+import pytest
 
 from src.stairlight import map_key
 from src.stairlight.stairlight import (

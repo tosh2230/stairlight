@@ -1,10 +1,10 @@
-import pytest
 from typing import Iterator
 
-from tests.conftest import teardown_rm_file, teardown_rm_config
+import pytest
 
 import src.stairlight.cli as cli_main
 from stairlight import StairLight
+from tests.conftest import teardown_rm_config, teardown_rm_file
 
 
 @pytest.fixture(scope="session")
