@@ -79,7 +79,8 @@ def stairlight_save(save_file="./tests/test_save_map.json") -> Iterator[StairLig
 @pytest.fixture(scope="session")
 def stairlight_load_and_save() -> Iterator[StairLight]:
     load_files = [
-        "./tests/results/file.json",
+        "./tests/results/file_01.json",
+        "./tests/results/file_02.json",
         "./tests/results/gcs.json",
     ]
     save_file = "./tests/results/actual.json"
