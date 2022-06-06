@@ -3,10 +3,10 @@ from typing import Iterator, Optional
 
 from google.cloud import storage
 
-from .. import config_key
 from ..config import get_config_value
 from .base import Template, TemplateSource, TemplateSourceType
 from .controller import GCS_URI_SCHEME
+from ..key import StairlightConfigKey
 
 
 class GcsTemplate(Template):
@@ -68,25 +68,25 @@ class GcsTemplateSource(TemplateSource):
             Iterator[SQLTemplate]: SQL template file attributes
         """
         project = get_config_value(
-            key=config_key.PROJECT_ID,
+            key=StairlightConfigKey.Gcs.PROJECT_ID,
             target=self.source_attributes,
             fail_if_not_found=False,
             enable_logging=False,
         )
         bucket = get_config_value(
-            key=config_key.BUCKET_NAME,
+            key=StairlightConfigKey.Gcs.BUCKET_NAME,
             target=self.source_attributes,
             fail_if_not_found=True,
             enable_logging=False,
         )
         default_table_prefix = get_config_value(
-            key=config_key.DEFAULT_TABLE_PREFIX,
+            key=StairlightConfigKey.DEFAULT_TABLE_PREFIX,
             target=self.source_attributes,
             fail_if_not_found=False,
             enable_logging=False,
         )
         regex = get_config_value(
-            key=config_key.REGEX,
+            key=StairlightConfigKey.REGEX,
             target=self.source_attributes,
             fail_if_not_found=True,
             enable_logging=False,

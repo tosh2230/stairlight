@@ -3,9 +3,12 @@ import json
 from logging import getLogger
 from typing import Union
 
-from . import config_key
-from .config import Configurator
-from .key import MapKey
+from .config import (
+    Configurator,
+    MAPPING_CONFIG_PREFIX_DEFAULT,
+    STAIRLIGHT_CONFIG_PREFIX_DEFAULT,
+)
+from .key import MapKey, MappingConfigKey, StairlightConfigKey
 from .map import Map
 from .source.controller import LoadMapController, SaveMapController
 
@@ -66,7 +69,7 @@ class StairLight:
         self._unmapped: list[dict] = []
         self._mapping_config: dict = None
         self._stairlight_config = self._configurator.read(
-            prefix=config_key.STAIRLIGHT_CONFIG_FILE_PREFIX
+            prefix=STAIRLIGHT_CONFIG_PREFIX_DEFAULT
         )
 
     def create_map(self) -> None:
@@ -111,18 +114,18 @@ class StairLight:
     def _set_config(self) -> None:
         """Set config"""
         if not self._stairlight_config:
-            logger.warning(
-                f"{config_key.STAIRLIGHT_CONFIG_FILE_PREFIX}.y(a)ml' is not found."
-            )
+            logger.warning(f"{STAIRLIGHT_CONFIG_PREFIX_DEFAULT}.y(a)ml' is not found.")
             return
 
-        mapping_config_prefix = config_key.MAPPING_CONFIG_FILE_PREFIX
-        if config_key.STAIRLIGHT_CONFIG_SETTING_SECTION in self._stairlight_config:
+        mapping_config_prefix = MAPPING_CONFIG_PREFIX_DEFAULT
+        if StairlightConfigKey.SETTING_SECTION in self._stairlight_config:
             settings: dict = self._stairlight_config[
-                config_key.STAIRLIGHT_CONFIG_SETTING_SECTION
+                StairlightConfigKey.SETTING_SECTION
             ]
-            if config_key.MAPPING_PREFIX in settings:
-                mapping_config_prefix: str = settings[config_key.MAPPING_PREFIX]
+            if StairlightConfigKey.MAPPING_PREFIX in settings:
+                mapping_config_prefix: str = settings.get(
+                    StairlightConfigKey.MAPPING_PREFIX
+                )
         self._mapping_config = self._configurator.read(prefix=mapping_config_prefix)
 
     def _write_map(self) -> None:
@@ -138,7 +141,7 @@ class StairLight:
 
         self._unmapped = dependency_map.unmapped
 
-    def init(self, prefix: str = config_key.STAIRLIGHT_CONFIG_FILE_PREFIX) -> str:
+    def init(self, prefix: str = STAIRLIGHT_CONFIG_PREFIX_DEFAULT) -> str:
         """Create Stairlight template file
 
         Args:
@@ -150,7 +153,7 @@ class StairLight:
         """
         return self._configurator.create_stairlight_file(prefix=prefix)
 
-    def check(self, prefix: str = config_key.MAPPING_CONFIG_FILE_PREFIX) -> str:
+    def check(self, prefix: str = MAPPING_CONFIG_PREFIX_DEFAULT) -> str:
         """Check mapped results and create a mapping template file
 
         Args:
@@ -442,25 +445,27 @@ class StairLight:
 
         # "mapping" section in mapping.yaml
         for configurations in self._mapping_config.get(
-            config_key.MAPPING_CONFIG_MAPPING_SECTION
+            MappingConfigKey.MAPPING_SECTION
         ):
-            for table_attributes in configurations.get(config_key.TABLES):
+            for table_attributes in configurations.get(MappingConfigKey.TABLES):
                 if self.is_target_label_found(
                     target_labels=target_labels,
-                    configured_labels=table_attributes.get(config_key.LABELS, {}),
+                    configured_labels=table_attributes.get(MappingConfigKey.LABELS, {}),
                 ):
-                    tables_to_search.append(table_attributes[config_key.TABLE_NAME])
+                    tables_to_search.append(
+                        table_attributes[MappingConfigKey.TABLE_NAME]
+                    )
 
         # "metadata" section in mapping.yaml
         table_attributes: dict
         for table_attributes in self._mapping_config.get(
-            config_key.MAPPING_CONFIG_METADATA_SECTION
+            MappingConfigKey.METADATA_SECTION
         ):
             if self.is_target_label_found(
                 target_labels=target_labels,
-                configured_labels=table_attributes.get(config_key.LABELS, {}),
+                configured_labels=table_attributes.get(MappingConfigKey.LABELS, {}),
             ):
-                tables_to_search.append(table_attributes[config_key.TABLE_NAME])
+                tables_to_search.append(table_attributes[MappingConfigKey.TABLE_NAME])
 
         return tables_to_search
 

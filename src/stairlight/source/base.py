@@ -7,7 +7,7 @@ from typing import Iterator, Optional
 from jinja2 import BaseLoader, Environment
 from jinja2.exceptions import UndefinedError
 
-from .. import config_key
+from ..key import MappingConfigKey, StairlightConfigKey
 
 
 class TemplateSourceType(enum.Enum):
@@ -62,14 +62,14 @@ class Template(ABC):
         Yields:
             Iterator[dict]: Mapped table attributes
         """
-        for mapping in self._mapping_config.get(
-            config_key.MAPPING_CONFIG_MAPPING_SECTION
-        ):
+        for mapping in self._mapping_config.get(MappingConfigKey.MAPPING_SECTION):
             has_suffix = False
-            if self.key and mapping.get(config_key.FILE_SUFFIX):
-                has_suffix = self.key.endswith(mapping.get(config_key.FILE_SUFFIX))
-            if has_suffix or self.uri == mapping.get(config_key.URI):
-                for table_attributes in mapping.get(config_key.TABLES):
+            if self.key and mapping.get(MappingConfigKey.File.FILE_SUFFIX):
+                has_suffix = self.key.endswith(
+                    mapping.get(MappingConfigKey.File.FILE_SUFFIX)
+                )
+            if has_suffix or self.uri == mapping.get(MappingConfigKey.Gcs.URI):
+                for table_attributes in mapping.get(MappingConfigKey.TABLES):
                     yield table_attributes
                 break
 
@@ -227,15 +227,13 @@ class TemplateSource(ABC):
             bool: Return True if the specified file is out of scope
         """
         result = False
-        exclude_list = self._stairlight_config.get(
-            config_key.STAIRLIGHT_CONFIG_EXCLUDE_SECTION
-        )
+        exclude_list = self._stairlight_config.get(StairlightConfigKey.EXCLUDE_SECTION)
         if not exclude_list:
             return result
         for exclude in exclude_list:
             if source_type.value == exclude.get(
-                config_key.TEMPLATE_SOURCE_TYPE
-            ) and re.search(rf"{exclude.get(config_key.REGEX)}", key):
+                StairlightConfigKey.TEMPLATE_SOURCE_TYPE
+            ) and re.search(rf"{exclude.get(StairlightConfigKey.REGEX)}", key):
                 result = True
                 break
         return result

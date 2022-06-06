@@ -8,11 +8,13 @@ from pathlib import Path
 
 import yaml
 
-from . import config_key
-from .key import MapKey
+from .key import MapKey, MappingConfigKey, StairlightConfigKey
 from .source.base import Template, TemplateSourceType
 
 logger = logging.getLogger()
+
+STAIRLIGHT_CONFIG_PREFIX_DEFAULT = "stairlight"
+MAPPING_CONFIG_PREFIX_DEFAULT = "mapping"
 
 
 class Configurator:
@@ -46,7 +48,7 @@ class Configurator:
         return config
 
     def create_stairlight_file(
-        self, prefix: str = config_key.STAIRLIGHT_CONFIG_FILE_PREFIX
+        self, prefix: str = STAIRLIGHT_CONFIG_PREFIX_DEFAULT
     ) -> str:
         """Create a Stairlight template file
 
@@ -65,7 +67,7 @@ class Configurator:
     def create_mapping_file(
         self,
         unmapped: "list[dict]",
-        prefix: str = config_key.MAPPING_CONFIG_FILE_PREFIX,
+        prefix: str = MAPPING_CONFIG_PREFIX_DEFAULT,
     ) -> str:
         """Create a mapping template file
 
@@ -108,55 +110,58 @@ class Configurator:
         """
         include_section_file = OrderedDict(
             {
-                config_key.TEMPLATE_SOURCE_TYPE: TemplateSourceType.FILE.value,
-                config_key.FILE_SYSTEM_PATH: None,
-                config_key.REGEX: None,
-                config_key.DEFAULT_TABLE_PREFIX: None,
+                StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.FILE.value,
+                StairlightConfigKey.File.FILE_SYSTEM_PATH: None,
+                StairlightConfigKey.REGEX: None,
+                StairlightConfigKey.DEFAULT_TABLE_PREFIX: None,
             }
         )
         include_section_gcs = OrderedDict(
             {
-                config_key.TEMPLATE_SOURCE_TYPE: TemplateSourceType.GCS.value,
-                config_key.PROJECT_ID: None,
-                config_key.BUCKET_NAME: None,
-                config_key.REGEX: None,
-                config_key.DEFAULT_TABLE_PREFIX: None,
+                StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.GCS.value,
+                StairlightConfigKey.Gcs.PROJECT_ID: None,
+                StairlightConfigKey.Gcs.BUCKET_NAME: None,
+                StairlightConfigKey.REGEX: None,
+                StairlightConfigKey.DEFAULT_TABLE_PREFIX: None,
             }
         )
         include_section_redash = OrderedDict(
             {
-                config_key.TEMPLATE_SOURCE_TYPE: TemplateSourceType.REDASH.value,
-                config_key.DATABASE_URL_ENVIRONMENT_VARIABLE: "REDASH_DATABASE_URL",
-                config_key.DATA_SOURCE_NAME: None,
-                config_key.QUERY_IDS: {},
+                StairlightConfigKey.TEMPLATE_SOURCE_TYPE: (
+                    TemplateSourceType.REDASH.value
+                ),
+                StairlightConfigKey.Redash.DATABASE_URL_ENV_VAR: "REDASH_DATABASE_URL",
+                StairlightConfigKey.Redash.DATA_SOURCE_NAME: None,
+                StairlightConfigKey.Redash.QUERY_IDS: {},
             }
         )
         include_section_dbt = OrderedDict(
             {
-                config_key.TEMPLATE_SOURCE_TYPE: TemplateSourceType.DBT.value,
-                config_key.DBT_PROJECT_DIR: None,
-                config_key.DBT_PROFILES_DIR: None,
-                config_key.DBT_PROFILE: None,
+                StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.DBT.value,
+                StairlightConfigKey.Dbt.PROJECT_DIR: None,
+                StairlightConfigKey.Dbt.PROFILES_DIR: None,
+                StairlightConfigKey.Dbt.TARGET: None,
+                StairlightConfigKey.Dbt.VARS: OrderedDict({"key": "value"}),
             }
         )
         return OrderedDict(
             {
-                config_key.STAIRLIGHT_CONFIG_INCLUDE_SECTION: [
+                StairlightConfigKey.INCLUDE_SECTION: [
                     include_section_file,
                     include_section_gcs,
                     include_section_redash,
                     include_section_dbt,
                 ],
-                config_key.STAIRLIGHT_CONFIG_EXCLUDE_SECTION: [
+                StairlightConfigKey.EXCLUDE_SECTION: [
                     OrderedDict(
                         {
-                            config_key.TEMPLATE_SOURCE_TYPE: None,
-                            config_key.DEFAULT_TABLE_PREFIX: None,
+                            StairlightConfigKey.TEMPLATE_SOURCE_TYPE: None,
+                            StairlightConfigKey.DEFAULT_TABLE_PREFIX: None,
                         }
                     )
                 ],
-                config_key.STAIRLIGHT_CONFIG_SETTING_SECTION: {
-                    config_key.MAPPING_PREFIX: config_key.MAPPING_CONFIG_FILE_PREFIX
+                StairlightConfigKey.SETTING_SECTION: {
+                    StairlightConfigKey.MAPPING_PREFIX: MAPPING_CONFIG_PREFIX_DEFAULT
                 },
             }
         )
@@ -172,8 +177,8 @@ class Configurator:
         """
         mapping_config_dict = OrderedDict(
             {
-                config_key.MAPPING_CONFIG_GLOBAL_SECTION: [],
-                config_key.MAPPING_CONFIG_MAPPING_SECTION: [],
+                MappingConfigKey.GLOBAL_SECTION: [],
+                MappingConfigKey.MAPPING_SECTION: [],
             }
         )
 
@@ -187,7 +192,7 @@ class Configurator:
             template: Template = unmapped_template[MapKey.TEMPLATE]
             mapping_values = OrderedDict(
                 {
-                    config_key.TEMPLATE_SOURCE_TYPE: template.source_type.value,
+                    MappingConfigKey.TEMPLATE_SOURCE_TYPE: template.source_type.value,
                 }
             )
             mapping_values.update(
@@ -195,10 +200,10 @@ class Configurator:
             )
 
             # Tables
-            mapping_values[config_key.TABLES] = [
+            mapping_values[MappingConfigKey.TABLES] = [
                 OrderedDict(
                     {
-                        config_key.TABLE_NAME: self.get_default_table_name(
+                        MappingConfigKey.TABLE_NAME: self.get_default_table_name(
                             template=template
                         )
                     }
@@ -214,8 +219,8 @@ class Configurator:
                     create_nested_dict(keys=splitted_params, results=parameters)
 
                 if parameters:
-                    mapping_values[config_key.TABLES][0][
-                        config_key.PARAMETERS
+                    mapping_values[MappingConfigKey.TABLES][0][
+                        MappingConfigKey.PARAMETERS
                     ] = parameters
 
                 if parameters in parameters_set:
@@ -224,25 +229,23 @@ class Configurator:
                     parameters_set.append(parameters)
 
             # Labels
-            mapping_values[config_key.TABLES][0][config_key.LABELS] = OrderedDict(
-                {"key": "value"}
-            )
+            mapping_values[MappingConfigKey.TABLES][0][
+                MappingConfigKey.LABELS
+            ] = OrderedDict({"key": "value"})
 
-            mapping_config_dict[config_key.MAPPING_CONFIG_MAPPING_SECTION].append(
-                mapping_values
-            )
+            mapping_config_dict[MappingConfigKey.MAPPING_SECTION].append(mapping_values)
 
         # Global section
-        mapping_config_dict[config_key.MAPPING_CONFIG_GLOBAL_SECTION] = OrderedDict(
-            deepcopy({config_key.PARAMETERS: global_parameters})
+        mapping_config_dict[MappingConfigKey.GLOBAL_SECTION] = OrderedDict(
+            deepcopy({MappingConfigKey.PARAMETERS: global_parameters})
         )
 
         # Metadata section
-        mapping_config_dict[config_key.MAPPING_CONFIG_METADATA_SECTION] = [
+        mapping_config_dict[MappingConfigKey.METADATA_SECTION] = [
             OrderedDict(
                 {
-                    config_key.TABLE_NAME: None,
-                    config_key.LABELS: OrderedDict({"key": "value"}),
+                    MappingConfigKey.TABLE_NAME: None,
+                    MappingConfigKey.LABELS: OrderedDict({"key": "value"}),
                 }
             )
         ]
@@ -253,16 +256,18 @@ class Configurator:
     def select_mapping_values_by_template(template: Template) -> dict:
         mapping_values: dict = {}
         if template.source_type == TemplateSourceType.FILE:
-            mapping_values[config_key.FILE_SUFFIX] = template.key
+            mapping_values[MappingConfigKey.File.FILE_SUFFIX] = template.key
         elif template.source_type == TemplateSourceType.GCS:
-            mapping_values[config_key.URI] = template.uri
-            mapping_values[config_key.BUCKET_NAME] = template.bucket
+            mapping_values[MappingConfigKey.Gcs.URI] = template.uri
+            mapping_values[MappingConfigKey.Gcs.BUCKET_NAME] = template.bucket
         elif template.source_type == TemplateSourceType.REDASH:
-            mapping_values[config_key.QUERY_ID] = template.query_id
-            mapping_values[config_key.DATA_SOURCE_NAME] = template.data_source_name
+            mapping_values[MappingConfigKey.Redash.QUERY_ID] = template.query_id
+            mapping_values[
+                MappingConfigKey.Redash.DATA_SOURCE_NAME
+            ] = template.data_source_name
         elif template.source_type == TemplateSourceType.DBT:
-            mapping_values[config_key.PROJECT_NAME] = template.project_name
-            mapping_values[config_key.FILE_SUFFIX] = template.key
+            mapping_values[MappingConfigKey.Dbt.PROJECT_NAME] = template.project_name
+            mapping_values[MappingConfigKey.Dbt.FILE_SUFFIX] = template.key
         return mapping_values
 
     @staticmethod

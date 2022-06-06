@@ -7,8 +7,8 @@ from typing import Iterator
 
 import yaml
 
-from .. import config_key
 from .base import Template, TemplateSource, TemplateSourceType
+from ..key import DbtProjectKey, StairlightConfigKey
 
 
 class DbtTemplate(Template):
@@ -65,19 +65,23 @@ class DbtTemplateSource(TemplateSource):
         self.REGEX_SCHEMA_TEST_FILE = re.compile(r".*/schema.yml/.*\.sql$")
 
     def search_templates(self) -> Iterator[Template]:
-        project_dir: str = self.source_attributes.get(config_key.DBT_PROJECT_DIR)
-        profiles_dir: str = self.source_attributes.get(config_key.DBT_PROFILES_DIR)
+        project_dir: str = self.source_attributes.get(
+            StairlightConfigKey.Dbt.PROJECT_DIR
+        )
+        profiles_dir: str = self.source_attributes.get(
+            StairlightConfigKey.Dbt.PROFILES_DIR
+        )
         dbt_project_config: dict = self.read_dbt_project_yml(project_dir=project_dir)
 
         _ = self.execute_dbt_compile(
             project_dir=project_dir,
             profiles_dir=profiles_dir,
-            profile=dbt_project_config.get(config_key.DBT_PROFILE),
-            target=self.source_attributes.get(config_key.DBT_TARGET),
-            vars=self.source_attributes.get(config_key.DBT_VARS),
+            profile=dbt_project_config.get(DbtProjectKey.PROFILE),
+            target=self.source_attributes.get(StairlightConfigKey.Dbt.TARGET),
+            vars=self.source_attributes.get(StairlightConfigKey.Dbt.VARS),
         )
 
-        for model_path in dbt_project_config[config_key.DBT_MODEL_PATHS]:
+        for model_path in dbt_project_config[DbtProjectKey.MODEL_PATHS]:
             dbt_model_path_str = self.concat_dbt_model_path_str(
                 project_dir=project_dir,
                 dbt_project_config=dbt_project_config,
@@ -96,7 +100,7 @@ class DbtTemplateSource(TemplateSource):
                 yield DbtTemplate(
                     mapping_config=self._mapping_config,
                     key=str(obj),
-                    project_name=dbt_project_config[config_key.DBT_PROJECT_NAME],
+                    project_name=dbt_project_config[DbtProjectKey.PROJECT_NAME],
                 )
 
     @staticmethod
@@ -107,9 +111,9 @@ class DbtTemplateSource(TemplateSource):
     ) -> str:
         return (
             f"{project_dir}/"
-            f"{dbt_project_config[config_key.DBT_TARGET_PATH]}/"
+            f"{dbt_project_config[DbtProjectKey.TARGET_PATH]}/"
             "compiled/"
-            f"{dbt_project_config[config_key.DBT_PROJECT_NAME]}/"
+            f"{dbt_project_config[DbtProjectKey.PROJECT_NAME]}/"
             f"{model_path}/"
         )
 

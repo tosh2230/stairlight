@@ -4,8 +4,11 @@ from typing import Iterator
 
 import pytest
 
-from src.stairlight import config_key
-from src.stairlight.config import Configurator
+from src.stairlight.config import (
+    Configurator,
+    MAPPING_CONFIG_PREFIX_DEFAULT,
+    STAIRLIGHT_CONFIG_PREFIX_DEFAULT,
+)
 from src.stairlight.stairlight import StairLight
 
 
@@ -16,12 +19,12 @@ def configurator() -> Configurator:
 
 @pytest.fixture(scope="session")
 def stairlight_config(configurator: Configurator) -> dict:
-    return configurator.read(prefix=config_key.STAIRLIGHT_CONFIG_FILE_PREFIX)
+    return configurator.read(prefix=STAIRLIGHT_CONFIG_PREFIX_DEFAULT)
 
 
 @pytest.fixture(scope="session")
 def mapping_config(configurator: Configurator) -> dict:
-    return configurator.read(prefix=config_key.MAPPING_CONFIG_FILE_PREFIX)
+    return configurator.read(prefix=MAPPING_CONFIG_PREFIX_DEFAULT)
 
 
 @pytest.fixture(scope="session")

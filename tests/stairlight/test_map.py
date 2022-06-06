@@ -1,7 +1,6 @@
 import pytest
 
-from src.stairlight import config_key
-from src.stairlight.key import MapKey
+from src.stairlight.key import MapKey, MappingConfigKey
 from src.stairlight.map import Map, create_dict_key_list
 
 
@@ -68,7 +67,7 @@ class TestSuccess:
 
     def test_merge_global_params_global_only(self, dependency_map: Map):
         table_attributes = {
-            config_key.TABLE_NAME: "PROJECT_g.DATASET_g.TABLE_g",
+            MappingConfigKey.TABLE_NAME: "PROJECT_g.DATASET_g.TABLE_g",
         }
         actual = dependency_map.merge_global_params(table_attributes=table_attributes)
         expected = dependency_map.get_global_params(key=MapKey.PARAMETERS)
@@ -76,8 +75,8 @@ class TestSuccess:
 
     def test_merge_global_params_by_table(self, dependency_map: Map):
         table_attributes = {
-            config_key.TABLE_NAME: "PROJECT_g.DATASET_g.TABLE_g",
-            config_key.PARAMETERS: {
+            MappingConfigKey.TABLE_NAME: "PROJECT_g.DATASET_g.TABLE_g",
+            MappingConfigKey.PARAMETERS: {
                 "params": {
                     "PROJECT": "PROJECT_BY_TABLE",
                     "DATASET": "DATASET_BY_TABLE",
