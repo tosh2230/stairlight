@@ -1,6 +1,7 @@
 import pytest
 
 from src.stairlight.key import StairlightConfigKey
+from src.stairlight.source.base import Template
 from src.stairlight.source.dbt import DbtTemplate, DbtTemplateSource, TemplateSourceType
 
 
@@ -105,8 +106,8 @@ class TestDbtTemplateSource:
     def dbt_templates(
         self,
         dbt_template_source: DbtTemplateSource,
-    ) -> "list[DbtTemplate]":
-        dbt_templates: list[DbtTemplate] = []
+    ) -> "list[Template]":
+        dbt_templates: list[Template] = []
         for dbt_template in dbt_template_source.search_templates():
             dbt_templates.append(dbt_template)
         return dbt_templates

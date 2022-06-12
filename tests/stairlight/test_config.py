@@ -91,7 +91,7 @@ class TestSuccess:
             }
         ]
 
-        global_value = OrderedDict({MappingConfigKey.PARAMETERS: {}})
+        global_value: OrderedDict = OrderedDict({MappingConfigKey.PARAMETERS: {}})
         mapping_value = OrderedDict(
             {
                 MappingConfigKey.TEMPLATE_SOURCE_TYPE: file_template.source_type.value,

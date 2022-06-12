@@ -1,5 +1,6 @@
 import pytest
 
+from src.stairlight.source.base import Template
 from src.stairlight.key import MapKey, MappingConfigKey
 from src.stairlight.map import Map, create_dict_key_list
 
@@ -47,9 +48,9 @@ class TestSuccess:
     ):
         actual = []
         for unmapped_attributes in dependency_map.unmapped:
-            template = unmapped_attributes.get(MapKey.TEMPLATE)
+            template: Template = unmapped_attributes.get(MapKey.TEMPLATE, None)
             if template.key == key:
-                actual = sorted(unmapped_attributes.get(MapKey.PARAMETERS))
+                actual = sorted(unmapped_attributes.get(MapKey.PARAMETERS, []))
                 break
         assert actual == expected
 

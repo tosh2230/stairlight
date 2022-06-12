@@ -7,7 +7,7 @@ from .key import MapKey
 class Query:
     """SQL query"""
 
-    def __init__(self, query_str: str = None, default_table_prefix: str = None) -> None:
+    def __init__(self, query_str: str, default_table_prefix: str = None) -> None:
         """SQL query
 
         Args:

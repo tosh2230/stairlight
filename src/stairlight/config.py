@@ -5,6 +5,7 @@ from collections import OrderedDict
 from copy import deepcopy
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 
 import yaml
 
@@ -35,7 +36,7 @@ class Configurator:
         Returns:
             dict: Results from reading configuration file
         """
-        config = None
+        config: dict = {}
         pattern = f"^{self.dir}/{prefix}.ya?ml$"
         config_file = [
             p
@@ -108,7 +109,7 @@ class Configurator:
         Returns:
             OrderedDict: stairlight.config template
         """
-        include_section_file = OrderedDict(
+        include_section_file: OrderedDict = OrderedDict(
             {
                 StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.FILE.value,
                 StairlightConfigKey.File.FILE_SYSTEM_PATH: None,
@@ -116,7 +117,7 @@ class Configurator:
                 StairlightConfigKey.DEFAULT_TABLE_PREFIX: None,
             }
         )
-        include_section_gcs = OrderedDict(
+        include_section_gcs: OrderedDict = OrderedDict(
             {
                 StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.GCS.value,
                 StairlightConfigKey.Gcs.PROJECT_ID: None,
@@ -125,7 +126,7 @@ class Configurator:
                 StairlightConfigKey.DEFAULT_TABLE_PREFIX: None,
             }
         )
-        include_section_redash = OrderedDict(
+        include_section_redash: OrderedDict = OrderedDict(
             {
                 StairlightConfigKey.TEMPLATE_SOURCE_TYPE: (
                     TemplateSourceType.REDASH.value
@@ -135,7 +136,7 @@ class Configurator:
                 StairlightConfigKey.Redash.QUERY_IDS: {},
             }
         )
-        include_section_dbt = OrderedDict(
+        include_section_dbt: OrderedDict = OrderedDict(
             {
                 StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.DBT.value,
                 StairlightConfigKey.Dbt.PROJECT_DIR: None,
@@ -175,7 +176,7 @@ class Configurator:
         Returns:
             OrderedDict: mapping.yaml template
         """
-        mapping_config_dict = OrderedDict(
+        mapping_config_dict: OrderedDict = OrderedDict(
             {
                 MappingConfigKey.GLOBAL_SECTION: [],
                 MappingConfigKey.MAPPING_SECTION: [],
@@ -190,7 +191,7 @@ class Configurator:
         unmapped_template: dict
         for unmapped_template in unmapped_templates:
             template: Template = unmapped_template[MapKey.TEMPLATE]
-            mapping_values = OrderedDict(
+            mapping_values: OrderedDict = OrderedDict(
                 {
                     MappingConfigKey.TEMPLATE_SOURCE_TYPE: template.source_type.value,
                 }
@@ -212,8 +213,10 @@ class Configurator:
 
             # Parameters
             if MapKey.PARAMETERS in unmapped_template:
-                undefined_params: list[str] = unmapped_template.get(MapKey.PARAMETERS)
-                parameters = OrderedDict()
+                undefined_params: list[str] = unmapped_template.get(
+                    MapKey.PARAMETERS, []
+                )
+                parameters: OrderedDict = OrderedDict()
                 for undefined_param in undefined_params:
                     splitted_params = undefined_param.split(".")
                     create_nested_dict(keys=splitted_params, results=parameters)
@@ -272,7 +275,7 @@ class Configurator:
 
     @staticmethod
     def get_default_table_name(template: Template) -> str:
-        default_table_name: str = None
+        default_table_name: str = ""
         if template.source_type == TemplateSourceType.REDASH:
             default_table_name = template.uri
         else:
@@ -281,7 +284,7 @@ class Configurator:
 
 
 def create_nested_dict(
-    keys: "list[str]", results: OrderedDict, density: int = 0, default_value: any = None
+    keys: "list[str]", results: OrderedDict, density: int = 0, default_value: Any = None
 ) -> None:
     """create nested dict from list
 
@@ -313,7 +316,7 @@ def get_config_value(
     target: dict,
     fail_if_not_found: bool = False,
     enable_logging: bool = False,
-) -> any:
+) -> Any:
     value = target.get(key)
     if not value:
         msg = f"{key} is not found in the configuration: {target}"

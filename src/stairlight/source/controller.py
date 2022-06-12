@@ -19,7 +19,7 @@ def get_template_source_class(template_source_type: str) -> TemplateSource:
     Returns:
         TemplateSource: Template source class
     """
-    template_source: TemplateSource = None
+    template_source: TemplateSource
     if template_source_type == TemplateSourceType.FILE.value:
         if not find_spec("FileTemplateSource"):
             from .file import FileTemplateSource

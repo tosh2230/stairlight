@@ -1,6 +1,6 @@
 import enum
 import re
-from abc import ABC
+from abc import ABC, abstractmethod
 from logging import getLogger
 from typing import Iterator, Optional
 
@@ -62,14 +62,16 @@ class Template(ABC):
         Yields:
             Iterator[dict]: Mapped table attributes
         """
-        for mapping in self._mapping_config.get(MappingConfigKey.MAPPING_SECTION):
+        mapping: dict
+        for mapping in self._mapping_config.get(MappingConfigKey.MAPPING_SECTION, {}):
             has_suffix = False
             if self.key and mapping.get(MappingConfigKey.File.FILE_SUFFIX):
                 has_suffix = self.key.endswith(
-                    mapping.get(MappingConfigKey.File.FILE_SUFFIX)
+                    mapping.get(MappingConfigKey.File.FILE_SUFFIX, "")
                 )
             if has_suffix or self.uri == mapping.get(MappingConfigKey.Gcs.URI):
-                for table_attributes in mapping.get(MappingConfigKey.TABLES):
+                table_attributes: dict
+                for table_attributes in mapping.get(MappingConfigKey.TABLES, {}):
                     yield table_attributes
                 break
 
@@ -102,7 +104,7 @@ class Template(ABC):
 
     @staticmethod
     def render_by_base_loader(
-        source_type: str, key: str, template_str: str, params: dict
+        source_type: TemplateSourceType, key: str, template_str: str, params: dict
     ) -> str:
         """Render query string from template string
 
@@ -156,6 +158,7 @@ class Template(ABC):
         """Get uri"""
         return ""
 
+    @abstractmethod
     def get_template_str(self) -> str:
         """Get template strings that read from template source"""
         return ""
@@ -168,6 +171,8 @@ class Template(ABC):
         Returns:
             str: SQL query string
         """
+        if not ignore_params:
+            ignore_params = []
         template_str = self.get_template_str()
         replaced_template_str = self.ignore_params_from_template_str(
             template_str=template_str,
@@ -208,6 +213,7 @@ class TemplateSource(ABC):
         self._stairlight_config = stairlight_config
         self._mapping_config = mapping_config
 
+    @abstractmethod
     def search_templates(self) -> Iterator[Template]:
         """Search SQL template files
 

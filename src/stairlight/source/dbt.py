@@ -66,10 +66,10 @@ class DbtTemplateSource(TemplateSource):
 
     def search_templates(self) -> Iterator[Template]:
         project_dir: str = self.source_attributes.get(
-            StairlightConfigKey.Dbt.PROJECT_DIR
+            StairlightConfigKey.Dbt.PROJECT_DIR, ""
         )
         profiles_dir: str = self.source_attributes.get(
-            StairlightConfigKey.Dbt.PROFILES_DIR
+            StairlightConfigKey.Dbt.PROFILES_DIR, ""
         )
         dbt_project_config: dict = self.read_dbt_project_yml(project_dir=project_dir)
 

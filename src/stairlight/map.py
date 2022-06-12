@@ -54,11 +54,12 @@ class Map:
             Iterator[TemplateSource]: Template source instance
         """
         source_attributes: dict
-        for source_attributes in stairlight_config.get(
-            StairlightConfigKey.INCLUDE_SECTION
-        ):
+        include_section: list[dict] = stairlight_config.get(
+            StairlightConfigKey.INCLUDE_SECTION, []
+        )
+        for source_attributes in include_section:
             template_source_type: str = source_attributes.get(
-                StairlightConfigKey.TEMPLATE_SOURCE_TYPE
+                StairlightConfigKey.TEMPLATE_SOURCE_TYPE, ""
             )
             template_source: TemplateSource = get_template_source_class(
                 template_source_type=template_source_type
@@ -102,9 +103,11 @@ class Map:
             default_table_prefix=template.default_table_prefix,
         )
 
-        downstairs: str = table_attributes.get(MappingConfigKey.TABLE_NAME)
-        mapping_labels: dict = table_attributes.get(MappingConfigKey.LABELS)
-        metadata: list[str] = self.mapping_config.get(MappingConfigKey.METADATA_SECTION)
+        downstairs: str = table_attributes.get(MappingConfigKey.TABLE_NAME, "")
+        mapping_labels: dict = table_attributes.get(MappingConfigKey.LABELS, {})
+        metadata: list[dict] = self.mapping_config.get(
+            MappingConfigKey.METADATA_SECTION, []
+        )
 
         if downstairs not in self.mapped:
             self.mapped[downstairs] = {}
@@ -134,9 +137,11 @@ class Map:
             dict: global parameters
         """
         global_params: dict = {}
-        global_section: dict = self.mapping_config.get(MappingConfigKey.GLOBAL_SECTION)
+        global_section: dict = self.mapping_config.get(
+            MappingConfigKey.GLOBAL_SECTION, {}
+        )
         if MappingConfigKey.PARAMETERS in global_section:
-            global_params = global_section.get(key)
+            global_params = global_section.get(key, {})
 
         return global_params
 
@@ -159,7 +164,7 @@ class Map:
     def create_upstairs_value(
         template: Template,
         mapping_labels: dict,
-        metadata: "list[str]",
+        metadata: "list[dict]",
         upstairs: str,
     ) -> dict:
         """create upstairs table information
@@ -173,7 +178,7 @@ class Map:
         Returns:
             dict: upstairs table information
         """
-        metadata_labels = []
+        metadata_labels: list[dict] = []
         upstairs_values = {
             MapKey.TEMPLATE_SOURCE_TYPE: template.source_type.value,
             MapKey.KEY: template.key,
@@ -188,7 +193,7 @@ class Map:
 
         if metadata:
             metadata_labels = [
-                m.get(MappingConfigKey.LABELS)
+                m.get(MappingConfigKey.LABELS, {})
                 for m in metadata
                 if m.get(MappingConfigKey.TABLE_NAME) == upstairs
             ]

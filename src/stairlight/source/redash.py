@@ -17,12 +17,12 @@ class RedashTemplate(Template):
         mapping_config: dict,
         query_id: int,
         query_name: str,
-        query_str: str = None,
-        data_source_name: str = None,
+        query_str: str = "",
+        data_source_name: str = "",
     ):
         super().__init__(
             mapping_config=mapping_config,
-            key=query_id,
+            key=str(query_id),
             source_type=TemplateSourceType.REDASH,
         )
         self.query_id = query_id
@@ -36,7 +36,7 @@ class RedashTemplate(Template):
         Yields:
             Iterator[dict]: Mapped table attributes
         """
-        for mapping in self._mapping_config.get(MappingConfigKey.MAPPING_SECTION):
+        for mapping in self._mapping_config.get(MappingConfigKey.MAPPING_SECTION, {}):
             if (
                 mapping.get(MappingConfigKey.Redash.QUERY_ID) == self.query_id
                 and mapping.get(MappingConfigKey.Redash.DATA_SOURCE_NAME)
@@ -63,8 +63,8 @@ class RedashTemplateSource(TemplateSource):
         )
         self.source_type = TemplateSourceType.REDASH
         self.source_attributes = source_attributes
-        self.where_clause = []
-        self.conditions = self.make_conditions()
+        self.where_clause: list[str] = []
+        self.conditions: dict = self.make_conditions()
 
     def make_conditions(self) -> dict:
         data_source_name = get_config_value(
@@ -110,16 +110,18 @@ class RedashTemplateSource(TemplateSource):
             self.build_query_string(path=f"{current_dir}/{sql_file_name}")
         )
 
-        data_source_condition = self.conditions.get(
-            StairlightConfigKey.Redash.DATA_SOURCE_NAME
+        data_source_condition: dict = self.conditions.get(
+            StairlightConfigKey.Redash.DATA_SOURCE_NAME, {}
         )
-        query_ids_condition = self.conditions.get(StairlightConfigKey.Redash.QUERY_IDS)
+        query_ids_condition: dict = self.conditions.get(
+            StairlightConfigKey.Redash.QUERY_IDS, {}
+        )
         connection_str = self.get_connection_str()
         engine = create_engine(connection_str)
         queries = engine.execute(
             query_text,
-            data_source=data_source_condition.get("parameters"),
-            query_ids=query_ids_condition.get("parameters"),
+            data_source=data_source_condition.get("parameters", ""),
+            query_ids=query_ids_condition.get("parameters", []),
         ).fetchall()
 
         return queries
@@ -142,7 +144,7 @@ class RedashTemplateSource(TemplateSource):
             fail_if_not_found=True,
             enable_logging=False,
         )
-        connection_str = os.environ.get(environment_variable_name)
+        connection_str = os.environ.get(environment_variable_name, "")
         if not connection_str:
             logger.error(f"{environment_variable_name} is not found.")
         return connection_str

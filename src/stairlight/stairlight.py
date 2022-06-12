@@ -50,7 +50,7 @@ class StairLight:
         self,
         config_dir: str = ".",
         load_files: "list[str]" = None,
-        save_file: str = None,
+        save_file: str = "",
     ) -> None:
         """Table dependency detector
 
@@ -63,11 +63,11 @@ class StairLight:
                 A file name of saving results if save option set. Defaults to None.
         """
         self.load_files = load_files
-        self.save_file = save_file
+        self.save_file: str = save_file
         self._configurator = Configurator(dir=config_dir)
-        self._mapped = {}
+        self._mapped: dict = {}
         self._unmapped: list[dict] = []
-        self._mapping_config: dict = None
+        self._mapping_config: dict = {}
         self._stairlight_config = self._configurator.read(
             prefix=STAIRLIGHT_CONFIG_PREFIX_DEFAULT
         )
@@ -117,14 +117,14 @@ class StairLight:
             logger.warning(f"{STAIRLIGHT_CONFIG_PREFIX_DEFAULT}.y(a)ml' is not found.")
             return
 
-        mapping_config_prefix = MAPPING_CONFIG_PREFIX_DEFAULT
+        mapping_config_prefix: str = MAPPING_CONFIG_PREFIX_DEFAULT
         if StairlightConfigKey.SETTING_SECTION in self._stairlight_config:
             settings: dict = self._stairlight_config[
                 StairlightConfigKey.SETTING_SECTION
             ]
             if StairlightConfigKey.MAPPING_PREFIX in settings:
-                mapping_config_prefix: str = settings.get(
-                    StairlightConfigKey.MAPPING_PREFIX
+                mapping_config_prefix = settings.get(
+                    StairlightConfigKey.MAPPING_PREFIX, ""
                 )
         self._mapping_config = self._configurator.read(prefix=mapping_config_prefix)
 
@@ -165,9 +165,9 @@ class StairLight:
         """
         if self.load_files:
             logger.warning("Load option is used, skip checking.")
-            return None
+            return ""
         elif not self._unmapped:
-            return None
+            return ""
 
         return self._configurator.create_mapping_file(
             unmapped=self._unmapped, prefix=prefix
@@ -182,6 +182,8 @@ class StairLight:
 
     def load_map(self) -> None:
         """Load mapped results"""
+        if not self.load_files:
+            return
         for load_file in self.load_files:
             load_map_controller = LoadMapController(load_file=load_file)
             loaded_map = load_map_controller.load()
@@ -284,7 +286,7 @@ class StairLight:
                 head=True,
             )
 
-        return None
+        return []
 
     def search_verbose(
         self,
@@ -309,7 +311,7 @@ class StairLight:
         relative_map = self.create_relative_map(
             table_name=table_name, direction=direction
         )
-        response = {table_name: {}}
+        response: dict = {table_name: {}}
         if not relative_map:
             return response
 
@@ -346,7 +348,6 @@ class StairLight:
                 }
 
         response[table_name][direction.value] = relative_map
-        logger.debug(json.dumps(response, indent=2))
         return response
 
     def search_plain(
@@ -382,7 +383,7 @@ class StairLight:
         for next_table_name in relative_map.keys():
             if recursive:
                 if head:
-                    searched_tables: list[str] = []
+                    searched_tables = []
                     searched_tables.append(table_name)
 
                 searched_tables.append(next_table_name)
@@ -424,9 +425,9 @@ class StairLight:
         Returns:
             dict: Relative map
         """
-        relative_map = {}
+        relative_map: dict = {}
         if direction == SearchDirection.UP:
-            relative_map = self._mapped.get(table_name)
+            relative_map = self._mapped.get(table_name, {})
         elif direction == SearchDirection.DOWN:
             for key in [k for k, v in self._mapped.items() if v.get(table_name)]:
                 relative_map[key] = self._mapped[key][table_name]
@@ -445,9 +446,9 @@ class StairLight:
 
         # "mapping" section in mapping.yaml
         for configurations in self._mapping_config.get(
-            MappingConfigKey.MAPPING_SECTION
+            MappingConfigKey.MAPPING_SECTION, {}
         ):
-            for table_attributes in configurations.get(MappingConfigKey.TABLES):
+            for table_attributes in configurations.get(MappingConfigKey.TABLES, {}):
                 if self.is_target_label_found(
                     target_labels=target_labels,
                     configured_labels=table_attributes.get(MappingConfigKey.LABELS, {}),
@@ -457,9 +458,8 @@ class StairLight:
                     )
 
         # "metadata" section in mapping.yaml
-        table_attributes: dict
         for table_attributes in self._mapping_config.get(
-            MappingConfigKey.METADATA_SECTION
+            MappingConfigKey.METADATA_SECTION, {}
         ):
             if self.is_target_label_found(
                 target_labels=target_labels,
@@ -498,7 +498,7 @@ def is_cyclic(tables: "list[str]") -> bool:
     Returns:
         bool: Table dependencies are cyclic or not
     """
-    nodes = {}
+    nodes: dict = {}
     for table in tables:
         if table not in nodes.keys():
             nodes[table] = Node(table)
@@ -526,7 +526,7 @@ def deep_merge(org: dict, add: dict) -> dict:
     """
     new: dict = org
     for add_key, add_value in add.items():
-        org_value = org.get(add_key)
+        org_value: dict = org.get(add_key, {})
         if add_key not in org:
             new[add_key] = add_value
         elif isinstance(add_value, dict):
