@@ -40,6 +40,11 @@ line_length = 88
 [tool.poetry.scripts]
 stairlight = "stairlight.cli:main"
 
+[tool.pytest.ini_options]
+addopts = "-rsxX -l --strict-markers"
+norecursedirs = "*.egg .* _darcs build CVS dist node_modules venv {arch} img scripts src"
+xfail_strict = true
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
