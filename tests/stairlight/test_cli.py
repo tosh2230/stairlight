@@ -110,11 +110,11 @@ class TestSuccess:
     def test_main(self, monkeypatch, capfd):
         monkeypatch.setattr("sys.argv", ["", "-c", "tests/config"])
         cli_main.main()
-        out, _ = capfd.readouterr()
-        assert len(out) > 0
+        out, err = capfd.readouterr()
+        assert len(out) > 0 and len(err) == 0
 
     def test_main_quiet(self, monkeypatch, capfd):
         monkeypatch.setattr("sys.argv", ["", "-c", "tests/config", "-q"])
         cli_main.main()
-        out, _ = capfd.readouterr()
-        assert len(out) == 0
+        out, err = capfd.readouterr()
+        assert len(out) == 0 and len(err) == 0
