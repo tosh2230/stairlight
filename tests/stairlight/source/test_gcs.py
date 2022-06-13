@@ -1,3 +1,5 @@
+from typing import Any
+
 import pytest
 
 from src.stairlight.key import StairlightConfigKey
@@ -13,8 +15,8 @@ class TestGcsTemplateSource:
     @pytest.fixture(scope="class")
     def gcs_template_source(
         self,
-        stairlight_config: dict,
-        mapping_config: dict,
+        stairlight_config: dict[str, Any],
+        mapping_config: dict[str, Any],
     ) -> GcsTemplateSource:
         source_attributes = {
             StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.GCS.value,
@@ -57,10 +59,10 @@ class TestGcsTemplate:
     @pytest.fixture(scope="function")
     def gcs_template(
         self,
-        mapping_config: dict,
+        mapping_config: dict[str, Any],
         bucket: str,
         key: str,
-        params: dict,
+        params: dict[str, Any],
         expected: str,
         ignore_params: "list[str]",
     ) -> GcsTemplate:
@@ -94,7 +96,7 @@ class TestGcsTemplate:
     def test_render(
         self,
         gcs_template: GcsTemplate,
-        params: dict,
+        params: dict[str, Any],
         expected: str,
         ignore_params: "list[str]",
     ):

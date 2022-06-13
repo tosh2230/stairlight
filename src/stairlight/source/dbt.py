@@ -3,7 +3,7 @@ import pathlib
 import re
 import shlex
 import subprocess
-from typing import Iterator
+from typing import Any, Iterator
 
 import yaml
 
@@ -14,7 +14,7 @@ from .base import Template, TemplateSource, TemplateSourceType
 class DbtTemplate(Template):
     def __init__(
         self,
-        mapping_config: dict,
+        mapping_config: dict[str, Any],
         key: str,
         project_name: str,
     ):
@@ -43,7 +43,9 @@ class DbtTemplate(Template):
         with open(self.key) as f:
             return f.read()
 
-    def render(self, params: dict = None, ignore_params: "list[str]" = None) -> str:
+    def render(
+        self, params: dict[str, Any] = None, ignore_params: "list[str]" = None
+    ) -> str:
         return self.get_template_str()
 
 
@@ -53,9 +55,9 @@ class DbtTemplateSource(TemplateSource):
 
     def __init__(
         self,
-        stairlight_config: dict,
-        mapping_config: dict,
-        source_attributes: dict,
+        stairlight_config: dict[str, Any],
+        mapping_config: dict[str, Any],
+        source_attributes: dict[str, Any],
     ) -> None:
         super().__init__(
             stairlight_config=stairlight_config,
@@ -71,7 +73,9 @@ class DbtTemplateSource(TemplateSource):
         profiles_dir: str = self._source_attributes.get(
             StairlightConfigKey.Dbt.PROFILES_DIR, ""
         )
-        dbt_project_config: dict = self.read_dbt_project_yml(project_dir=project_dir)
+        dbt_project_config: dict[str, Any] = self.read_dbt_project_yml(
+            project_dir=project_dir
+        )
 
         _ = self.execute_dbt_compile(
             project_dir=project_dir,
@@ -106,7 +110,7 @@ class DbtTemplateSource(TemplateSource):
     @staticmethod
     def concat_dbt_model_path_str(
         project_dir: str,
-        dbt_project_config: dict,
+        dbt_project_config: dict[str, Any],
         model_path: pathlib.Path,
     ) -> str:
         return (
@@ -123,7 +127,7 @@ class DbtTemplateSource(TemplateSource):
         profiles_dir: str,
         profile: str = None,
         target: str = None,
-        vars: dict = None,
+        vars: dict[str, Any] = None,
     ) -> int:
         command = (
             "dbt compile "

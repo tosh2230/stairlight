@@ -1,3 +1,5 @@
+from typing import Any
+
 import pytest
 
 from src.stairlight.key import StairlightConfigKey
@@ -15,7 +17,7 @@ class TestDbtTemplate:
     @pytest.fixture(scope="function")
     def dbt_template(
         self,
-        mapping_config: dict,
+        mapping_config: dict[str, Any],
         key: str,
     ):
         return DbtTemplate(
@@ -53,12 +55,12 @@ class TestDbtTemplateSource:
     @pytest.fixture(scope="function")
     def dbt_template_source(
         self,
-        stairlight_config: dict,
-        mapping_config: dict,
+        stairlight_config: dict[str, Any],
+        mapping_config: dict[str, Any],
         project_dir: str,
         profiles_dir: str,
         target: str,
-        vars: dict,
+        vars: dict[str, Any],
         profile: str,
         project_name: str,
     ) -> DbtTemplateSource:
@@ -82,7 +84,7 @@ class TestDbtTemplateSource:
         profiles_dir: str,
         profile: str,
         target: str,
-        vars: dict,
+        vars: dict[str, Any],
     ):
         actual = dbt_template_source.execute_dbt_compile(
             project_dir=project_dir,

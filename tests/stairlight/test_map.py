@@ -1,12 +1,16 @@
+from typing import Any
+
 import pytest
 
-from src.stairlight.source.base import Template
 from src.stairlight.key import MapKey, MappingConfigKey
 from src.stairlight.map import Map, create_dict_key_list
+from src.stairlight.source.base import Template
 
 
 @pytest.fixture(scope="session")
-def dependency_map(stairlight_config: dict, mapping_config: dict) -> Map:
+def dependency_map(
+    stairlight_config: dict[str, Any], mapping_config: dict[str, Any]
+) -> Map:
     dependency_map = Map(
         stairlight_config=stairlight_config, mapping_config=mapping_config
     )

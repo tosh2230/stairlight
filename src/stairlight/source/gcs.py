@@ -1,5 +1,5 @@
 import re
-from typing import Iterator, Optional
+from typing import Any, Iterator, Optional
 
 from google.cloud import storage
 
@@ -12,7 +12,7 @@ from .controller import GCS_URI_SCHEME
 class GcsTemplate(Template):
     def __init__(
         self,
-        mapping_config: dict,
+        mapping_config: dict[str, Any],
         key: str,
         bucket: Optional[str] = None,
         project: Optional[str] = None,
@@ -50,7 +50,10 @@ class GcsTemplate(Template):
 
 class GcsTemplateSource(TemplateSource):
     def __init__(
-        self, stairlight_config: dict, mapping_config: dict, source_attributes: dict
+        self,
+        stairlight_config: dict[str, Any],
+        mapping_config: dict[str, Any],
+        source_attributes: dict[str, Any],
     ) -> None:
         super().__init__(
             stairlight_config=stairlight_config,

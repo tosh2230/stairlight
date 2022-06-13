@@ -1,12 +1,12 @@
 from logging import getLogger
-from typing import Iterator, Type
+from typing import Any, Iterator, Type
 
 from .key import MapKey, MappingConfigKey, StairlightConfigKey
 from .query import Query
 from .source.base import Template, TemplateSource
+from .source.controller import get_template_source_class
 from .source.gcs import GcsTemplate
 from .source.redash import RedashTemplate
-from .source.controller import get_template_source_class
 
 logger = getLogger(__name__)
 
@@ -15,7 +15,10 @@ class Map:
     """Manages functions related to dependency map objects"""
 
     def __init__(
-        self, stairlight_config: dict, mapping_config: dict, mapped: dict = None
+        self,
+        stairlight_config: dict[str, Any],
+        mapping_config: dict[str, Any],
+        mapped: dict[str, Any] = None,
     ) -> None:
         """Manages functions related to dependency map objects
 
@@ -44,7 +47,7 @@ class Map:
 
     @staticmethod
     def find_template_source(
-        stairlight_config: dict, mapping_config: dict
+        stairlight_config: dict[str, Any], mapping_config: dict[str, Any]
     ) -> Iterator[TemplateSource]:
         """find template source
 
@@ -55,7 +58,7 @@ class Map:
         Yields:
             Iterator[TemplateSource]: Template source instance
         """
-        source_attributes: dict
+        source_attributes: dict[str, Any]
         include_section: list[dict] = stairlight_config.get(
             StairlightConfigKey.INCLUDE_SECTION, []
         )
@@ -106,8 +109,10 @@ class Map:
         )
 
         downstairs: str = table_attributes.get(MappingConfigKey.TABLE_NAME, "")
-        mapping_labels: dict = table_attributes.get(MappingConfigKey.LABELS, {})
-        metadata: list[dict] = self.mapping_config.get(
+        mapping_labels: dict[Any, Any] = table_attributes.get(
+            MappingConfigKey.LABELS, {}
+        )
+        metadata: list[dict[Any, Any]] = self.mapping_config.get(
             MappingConfigKey.METADATA_SECTION, []
         )
 
@@ -138,8 +143,8 @@ class Map:
         Returns:
             dict: global parameters
         """
-        global_params: dict = {}
-        global_section: dict = self.mapping_config.get(
+        global_params: dict[str, Any] = {}
+        global_section: dict[str, Any] = self.mapping_config.get(
             MappingConfigKey.GLOBAL_SECTION, {}
         )
         if MappingConfigKey.PARAMETERS in global_section:
@@ -147,17 +152,21 @@ class Map:
 
         return global_params
 
-    def merge_global_params(self, table_attributes: dict) -> dict:
+    def merge_global_params(self, table_attributes: dict[str, Any]) -> dict:
         """return a combination of global parameters and table parameters
 
         Args:
-            table_attributes (dict): table attributes
+            table_attributes (dict[str, Any]): table attributes
 
         Returns:
             dict: combined parameters
         """
-        global_params: dict = self.get_global_params(key=MappingConfigKey.PARAMETERS)
-        table_params: dict = table_attributes.get(MappingConfigKey.PARAMETERS, {})
+        global_params: dict[str, Any] = self.get_global_params(
+            key=MappingConfigKey.PARAMETERS
+        )
+        table_params: dict[str, Any] = table_attributes.get(
+            MappingConfigKey.PARAMETERS, {}
+        )
 
         # Table parameters are prioritized over global parameters
         return {**global_params, **table_params}
@@ -165,8 +174,8 @@ class Map:
     @staticmethod
     def create_upstairs_value(
         template: Template,
-        mapping_labels: dict,
-        metadata: "list[dict]",
+        mapping_labels: dict[str, Any],
+        metadata: "list[dict[str, Any]]",
         upstairs: str,
     ) -> dict:
         """create upstairs table information
@@ -180,7 +189,7 @@ class Map:
         Returns:
             dict: upstairs table information
         """
-        metadata_labels: list[dict] = []
+        metadata_labels: list[dict[str, Any]] = []
         upstairs_values = {
             MapKey.TEMPLATE_SOURCE_TYPE: template.source_type.value,
             MapKey.KEY: template.key,
@@ -248,7 +257,7 @@ class Map:
         if not template_params:
             return
 
-        mapped_params_dict: dict = self.merge_global_params(
+        mapped_params_dict: dict[str, Any] = self.merge_global_params(
             table_attributes=table_attributes
         )
         mapped_params: list[str] = create_dict_key_list(d=mapped_params_dict)
@@ -263,11 +272,11 @@ class Map:
             self.add_unmapped_params(template=template, params=diff_params)
 
 
-def create_dict_key_list(d: dict, delimiter: str = ".") -> "list[str]":
+def create_dict_key_list(d: dict[str, Any], delimiter: str = ".") -> "list[str]":
     """combine nested dictionary keys and converts to a list
 
     Args:
-        d (dict): dict
+        d (dict): dict[str, Any]
 
     Returns:
         list: results

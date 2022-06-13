@@ -1,5 +1,4 @@
-from argparse import ArgumentParser
-from typing import Iterator, Union
+from typing import Any, Iterator, Union
 
 import pytest
 
@@ -114,7 +113,7 @@ class TestSuccess:
         results: Union[dict, list[dict]] = cli_main.command_down(
             stairlight=stairlight_save, args=args
         )
-        actual: dict
+        actual: dict[str, Any]
         if isinstance(results, dict):
             actual = results
         elif isinstance(results, list):

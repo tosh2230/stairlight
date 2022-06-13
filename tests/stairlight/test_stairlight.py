@@ -1,5 +1,5 @@
 import json
-from typing import Iterator
+from typing import Any, Iterator
 
 import pytest
 
@@ -242,9 +242,9 @@ class TestStairLight:
 
     def test_multiple_load_and_save(self, stairlight_load_and_save: StairLight):
         stairlight_load_and_save.load_map()
-        actual: dict = stairlight_load_and_save.mapped
+        actual: dict[str, Any] = stairlight_load_and_save.mapped
         with open("tests/results/merged.json", "r") as f:
-            expected: dict = json.load(f)
+            expected: dict[str, Any] = json.load(f)
         assert actual == expected
 
 

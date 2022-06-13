@@ -36,7 +36,7 @@ class Configurator:
         Returns:
             dict: Results from reading configuration file
         """
-        config: dict = {}
+        config: dict[str, Any] = {}
         pattern = f"^{self.dir}/{prefix}.ya?ml$"
         config_file = [
             p
@@ -185,10 +185,10 @@ class Configurator:
 
         # List(instead of Set) because OrderedDict is not hashable
         parameters_set: list[OrderedDict] = []
-        global_parameters: dict = {}
+        global_parameters: dict[str, Any] = {}
 
         # Mapping section
-        unmapped_template: dict
+        unmapped_template: dict[str, Any]
         for unmapped_template in unmapped_templates:
             template: Template = unmapped_template[MapKey.TEMPLATE]
             mapping_values: OrderedDict = OrderedDict(
@@ -257,7 +257,7 @@ class Configurator:
 
     @staticmethod
     def select_mapping_values_by_template(template: Template) -> dict:
-        mapping_values: dict = {}
+        mapping_values: dict[str, Any] = {}
 
         # To avoid circular imports
         from .source.dbt import DbtTemplate
@@ -320,7 +320,7 @@ class ConfigKeyNotFoundException(Exception):
 
 def get_config_value(
     key: str,
-    target: dict,
+    target: dict[Any, Any],
     fail_if_not_found: bool = False,
     enable_logging: bool = False,
 ) -> Any:

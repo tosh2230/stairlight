@@ -1,7 +1,7 @@
 import enum
 import json
 from logging import getLogger
-from typing import Union
+from typing import Any, Union
 
 from .config import (
     MAPPING_CONFIG_PREFIX_DEFAULT,
@@ -28,8 +28,8 @@ class ResponseType(enum.Enum):
 class SearchDirection(enum.Enum):
     """Enum: Search direction"""
 
-    UP = "Upstairs"
-    DOWN = "Downstairs"
+    UP: str = "Upstairs"
+    DOWN: str = "Downstairs"
 
     def __str__(self):
         return self.name
@@ -38,9 +38,9 @@ class SearchDirection(enum.Enum):
 class Node:
     """A Node of singly-linked list"""
 
-    def __init__(self, val, next=None):
-        self.val = val
-        self.next = None
+    def __init__(self, val: str, next: "Node" = None):
+        self.val: str = val
+        self.next: "Node" = None
 
 
 class StairLight:
@@ -65,9 +65,9 @@ class StairLight:
         self.load_files = load_files
         self.save_file: str = save_file
         self._configurator = Configurator(dir=config_dir)
-        self._mapped: dict = {}
+        self._mapped: dict[str, Any] = {}
         self._unmapped: list[dict] = []
-        self._mapping_config: dict = {}
+        self._mapping_config: dict[str, Any] = {}
         self._stairlight_config = self._configurator.read(
             prefix=STAIRLIGHT_CONFIG_PREFIX_DEFAULT
         )
@@ -119,7 +119,7 @@ class StairLight:
 
         mapping_config_prefix: str = MAPPING_CONFIG_PREFIX_DEFAULT
         if StairlightConfigKey.SETTING_SECTION in self._stairlight_config:
-            settings: dict = self._stairlight_config[
+            settings: dict[str, Any] = self._stairlight_config[
                 StairlightConfigKey.SETTING_SECTION
             ]
             if StairlightConfigKey.MAPPING_PREFIX in settings:
@@ -311,7 +311,7 @@ class StairLight:
         relative_map = self.create_relative_map(
             table_name=table_name, direction=direction
         )
-        response: dict = {table_name: {}}
+        response: dict[str, Any] = {table_name: {}}
         if not relative_map:
             return response
 
@@ -425,7 +425,7 @@ class StairLight:
         Returns:
             dict: Relative map
         """
-        relative_map: dict = {}
+        relative_map: dict[str, Any] = {}
         if direction == SearchDirection.UP:
             relative_map = self._mapped.get(table_name, {})
         elif direction == SearchDirection.DOWN:
@@ -471,7 +471,7 @@ class StairLight:
 
     @staticmethod
     def is_target_label_found(
-        target_labels: "list[str]", configured_labels: dict
+        target_labels: "list[str]", configured_labels: dict[str, Any]
     ) -> bool:
         found_count: int = 0
         configured_label_key: str
@@ -498,7 +498,7 @@ def is_cyclic(tables: "list[str]") -> bool:
     Returns:
         bool: Table dependencies are cyclic or not
     """
-    nodes: dict = {}
+    nodes: dict[str, Node] = {}
     for table in tables:
         if table not in nodes.keys():
             nodes[table] = Node(table)
@@ -514,19 +514,19 @@ def is_cyclic(tables: "list[str]") -> bool:
     return False
 
 
-def deep_merge(org: dict, add: dict) -> dict:
+def deep_merge(org: dict[str, Any], add: dict[str, Any]) -> dict:
     """Merge nested dicts
 
     Args:
-        org (dict): original dict
-        add (dict): dict to add
+        org (dict[str, Any]): original dict
+        add (dict[str, Any]): dict to add
 
     Returns:
         dict: merged dict
     """
-    new: dict = org
+    new: dict[str, Any] = org
     for add_key, add_value in add.items():
-        org_value: dict = org.get(add_key, {})
+        org_value: dict[str, Any] = org.get(add_key, {})
         if add_key not in org:
             new[add_key] = add_value
         elif isinstance(add_value, dict):

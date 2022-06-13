@@ -2,7 +2,7 @@ import enum
 import re
 from abc import ABC, abstractmethod
 from logging import getLogger
-from typing import Iterator, Optional
+from typing import Any, Iterator, Optional
 
 from jinja2 import BaseLoader, Environment
 from jinja2.exceptions import UndefinedError
@@ -27,7 +27,7 @@ class Template(ABC):
 
     def __init__(
         self,
-        mapping_config: dict,
+        mapping_config: dict[str, Any],
         key: str,
         source_type: TemplateSourceType,
         bucket: Optional[str] = None,
@@ -37,7 +37,7 @@ class Template(ABC):
         """SQL template
 
         Args:
-            mapping_config (dict): Mapping configuration
+            mapping_config (dict[str, Any]): Mapping configuration
             key (str): SQL file key
             source_type (SourceType): Source type
             bucket (Optional[str], optional):
@@ -62,7 +62,7 @@ class Template(ABC):
         Yields:
             Iterator[dict]: Mapped table attributes
         """
-        mapping: dict
+        mapping: dict[str, Any]
         for mapping in self._mapping_config.get(MappingConfigKey.MAPPING_SECTION, {}):
             has_suffix = False
             if self.key and mapping.get(MappingConfigKey.File.FILE_SUFFIX):
@@ -70,7 +70,7 @@ class Template(ABC):
                     mapping.get(MappingConfigKey.File.FILE_SUFFIX, "")
                 )
             if has_suffix or self.uri == mapping.get(MappingConfigKey.Gcs.URI):
-                table_attributes: dict
+                table_attributes: dict[str, Any]
                 for table_attributes in mapping.get(MappingConfigKey.TABLES, {}):
                     yield table_attributes
                 break
@@ -104,7 +104,10 @@ class Template(ABC):
 
     @staticmethod
     def render_by_base_loader(
-        source_type: TemplateSourceType, key: str, template_str: str, params: dict
+        source_type: TemplateSourceType,
+        key: str,
+        template_str: str,
+        params: dict[str, Any],
     ) -> str:
         """Render query string from template string
 
@@ -112,7 +115,7 @@ class Template(ABC):
             source_type (str): source type
             key (str): key path
             template_str (str): template string
-            params (dict): parameters
+            params (dict[str, Any]): parameters
 
         Raises:
             RenderingTemplateException: class RenderingTemplateException
@@ -163,10 +166,10 @@ class Template(ABC):
         """Get template strings that read from template source"""
         return ""
 
-    def render(self, params: dict, ignore_params: "list[str]" = None) -> str:
+    def render(self, params: dict[str, Any], ignore_params: "list[str]" = None) -> str:
         """Render SQL query string from a jinja template on Redash queries
         Args:
-            params (dict): Jinja parameters
+            params (dict[str, Any]): Jinja parameters
             ignore_params (list[str]): Ignore parameters
         Returns:
             str: SQL query string
@@ -204,13 +207,17 @@ class TemplateSource(ABC):
     logger = getLogger(__name__)
 
     def __init__(
-        self, stairlight_config: dict, mapping_config: dict, source_attributes: dict
+        self,
+        stairlight_config: dict[str, Any],
+        mapping_config: dict[str, Any],
+        source_attributes: dict[str, Any],
     ) -> None:
         """SQL template source
 
         Args:
-            stairlight_config (dict): Stairlight configuration
-            mapping_config (dict): Mapping configuration
+            stairlight_config (dict[str, Any]): Stairlight configuration
+            mapping_config (dict[str, Any]): Mapping configuration
+            source_attributes (dict[str, Any]): Template source attributes
         """
         self._stairlight_config = stairlight_config
         self._mapping_config = mapping_config
