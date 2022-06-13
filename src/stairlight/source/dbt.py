@@ -48,6 +48,9 @@ class DbtTemplate(Template):
 
 
 class DbtTemplateSource(TemplateSource):
+    DBT_PROJECT_YAML = "dbt_project.yml"
+    REGEX_SCHEMA_TEST_FILE = re.compile(r".*/schema.yml/.*\.sql$")
+
     def __init__(
         self,
         stairlight_config: dict,
@@ -57,18 +60,15 @@ class DbtTemplateSource(TemplateSource):
         super().__init__(
             stairlight_config=stairlight_config,
             mapping_config=mapping_config,
+            source_attributes=source_attributes,
         )
-        self.source_attributes = source_attributes
         self.source_type = TemplateSourceType.DBT
 
-        self.DBT_PROJECT_YAML = "dbt_project.yml"
-        self.REGEX_SCHEMA_TEST_FILE = re.compile(r".*/schema.yml/.*\.sql$")
-
     def search_templates(self) -> Iterator[Template]:
-        project_dir: str = self.source_attributes.get(
+        project_dir: str = self._source_attributes.get(
             StairlightConfigKey.Dbt.PROJECT_DIR, ""
         )
-        profiles_dir: str = self.source_attributes.get(
+        profiles_dir: str = self._source_attributes.get(
             StairlightConfigKey.Dbt.PROFILES_DIR, ""
         )
         dbt_project_config: dict = self.read_dbt_project_yml(project_dir=project_dir)
@@ -77,8 +77,8 @@ class DbtTemplateSource(TemplateSource):
             project_dir=project_dir,
             profiles_dir=profiles_dir,
             profile=dbt_project_config.get(DbtProjectKey.PROFILE),
-            target=self.source_attributes.get(StairlightConfigKey.Dbt.TARGET),
-            vars=self.source_attributes.get(StairlightConfigKey.Dbt.VARS),
+            target=self._source_attributes.get(StairlightConfigKey.Dbt.TARGET),
+            vars=self._source_attributes.get(StairlightConfigKey.Dbt.VARS),
         )
 
         for model_path in dbt_project_config[DbtProjectKey.MODEL_PATHS]:

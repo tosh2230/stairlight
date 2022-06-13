@@ -258,17 +258,24 @@ class Configurator:
     @staticmethod
     def select_mapping_values_by_template(template: Template) -> dict:
         mapping_values: dict = {}
-        if template.source_type == TemplateSourceType.FILE:
+
+        # To avoid circular imports
+        from .source.dbt import DbtTemplate
+        from .source.file import FileTemplate
+        from .source.gcs import GcsTemplate
+        from .source.redash import RedashTemplate
+
+        if isinstance(template, FileTemplate):
             mapping_values[MappingConfigKey.File.FILE_SUFFIX] = template.key
-        elif template.source_type == TemplateSourceType.GCS:
+        elif isinstance(template, GcsTemplate):
             mapping_values[MappingConfigKey.Gcs.URI] = template.uri
             mapping_values[MappingConfigKey.Gcs.BUCKET_NAME] = template.bucket
-        elif template.source_type == TemplateSourceType.REDASH:
+        elif isinstance(template, RedashTemplate):
             mapping_values[MappingConfigKey.Redash.QUERY_ID] = template.query_id
             mapping_values[
                 MappingConfigKey.Redash.DATA_SOURCE_NAME
             ] = template.data_source_name
-        elif template.source_type == TemplateSourceType.DBT:
+        elif isinstance(template, DbtTemplate):
             mapping_values[MappingConfigKey.Dbt.PROJECT_NAME] = template.project_name
             mapping_values[MappingConfigKey.Dbt.FILE_SUFFIX] = template.key
         return mapping_values

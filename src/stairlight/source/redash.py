@@ -59,23 +59,24 @@ class RedashTemplateSource(TemplateSource):
         self, stairlight_config: dict, mapping_config: dict, source_attributes: dict
     ) -> None:
         super().__init__(
-            stairlight_config=stairlight_config, mapping_config=mapping_config
+            stairlight_config=stairlight_config,
+            mapping_config=mapping_config,
+            source_attributes=source_attributes,
         )
         self.source_type = TemplateSourceType.REDASH
-        self.source_attributes = source_attributes
         self.where_clause: list[str] = []
         self.conditions: dict = self.make_conditions()
 
     def make_conditions(self) -> dict:
         data_source_name = get_config_value(
             key=StairlightConfigKey.Redash.DATA_SOURCE_NAME,
-            target=self.source_attributes,
+            target=self._source_attributes,
             fail_if_not_found=True,
             enable_logging=False,
         )
         query_ids = get_config_value(
             key=StairlightConfigKey.Redash.QUERY_IDS,
-            target=self.source_attributes,
+            target=self._source_attributes,
             fail_if_not_found=True,
             enable_logging=False,
         )
@@ -129,7 +130,7 @@ class RedashTemplateSource(TemplateSource):
     def build_query_string(self, path: str) -> str:
         base_query_string = self.read_query_from_file(path=path)
         for condition in self.conditions.values():
-            if self.source_attributes.get(condition["key"]):
+            if self._source_attributes.get(condition["key"]):
                 self.where_clause.append(condition["query"])
         return base_query_string + "WHERE " + " AND ".join(self.where_clause)
 
@@ -140,7 +141,7 @@ class RedashTemplateSource(TemplateSource):
     def get_connection_str(self) -> str:
         environment_variable_name = get_config_value(
             key=StairlightConfigKey.Redash.DATABASE_URL_ENV_VAR,
-            target=self.source_attributes,
+            target=self._source_attributes,
             fail_if_not_found=True,
             enable_logging=False,
         )

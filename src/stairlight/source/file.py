@@ -45,9 +45,10 @@ class FileTemplateSource(TemplateSource):
         self, stairlight_config: dict, mapping_config: dict, source_attributes: dict
     ) -> None:
         super().__init__(
-            stairlight_config=stairlight_config, mapping_config=mapping_config
+            stairlight_config=stairlight_config,
+            mapping_config=mapping_config,
+            source_attributes=source_attributes,
         )
-        self.source_attributes = source_attributes
         self.source_type = TemplateSourceType.FILE
 
     def search_templates(self) -> Iterator[Template]:
@@ -61,19 +62,19 @@ class FileTemplateSource(TemplateSource):
         """
         path = get_config_value(
             key=StairlightConfigKey.File.FILE_SYSTEM_PATH,
-            target=self.source_attributes,
+            target=self._source_attributes,
             fail_if_not_found=True,
             enable_logging=False,
         )
         default_table_prefix = get_config_value(
             key=StairlightConfigKey.DEFAULT_TABLE_PREFIX,
-            target=self.source_attributes,
+            target=self._source_attributes,
             fail_if_not_found=False,
             enable_logging=False,
         )
         regex = get_config_value(
             key=StairlightConfigKey.REGEX,
-            target=self.source_attributes,
+            target=self._source_attributes,
             fail_if_not_found=True,
             enable_logging=False,
         )

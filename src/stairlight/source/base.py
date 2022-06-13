@@ -203,7 +203,9 @@ class TemplateSource(ABC):
 
     logger = getLogger(__name__)
 
-    def __init__(self, stairlight_config: dict, mapping_config: dict) -> None:
+    def __init__(
+        self, stairlight_config: dict, mapping_config: dict, source_attributes: dict
+    ) -> None:
         """SQL template source
 
         Args:
@@ -212,6 +214,7 @@ class TemplateSource(ABC):
         """
         self._stairlight_config = stairlight_config
         self._mapping_config = mapping_config
+        self._source_attributes = source_attributes
 
     @abstractmethod
     def search_templates(self) -> Iterator[Template]:

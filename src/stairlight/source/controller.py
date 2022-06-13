@@ -2,6 +2,7 @@ import json
 import os
 from importlib.util import find_spec
 from logging import getLogger
+from typing import Type
 
 from .base import TemplateSource, TemplateSourceType
 
@@ -10,7 +11,7 @@ GCS_URI_SCHEME = "gs://"
 logger = getLogger(__name__)
 
 
-def get_template_source_class(template_source_type: str) -> TemplateSource:
+def get_template_source_class(template_source_type: str) -> Type[TemplateSource]:
     """Get template source class
 
     Args:
@@ -19,7 +20,7 @@ def get_template_source_class(template_source_type: str) -> TemplateSource:
     Returns:
         TemplateSource: Template source class
     """
-    template_source: TemplateSource
+    template_source: Type[TemplateSource]
     if template_source_type == TemplateSourceType.FILE.value:
         if not find_spec("FileTemplateSource"):
             from .file import FileTemplateSource

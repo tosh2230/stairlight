@@ -1,9 +1,11 @@
 from logging import getLogger
-from typing import Iterator
+from typing import Iterator, Type
 
 from .key import MapKey, MappingConfigKey, StairlightConfigKey
 from .query import Query
-from .source.base import Template, TemplateSource, TemplateSourceType
+from .source.base import Template, TemplateSource
+from .source.gcs import GcsTemplate
+from .source.redash import RedashTemplate
 from .source.controller import get_template_source_class
 
 logger = getLogger(__name__)
@@ -61,7 +63,7 @@ class Map:
             template_source_type: str = source_attributes.get(
                 StairlightConfigKey.TEMPLATE_SOURCE_TYPE, ""
             )
-            template_source: TemplateSource = get_template_source_class(
+            template_source: Type[TemplateSource] = get_template_source_class(
                 template_source_type=template_source_type
             )
             if not template_source:
@@ -186,9 +188,9 @@ class Map:
             MapKey.LINES: [],
         }
 
-        if template.source_type == TemplateSourceType.GCS:
+        if isinstance(template, GcsTemplate):
             upstairs_values[MapKey.BUCKET_NAME] = template.bucket
-        elif template.source_type == TemplateSourceType.REDASH:
+        elif isinstance(template, RedashTemplate):
             upstairs_values[MapKey.DATA_SOURCE_NAME] = template.data_source_name
 
         if metadata:
