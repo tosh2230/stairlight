@@ -1,8 +1,9 @@
 import os
 from logging import getLogger
-from typing import Any, Iterator
+from typing import Any, Dict, Iterator, List
 
 from sqlalchemy import create_engine, text
+from sqlalchemy.engine.row import Row
 
 from ..config import get_config_value
 from ..key import MappingConfigKey, StairlightConfigKey
@@ -14,7 +15,7 @@ logger = getLogger(__name__)
 class RedashTemplate(Template):
     def __init__(
         self,
-        mapping_config: dict[str, Any],
+        mapping_config: Dict[str, Any],
         query_id: int,
         query_name: str,
         query_str: str = "",
@@ -30,7 +31,7 @@ class RedashTemplate(Template):
         self.uri = query_name
         self.data_source_name = data_source_name
 
-    def find_mapped_table_attributes(self) -> Iterator[dict]:
+    def find_mapped_table_attributes(self) -> Iterator[Dict[str, Any]]:
         """Get mapped tables as iterator
 
         Yields:
@@ -57,9 +58,9 @@ class RedashTemplate(Template):
 class RedashTemplateSource(TemplateSource):
     def __init__(
         self,
-        stairlight_config: dict[str, Any],
-        mapping_config: dict[str, Any],
-        source_attributes: dict[str, Any],
+        stairlight_config: Dict[str, Any],
+        mapping_config: Dict[str, Any],
+        source_attributes: Dict[str, Any],
     ) -> None:
         super().__init__(
             stairlight_config=stairlight_config,
@@ -67,10 +68,10 @@ class RedashTemplateSource(TemplateSource):
             source_attributes=source_attributes,
         )
         self.source_type = TemplateSourceType.REDASH
-        self.where_clause: list[str] = []
-        self.conditions: dict[str, Any] = self.make_conditions()
+        self.where_clause: List[str] = []
+        self.conditions: Dict[str, Any] = self.make_conditions()
 
-    def make_conditions(self) -> dict[str, Any]:
+    def make_conditions(self) -> Dict[str, Any]:
         data_source_name = get_config_value(
             key=StairlightConfigKey.Redash.DATA_SOURCE_NAME,
             target=self._source_attributes,
@@ -107,17 +108,17 @@ class RedashTemplateSource(TemplateSource):
                 data_source_name=result[3],
             )
 
-    def get_queries_from_redash(self) -> list:
+    def get_queries_from_redash(self) -> List[Row]:
         sql_file_name = "sql/redash_queries.sql"
         current_dir = os.path.dirname(os.path.abspath(__file__))
         query_text = text(
             self.build_query_string(path=f"{current_dir}/{sql_file_name}")
         )
 
-        data_source_condition: dict[str, Any] = self.conditions.get(
+        data_source_condition: Dict[str, Any] = self.conditions.get(
             StairlightConfigKey.Redash.DATA_SOURCE_NAME, {}
         )
-        query_ids_condition: dict[str, Any] = self.conditions.get(
+        query_ids_condition: Dict[str, Any] = self.conditions.get(
             StairlightConfigKey.Redash.QUERY_IDS, {}
         )
         connection_str = self.get_connection_str()

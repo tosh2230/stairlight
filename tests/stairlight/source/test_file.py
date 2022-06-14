@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Dict
 
 import pytest
 
@@ -23,8 +23,8 @@ class TestFileTemplateSource:
     @pytest.fixture(scope="function")
     def file_template_source(
         self,
-        stairlight_config: dict[str, Any],
-        mapping_config: dict[str, Any],
+        stairlight_config: Dict[str, Any],
+        mapping_config: Dict[str, Any],
         key: str,
         expected_is_excluded: bool,
     ) -> FileTemplateSource:
@@ -73,7 +73,7 @@ class TestFileTemplateSourceNoExclude:
     def file_template_source(
         self,
         configurator: Configurator,
-        mapping_config: dict[str, Any],
+        mapping_config: Dict[str, Any],
     ) -> FileTemplateSource:
         stairlight_config = configurator.read(prefix="stairlight_no_exclude")
         source_attributes = {
@@ -105,7 +105,7 @@ class TestFileTemplateKeyNotFound:
     def file_template_source(
         self,
         configurator: Configurator,
-        mapping_config: dict[str, Any],
+        mapping_config: Dict[str, Any],
     ) -> FileTemplateSource:
         stairlight_config = configurator.read(prefix="stairlight_key_not_found")
         source_attributes = {
@@ -137,7 +137,7 @@ class TestFileTemplateMapped:
     @pytest.fixture(scope="function")
     def file_template(
         self,
-        mapping_config: dict[str, Any],
+        mapping_config: Dict[str, Any],
         key: str,
     ):
         return FileTemplate(
@@ -251,7 +251,7 @@ class TestFileTemplateRenderException:
         self,
         file_template: FileTemplate,
         key: str,
-        params: dict[str, Any],
+        params: Dict[str, Any],
     ):
         with pytest.raises(RenderingTemplateException) as exception:
             _ = file_template.render(params=params)

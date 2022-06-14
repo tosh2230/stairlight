@@ -1,7 +1,7 @@
 import argparse
 import json
 import textwrap
-from typing import Callable, Union
+from typing import Any, Callable, Dict, List, Union
 
 from stairlight.stairlight import ResponseType, StairLight
 
@@ -52,7 +52,7 @@ def command_check(stairlight: StairLight, args: argparse.Namespace) -> str:
 
 def command_up(
     stairlight: StairLight, args: argparse.Namespace
-) -> Union[dict, "list[dict]"]:
+) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
     """Execute up command
 
     Args:
@@ -71,7 +71,7 @@ def command_up(
 
 def command_down(
     stairlight: StairLight, args: argparse.Namespace
-) -> Union[dict, "list[dict]"]:
+) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
     """Execute down command
 
     Args:
@@ -89,8 +89,8 @@ def command_down(
 
 
 def search(
-    func: Callable, args: argparse.Namespace, tables: Union[str, "list[str]"]
-) -> Union[dict, "list[dict]"]:
+    func: Callable, args: argparse.Namespace, tables: Union[str, List[str]]
+) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
     """Search tables by executing stairlight.up() or stairlight.down()
 
     Args:
@@ -118,7 +118,7 @@ def search(
 
 def find_tables_to_search(
     stairlight: StairLight, args: argparse.Namespace
-) -> "list[str]":
+) -> List[str]:
     """Find tables to search
 
     Args:

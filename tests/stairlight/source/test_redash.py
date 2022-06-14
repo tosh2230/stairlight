@@ -1,5 +1,5 @@
 import os
-from typing import Any
+from typing import Any, Dict
 
 import pytest
 
@@ -23,7 +23,7 @@ class TestRedashTemplateSource:
     def redash_template_source(
         self,
         configurator: Configurator,
-        mapping_config: dict[str, Any],
+        mapping_config: Dict[str, Any],
         env_key: str,
         path: str,
     ) -> RedashTemplateSource:
@@ -120,8 +120,8 @@ class TestRedashTemplate:
         query_name: str,
         query_str: str,
         data_source_name: str,
-        params: dict[str, Any],
-        mapped_table_attributes: dict[str, Any],
+        params: Dict[str, Any],
+        mapped_table_attributes: Dict[str, Any],
     ) -> RedashTemplate:
         mapping_config = configurator.read(prefix="mapping_redash")
         return RedashTemplate(
@@ -135,7 +135,7 @@ class TestRedashTemplate:
     def test_find_mapped_table_attributes(
         self,
         redash_template: RedashTemplate,
-        mapped_table_attributes: dict[str, Any],
+        mapped_table_attributes: Dict[str, Any],
     ):
         expected = mapped_table_attributes
         actual = {}

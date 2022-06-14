@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Dict, List
 
 import pytest
 
@@ -15,8 +15,8 @@ class TestGcsTemplateSource:
     @pytest.fixture(scope="class")
     def gcs_template_source(
         self,
-        stairlight_config: dict[str, Any],
-        mapping_config: dict[str, Any],
+        stairlight_config: Dict[str, Any],
+        mapping_config: Dict[str, Any],
     ) -> GcsTemplateSource:
         source_attributes = {
             StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.GCS.value,
@@ -59,12 +59,12 @@ class TestGcsTemplate:
     @pytest.fixture(scope="function")
     def gcs_template(
         self,
-        mapping_config: dict[str, Any],
+        mapping_config: Dict[str, Any],
         bucket: str,
         key: str,
-        params: dict[str, Any],
+        params: Dict[str, Any],
         expected: str,
-        ignore_params: "list[str]",
+        ignore_params: List[str],
     ) -> GcsTemplate:
         return GcsTemplate(
             mapping_config=mapping_config,
@@ -96,9 +96,9 @@ class TestGcsTemplate:
     def test_render(
         self,
         gcs_template: GcsTemplate,
-        params: dict[str, Any],
+        params: Dict[str, Any],
         expected: str,
-        ignore_params: "list[str]",
+        ignore_params: List[str],
     ):
         actual = gcs_template.render(params=params, ignore_params=ignore_params)
         assert expected in actual

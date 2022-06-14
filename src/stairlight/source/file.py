@@ -1,6 +1,6 @@
 import pathlib
 import re
-from typing import Any, Iterator, Optional
+from typing import Any, Dict, Iterator, Optional
 
 from ..config import get_config_value
 from ..key import StairlightConfigKey
@@ -10,7 +10,7 @@ from .base import Template, TemplateSource, TemplateSourceType
 class FileTemplate(Template):
     def __init__(
         self,
-        mapping_config: dict[str, Any],
+        mapping_config: Dict[str, Any],
         key: str,
         default_table_prefix: Optional[str] = None,
     ):
@@ -43,9 +43,9 @@ class FileTemplate(Template):
 class FileTemplateSource(TemplateSource):
     def __init__(
         self,
-        stairlight_config: dict[str, Any],
-        mapping_config: dict[str, Any],
-        source_attributes: dict[str, Any],
+        stairlight_config: Dict[str, Any],
+        mapping_config: Dict[str, Any],
+        source_attributes: Dict[str, Any],
     ) -> None:
         super().__init__(
             stairlight_config=stairlight_config,

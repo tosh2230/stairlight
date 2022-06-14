@@ -5,7 +5,7 @@ from collections import OrderedDict
 from copy import deepcopy
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, List
 
 import yaml
 
@@ -27,7 +27,7 @@ class Configurator:
         """
         self.dir = dir
 
-    def read(self, prefix: str) -> dict:
+    def read(self, prefix: str) -> Dict[str, Any]:
         """Read a configuration file
 
         Args:
@@ -36,7 +36,7 @@ class Configurator:
         Returns:
             dict: Results from reading configuration file
         """
-        config: dict[str, Any] = {}
+        config: Dict[str, Any] = {}
         pattern = f"^{self.dir}/{prefix}.ya?ml$"
         config_file = [
             p
@@ -67,7 +67,7 @@ class Configurator:
 
     def create_mapping_file(
         self,
-        unmapped: "list[dict]",
+        unmapped: List[Dict[str, Any]],
         prefix: str = MAPPING_CONFIG_PREFIX_DEFAULT,
     ) -> str:
         """Create a mapping template file
@@ -167,7 +167,9 @@ class Configurator:
             }
         )
 
-    def build_mapping_config(self, unmapped_templates: "list[dict]") -> OrderedDict:
+    def build_mapping_config(
+        self, unmapped_templates: List[Dict[str, Any]]
+    ) -> OrderedDict:
         """Create a OrderedDict for mapping.yaml
 
         Args:
@@ -184,11 +186,11 @@ class Configurator:
         )
 
         # List(instead of Set) because OrderedDict is not hashable
-        parameters_set: list[OrderedDict] = []
-        global_parameters: dict[str, Any] = {}
+        parameters_set: List[OrderedDict] = []
+        global_parameters: Dict[str, Any] = {}
 
         # Mapping section
-        unmapped_template: dict[str, Any]
+        unmapped_template: Dict[str, Any]
         for unmapped_template in unmapped_templates:
             template: Template = unmapped_template[MapKey.TEMPLATE]
             mapping_values: OrderedDict = OrderedDict(
@@ -213,7 +215,7 @@ class Configurator:
 
             # Parameters
             if MapKey.PARAMETERS in unmapped_template:
-                undefined_params: list[str] = unmapped_template.get(
+                undefined_params: List[str] = unmapped_template.get(
                     MapKey.PARAMETERS, []
                 )
                 parameters: OrderedDict = OrderedDict()
@@ -256,8 +258,8 @@ class Configurator:
         return mapping_config_dict
 
     @staticmethod
-    def select_mapping_values_by_template(template: Template) -> dict:
-        mapping_values: dict[str, Any] = {}
+    def select_mapping_values_by_template(template: Template) -> Dict[str, Any]:
+        mapping_values: Dict[str, Any] = {}
 
         # To avoid circular imports
         from .source.dbt import DbtTemplate
@@ -291,7 +293,7 @@ class Configurator:
 
 
 def create_nested_dict(
-    keys: "list[str]", results: OrderedDict, density: int = 0, default_value: Any = None
+    keys: List[str], results: OrderedDict, density: int = 0, default_value: Any = None
 ) -> None:
     """create nested dict from list
 
@@ -320,7 +322,7 @@ class ConfigKeyNotFoundException(Exception):
 
 def get_config_value(
     key: str,
-    target: dict[Any, Any],
+    target: Dict[Any, Any],
     fail_if_not_found: bool = False,
     enable_logging: bool = False,
 ) -> Any:

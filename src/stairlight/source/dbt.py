@@ -3,7 +3,7 @@ import pathlib
 import re
 import shlex
 import subprocess
-from typing import Any, Iterator
+from typing import Any, Dict, Iterator, List
 
 import yaml
 
@@ -14,7 +14,7 @@ from .base import Template, TemplateSource, TemplateSourceType
 class DbtTemplate(Template):
     def __init__(
         self,
-        mapping_config: dict[str, Any],
+        mapping_config: Dict[str, Any],
         key: str,
         project_name: str,
     ):
@@ -44,7 +44,7 @@ class DbtTemplate(Template):
             return f.read()
 
     def render(
-        self, params: dict[str, Any] = None, ignore_params: "list[str]" = None
+        self, params: Dict[str, Any] = None, ignore_params: List[str] = None
     ) -> str:
         return self.get_template_str()
 
@@ -55,9 +55,9 @@ class DbtTemplateSource(TemplateSource):
 
     def __init__(
         self,
-        stairlight_config: dict[str, Any],
-        mapping_config: dict[str, Any],
-        source_attributes: dict[str, Any],
+        stairlight_config: Dict[str, Any],
+        mapping_config: Dict[str, Any],
+        source_attributes: Dict[str, Any],
     ) -> None:
         super().__init__(
             stairlight_config=stairlight_config,
@@ -73,7 +73,7 @@ class DbtTemplateSource(TemplateSource):
         profiles_dir: str = self._source_attributes.get(
             StairlightConfigKey.Dbt.PROFILES_DIR, ""
         )
-        dbt_project_config: dict[str, Any] = self.read_dbt_project_yml(
+        dbt_project_config: Dict[str, Any] = self.read_dbt_project_yml(
             project_dir=project_dir
         )
 
@@ -110,7 +110,7 @@ class DbtTemplateSource(TemplateSource):
     @staticmethod
     def concat_dbt_model_path_str(
         project_dir: str,
-        dbt_project_config: dict[str, Any],
+        dbt_project_config: Dict[str, Any],
         model_path: pathlib.Path,
     ) -> str:
         return (
@@ -127,7 +127,7 @@ class DbtTemplateSource(TemplateSource):
         profiles_dir: str,
         profile: str = None,
         target: str = None,
-        vars: dict[str, Any] = None,
+        vars: Dict[str, Any] = None,
     ) -> int:
         command = (
             "dbt compile "

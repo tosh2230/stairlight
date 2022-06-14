@@ -1,7 +1,7 @@
 import enum
 import json
 from logging import getLogger
-from typing import Any, Union
+from typing import Any, Dict, List, Union
 
 from .config import (
     MAPPING_CONFIG_PREFIX_DEFAULT,
@@ -49,7 +49,7 @@ class StairLight:
     def __init__(
         self,
         config_dir: str = ".",
-        load_files: "list[str]" = None,
+        load_files: List[str] = None,
         save_file: str = "",
     ) -> None:
         """Table dependency detector
@@ -65,9 +65,9 @@ class StairLight:
         self.load_files = load_files
         self.save_file: str = save_file
         self._configurator = Configurator(dir=config_dir)
-        self._mapped: dict[str, Any] = {}
-        self._unmapped: list[dict] = []
-        self._mapping_config: dict[str, Any] = {}
+        self._mapped: Dict[str, Any] = {}
+        self._unmapped: List[Dict[str, Any]] = []
+        self._mapping_config: Dict[str, Any] = {}
         self._stairlight_config = self._configurator.read(
             prefix=STAIRLIGHT_CONFIG_PREFIX_DEFAULT
         )
@@ -86,7 +86,7 @@ class StairLight:
             self.save_map()
 
     @property
-    def mapped(self) -> dict:
+    def mapped(self) -> Dict[str, Any]:
         """Return mapped
 
         Returns:
@@ -95,7 +95,7 @@ class StairLight:
         return self._mapped
 
     @property
-    def unmapped(self) -> "list[dict]":
+    def unmapped(self) -> List[Dict[str, Any]]:
         """Return unmapped
 
         Returns:
@@ -119,7 +119,7 @@ class StairLight:
 
         mapping_config_prefix: str = MAPPING_CONFIG_PREFIX_DEFAULT
         if StairlightConfigKey.SETTING_SECTION in self._stairlight_config:
-            settings: dict[str, Any] = self._stairlight_config[
+            settings: Dict[str, Any] = self._stairlight_config[
                 StairlightConfigKey.SETTING_SECTION
             ]
             if StairlightConfigKey.MAPPING_PREFIX in settings:
@@ -199,7 +199,7 @@ class StairLight:
         recursive: bool = False,
         verbose: bool = False,
         response_type: str = ResponseType.TABLE.value,
-    ) -> Union["list[str]", dict]:
+    ) -> Union[List[str], Dict[str, Any]]:
         """Search upstream nodes
 
         Args:
@@ -226,7 +226,7 @@ class StairLight:
         recursive=False,
         verbose=False,
         response_type=ResponseType.TABLE.value,
-    ) -> Union["list[str]", dict]:
+    ) -> Union[List[str], Dict[str, Any]]:
         """Search downstream nodes
 
         Args:
@@ -254,7 +254,7 @@ class StairLight:
         verbose: bool,
         response_type: str,
         direction: SearchDirection,
-    ) -> Union["list[str]", dict]:
+    ) -> Union[List[str], Dict[str, Any]]:
         """Search nodes
 
         Args:
@@ -293,7 +293,7 @@ class StairLight:
         table_name: str,
         recursive: bool,
         direction: SearchDirection,
-        searched_tables: "list[str]",
+        searched_tables: List[str],
         head: bool,
     ) -> dict:
         """Search nodes and return verbose results
@@ -311,7 +311,7 @@ class StairLight:
         relative_map = self.create_relative_map(
             table_name=table_name, direction=direction
         )
-        response: dict[str, Any] = {table_name: {}}
+        response: Dict[str, Any] = {table_name: {}}
         if not relative_map:
             return response
 
@@ -356,9 +356,9 @@ class StairLight:
         recursive: bool,
         response_type: str,
         direction: SearchDirection,
-        searched_tables: "list[str]",
+        searched_tables: List[str],
         head: bool,
-    ) -> "list[str]":
+    ) -> List[str]:
         """Search nodes and return simple results
 
         Args:
@@ -375,7 +375,7 @@ class StairLight:
         relative_map = self.create_relative_map(
             table_name=table_name, direction=direction
         )
-        response: list[str] = []
+        response: List[str] = []
         if not relative_map:
             return response
 
@@ -415,7 +415,9 @@ class StairLight:
 
         return sorted(list(set(response)))
 
-    def create_relative_map(self, table_name: str, direction: SearchDirection) -> dict:
+    def create_relative_map(
+        self, table_name: str, direction: SearchDirection
+    ) -> Dict[str, Any]:
         """Create a relative map for the specified direction
 
         Args:
@@ -425,7 +427,7 @@ class StairLight:
         Returns:
             dict: Relative map
         """
-        relative_map: dict[str, Any] = {}
+        relative_map: Dict[str, Any] = {}
         if direction == SearchDirection.UP:
             relative_map = self._mapped.get(table_name, {})
         elif direction == SearchDirection.DOWN:
@@ -433,7 +435,7 @@ class StairLight:
                 relative_map[key] = self._mapped[key][table_name]
         return relative_map
 
-    def find_tables_by_labels(self, target_labels: "list[str]") -> "list[str]":
+    def find_tables_by_labels(self, target_labels: List[str]) -> List[str]:
         """Find tables to search by labels
 
         Args:
@@ -442,7 +444,7 @@ class StairLight:
         Returns:
             list[str]: Tables to search
         """
-        tables_to_search: list[str] = []
+        tables_to_search: List[str] = []
 
         # "mapping" section in mapping.yaml
         for configurations in self._mapping_config.get(
@@ -471,7 +473,7 @@ class StairLight:
 
     @staticmethod
     def is_target_label_found(
-        target_labels: "list[str]", configured_labels: dict[str, Any]
+        target_labels: List[str], configured_labels: Dict[str, Any]
     ) -> bool:
         found_count: int = 0
         configured_label_key: str
@@ -489,7 +491,7 @@ class StairLight:
         return found_count == len(target_labels)
 
 
-def is_cyclic(tables: "list[str]") -> bool:
+def is_cyclic(tables: List[str]) -> bool:
     """Floyd's cycle-finding algorithm
 
     Args:
@@ -498,7 +500,7 @@ def is_cyclic(tables: "list[str]") -> bool:
     Returns:
         bool: Table dependencies are cyclic or not
     """
-    nodes: dict[str, Node] = {}
+    nodes: Dict[str, Node] = {}
     for table in tables:
         if table not in nodes.keys():
             nodes[table] = Node(table)
@@ -514,7 +516,7 @@ def is_cyclic(tables: "list[str]") -> bool:
     return False
 
 
-def deep_merge(org: dict[str, Any], add: dict[str, Any]) -> dict:
+def deep_merge(org: Dict[str, Any], add: Dict[str, Any]) -> Dict[str, Any]:
     """Merge nested dicts
 
     Args:
@@ -524,9 +526,9 @@ def deep_merge(org: dict[str, Any], add: dict[str, Any]) -> dict:
     Returns:
         dict: merged dict
     """
-    new: dict[str, Any] = org
+    new: Dict[str, Any] = org
     for add_key, add_value in add.items():
-        org_value: dict[str, Any] = org.get(add_key, {})
+        org_value: Dict[str, Any] = org.get(add_key, {})
         if add_key not in org:
             new[add_key] = add_value
         elif isinstance(add_value, dict):

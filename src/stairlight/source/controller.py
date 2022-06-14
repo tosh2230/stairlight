@@ -2,7 +2,7 @@ import json
 import os
 from importlib.util import find_spec
 from logging import getLogger
-from typing import Any, Type
+from typing import Any, Dict, Type
 
 from .base import TemplateSource, TemplateSourceType
 
@@ -41,7 +41,7 @@ def get_template_source_class(template_source_type: str) -> Type[TemplateSource]
 
 
 class SaveMapController:
-    def __init__(self, save_file: str, mapped: dict[str, Any]) -> None:
+    def __init__(self, save_file: str, mapped: Dict[str, Any]) -> None:
         self.save_file = save_file
         self._mapped = mapped
 

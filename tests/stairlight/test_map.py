@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Dict, List
 
 import pytest
 
@@ -9,7 +9,7 @@ from src.stairlight.source.base import Template
 
 @pytest.fixture(scope="session")
 def dependency_map(
-    stairlight_config: dict[str, Any], mapping_config: dict[str, Any]
+    stairlight_config: Dict[str, Any], mapping_config: Dict[str, Any]
 ) -> Map:
     dependency_map = Map(
         stairlight_config=stairlight_config, mapping_config=mapping_config
@@ -48,7 +48,7 @@ class TestSuccess:
         ],
     )
     def test_find_unmapped_params(
-        self, dependency_map: Map, key: str, expected: "list[str]"
+        self, dependency_map: Map, key: str, expected: List[str]
     ):
         actual = []
         for unmapped_attributes in dependency_map.unmapped:
