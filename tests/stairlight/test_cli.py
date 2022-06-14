@@ -1,4 +1,4 @@
-from typing import Iterator
+from typing import Any, Dict, Iterator, List, Union
 
 import pytest
 
@@ -34,22 +34,28 @@ class TestSuccess:
     parser = cli_main.create_parser()
 
     def test_command_init(self, stairlight_init: StairLight):
-        message = cli_main.command_init(stairlight=stairlight_init, args=None)
+        message = cli_main.command_init(
+            stairlight=stairlight_init, args=self.parser.parse_args([])
+        )
         assert len(message) > 0
 
     def test_command_check(self, stairlight_save: StairLight):
-        message = cli_main.command_check(stairlight=stairlight_save, args=None)
+        message = cli_main.command_check(
+            stairlight=stairlight_save, args=self.parser.parse_args([])
+        )
         assert len(message) > 0
 
     def test_command_check_at_first(self, stairlight_check: StairLight):
-        message = cli_main.command_check(stairlight=stairlight_check, args=None)
+        message = cli_main.command_check(
+            stairlight=stairlight_check, args=self.parser.parse_args([])
+        )
         assert len(message) > 0
 
     def test_command_check_no_file_found(
         self, stairlight_check_no_file_found: StairLight
     ):
         message = cli_main.command_check(
-            stairlight=stairlight_check_no_file_found, args=None
+            stairlight=stairlight_check_no_file_found, args=self.parser.parse_args([])
         )
         assert message == "Templates are not found."
 
@@ -104,8 +110,15 @@ class TestSuccess:
                 "-v",
             ]
         )
-        results = cli_main.command_down(stairlight=stairlight_save, args=args)
-        assert results.get("PROJECT_J.DATASET_K.TABLE_L") != {}
+        results: Union[Dict[str, Any], List[Dict[str, Any]]] = cli_main.command_down(
+            stairlight=stairlight_save, args=args
+        )
+        actual: Dict[str, Any]
+        if isinstance(results, dict):
+            actual = results
+        elif isinstance(results, list):
+            actual = results[0]
+        assert actual.get("PROJECT_J.DATASET_K.TABLE_L")
 
     def test_main(self, monkeypatch, capfd):
         monkeypatch.setattr("sys.argv", ["", "-c", "tests/config"])

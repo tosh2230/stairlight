@@ -1,5 +1,5 @@
 import re
-from typing import Iterator, Optional
+from typing import Any, Dict, Iterator, Optional
 
 from google.cloud import storage
 
@@ -12,7 +12,7 @@ from .controller import GCS_URI_SCHEME
 class GcsTemplate(Template):
     def __init__(
         self,
-        mapping_config: dict,
+        mapping_config: Dict[str, Any],
         key: str,
         bucket: Optional[str] = None,
         project: Optional[str] = None,
@@ -50,12 +50,16 @@ class GcsTemplate(Template):
 
 class GcsTemplateSource(TemplateSource):
     def __init__(
-        self, stairlight_config: dict, mapping_config: dict, source_attributes: dict
+        self,
+        stairlight_config: Dict[str, Any],
+        mapping_config: Dict[str, Any],
+        source_attributes: Dict[str, Any],
     ) -> None:
         super().__init__(
-            stairlight_config=stairlight_config, mapping_config=mapping_config
+            stairlight_config=stairlight_config,
+            mapping_config=mapping_config,
+            source_attributes=source_attributes,
         )
-        self.source_attributes = source_attributes
         self.source_type = TemplateSourceType.GCS
 
     def search_templates(self) -> Iterator[Template]:
@@ -69,25 +73,25 @@ class GcsTemplateSource(TemplateSource):
         """
         project = get_config_value(
             key=StairlightConfigKey.Gcs.PROJECT_ID,
-            target=self.source_attributes,
+            target=self._source_attributes,
             fail_if_not_found=False,
             enable_logging=False,
         )
         bucket = get_config_value(
             key=StairlightConfigKey.Gcs.BUCKET_NAME,
-            target=self.source_attributes,
+            target=self._source_attributes,
             fail_if_not_found=True,
             enable_logging=False,
         )
         default_table_prefix = get_config_value(
             key=StairlightConfigKey.DEFAULT_TABLE_PREFIX,
-            target=self.source_attributes,
+            target=self._source_attributes,
             fail_if_not_found=False,
             enable_logging=False,
         )
         regex = get_config_value(
             key=StairlightConfigKey.REGEX,
-            target=self.source_attributes,
+            target=self._source_attributes,
             fail_if_not_found=True,
             enable_logging=False,
         )

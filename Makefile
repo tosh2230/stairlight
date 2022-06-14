@@ -5,6 +5,8 @@ lint:
 	poetry run flake8 src tests
 	poetry run isort --check --diff src tests
 	poetry run black --check src tests
+type-check:
+	poetry run mypy .
 format:
 	poetry run isort src tests
 	poetry run black src tests
@@ -18,8 +20,10 @@ check:
 	@make install
 	@poetry run python -m stairlight check -c tests/config
 test:
-	@make install
 	@poetry run pytest tests/stairlight -v --cov=src
+install-test:
+	@make install
+	@make test
 test-report:
 	@rm -r htmlcov
 	@make install

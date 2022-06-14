@@ -3,7 +3,7 @@ import pathlib
 import re
 import shlex
 import subprocess
-from typing import Iterator
+from typing import Any, Dict, Iterator, List
 
 import yaml
 
@@ -14,7 +14,7 @@ from .base import Template, TemplateSource, TemplateSourceType
 class DbtTemplate(Template):
     def __init__(
         self,
-        mapping_config: dict,
+        mapping_config: Dict[str, Any],
         key: str,
         project_name: str,
     ):
@@ -43,42 +43,46 @@ class DbtTemplate(Template):
         with open(self.key) as f:
             return f.read()
 
-    def render(self, params: dict = None, ignore_params: "list[str]" = None) -> str:
+    def render(
+        self, params: Dict[str, Any] = None, ignore_params: List[str] = None
+    ) -> str:
         return self.get_template_str()
 
 
 class DbtTemplateSource(TemplateSource):
+    DBT_PROJECT_YAML = "dbt_project.yml"
+    REGEX_SCHEMA_TEST_FILE = re.compile(r".*/schema.yml/.*\.sql$")
+
     def __init__(
         self,
-        stairlight_config: dict,
-        mapping_config: dict,
-        source_attributes: dict,
+        stairlight_config: Dict[str, Any],
+        mapping_config: Dict[str, Any],
+        source_attributes: Dict[str, Any],
     ) -> None:
         super().__init__(
             stairlight_config=stairlight_config,
             mapping_config=mapping_config,
+            source_attributes=source_attributes,
         )
-        self.source_attributes = source_attributes
         self.source_type = TemplateSourceType.DBT
 
-        self.DBT_PROJECT_YAML = "dbt_project.yml"
-        self.REGEX_SCHEMA_TEST_FILE = re.compile(r".*/schema.yml/.*\.sql$")
-
     def search_templates(self) -> Iterator[Template]:
-        project_dir: str = self.source_attributes.get(
-            StairlightConfigKey.Dbt.PROJECT_DIR
+        project_dir: str = self._source_attributes.get(
+            StairlightConfigKey.Dbt.PROJECT_DIR, ""
         )
-        profiles_dir: str = self.source_attributes.get(
-            StairlightConfigKey.Dbt.PROFILES_DIR
+        profiles_dir: str = self._source_attributes.get(
+            StairlightConfigKey.Dbt.PROFILES_DIR, ""
         )
-        dbt_project_config: dict = self.read_dbt_project_yml(project_dir=project_dir)
+        dbt_project_config: Dict[str, Any] = self.read_dbt_project_yml(
+            project_dir=project_dir
+        )
 
         _ = self.execute_dbt_compile(
             project_dir=project_dir,
             profiles_dir=profiles_dir,
             profile=dbt_project_config.get(DbtProjectKey.PROFILE),
-            target=self.source_attributes.get(StairlightConfigKey.Dbt.TARGET),
-            vars=self.source_attributes.get(StairlightConfigKey.Dbt.VARS),
+            target=self._source_attributes.get(StairlightConfigKey.Dbt.TARGET),
+            vars=self._source_attributes.get(StairlightConfigKey.Dbt.VARS),
         )
 
         for model_path in dbt_project_config[DbtProjectKey.MODEL_PATHS]:
@@ -106,7 +110,7 @@ class DbtTemplateSource(TemplateSource):
     @staticmethod
     def concat_dbt_model_path_str(
         project_dir: str,
-        dbt_project_config: dict,
+        dbt_project_config: Dict[str, Any],
         model_path: pathlib.Path,
     ) -> str:
         return (
@@ -123,7 +127,7 @@ class DbtTemplateSource(TemplateSource):
         profiles_dir: str,
         profile: str = None,
         target: str = None,
-        vars: dict = None,
+        vars: Dict[str, Any] = None,
     ) -> int:
         command = (
             "dbt compile "

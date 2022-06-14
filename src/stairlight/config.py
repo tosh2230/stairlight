@@ -5,6 +5,7 @@ from collections import OrderedDict
 from copy import deepcopy
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any, Dict, List
 
 import yaml
 
@@ -26,7 +27,7 @@ class Configurator:
         """
         self.dir = dir
 
-    def read(self, prefix: str) -> dict:
+    def read(self, prefix: str) -> Dict[str, Any]:
         """Read a configuration file
 
         Args:
@@ -35,7 +36,7 @@ class Configurator:
         Returns:
             dict: Results from reading configuration file
         """
-        config = None
+        config: Dict[str, Any] = {}
         pattern = f"^{self.dir}/{prefix}.ya?ml$"
         config_file = [
             p
@@ -66,7 +67,7 @@ class Configurator:
 
     def create_mapping_file(
         self,
-        unmapped: "list[dict]",
+        unmapped: List[Dict[str, Any]],
         prefix: str = MAPPING_CONFIG_PREFIX_DEFAULT,
     ) -> str:
         """Create a mapping template file
@@ -108,7 +109,7 @@ class Configurator:
         Returns:
             OrderedDict: stairlight.config template
         """
-        include_section_file = OrderedDict(
+        include_section_file: OrderedDict = OrderedDict(
             {
                 StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.FILE.value,
                 StairlightConfigKey.File.FILE_SYSTEM_PATH: None,
@@ -116,7 +117,7 @@ class Configurator:
                 StairlightConfigKey.DEFAULT_TABLE_PREFIX: None,
             }
         )
-        include_section_gcs = OrderedDict(
+        include_section_gcs: OrderedDict = OrderedDict(
             {
                 StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.GCS.value,
                 StairlightConfigKey.Gcs.PROJECT_ID: None,
@@ -125,7 +126,7 @@ class Configurator:
                 StairlightConfigKey.DEFAULT_TABLE_PREFIX: None,
             }
         )
-        include_section_redash = OrderedDict(
+        include_section_redash: OrderedDict = OrderedDict(
             {
                 StairlightConfigKey.TEMPLATE_SOURCE_TYPE: (
                     TemplateSourceType.REDASH.value
@@ -135,7 +136,7 @@ class Configurator:
                 StairlightConfigKey.Redash.QUERY_IDS: {},
             }
         )
-        include_section_dbt = OrderedDict(
+        include_section_dbt: OrderedDict = OrderedDict(
             {
                 StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.DBT.value,
                 StairlightConfigKey.Dbt.PROJECT_DIR: None,
@@ -166,7 +167,9 @@ class Configurator:
             }
         )
 
-    def build_mapping_config(self, unmapped_templates: "list[dict]") -> OrderedDict:
+    def build_mapping_config(
+        self, unmapped_templates: List[Dict[str, Any]]
+    ) -> OrderedDict:
         """Create a OrderedDict for mapping.yaml
 
         Args:
@@ -175,7 +178,7 @@ class Configurator:
         Returns:
             OrderedDict: mapping.yaml template
         """
-        mapping_config_dict = OrderedDict(
+        mapping_config_dict: OrderedDict = OrderedDict(
             {
                 MappingConfigKey.GLOBAL_SECTION: [],
                 MappingConfigKey.MAPPING_SECTION: [],
@@ -183,14 +186,14 @@ class Configurator:
         )
 
         # List(instead of Set) because OrderedDict is not hashable
-        parameters_set: list[OrderedDict] = []
-        global_parameters: dict = {}
+        parameters_set: List[OrderedDict] = []
+        global_parameters: Dict[str, Any] = {}
 
         # Mapping section
-        unmapped_template: dict
+        unmapped_template: Dict[str, Any]
         for unmapped_template in unmapped_templates:
             template: Template = unmapped_template[MapKey.TEMPLATE]
-            mapping_values = OrderedDict(
+            mapping_values: OrderedDict = OrderedDict(
                 {
                     MappingConfigKey.TEMPLATE_SOURCE_TYPE: template.source_type.value,
                 }
@@ -212,8 +215,10 @@ class Configurator:
 
             # Parameters
             if MapKey.PARAMETERS in unmapped_template:
-                undefined_params: list[str] = unmapped_template.get(MapKey.PARAMETERS)
-                parameters = OrderedDict()
+                undefined_params: List[str] = unmapped_template.get(
+                    MapKey.PARAMETERS, []
+                )
+                parameters: OrderedDict = OrderedDict()
                 for undefined_param in undefined_params:
                     splitted_params = undefined_param.split(".")
                     create_nested_dict(keys=splitted_params, results=parameters)
@@ -253,26 +258,33 @@ class Configurator:
         return mapping_config_dict
 
     @staticmethod
-    def select_mapping_values_by_template(template: Template) -> dict:
-        mapping_values: dict = {}
-        if template.source_type == TemplateSourceType.FILE:
+    def select_mapping_values_by_template(template: Template) -> Dict[str, Any]:
+        mapping_values: Dict[str, Any] = {}
+
+        # To avoid circular imports
+        from .source.dbt import DbtTemplate
+        from .source.file import FileTemplate
+        from .source.gcs import GcsTemplate
+        from .source.redash import RedashTemplate
+
+        if isinstance(template, FileTemplate):
             mapping_values[MappingConfigKey.File.FILE_SUFFIX] = template.key
-        elif template.source_type == TemplateSourceType.GCS:
+        elif isinstance(template, GcsTemplate):
             mapping_values[MappingConfigKey.Gcs.URI] = template.uri
             mapping_values[MappingConfigKey.Gcs.BUCKET_NAME] = template.bucket
-        elif template.source_type == TemplateSourceType.REDASH:
+        elif isinstance(template, RedashTemplate):
             mapping_values[MappingConfigKey.Redash.QUERY_ID] = template.query_id
             mapping_values[
                 MappingConfigKey.Redash.DATA_SOURCE_NAME
             ] = template.data_source_name
-        elif template.source_type == TemplateSourceType.DBT:
+        elif isinstance(template, DbtTemplate):
             mapping_values[MappingConfigKey.Dbt.PROJECT_NAME] = template.project_name
             mapping_values[MappingConfigKey.Dbt.FILE_SUFFIX] = template.key
         return mapping_values
 
     @staticmethod
     def get_default_table_name(template: Template) -> str:
-        default_table_name: str = None
+        default_table_name: str = ""
         if template.source_type == TemplateSourceType.REDASH:
             default_table_name = template.uri
         else:
@@ -281,7 +293,7 @@ class Configurator:
 
 
 def create_nested_dict(
-    keys: "list[str]", results: OrderedDict, density: int = 0, default_value: any = None
+    keys: List[str], results: OrderedDict, density: int = 0, default_value: Any = None
 ) -> None:
     """create nested dict from list
 
@@ -310,10 +322,10 @@ class ConfigKeyNotFoundException(Exception):
 
 def get_config_value(
     key: str,
-    target: dict,
+    target: Dict[Any, Any],
     fail_if_not_found: bool = False,
     enable_logging: bool = False,
-) -> any:
+) -> Any:
     value = target.get(key)
     if not value:
         msg = f"{key} is not found in the configuration: {target}"

@@ -3,11 +3,14 @@ from typing import Any
 
 
 class Key(ABC):
-    def __setattr__(self, __name: str, __value: Any) -> None:
-        if __name in self.__dict__:
+    def __init__(self) -> None:
+        super().__init__()
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        if name in self.__dict__:
             raise TypeError()
         else:
-            self.__setattr__(__name=__name, __value=__value)
+            self.__setattr__(name=name, value=value)
 
 
 class StairlightConfigKey(Key):

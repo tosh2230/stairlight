@@ -24,10 +24,12 @@ redash = ["psycopg2", "SQLAlchemy"]
 dbt-bigquery = ["dbt-core", "dbt-bigquery"]
 
 [tool.poetry.dev-dependencies]
+black = "^22.3.0"
 flake8 = "^4.0.1"
 isort = "^5.9.3"
+mypy = "^0.961"
+types-PyYAML = "^6.0.8"
 pytest = "^7.0.0"
-black = "^22.3.0"
 pytest-cov = "^3.0.0"
 
 [tool.black]
@@ -36,6 +38,11 @@ line-length = 88
 [tool.isort]
 profile = "black"
 line_length = 88
+
+[tool.mypy]
+check_untyped_defs = true
+ignore_missing_imports = true
+no_strict_optional = true
 
 [tool.poetry.scripts]
 stairlight = "stairlight.cli:main"

@@ -1,11 +1,16 @@
+from typing import Any, Dict, List
+
 import pytest
 
 from src.stairlight.key import MapKey, MappingConfigKey
 from src.stairlight.map import Map, create_dict_key_list
+from src.stairlight.source.base import Template
 
 
 @pytest.fixture(scope="session")
-def dependency_map(stairlight_config: dict, mapping_config: dict) -> Map:
+def dependency_map(
+    stairlight_config: Dict[str, Any], mapping_config: Dict[str, Any]
+) -> Map:
     dependency_map = Map(
         stairlight_config=stairlight_config, mapping_config=mapping_config
     )
@@ -43,13 +48,13 @@ class TestSuccess:
         ],
     )
     def test_find_unmapped_params(
-        self, dependency_map: Map, key: str, expected: "list[str]"
+        self, dependency_map: Map, key: str, expected: List[str]
     ):
         actual = []
         for unmapped_attributes in dependency_map.unmapped:
-            template = unmapped_attributes.get(MapKey.TEMPLATE)
+            template: Template = unmapped_attributes.get(MapKey.TEMPLATE, None)
             if template.key == key:
-                actual = sorted(unmapped_attributes.get(MapKey.PARAMETERS))
+                actual = sorted(unmapped_attributes.get(MapKey.PARAMETERS, []))
                 break
         assert actual == expected
 
