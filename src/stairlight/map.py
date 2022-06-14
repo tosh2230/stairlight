@@ -1,10 +1,12 @@
 from logging import getLogger
-from typing import Iterator
+from typing import Any, Dict, Iterator, List, Type
 
 from .key import MapKey, MappingConfigKey, StairlightConfigKey
 from .query import Query
-from .source.base import Template, TemplateSource, TemplateSourceType
+from .source.base import Template, TemplateSource
 from .source.controller import get_template_source_class
+from .source.gcs import GcsTemplate
+from .source.redash import RedashTemplate
 
 logger = getLogger(__name__)
 
@@ -13,7 +15,10 @@ class Map:
     """Manages functions related to dependency map objects"""
 
     def __init__(
-        self, stairlight_config: dict, mapping_config: dict, mapped: dict = None
+        self,
+        stairlight_config: Dict[str, Any],
+        mapping_config: Dict[str, Any],
+        mapped: Dict[str, Any] = None,
     ) -> None:
         """Manages functions related to dependency map objects
 
@@ -28,7 +33,7 @@ class Map:
             self.mapped = mapped
         else:
             self.mapped = {}
-        self.unmapped: list[dict] = []
+        self.unmapped: List[dict] = []
         self.stairlight_config = stairlight_config
         self.mapping_config = mapping_config
 
@@ -42,7 +47,7 @@ class Map:
 
     @staticmethod
     def find_template_source(
-        stairlight_config: dict, mapping_config: dict
+        stairlight_config: Dict[str, Any], mapping_config: Dict[str, Any]
     ) -> Iterator[TemplateSource]:
         """find template source
 
@@ -53,14 +58,15 @@ class Map:
         Yields:
             Iterator[TemplateSource]: Template source instance
         """
-        source_attributes: dict
-        for source_attributes in stairlight_config.get(
-            StairlightConfigKey.INCLUDE_SECTION
-        ):
+        source_attributes: Dict[str, Any]
+        include_section: List[Dict[str, Any]] = stairlight_config.get(
+            StairlightConfigKey.INCLUDE_SECTION, []
+        )
+        for source_attributes in include_section:
             template_source_type: str = source_attributes.get(
-                StairlightConfigKey.TEMPLATE_SOURCE_TYPE
+                StairlightConfigKey.TEMPLATE_SOURCE_TYPE, ""
             )
-            template_source: TemplateSource = get_template_source_class(
+            template_source: Type[TemplateSource] = get_template_source_class(
                 template_source_type=template_source_type
             )
             if not template_source:
@@ -86,7 +92,7 @@ class Map:
             else:
                 self.add_unmapped_params(template=template)
 
-    def remap(self, template: Template, table_attributes: dict) -> None:
+    def remap(self, template: Template, table_attributes: Dict[str, Any]) -> None:
         """Remap a dependency map
 
         Args:
@@ -102,9 +108,13 @@ class Map:
             default_table_prefix=template.default_table_prefix,
         )
 
-        downstairs: str = table_attributes.get(MappingConfigKey.TABLE_NAME)
-        mapping_labels: dict = table_attributes.get(MappingConfigKey.LABELS)
-        metadata: list[str] = self.mapping_config.get(MappingConfigKey.METADATA_SECTION)
+        downstairs: str = table_attributes.get(MappingConfigKey.TABLE_NAME, "")
+        mapping_labels: Dict[Any, Any] = table_attributes.get(
+            MappingConfigKey.LABELS, {}
+        )
+        metadata: List[Dict[Any, Any]] = self.mapping_config.get(
+            MappingConfigKey.METADATA_SECTION, []
+        )
 
         if downstairs not in self.mapped:
             self.mapped[downstairs] = {}
@@ -127,30 +137,36 @@ class Map:
                 }
             )
 
-    def get_global_params(self, key: str) -> dict:
+    def get_global_params(self, key: str) -> Dict[str, Any]:
         """get global parameters in mapping.yaml
 
         Returns:
             dict: global parameters
         """
-        global_params: dict = {}
-        global_section: dict = self.mapping_config.get(MappingConfigKey.GLOBAL_SECTION)
+        global_params: Dict[str, Any] = {}
+        global_section: Dict[str, Any] = self.mapping_config.get(
+            MappingConfigKey.GLOBAL_SECTION, {}
+        )
         if MappingConfigKey.PARAMETERS in global_section:
-            global_params = global_section.get(key)
+            global_params = global_section.get(key, {})
 
         return global_params
 
-    def merge_global_params(self, table_attributes: dict) -> dict:
+    def merge_global_params(self, table_attributes: Dict[str, Any]) -> Dict[str, Any]:
         """return a combination of global parameters and table parameters
 
         Args:
-            table_attributes (dict): table attributes
+            table_attributes (dict[str, Any]): table attributes
 
         Returns:
             dict: combined parameters
         """
-        global_params: dict = self.get_global_params(key=MappingConfigKey.PARAMETERS)
-        table_params: dict = table_attributes.get(MappingConfigKey.PARAMETERS, {})
+        global_params: Dict[str, Any] = self.get_global_params(
+            key=MappingConfigKey.PARAMETERS
+        )
+        table_params: Dict[str, Any] = table_attributes.get(
+            MappingConfigKey.PARAMETERS, {}
+        )
 
         # Table parameters are prioritized over global parameters
         return {**global_params, **table_params}
@@ -158,10 +174,10 @@ class Map:
     @staticmethod
     def create_upstairs_value(
         template: Template,
-        mapping_labels: dict,
-        metadata: "list[str]",
+        mapping_labels: Dict[str, Any],
+        metadata: List[Dict[str, Any]],
         upstairs: str,
-    ) -> dict:
+    ) -> Dict[str, Any]:
         """create upstairs table information
 
         Args:
@@ -173,7 +189,7 @@ class Map:
         Returns:
             dict: upstairs table information
         """
-        metadata_labels = []
+        metadata_labels: List[Dict[str, Any]] = []
         upstairs_values = {
             MapKey.TEMPLATE_SOURCE_TYPE: template.source_type.value,
             MapKey.KEY: template.key,
@@ -181,14 +197,14 @@ class Map:
             MapKey.LINES: [],
         }
 
-        if template.source_type == TemplateSourceType.GCS:
+        if isinstance(template, GcsTemplate):
             upstairs_values[MapKey.BUCKET_NAME] = template.bucket
-        elif template.source_type == TemplateSourceType.REDASH:
+        elif isinstance(template, RedashTemplate):
             upstairs_values[MapKey.DATA_SOURCE_NAME] = template.data_source_name
 
         if metadata:
             metadata_labels = [
-                m.get(MappingConfigKey.LABELS)
+                m.get(MappingConfigKey.LABELS, {})
                 for m in metadata
                 if m.get(MappingConfigKey.TABLE_NAME) == upstairs
             ]
@@ -208,9 +224,7 @@ class Map:
             }
         return upstairs_values
 
-    def add_unmapped_params(
-        self, template: Template, params: "list[str]" = None
-    ) -> None:
+    def add_unmapped_params(self, template: Template, params: List[str] = None) -> None:
         """add to the list of unmapped params
 
         Args:
@@ -228,7 +242,7 @@ class Map:
         )
 
     def detect_unmapped_params(
-        self, template: Template, table_attributes: dict
+        self, template: Template, table_attributes: Dict[str, Any]
     ) -> None:
         """detect unmapped parameters in mapped files
 
@@ -237,18 +251,18 @@ class Map:
             table_attributes (dict): Table attributes from mapping configuration
         """
         template_str: str = template.get_template_str()
-        template_params: list[str] = template.detect_jinja_params(template_str)
+        template_params: List[str] = template.detect_jinja_params(template_str)
         if not template_params:
             return
 
-        mapped_params_dict: dict = self.merge_global_params(
+        mapped_params_dict: Dict[str, Any] = self.merge_global_params(
             table_attributes=table_attributes
         )
-        mapped_params: list[str] = create_dict_key_list(d=mapped_params_dict)
-        ignore_params: list[str] = table_attributes.get(
+        mapped_params: List[str] = create_dict_key_list(d=mapped_params_dict)
+        ignore_params: List[str] = table_attributes.get(
             MappingConfigKey.IGNORE_PARAMETERS, []
         )
-        diff_params: list[str] = list(
+        diff_params: List[str] = list(
             set(template_params) - set(mapped_params) - set(ignore_params)
         )
 
@@ -256,11 +270,11 @@ class Map:
             self.add_unmapped_params(template=template, params=diff_params)
 
 
-def create_dict_key_list(d: dict, delimiter: str = ".") -> "list[str]":
+def create_dict_key_list(d: Dict[str, Any], delimiter: str = ".") -> List[str]:
     """combine nested dictionary keys and converts to a list
 
     Args:
-        d (dict): dict
+        d (dict): dict[str, Any]
 
     Returns:
         list: results

@@ -1,6 +1,9 @@
+from typing import Any, Dict, List
+
 import pytest
 
 from src.stairlight.key import StairlightConfigKey
+from src.stairlight.source.base import Template
 from src.stairlight.source.dbt import DbtTemplate, DbtTemplateSource, TemplateSourceType
 
 
@@ -14,7 +17,7 @@ class TestDbtTemplate:
     @pytest.fixture(scope="function")
     def dbt_template(
         self,
-        mapping_config: dict,
+        mapping_config: Dict[str, Any],
         key: str,
     ):
         return DbtTemplate(
@@ -52,12 +55,12 @@ class TestDbtTemplateSource:
     @pytest.fixture(scope="function")
     def dbt_template_source(
         self,
-        stairlight_config: dict,
-        mapping_config: dict,
+        stairlight_config: Dict[str, Any],
+        mapping_config: Dict[str, Any],
         project_dir: str,
         profiles_dir: str,
         target: str,
-        vars: dict,
+        vars: Dict[str, Any],
         profile: str,
         project_name: str,
     ) -> DbtTemplateSource:
@@ -81,7 +84,7 @@ class TestDbtTemplateSource:
         profiles_dir: str,
         profile: str,
         target: str,
-        vars: dict,
+        vars: Dict[str, Any],
     ):
         actual = dbt_template_source.execute_dbt_compile(
             project_dir=project_dir,
@@ -105,8 +108,8 @@ class TestDbtTemplateSource:
     def dbt_templates(
         self,
         dbt_template_source: DbtTemplateSource,
-    ) -> "list[DbtTemplate]":
-        dbt_templates: list[DbtTemplate] = []
+    ) -> List[Template]:
+        dbt_templates: List[Template] = []
         for dbt_template in dbt_template_source.search_templates():
             dbt_templates.append(dbt_template)
         return dbt_templates
@@ -114,14 +117,14 @@ class TestDbtTemplateSource:
     def test_search_templates(
         self,
         dbt_template_source: DbtTemplateSource,
-        dbt_templates: "list[DbtTemplate]",
+        dbt_templates: List[DbtTemplate],
     ):
         assert len(dbt_templates) > 0
 
     def test_not_exists_schema(
         self,
         dbt_template_source: DbtTemplateSource,
-        dbt_templates: "list[DbtTemplate]",
+        dbt_templates: List[DbtTemplate],
     ):
         re_matched = [
             dbt_template.key

@@ -1,5 +1,5 @@
 import json
-from typing import Iterator
+from typing import Any, Dict, Iterator, List
 
 import pytest
 
@@ -85,13 +85,16 @@ class TestStairLight:
         ]
 
     def test_up_recursive_verbose(self):
-        table_name = "PROJECT_D.DATASET_E.TABLE_F"
+        actual: List[str] = []
+        table_name: str = "PROJECT_D.DATASET_E.TABLE_F"
         result = self.stairlight.up(table_name=table_name, recursive=True, verbose=True)
-        assert sorted(
-            result[table_name][SearchDirection.UP.value]["PROJECT_J.DATASET_K.TABLE_L"][
-                SearchDirection.UP.value
-            ].keys()
-        ) == [
+        if isinstance(result, dict):
+            actual = sorted(
+                result[table_name][SearchDirection.UP.value][
+                    "PROJECT_J.DATASET_K.TABLE_L"
+                ][SearchDirection.UP.value].keys()
+            )
+        assert actual == [
             "PROJECT_P.DATASET_Q.TABLE_R",
             "PROJECT_S.DATASET_T.TABLE_U",
             "PROJECT_V.DATASET_W.TABLE_X",
@@ -141,15 +144,18 @@ class TestStairLight:
         ]
 
     def test_down_recursive_verbose(self):
+        actual: List[str] = []
         table_name = "PROJECT_C.DATASET_C.TABLE_C"
         result = self.stairlight.down(
             table_name=table_name, recursive=True, verbose=True
         )
-        assert sorted(
-            result[table_name][SearchDirection.DOWN.value][
-                "PROJECT_d.DATASET_e.TABLE_f"
-            ][SearchDirection.DOWN.value].keys()
-        ) == [
+        if isinstance(result, dict):
+            actual = sorted(
+                result[table_name][SearchDirection.DOWN.value][
+                    "PROJECT_d.DATASET_e.TABLE_f"
+                ][SearchDirection.DOWN.value].keys()
+            )
+        assert actual == [
             "PROJECT_j.DATASET_k.TABLE_l",
         ]
 
@@ -232,38 +238,38 @@ class TestStairLight:
         stairlight_load = StairLight(
             config_dir="tests/config", load_files=[stairlight_save.save_file]
         )
-        assert stairlight_load.check() is None
+        assert not stairlight_load.check()
 
     def test_multiple_load_and_save(self, stairlight_load_and_save: StairLight):
         stairlight_load_and_save.load_map()
-        actual: dict = stairlight_load_and_save.mapped
+        actual: Dict[str, Any] = stairlight_load_and_save.mapped
         with open("tests/results/merged.json", "r") as f:
-            expected: dict = json.load(f)
+            expected: Dict[str, Any] = json.load(f)
         assert actual == expected
 
 
 class TestIsCyclic:
-    def test_a(self):
-        node_list = [1, 2, 1, 2, 1, 2, 1, 2]
+    def test_cyclic_each(self):
+        node_list = ["1", "2", "1", "2", "1", "2", "1", "2"]
         assert is_cyclic(node_list)
 
-    def test_b(self):
-        node_list = [1, 2, 3, 2, 3, 2, 3]
+    def test_cyclic_except_first(self):
+        node_list = ["1", "2", "3", "2", "3", "2", "3"]
         assert is_cyclic(node_list)
 
-    def test_c(self):
-        node_list = [1, 2, 3, 4, 5, 3, 4, 5]
+    def test_cyclic_except_first_two(self):
+        node_list = ["1", "2", "3", "4", "5", "3", "4", "5"]
         assert is_cyclic(node_list)
 
-    def test_d(self):
-        node_list = [1, 2, 3, 4, 5, 1, 2, 3, 4]
+    def test_cyclic_first_four(self):
+        node_list = ["1", "2", "3", "4", "5", "1", "2", "3", "4"]
         assert is_cyclic(node_list)
 
-    def test_e(self):
-        node_list = [1, 2, 3, 4, 5]
+    def test_not_cyclic(self):
+        node_list = ["1", "2", "3", "4", "5"]
         assert not is_cyclic(node_list)
 
-    def test_f(self):
+    def test_cyclic_tables(self):
         node_list = [
             "PROJECT_D.DATASET_E.TABLE_F",
             "PROJECT_J.DATASET_K.TABLE_L",

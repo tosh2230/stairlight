@@ -45,6 +45,9 @@ jobs:
           GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
           GCP_WORKLOAD_IDP: ${{ secrets.GCP_WORKLOAD_IDP }}
           GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - name: Type check
+        run: |
+          make type-check
       - name: Unit test
         run: |
-          poetry run pytest tests/stairlight -v --cov=src
+          make test

@@ -33,7 +33,8 @@ def tests_abspath() -> str:
 
 
 @pytest.fixture(scope="session")
-def stairlight_save(save_file="./tests/test_save_map.json") -> Iterator[StairLight]:
+def stairlight_save() -> Iterator[StairLight]:
+    save_file = "./tests/test_save_map.json"
     stairlight = StairLight(config_dir="tests/config", save_file=save_file)
     stairlight.create_map()
     yield stairlight

@@ -1,6 +1,6 @@
 import pathlib
 import re
-from typing import Iterator, Optional
+from typing import Any, Dict, Iterator, Optional
 
 from ..config import get_config_value
 from ..key import StairlightConfigKey
@@ -10,7 +10,7 @@ from .base import Template, TemplateSource, TemplateSourceType
 class FileTemplate(Template):
     def __init__(
         self,
-        mapping_config: dict,
+        mapping_config: Dict[str, Any],
         key: str,
         default_table_prefix: Optional[str] = None,
     ):
@@ -42,12 +42,16 @@ class FileTemplate(Template):
 
 class FileTemplateSource(TemplateSource):
     def __init__(
-        self, stairlight_config: dict, mapping_config: dict, source_attributes: dict
+        self,
+        stairlight_config: Dict[str, Any],
+        mapping_config: Dict[str, Any],
+        source_attributes: Dict[str, Any],
     ) -> None:
         super().__init__(
-            stairlight_config=stairlight_config, mapping_config=mapping_config
+            stairlight_config=stairlight_config,
+            mapping_config=mapping_config,
+            source_attributes=source_attributes,
         )
-        self.source_attributes = source_attributes
         self.source_type = TemplateSourceType.FILE
 
     def search_templates(self) -> Iterator[Template]:
@@ -61,19 +65,19 @@ class FileTemplateSource(TemplateSource):
         """
         path = get_config_value(
             key=StairlightConfigKey.File.FILE_SYSTEM_PATH,
-            target=self.source_attributes,
+            target=self._source_attributes,
             fail_if_not_found=True,
             enable_logging=False,
         )
         default_table_prefix = get_config_value(
             key=StairlightConfigKey.DEFAULT_TABLE_PREFIX,
-            target=self.source_attributes,
+            target=self._source_attributes,
             fail_if_not_found=False,
             enable_logging=False,
         )
         regex = get_config_value(
             key=StairlightConfigKey.REGEX,
-            target=self.source_attributes,
+            target=self._source_attributes,
             fail_if_not_found=True,
             enable_logging=False,
         )
