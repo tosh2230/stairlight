@@ -1,7 +1,7 @@
 import pytest
 
-from src.stairlight.key import MapKey
 from src.stairlight.query import Query, solve_table_prefix
+from src.stairlight.source.config import MapKey
 
 
 class TestSuccess:

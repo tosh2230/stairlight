@@ -2,9 +2,8 @@ import pathlib
 import re
 from typing import Any, Dict, Iterator, Optional
 
-from ..config import get_config_value
-from ..key import StairlightConfigKey
-from .base import Template, TemplateSource, TemplateSourceType
+from ..config import StairlightConfigKey, get_config_value
+from ..template import Template, TemplateSource, TemplateSourceType
 
 
 class FileTemplate(Template):

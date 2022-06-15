@@ -3,10 +3,9 @@ from typing import Any, Dict, Iterator, Optional
 
 from google.cloud import storage
 
-from ..config import get_config_value
-from ..key import StairlightConfigKey
-from .base import Template, TemplateSource, TemplateSourceType
-from .controller import GCS_URI_SCHEME
+from ..config import StairlightConfigKey, get_config_value
+from ..controller import GCS_URI_SCHEME
+from ..template import Template, TemplateSource, TemplateSourceType
 
 
 class GcsTemplate(Template):

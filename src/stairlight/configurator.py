@@ -3,14 +3,25 @@ import logging
 import re
 from collections import OrderedDict
 from copy import deepcopy
+from dataclasses import asdict
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List
 
 import yaml
 
-from .key import MapKey, MappingConfigKey, StairlightConfigKey
-from .source.base import Template, TemplateSourceType
+from .source.config import (
+    MapKey,
+    MappingConfigKey,
+    StairlightConfig,
+    StairlightConfigExclude,
+    StairlightConfigSettings,
+)
+from .source.dbt.config import StairlightConfigIncludeDbt
+from .source.file.config import StairlightConfigIncludeFile
+from .source.gcs.config import StairlightConfigIncludeGcs
+from .source.redash.config import StairlightConfigIncludeRedash
+from .source.template import Template, TemplateSourceType
 
 logger = logging.getLogger()
 
@@ -109,62 +120,19 @@ class Configurator:
         Returns:
             OrderedDict: stairlight.config template
         """
-        include_section_file: OrderedDict = OrderedDict(
-            {
-                StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.FILE.value,
-                StairlightConfigKey.File.FILE_SYSTEM_PATH: None,
-                StairlightConfigKey.REGEX: None,
-                StairlightConfigKey.DEFAULT_TABLE_PREFIX: None,
-            }
-        )
-        include_section_gcs: OrderedDict = OrderedDict(
-            {
-                StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.GCS.value,
-                StairlightConfigKey.Gcs.PROJECT_ID: None,
-                StairlightConfigKey.Gcs.BUCKET_NAME: None,
-                StairlightConfigKey.REGEX: None,
-                StairlightConfigKey.DEFAULT_TABLE_PREFIX: None,
-            }
-        )
-        include_section_redash: OrderedDict = OrderedDict(
-            {
-                StairlightConfigKey.TEMPLATE_SOURCE_TYPE: (
-                    TemplateSourceType.REDASH.value
-                ),
-                StairlightConfigKey.Redash.DATABASE_URL_ENV_VAR: "REDASH_DATABASE_URL",
-                StairlightConfigKey.Redash.DATA_SOURCE_NAME: None,
-                StairlightConfigKey.Redash.QUERY_IDS: {},
-            }
-        )
-        include_section_dbt: OrderedDict = OrderedDict(
-            {
-                StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.DBT.value,
-                StairlightConfigKey.Dbt.PROJECT_DIR: None,
-                StairlightConfigKey.Dbt.PROFILES_DIR: None,
-                StairlightConfigKey.Dbt.TARGET: None,
-                StairlightConfigKey.Dbt.VARS: OrderedDict({"key": "value"}),
-            }
-        )
         return OrderedDict(
-            {
-                StairlightConfigKey.INCLUDE_SECTION: [
-                    include_section_file,
-                    include_section_gcs,
-                    include_section_redash,
-                    include_section_dbt,
-                ],
-                StairlightConfigKey.EXCLUDE_SECTION: [
-                    OrderedDict(
-                        {
-                            StairlightConfigKey.TEMPLATE_SOURCE_TYPE: None,
-                            StairlightConfigKey.DEFAULT_TABLE_PREFIX: None,
-                        }
-                    )
-                ],
-                StairlightConfigKey.SETTING_SECTION: {
-                    StairlightConfigKey.MAPPING_PREFIX: MAPPING_CONFIG_PREFIX_DEFAULT
-                },
-            }
+            asdict(
+                StairlightConfig(
+                    Include=[
+                        OrderedDict(asdict(StairlightConfigIncludeFile())),
+                        OrderedDict(asdict(StairlightConfigIncludeGcs())),
+                        OrderedDict(asdict(StairlightConfigIncludeRedash())),
+                        OrderedDict(asdict(StairlightConfigIncludeDbt())),
+                    ],
+                    Exclude=[OrderedDict(asdict(StairlightConfigExclude()))],
+                    Settings=OrderedDict(asdict(StairlightConfigSettings())),
+                )
+            ),
         )
 
     def build_mapping_config(
@@ -262,10 +230,10 @@ class Configurator:
         mapping_values: Dict[str, Any] = {}
 
         # To avoid circular imports
-        from .source.dbt import DbtTemplate
-        from .source.file import FileTemplate
-        from .source.gcs import GcsTemplate
-        from .source.redash import RedashTemplate
+        from .source.dbt.template import DbtTemplate
+        from .source.file.template import FileTemplate
+        from .source.gcs.template import GcsTemplate
+        from .source.redash.template import RedashTemplate
 
         if isinstance(template, FileTemplate):
             mapping_values[MappingConfigKey.File.FILE_SUFFIX] = template.key
@@ -310,27 +278,3 @@ def create_nested_dict(
         create_nested_dict(keys=keys, results=results[key], density=density + 1)
     else:
         results[key] = default_value
-
-
-class ConfigKeyNotFoundException(Exception):
-    def __init__(self, msg: str) -> None:
-        self.msg = msg
-
-    def __str__(self) -> str:
-        return self.msg
-
-
-def get_config_value(
-    key: str,
-    target: Dict[Any, Any],
-    fail_if_not_found: bool = False,
-    enable_logging: bool = False,
-) -> Any:
-    value = target.get(key)
-    if not value:
-        msg = f"{key} is not found in the configuration: {target}"
-        if fail_if_not_found:
-            raise ConfigKeyNotFoundException(msg=msg)
-        if enable_logging:
-            logger.warning(msg=msg)
-    return value

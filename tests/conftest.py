@@ -4,7 +4,7 @@ from typing import Iterator
 
 import pytest
 
-from src.stairlight.config import (
+from src.stairlight.configurator import (
     MAPPING_CONFIG_PREFIX_DEFAULT,
     STAIRLIGHT_CONFIG_PREFIX_DEFAULT,
     Configurator,

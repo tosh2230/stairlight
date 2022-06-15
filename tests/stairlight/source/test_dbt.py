@@ -2,9 +2,13 @@ from typing import Any, Dict, List
 
 import pytest
 
-from src.stairlight.key import StairlightConfigKey
-from src.stairlight.source.base import Template
-from src.stairlight.source.dbt import DbtTemplate, DbtTemplateSource, TemplateSourceType
+from src.stairlight.source.config import StairlightConfigKey
+from src.stairlight.source.dbt.template import (
+    DbtTemplate,
+    DbtTemplateSource,
+    TemplateSourceType,
+)
+from src.stairlight.source.template import Template
 
 
 @pytest.mark.parametrize(

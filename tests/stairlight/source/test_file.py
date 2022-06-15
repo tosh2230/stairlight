@@ -2,14 +2,14 @@ from typing import Any, Dict
 
 import pytest
 
-from src.stairlight.config import ConfigKeyNotFoundException, Configurator
-from src.stairlight.key import StairlightConfigKey
-from src.stairlight.source.base import RenderingTemplateException
-from src.stairlight.source.file import (
+from src.stairlight.configurator import Configurator
+from src.stairlight.source.config import ConfigKeyNotFoundException, StairlightConfigKey
+from src.stairlight.source.file.template import (
     FileTemplate,
     FileTemplateSource,
     TemplateSourceType,
 )
+from src.stairlight.source.template import RenderingTemplateException
 
 
 @pytest.mark.parametrize(

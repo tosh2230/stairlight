@@ -7,7 +7,7 @@ from typing import Any, Dict, Iterator, List, Optional
 from jinja2 import BaseLoader, Environment
 from jinja2.exceptions import UndefinedError
 
-from ..key import MappingConfigKey, StairlightConfigKey
+from .config import MappingConfigKey, StairlightConfigKey
 
 
 class TemplateSourceType(enum.Enum):
@@ -33,6 +33,7 @@ class Template(ABC):
         bucket: Optional[str] = None,
         project: Optional[str] = None,
         default_table_prefix: Optional[str] = None,
+        data_source_name: Optional[str] = None,
     ):
         """SQL template
 
@@ -54,6 +55,7 @@ class Template(ABC):
         self.bucket = bucket
         self.project = project
         self.default_table_prefix = default_table_prefix
+        self.data_source_name = data_source_name
         self.uri = ""
 
     def find_mapped_table_attributes(self) -> Iterator[Dict[str, Any]]:

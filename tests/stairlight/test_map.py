@@ -2,9 +2,9 @@ from typing import Any, Dict, List
 
 import pytest
 
-from src.stairlight.key import MapKey, MappingConfigKey
 from src.stairlight.map import Map, create_dict_key_list
-from src.stairlight.source.base import Template
+from src.stairlight.source.config import MapKey, MappingConfigKey
+from src.stairlight.source.template import Template
 
 
 @pytest.fixture(scope="session")

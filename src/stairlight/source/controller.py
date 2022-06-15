@@ -4,7 +4,7 @@ from importlib.util import find_spec
 from logging import getLogger
 from typing import Any, Dict, Type
 
-from .base import TemplateSource, TemplateSourceType
+from .template import TemplateSource, TemplateSourceType
 
 GCS_URI_SCHEME = "gs://"
 
@@ -23,19 +23,19 @@ def get_template_source_class(template_source_type: str) -> Type[TemplateSource]
     template_source: Type[TemplateSource]
     if template_source_type == TemplateSourceType.FILE.value:
         if not find_spec("FileTemplateSource"):
-            from .file import FileTemplateSource
+            from .file.template import FileTemplateSource
         template_source = FileTemplateSource
     elif template_source_type == TemplateSourceType.GCS.value:
         if not find_spec("GcsTemplateSource"):
-            from .gcs import GcsTemplateSource
+            from .gcs.template import GcsTemplateSource
         template_source = GcsTemplateSource
     elif template_source_type == TemplateSourceType.REDASH.value:
         if not find_spec("RedashTemplateSource"):
-            from .redash import RedashTemplateSource
+            from .redash.template import RedashTemplateSource
         template_source = RedashTemplateSource
     elif template_source_type == TemplateSourceType.DBT.value:
         if not find_spec("DbtTemplateSource"):
-            from .dbt import DbtTemplateSource
+            from .dbt.template import DbtTemplateSource
         template_source = DbtTemplateSource
     return template_source
 
@@ -58,7 +58,7 @@ class SaveMapController:
 
     def _save_map_gcs(self) -> None:
         """Save mapped results to Google Cloud Storage"""
-        from .gcs import get_gcs_blob
+        from .gcs.template import get_gcs_blob
 
         blob = get_gcs_blob(self.save_file)
         blob.upload_from_string(
@@ -89,7 +89,7 @@ class LoadMapController:
 
     def _load_map_gcs(self) -> dict:
         """Load mapped results from Google Cloud Storage"""
-        from .gcs import get_gcs_blob
+        from .gcs.template import get_gcs_blob
 
         blob = get_gcs_blob(self.load_file)
         if not blob.exists():

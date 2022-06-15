@@ -3,18 +3,22 @@ from collections import OrderedDict
 
 import pytest
 
-from src.stairlight.config import (
+from src.stairlight.configurator import (
     MAPPING_CONFIG_PREFIX_DEFAULT,
     STAIRLIGHT_CONFIG_PREFIX_DEFAULT,
-    ConfigKeyNotFoundException,
     Configurator,
+)
+from src.stairlight.source.config import (
+    ConfigKeyNotFoundException,
+    MapKey,
+    MappingConfigKey,
+    StairlightConfigKey,
     get_config_value,
 )
-from src.stairlight.key import MapKey, MappingConfigKey, StairlightConfigKey
-from src.stairlight.source.dbt import DbtTemplate
-from src.stairlight.source.file import FileTemplate
-from src.stairlight.source.gcs import GcsTemplate
-from src.stairlight.source.redash import RedashTemplate
+from src.stairlight.source.dbt.template import DbtTemplate
+from src.stairlight.source.file.template import FileTemplate
+from src.stairlight.source.gcs.template import GcsTemplate
+from src.stairlight.source.redash.template import RedashTemplate
 
 
 class TestSuccess:

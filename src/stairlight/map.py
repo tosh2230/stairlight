@@ -1,12 +1,10 @@
 from logging import getLogger
 from typing import Any, Dict, Iterator, List, Type
 
-from .key import MapKey, MappingConfigKey, StairlightConfigKey
 from .query import Query
-from .source.base import Template, TemplateSource
+from .source.config import MapKey, MappingConfigKey, StairlightConfigKey
 from .source.controller import get_template_source_class
-from .source.gcs import GcsTemplate
-from .source.redash import RedashTemplate
+from .source.template import Template, TemplateSource, TemplateSourceType
 
 logger = getLogger(__name__)
 
@@ -197,9 +195,9 @@ class Map:
             MapKey.LINES: [],
         }
 
-        if isinstance(template, GcsTemplate):
+        if template.source_type == TemplateSourceType.GCS:
             upstairs_values[MapKey.BUCKET_NAME] = template.bucket
-        elif isinstance(template, RedashTemplate):
+        elif template.source_type == TemplateSourceType.REDASH:
             upstairs_values[MapKey.DATA_SOURCE_NAME] = template.data_source_name
 
         if metadata:

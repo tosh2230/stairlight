@@ -7,8 +7,8 @@ from typing import Any, Dict, Iterator, List
 
 import yaml
 
-from ..key import DbtProjectKey, StairlightConfigKey
-from .base import Template, TemplateSource, TemplateSourceType
+from ..config import DbtProjectKey, StairlightConfigKey
+from ..template import Template, TemplateSource, TemplateSourceType
 
 
 class DbtTemplate(Template):

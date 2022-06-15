@@ -5,9 +5,8 @@ from typing import Any, Dict, Iterator, List
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine.row import Row
 
-from ..config import get_config_value
-from ..key import MappingConfigKey, StairlightConfigKey
-from .base import Template, TemplateSource, TemplateSourceType
+from ..config import MappingConfigKey, StairlightConfigKey, get_config_value
+from ..template import Template, TemplateSource, TemplateSourceType
 
 logger = getLogger(__name__)
 

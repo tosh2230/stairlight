@@ -3,7 +3,7 @@ from typing import Any, Dict, Iterator, List
 
 import pytest
 
-from src.stairlight.key import MapKey
+from src.stairlight.source.config import MapKey
 from src.stairlight.stairlight import (
     ResponseType,
     SearchDirection,

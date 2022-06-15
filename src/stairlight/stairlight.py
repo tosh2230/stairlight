@@ -3,13 +3,13 @@ import json
 from logging import getLogger
 from typing import Any, Dict, List, Union
 
-from .config import (
+from .configurator import (
     MAPPING_CONFIG_PREFIX_DEFAULT,
     STAIRLIGHT_CONFIG_PREFIX_DEFAULT,
     Configurator,
 )
-from .key import MapKey, MappingConfigKey, StairlightConfigKey
 from .map import Map
+from .source.config import MapKey, MappingConfigKey, StairlightConfigKey
 from .source.controller import LoadMapController, SaveMapController
 
 logger = getLogger(__name__)

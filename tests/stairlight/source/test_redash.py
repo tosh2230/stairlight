@@ -3,9 +3,9 @@ from typing import Any, Dict
 
 import pytest
 
-from src.stairlight.config import Configurator
-from src.stairlight.key import StairlightConfigKey
-from src.stairlight.source.redash import (
+from src.stairlight.configurator import Configurator
+from src.stairlight.source.config import StairlightConfigKey
+from src.stairlight.source.redash.template import (
     RedashTemplate,
     RedashTemplateSource,
     TemplateSourceType,
@@ -15,7 +15,7 @@ from src.stairlight.source.redash import (
 @pytest.mark.parametrize(
     "env_key, path",
     [
-        ("REDASH_DATABASE_URL", "src/stairlight/source/sql/redash_queries.sql"),
+        ("REDASH_DATABASE_URL", "src/stairlight/source/redash/sql/redash_queries.sql"),
     ],
 )
 class TestRedashTemplateSource:
