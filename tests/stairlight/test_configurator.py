@@ -8,7 +8,7 @@ from src.stairlight.configurator import (
     STAIRLIGHT_CONFIG_PREFIX_DEFAULT,
     Configurator,
 )
-from src.stairlight.source.config import (
+from src.stairlight.source.config_key import (
     ConfigKeyNotFoundException,
     MapKey,
     MappingConfigKey,
@@ -79,12 +79,11 @@ class TestSuccess:
         mapping_value = OrderedDict(
             {
                 MappingConfigKey.TEMPLATE_SOURCE_TYPE: file_template.source_type.value,
-                MappingConfigKey.File.FILE_SUFFIX: file_template.key,
                 MappingConfigKey.TABLES: [
                     OrderedDict(
                         {
                             MappingConfigKey.TABLE_NAME: "test_undefined",
-                            MappingConfigKey.IGNORE_PARAMETERS: OrderedDict(),
+                            MappingConfigKey.IGNORE_PARAMETERS: [],
                             MappingConfigKey.PARAMETERS: OrderedDict(
                                 {
                                     "params": {
@@ -98,10 +97,11 @@ class TestSuccess:
                         }
                     )
                 ],
+                MappingConfigKey.File.FILE_SUFFIX: file_template.key,
             }
         )
 
-        metadata_value = OrderedDict(
+        metadata_value: OrderedDict = OrderedDict(
             {
                 MappingConfigKey.TABLE_NAME: None,
                 MappingConfigKey.LABELS: OrderedDict(),

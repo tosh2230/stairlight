@@ -4,7 +4,7 @@ from typing import Any, Dict
 import pytest
 
 from src.stairlight.configurator import Configurator
-from src.stairlight.source.config import StairlightConfigKey
+from src.stairlight.source.config_key import StairlightConfigKey
 from src.stairlight.source.redash.template import (
     RedashTemplate,
     RedashTemplateSource,

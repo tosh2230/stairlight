@@ -3,13 +3,13 @@ import os
 from importlib.util import find_spec
 from logging import getLogger
 from pathlib import Path
-from typing import Any, Dict, List, Type
+from typing import Any, Dict, List, OrderedDict, Type
 
 from .config import MappingConfigMapping
+from .dbt.config import MappingConfigMappingDbt
 from .file.config import MappingConfigMappingFile
 from .gcs.config import MappingConfigMappingGcs
 from .redash.config import MappingConfigMappingRedash
-from .dbt.config import MappingConfigMappingDbt
 from .template import Template, TemplateSource, TemplateSourceType
 
 GCS_URI_SCHEME = "gs://"
@@ -57,7 +57,7 @@ def get_default_table_name(template: Template) -> str:
 
 def collect_mapping_attributes(
     template: Template,
-    tables: List[Dict[str, Any]],
+    tables: List[OrderedDict[str, Any]],
 ) -> MappingConfigMapping:
     mapping: MappingConfigMapping
 

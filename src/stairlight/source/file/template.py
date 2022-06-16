@@ -2,7 +2,7 @@ import pathlib
 import re
 from typing import Any, Dict, Iterator, Optional
 
-from ..config import StairlightConfigKey, get_config_value
+from ..config_key import StairlightConfigKey, get_config_value
 from ..template import Template, TemplateSource, TemplateSourceType
 
 

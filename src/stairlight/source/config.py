@@ -1,7 +1,9 @@
 import logging
-from abc import ABC
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, OrderedDict
+from typing import Any, Dict, Iterator, List, OrderedDict, Type
+
+from .config_key import MapKey
+from .template import TemplateSourceType
 
 logger = logging.getLogger()
 
@@ -30,147 +32,73 @@ class StairlightConfigSettings:
 
 
 @dataclass
-class MappingConfig:
-    Global: OrderedDict
-    Mapping: List[OrderedDict]
-    Metadata: List[OrderedDict]
-
-
-@dataclass
 class MappingConfigGlobal:
     Parameters: Dict[str, Any]
 
 
 @dataclass
-class MappingConfigMapping:
-    TemplateSourceType: str
+class MappingConfigMappingTable:
+    TableName: str
+    IgnoreParameters: List[str] = field(default_factory=list)
+    Parameters: OrderedDict = field(default_factory=OrderedDict)
+    Labels: Dict[str, Any] = field(default_factory=OrderedDict)
 
 
 @dataclass
-class MappingConfigMappingTable:
-    TableName: str
-    IgnoreParameters: List[str]
-    Parameters: OrderedDict
-    Labels: OrderedDict
+class MappingConfigMapping:
+    TemplateSourceType: str
+    Tables: List[OrderedDict]
+
+    def get_table(self) -> Iterator[MappingConfigMappingTable]:
+        for _table in self.Tables:
+            yield MappingConfigMappingTable(**_table)
 
 
 @dataclass
 class MappingConfigMetadata:
     TableName: str = None
-    Labels: OrderedDict = field(default_factory=OrderedDict)
+    Labels: Dict[str, Any] = field(default_factory=OrderedDict)
 
 
-class Key(ABC):
-    def __init__(self) -> None:
-        super().__init__()
+@dataclass
+class MappingConfig:
+    Global: OrderedDict
+    Mapping: List[OrderedDict]
+    Metadata: List[OrderedDict]
 
-    def __setattr__(self, name: str, value: Any) -> None:
-        if name in self.__dict__:
-            raise TypeError()
-        else:
-            self.__setattr__(name=name, value=value)
+    def get_global(self) -> MappingConfigGlobal:
+        return MappingConfigGlobal(**self.Global)
 
+    def get_mapping(self) -> Iterator[MappingConfigMapping]:
+        for _mapping in self.Mapping:
+            mapping_config = self.select_mapping_config(
+                source_type=_mapping.get(MapKey.TEMPLATE_SOURCE_TYPE)
+            )
+            yield mapping_config(**_mapping)
 
-class StairlightConfigKey(Key):
-    INCLUDE_SECTION = "Include"
-    EXCLUDE_SECTION = "Exclude"
-    SETTING_SECTION = "Settings"
+    def get_metadata(self) -> Iterator[MappingConfigMetadata]:
+        for _metadata in self.Metadata:
+            yield MappingConfigMetadata(**_metadata)
 
-    TEMPLATE_SOURCE_TYPE = "TemplateSourceType"
-    DEFAULT_TABLE_PREFIX = "DefaultTablePrefix"
-    REGEX = "Regex"
+    @staticmethod
+    def select_mapping_config(source_type: str) -> Type[MappingConfigMapping]:
+        mapping_config: Type[MappingConfigMapping] = None
 
-    MAPPING_PREFIX = "MappingPrefix"
+        # Avoid to occur circular imports
+        if source_type == TemplateSourceType.FILE.value:
+            from .file.config import MappingConfigMappingFile
 
-    class File(Key):
-        FILE_SYSTEM_PATH = "FileSystemPath"
+            mapping_config = MappingConfigMappingFile
+        elif source_type == TemplateSourceType.GCS.value:
+            from .gcs.config import MappingConfigMappingGcs
 
-    class Gcs(Key):
-        PROJECT_ID = "ProjectId"
-        BUCKET_NAME = "BucketName"
+            mapping_config = MappingConfigMappingGcs
+        elif source_type == TemplateSourceType.REDASH.value:
+            from .redash.config import MappingConfigMappingRedash
 
-    class Redash(Key):
-        DATABASE_URL_ENV_VAR = "DatabaseUrlEnvironmentVariable"
-        DATA_SOURCE_NAME = "DataSourceName"
-        QUERY_IDS = "QueryIds"
+            mapping_config = MappingConfigMappingRedash
+        elif source_type == TemplateSourceType.DBT.value:
+            from .dbt.config import MappingConfigMappingDbt
 
-    class Dbt(Key):
-        PROJECT_DIR = "ProjectDir"
-        PROFILES_DIR = "ProfilesDir"
-        TARGET = "Target"
-        VARS = "Vars"
-
-
-class MappingConfigKey(Key):
-    GLOBAL_SECTION = "Global"
-    MAPPING_SECTION = "Mapping"
-    METADATA_SECTION = "Metadata"
-
-    TEMPLATE_SOURCE_TYPE = "TemplateSourceType"
-    TABLES = "Tables"
-    TABLE_NAME = "TableName"
-    IGNORE_PARAMETERS = "IgnoreParameters"
-    PARAMETERS = "Parameters"
-    LABELS = "Labels"
-
-    class File(Key):
-        FILE_SUFFIX = "FileSuffix"
-
-    class Gcs(Key):
-        URI = "Uri"
-        BUCKET_NAME = "BucketName"
-
-    class Redash(Key):
-        QUERY_ID = "QueryId"
-        DATA_SOURCE_NAME = "DataSourceName"
-
-    class Dbt(Key):
-        FILE_SUFFIX = "FileSuffix"
-        PROJECT_NAME = "ProjectName"
-
-
-class DbtProjectKey(Key):
-    PROJECT_NAME = "name"
-    MODEL_PATHS = "model-paths"
-    TARGET_PATH = "target-path"
-    PROFILE = "Profile"
-
-
-class MapKey(Key):
-    TABLE_NAME = "TableName"
-    TEMPLATE_SOURCE_TYPE = "TemplateSourceType"
-    KEY = "Key"
-    URI = "Uri"
-    LINES = "Lines"
-    LINE_NUMBER = "LineNumber"
-    LINE_STRING = "LineString"
-    BUCKET_NAME = "BucketName"
-    LABELS = "Labels"
-    DATA_SOURCE_NAME = "DataSourceName"
-
-    TEMPLATE = "Template"
-    PARAMETERS = "Parameters"
-
-
-class ConfigKeyNotFoundException(Exception):
-    def __init__(self, msg: str) -> None:
-        self.msg = msg
-
-    def __str__(self) -> str:
-        return self.msg
-
-
-def get_config_value(
-    key: str,
-    target: Dict[Any, Any],
-    fail_if_not_found: bool = False,
-    enable_logging: bool = False,
-) -> Any:
-    value = target.get(key)
-    if not value:
-        msg = f"{key} is not found in the configuration: {target}"
-        if fail_if_not_found:
-            raise ConfigKeyNotFoundException(msg=msg)
-        if enable_logging:
-            logger.warning(msg=msg)
-    return value
+            mapping_config = MappingConfigMappingDbt
+        return mapping_config

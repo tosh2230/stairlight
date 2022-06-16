@@ -1,17 +1,17 @@
-import pytest
 from dataclasses import asdict
 
+import pytest
+
+from src.stairlight.configurator import MAPPING_CONFIG_PREFIX_DEFAULT, Configurator
+from src.stairlight.source.config_key import MappingConfigKey
 from src.stairlight.source.controller import (
     collect_mapping_attributes,
     get_default_table_name,
 )
-
-from src.stairlight.configurator import MAPPING_CONFIG_PREFIX_DEFAULT, Configurator
-from src.stairlight.source.config import MappingConfigKey
+from src.stairlight.source.dbt.template import DbtTemplate
 from src.stairlight.source.file.template import FileTemplate
 from src.stairlight.source.gcs.template import GcsTemplate
 from src.stairlight.source.redash.template import RedashTemplate
-from src.stairlight.source.dbt.template import DbtTemplate
 
 
 class TestSuccess:

@@ -3,7 +3,10 @@ from typing import Any, Dict
 import pytest
 
 from src.stairlight.configurator import Configurator
-from src.stairlight.source.config import ConfigKeyNotFoundException, StairlightConfigKey
+from src.stairlight.source.config_key import (
+    ConfigKeyNotFoundException,
+    StairlightConfigKey,
+)
 from src.stairlight.source.file.template import (
     FileTemplate,
     FileTemplateSource,

@@ -9,7 +9,6 @@ from typing import Any, Dict, List
 import yaml
 
 from .source.config import (
-    MapKey,
     MappingConfig,
     MappingConfigGlobal,
     MappingConfigMapping,
@@ -19,6 +18,7 @@ from .source.config import (
     StairlightConfigExclude,
     StairlightConfigSettings,
 )
+from .source.config_key import MapKey
 from .source.controller import collect_mapping_attributes, get_default_table_name
 from .source.dbt.config import StairlightConfigIncludeDbt
 from .source.file.config import StairlightConfigIncludeFile
@@ -40,6 +40,18 @@ class Configurator:
             path (str): Configuration file path
         """
         self.dir = dir
+
+    def read_stairlight(
+        self, prefix: str = STAIRLIGHT_CONFIG_PREFIX_DEFAULT
+    ) -> StairlightConfig:
+        config = self.read(prefix=prefix)
+        return StairlightConfig(**config)
+
+    def read_mapping(
+        self, prefix: str = MAPPING_CONFIG_PREFIX_DEFAULT
+    ) -> MappingConfig:
+        config = self.read(prefix=prefix)
+        return MappingConfig(**config)
 
     def read(self, prefix: str) -> Dict[str, Any]:
         """Read a configuration file
@@ -179,7 +191,7 @@ class Configurator:
                     MappingConfigMappingTable(
                         TableName=get_default_table_name(template=template),
                         Parameters=parameters,
-                        IgnoreParameters=OrderedDict(),
+                        IgnoreParameters=[],
                         Labels=OrderedDict(),
                     )
                 )

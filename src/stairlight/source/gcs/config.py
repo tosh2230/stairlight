@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Any, Dict, List
+from typing import Any, List, OrderedDict
 
 from ..config import MappingConfigMapping, StairlightConfigInclude
 from ..template import TemplateSourceType as source_type
@@ -18,4 +18,4 @@ class StairlightConfigIncludeGcs(StairlightConfigInclude):
 class MappingConfigMappingGcs(MappingConfigMapping):
     TemplateSourceType: str = source_type.GCS.value
     Uri: str = None
-    Tables: List[Dict[str, Any]] = field(default_factory=list)
+    Tables: List[OrderedDict[str, Any]] = field(default_factory=list)

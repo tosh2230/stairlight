@@ -7,7 +7,7 @@ from typing import Any, Dict, Iterator, List
 
 import yaml
 
-from ..config import DbtProjectKey, StairlightConfigKey
+from ..config_key import DbtProjectKey, StairlightConfigKey
 from ..template import Template, TemplateSource, TemplateSourceType
 
 

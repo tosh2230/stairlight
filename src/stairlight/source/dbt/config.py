@@ -1,8 +1,8 @@
 from collections import OrderedDict as ordered_dict
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, OrderedDict
+from typing import Any, List, OrderedDict
 
-from ..config import StairlightConfigInclude, MappingConfigMapping
+from ..config import MappingConfigMapping, StairlightConfigInclude
 from ..template import TemplateSourceType as source_type
 
 
@@ -20,4 +20,4 @@ class MappingConfigMappingDbt(MappingConfigMapping):
     TemplateSourceType: str = source_type.DBT.value
     ProjectName: str = None
     FileSuffix: str = None
-    Tables: List[Dict[str, Any]] = field(default_factory=list)
+    Tables: List[OrderedDict[str, Any]] = field(default_factory=list)

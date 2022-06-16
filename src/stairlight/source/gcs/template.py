@@ -3,7 +3,7 @@ from typing import Any, Dict, Iterator, Optional
 
 from google.cloud import storage
 
-from ..config import StairlightConfigKey, get_config_value
+from ..config_key import StairlightConfigKey, get_config_value
 from ..controller import GCS_URI_SCHEME
 from ..template import Template, TemplateSource, TemplateSourceType
 

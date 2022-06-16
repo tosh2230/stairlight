@@ -1,5 +1,6 @@
 import enum
 import json
+from dataclasses import asdict
 from logging import getLogger
 from typing import Any, Dict, List, Union
 
@@ -9,7 +10,12 @@ from .configurator import (
     Configurator,
 )
 from .map import Map
-from .source.config import MapKey, MappingConfigKey, StairlightConfigKey
+from .source.config import (
+    MapKey,
+    MappingConfig,
+    StairlightConfig,
+    StairlightConfigSettings,
+)
 from .source.controller import LoadMapController, SaveMapController
 
 logger = getLogger(__name__)
@@ -67,8 +73,8 @@ class StairLight:
         self._configurator = Configurator(dir=config_dir)
         self._mapped: Dict[str, Any] = {}
         self._unmapped: List[Dict[str, Any]] = []
-        self._mapping_config: Dict[str, Any] = {}
-        self._stairlight_config = self._configurator.read(
+        self._mapping_config: MappingConfig = None
+        self._stairlight_config: StairlightConfig = self._configurator.read_stairlight(
             prefix=STAIRLIGHT_CONFIG_PREFIX_DEFAULT
         )
 
@@ -118,21 +124,21 @@ class StairLight:
             return
 
         mapping_config_prefix: str = MAPPING_CONFIG_PREFIX_DEFAULT
-        if StairlightConfigKey.SETTING_SECTION in self._stairlight_config:
-            settings: Dict[str, Any] = self._stairlight_config[
-                StairlightConfigKey.SETTING_SECTION
-            ]
-            if StairlightConfigKey.MAPPING_PREFIX in settings:
-                mapping_config_prefix = settings.get(
-                    StairlightConfigKey.MAPPING_PREFIX, ""
-                )
-        self._mapping_config = self._configurator.read(prefix=mapping_config_prefix)
+        if self._stairlight_config.Settings:
+            settings: StairlightConfigSettings = StairlightConfigSettings(
+                **self._stairlight_config.Settings
+            )
+            if settings.MappingPrefix:
+                mapping_config_prefix = settings.MappingPrefix
+        self._mapping_config = self._configurator.read_mapping(
+            prefix=mapping_config_prefix
+        )
 
     def _write_map(self) -> None:
         """write a dependency map"""
         dependency_map = Map(
-            stairlight_config=self._stairlight_config,
-            mapping_config=self._mapping_config,
+            stairlight_config=asdict(self._stairlight_config),
+            mapping_config=asdict(self._mapping_config),
         )
 
         dependency_map.write()
@@ -447,27 +453,21 @@ class StairLight:
         tables_to_search: List[str] = []
 
         # "mapping" section in mapping.yaml
-        for configurations in self._mapping_config.get(
-            MappingConfigKey.MAPPING_SECTION, {}
-        ):
-            for table_attributes in configurations.get(MappingConfigKey.TABLES, {}):
+        for mapping in self._mapping_config.get_mapping():
+            for mapping_table in mapping.get_table():
                 if self.is_target_label_found(
                     target_labels=target_labels,
-                    configured_labels=table_attributes.get(MappingConfigKey.LABELS, {}),
+                    configured_labels=mapping_table.Labels,
                 ):
-                    tables_to_search.append(
-                        table_attributes[MappingConfigKey.TABLE_NAME]
-                    )
+                    tables_to_search.append(mapping_table.TableName)
 
         # "metadata" section in mapping.yaml
-        for table_attributes in self._mapping_config.get(
-            MappingConfigKey.METADATA_SECTION, {}
-        ):
+        for metadata in self._mapping_config.get_metadata():
             if self.is_target_label_found(
                 target_labels=target_labels,
-                configured_labels=table_attributes.get(MappingConfigKey.LABELS, {}),
+                configured_labels=metadata.Labels,
             ):
-                tables_to_search.append(table_attributes[MappingConfigKey.TABLE_NAME])
+                tables_to_search.append(metadata.TableName)
 
         return tables_to_search
 

@@ -2,7 +2,7 @@ from logging import getLogger
 from typing import Any, Dict, Iterator, List, Type
 
 from .query import Query
-from .source.config import MapKey, MappingConfigKey, StairlightConfigKey
+from .source.config_key import MapKey, MappingConfigKey, StairlightConfigKey
 from .source.controller import get_template_source_class
 from .source.template import Template, TemplateSource, TemplateSourceType
 

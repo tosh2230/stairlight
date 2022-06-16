@@ -2,7 +2,7 @@ from typing import Any, Dict, List
 
 import pytest
 
-from src.stairlight.source.config import StairlightConfigKey
+from src.stairlight.source.config_key import StairlightConfigKey
 from src.stairlight.source.gcs.template import (
     GCS_URI_SCHEME,
     GcsTemplate,
