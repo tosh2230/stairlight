@@ -2,26 +2,29 @@ import glob
 import logging
 import re
 from collections import OrderedDict
-from copy import deepcopy
 from dataclasses import asdict
 from datetime import datetime, timezone
-from pathlib import Path
 from typing import Any, Dict, List
 
 import yaml
 
 from .source.config import (
     MapKey,
-    MappingConfigKey,
+    MappingConfig,
+    MappingConfigGlobal,
+    MappingConfigMapping,
+    MappingConfigMappingTable,
+    MappingConfigMetadata,
     StairlightConfig,
     StairlightConfigExclude,
     StairlightConfigSettings,
 )
+from .source.controller import collect_mapping_attributes, get_default_table_name
 from .source.dbt.config import StairlightConfigIncludeDbt
 from .source.file.config import StairlightConfigIncludeFile
 from .source.gcs.config import StairlightConfigIncludeGcs
 from .source.redash.config import StairlightConfigIncludeRedash
-from .source.template import Template, TemplateSourceType
+from .source.template import Template
 
 logger = logging.getLogger()
 
@@ -146,118 +149,58 @@ class Configurator:
         Returns:
             OrderedDict: mapping.yaml template
         """
-        mapping_config_dict: OrderedDict = OrderedDict(
-            {
-                MappingConfigKey.GLOBAL_SECTION: [],
-                MappingConfigKey.MAPPING_SECTION: [],
-            }
-        )
-
         # List(instead of Set) because OrderedDict is not hashable
         parameters_set: List[OrderedDict] = []
         global_parameters: Dict[str, Any] = {}
 
         # Mapping section
+        mappings: List[MappingConfigMapping] = []
         unmapped_template: Dict[str, Any]
         for unmapped_template in unmapped_templates:
+            # Tables.Parameters
+            parameters: OrderedDict = OrderedDict()
             template: Template = unmapped_template[MapKey.TEMPLATE]
-            mapping_values: OrderedDict = OrderedDict(
-                {
-                    MappingConfigKey.TEMPLATE_SOURCE_TYPE: template.source_type.value,
-                }
-            )
-            mapping_values.update(
-                self.select_mapping_values_by_template(template=template)
-            )
 
-            # Tables
-            mapping_values[MappingConfigKey.TABLES] = [
-                OrderedDict(
-                    {
-                        MappingConfigKey.TABLE_NAME: self.get_default_table_name(
-                            template=template
-                        )
-                    }
-                )
-            ]
-
-            # Parameters
             if MapKey.PARAMETERS in unmapped_template:
                 undefined_params: List[str] = unmapped_template.get(
                     MapKey.PARAMETERS, []
                 )
-                parameters: OrderedDict = OrderedDict()
                 for undefined_param in undefined_params:
                     splitted_params = undefined_param.split(".")
                     create_nested_dict(keys=splitted_params, results=parameters)
-
-                if parameters:
-                    mapping_values[MappingConfigKey.TABLES][0][
-                        MappingConfigKey.PARAMETERS
-                    ] = parameters
 
                 if parameters in parameters_set:
                     global_parameters.update(parameters)
                 else:
                     parameters_set.append(parameters)
 
-            # Labels
-            mapping_values[MappingConfigKey.TABLES][0][
-                MappingConfigKey.LABELS
-            ] = OrderedDict({"key": "value"})
-
-            mapping_config_dict[MappingConfigKey.MAPPING_SECTION].append(mapping_values)
-
-        # Global section
-        mapping_config_dict[MappingConfigKey.GLOBAL_SECTION] = OrderedDict(
-            deepcopy({MappingConfigKey.PARAMETERS: global_parameters})
-        )
-
-        # Metadata section
-        mapping_config_dict[MappingConfigKey.METADATA_SECTION] = [
-            OrderedDict(
-                {
-                    MappingConfigKey.TABLE_NAME: None,
-                    MappingConfigKey.LABELS: OrderedDict({"key": "value"}),
-                }
+            table = OrderedDict(
+                asdict(
+                    MappingConfigMappingTable(
+                        TableName=get_default_table_name(template=template),
+                        Parameters=parameters,
+                        IgnoreParameters=OrderedDict(),
+                        Labels=OrderedDict(),
+                    )
+                )
             )
-        ]
+            mapping: MappingConfigMapping = collect_mapping_attributes(
+                template=template,
+                tables=[table],
+            )
+            mappings.append(mapping)
 
-        return mapping_config_dict
-
-    @staticmethod
-    def select_mapping_values_by_template(template: Template) -> Dict[str, Any]:
-        mapping_values: Dict[str, Any] = {}
-
-        # To avoid circular imports
-        from .source.dbt.template import DbtTemplate
-        from .source.file.template import FileTemplate
-        from .source.gcs.template import GcsTemplate
-        from .source.redash.template import RedashTemplate
-
-        if isinstance(template, FileTemplate):
-            mapping_values[MappingConfigKey.File.FILE_SUFFIX] = template.key
-        elif isinstance(template, GcsTemplate):
-            mapping_values[MappingConfigKey.Gcs.URI] = template.uri
-            mapping_values[MappingConfigKey.Gcs.BUCKET_NAME] = template.bucket
-        elif isinstance(template, RedashTemplate):
-            mapping_values[MappingConfigKey.Redash.QUERY_ID] = template.query_id
-            mapping_values[
-                MappingConfigKey.Redash.DATA_SOURCE_NAME
-            ] = template.data_source_name
-        elif isinstance(template, DbtTemplate):
-            mapping_values[MappingConfigKey.Dbt.PROJECT_NAME] = template.project_name
-            mapping_values[MappingConfigKey.Dbt.FILE_SUFFIX] = template.key
-        return mapping_values
-
-    @staticmethod
-    def get_default_table_name(template: Template) -> str:
-        default_table_name: str = ""
-        if template.source_type == TemplateSourceType.REDASH:
-            default_table_name = template.uri
-        else:
-            default_table_name = Path(template.key).stem
-        return default_table_name
+        return OrderedDict(
+            asdict(
+                MappingConfig(
+                    Global=OrderedDict(
+                        asdict(MappingConfigGlobal(Parameters=global_parameters))
+                    ),
+                    Mapping=[OrderedDict(asdict(mapping)) for mapping in mappings],
+                    Metadata=[OrderedDict(asdict(MappingConfigMetadata()))],
+                )
+            )
+        )
 
 
 def create_nested_dict(

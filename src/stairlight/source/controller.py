@@ -2,9 +2,15 @@ import json
 import os
 from importlib.util import find_spec
 from logging import getLogger
-from typing import Any, Dict, Type
+from pathlib import Path
+from typing import Any, Dict, List, Type
 
-from .template import TemplateSource, TemplateSourceType
+from .config import MappingConfigMapping
+from .file.config import MappingConfigMappingFile
+from .gcs.config import MappingConfigMappingGcs
+from .redash.config import MappingConfigMappingRedash
+from .dbt.config import MappingConfigMappingDbt
+from .template import Template, TemplateSource, TemplateSourceType
 
 GCS_URI_SCHEME = "gs://"
 
@@ -38,6 +44,47 @@ def get_template_source_class(template_source_type: str) -> Type[TemplateSource]
             from .dbt.template import DbtTemplateSource
         template_source = DbtTemplateSource
     return template_source
+
+
+def get_default_table_name(template: Template) -> str:
+    default_table_name: str = ""
+    if template.source_type == TemplateSourceType.REDASH:
+        default_table_name = template.uri
+    else:
+        default_table_name = Path(template.key).stem
+    return default_table_name
+
+
+def collect_mapping_attributes(
+    template: Template,
+    tables: List[Dict[str, Any]],
+) -> MappingConfigMapping:
+    mapping: MappingConfigMapping
+
+    if template.source_type == TemplateSourceType.FILE:
+        mapping = MappingConfigMappingFile(
+            FileSuffix=template.key,
+            Tables=tables,
+        )
+    elif template.source_type == TemplateSourceType.GCS:
+        mapping = MappingConfigMappingGcs(
+            Uri=template.uri,
+            Tables=tables,
+        )
+    elif template.source_type == TemplateSourceType.REDASH:
+        mapping = MappingConfigMappingRedash(
+            QueryId=template.query_id,
+            DataSourceName=template.data_source_name,
+            Tables=tables,
+        )
+    elif template.source_type == TemplateSourceType.DBT:
+        mapping = MappingConfigMappingDbt(
+            ProjectName=template.project_name,
+            FileSuffix=template.key,
+            Tables=tables,
+        )
+
+    return mapping
 
 
 class SaveMapController:

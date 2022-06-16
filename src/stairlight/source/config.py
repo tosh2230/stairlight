@@ -1,9 +1,16 @@
 import logging
 from abc import ABC
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Dict, List, OrderedDict
 
 logger = logging.getLogger()
+
+
+@dataclass
+class StairlightConfig:
+    Include: List[OrderedDict]
+    Exclude: List[OrderedDict]
+    Settings: OrderedDict
 
 
 @dataclass
@@ -23,10 +30,34 @@ class StairlightConfigSettings:
 
 
 @dataclass
-class StairlightConfig:
-    Include: List[OrderedDict]
-    Exclude: List[OrderedDict]
-    Settings: OrderedDict
+class MappingConfig:
+    Global: OrderedDict
+    Mapping: List[OrderedDict]
+    Metadata: List[OrderedDict]
+
+
+@dataclass
+class MappingConfigGlobal:
+    Parameters: Dict[str, Any]
+
+
+@dataclass
+class MappingConfigMapping:
+    TemplateSourceType: str
+
+
+@dataclass
+class MappingConfigMappingTable:
+    TableName: str
+    IgnoreParameters: List[str]
+    Parameters: OrderedDict
+    Labels: OrderedDict
+
+
+@dataclass
+class MappingConfigMetadata:
+    TableName: str = None
+    Labels: OrderedDict = field(default_factory=OrderedDict)
 
 
 class Key(ABC):

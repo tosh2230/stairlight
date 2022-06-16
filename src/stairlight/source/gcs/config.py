@@ -1,6 +1,7 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Any, Dict, List
 
-from ..config import StairlightConfigInclude
+from ..config import MappingConfigMapping, StairlightConfigInclude
 from ..template import TemplateSourceType as source_type
 
 
@@ -11,3 +12,10 @@ class StairlightConfigIncludeGcs(StairlightConfigInclude):
     BucketName: str = None
     Regex: str = None
     DefaultTablePrefix: str = None
+
+
+@dataclass
+class MappingConfigMappingGcs(MappingConfigMapping):
+    TemplateSourceType: str = source_type.GCS.value
+    Uri: str = None
+    Tables: List[Dict[str, Any]] = field(default_factory=list)
