@@ -20,12 +20,12 @@ An end-to-end data lineage tool, detects table dependencies by SQL SELECT statem
 
 ## Supported Data Sources
 
-| Data Source | | Remarks |
-| --- | --- | --- |
-| Local file system | | With Python Pathlib module |
+| Data Source | Remarks |
+| --- | --- |
+| Local file system | With Python Pathlib module |
 | [Google Cloud Storage(GCS)](https://cloud.google.com/storage) | | Also available for [Google Cloud Composer](https://cloud.google.com/composer) |
-| [Redash](https://redash.io/) | | |
-| [dbt](https://www.getdbt.com/) | Google BigQuery | Using `dbt compile` command internally |
+| [Redash](https://redash.io/) | |
+| [dbt](https://www.getdbt.com/) - [Google BigQuery](https://cloud.google.com/bigquery) | Using `dbt compile` command internally |
 
 ## Installation
 
@@ -37,12 +37,12 @@ $ pip install stairlight
 
 (v0.4+) The base package is for local file system only. Please set extras when reading from other data sources.
 
-| Data Source | | TemplateSourceType | Extra |
-| --- | --- | --- | --- |
-| Local file system | | File | - |
-| GCS | | GCS | gcs |
-| Redash | | Redash | redash |
-| dbt | Google Bigquery | dbt | dbt-bigquery |
+| Data Source | TemplateSourceType | Extra |
+| --- | --- | --- |
+| Local file system | File | - |
+| GCS | GCS | gcs |
+| Redash | Redash | redash |
+| dbt - Google Bigquery | dbt | dbt-bigquery |
 
 ```sh
 # e.g. Read from GCS and Redash
