@@ -1,5 +1,8 @@
+import logging
 from abc import ABC
 from typing import Any
+
+logger = logging.getLogger()
 
 
 class Key(ABC):
@@ -28,7 +31,7 @@ class StairlightConfigKey(Key):
         FILE_SYSTEM_PATH = "FileSystemPath"
 
     class Gcs(Key):
-        PROJECT_ID = "FileSystemPath"
+        PROJECT_ID = "ProjectId"
         BUCKET_NAME = "BucketName"
 
     class Redash(Key):

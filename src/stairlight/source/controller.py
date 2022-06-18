@@ -2,9 +2,15 @@ import json
 import os
 from importlib.util import find_spec
 from logging import getLogger
-from typing import Any, Dict, Type
+from pathlib import Path
+from typing import Any, Dict, List, OrderedDict, Type
 
-from .base import TemplateSource, TemplateSourceType
+from .config import MappingConfigMapping
+from .dbt.config import MappingConfigMappingDbt
+from .file.config import MappingConfigMappingFile
+from .gcs.config import MappingConfigMappingGcs
+from .redash.config import MappingConfigMappingRedash
+from .template import Template, TemplateSource, TemplateSourceType
 
 GCS_URI_SCHEME = "gs://"
 
@@ -23,21 +29,62 @@ def get_template_source_class(template_source_type: str) -> Type[TemplateSource]
     template_source: Type[TemplateSource]
     if template_source_type == TemplateSourceType.FILE.value:
         if not find_spec("FileTemplateSource"):
-            from .file import FileTemplateSource
+            from .file.template import FileTemplateSource
         template_source = FileTemplateSource
     elif template_source_type == TemplateSourceType.GCS.value:
         if not find_spec("GcsTemplateSource"):
-            from .gcs import GcsTemplateSource
+            from .gcs.template import GcsTemplateSource
         template_source = GcsTemplateSource
     elif template_source_type == TemplateSourceType.REDASH.value:
         if not find_spec("RedashTemplateSource"):
-            from .redash import RedashTemplateSource
+            from .redash.template import RedashTemplateSource
         template_source = RedashTemplateSource
     elif template_source_type == TemplateSourceType.DBT.value:
         if not find_spec("DbtTemplateSource"):
-            from .dbt import DbtTemplateSource
+            from .dbt.template import DbtTemplateSource
         template_source = DbtTemplateSource
     return template_source
+
+
+def get_default_table_name(template: Template) -> str:
+    default_table_name: str = ""
+    if template.source_type == TemplateSourceType.REDASH:
+        default_table_name = template.uri
+    else:
+        default_table_name = Path(template.key).stem
+    return default_table_name
+
+
+def collect_mapping_attributes(
+    template: Template,
+    tables: List[OrderedDict[str, Any]],
+) -> MappingConfigMapping:
+    mapping: MappingConfigMapping
+
+    if template.source_type == TemplateSourceType.FILE:
+        mapping = MappingConfigMappingFile(
+            FileSuffix=template.key,
+            Tables=tables,
+        )
+    elif template.source_type == TemplateSourceType.GCS:
+        mapping = MappingConfigMappingGcs(
+            Uri=template.uri,
+            Tables=tables,
+        )
+    elif template.source_type == TemplateSourceType.REDASH:
+        mapping = MappingConfigMappingRedash(
+            QueryId=template.query_id,
+            DataSourceName=template.data_source_name,
+            Tables=tables,
+        )
+    elif template.source_type == TemplateSourceType.DBT:
+        mapping = MappingConfigMappingDbt(
+            ProjectName=template.project_name,
+            FileSuffix=template.key,
+            Tables=tables,
+        )
+
+    return mapping
 
 
 class SaveMapController:
@@ -58,7 +105,7 @@ class SaveMapController:
 
     def _save_map_gcs(self) -> None:
         """Save mapped results to Google Cloud Storage"""
-        from .gcs import get_gcs_blob
+        from .gcs.template import get_gcs_blob
 
         blob = get_gcs_blob(self.save_file)
         blob.upload_from_string(
@@ -89,7 +136,7 @@ class LoadMapController:
 
     def _load_map_gcs(self) -> dict:
         """Load mapped results from Google Cloud Storage"""
-        from .gcs import get_gcs_blob
+        from .gcs.template import get_gcs_blob
 
         blob = get_gcs_blob(self.load_file)
         if not blob.exists():

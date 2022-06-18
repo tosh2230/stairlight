@@ -1,7 +1,7 @@
 import re
 from typing import Iterator, List
 
-from .key import MapKey
+from .source.config import MapKey
 
 
 class Query:

@@ -7,14 +7,16 @@ from typing import Any, Dict, Iterator, List
 
 import yaml
 
-from ..key import DbtProjectKey, StairlightConfigKey
-from .base import Template, TemplateSource, TemplateSourceType
+from ..config import MappingConfig, StairlightConfig
+from ..config_key import DbtProjectKey
+from ..template import Template, TemplateSource, TemplateSourceType
+from .config import StairlightConfigIncludeDbt
 
 
 class DbtTemplate(Template):
     def __init__(
         self,
-        mapping_config: Dict[str, Any],
+        mapping_config: MappingConfig,
         key: str,
         project_name: str,
     ):
@@ -55,34 +57,28 @@ class DbtTemplateSource(TemplateSource):
 
     def __init__(
         self,
-        stairlight_config: Dict[str, Any],
-        mapping_config: Dict[str, Any],
-        source_attributes: Dict[str, Any],
+        stairlight_config: StairlightConfig,
+        mapping_config: MappingConfig,
+        include: StairlightConfigIncludeDbt,
     ) -> None:
         super().__init__(
             stairlight_config=stairlight_config,
             mapping_config=mapping_config,
-            source_attributes=source_attributes,
         )
-        self.source_type = TemplateSourceType.DBT
+        self._include = include
 
     def search_templates(self) -> Iterator[Template]:
-        project_dir: str = self._source_attributes.get(
-            StairlightConfigKey.Dbt.PROJECT_DIR, ""
-        )
-        profiles_dir: str = self._source_attributes.get(
-            StairlightConfigKey.Dbt.PROFILES_DIR, ""
-        )
+        project_dir: str = self._include.ProjectDir
         dbt_project_config: Dict[str, Any] = self.read_dbt_project_yml(
             project_dir=project_dir
         )
 
         _ = self.execute_dbt_compile(
             project_dir=project_dir,
-            profiles_dir=profiles_dir,
+            profiles_dir=self._include.ProfilesDir,
             profile=dbt_project_config.get(DbtProjectKey.PROFILE),
-            target=self._source_attributes.get(StairlightConfigKey.Dbt.TARGET),
-            vars=self._source_attributes.get(StairlightConfigKey.Dbt.VARS),
+            target=self._include.Target,
+            vars=self._include.Vars,
         )
 
         for model_path in dbt_project_config[DbtProjectKey.MODEL_PATHS]:
@@ -96,7 +92,12 @@ class DbtTemplateSource(TemplateSource):
                 if (
                     (obj.is_dir())
                     or (self.REGEX_SCHEMA_TEST_FILE.fullmatch(str(obj)))
-                    or self.is_excluded(source_type=self.source_type, key=str(obj))
+                    or self.is_excluded(
+                        source_type=TemplateSourceType(
+                            self._include.TemplateSourceType
+                        ),
+                        key=str(obj),
+                    )
                 ):
                     self.logger.debug(f"{str(obj)} is skipped.")
                     continue
@@ -106,6 +107,28 @@ class DbtTemplateSource(TemplateSource):
                     key=str(obj),
                     project_name=dbt_project_config[DbtProjectKey.PROJECT_NAME],
                 )
+
+    def read_dbt_project_yml(self, project_dir: str) -> dict:
+        """Read dbt_project.yml
+
+        Args:
+            project_dir (str): dbt project directory
+
+        Returns:
+            dict: dbt project settings
+        """
+        dbt_project_pattern = re.compile(f"^{project_dir}/{self.DBT_PROJECT_YAML}$")
+        return self.read_yml(dir=project_dir, re_pattern=dbt_project_pattern)
+
+    @staticmethod
+    def read_yml(dir: str, re_pattern: re.Pattern) -> dict:
+        files = [
+            obj
+            for obj in glob.glob(f"{dir}/**", recursive=False)
+            if re_pattern.fullmatch(obj)
+        ]
+        with open(files[0]) as file:
+            return yaml.safe_load(file)
 
     @staticmethod
     def concat_dbt_model_path_str(
@@ -148,25 +171,3 @@ class DbtTemplateSource(TemplateSource):
             stdout=subprocess.DEVNULL,
         )
         return proc.returncode
-
-    def read_dbt_project_yml(self, project_dir: str) -> dict:
-        """Read dbt_project.yml
-
-        Args:
-            project_dir (str): dbt project directory
-
-        Returns:
-            dict: dbt project settings
-        """
-        dbt_project_pattern = re.compile(f"^{project_dir}/{self.DBT_PROJECT_YAML}$")
-        return self.read_yml(dir=project_dir, re_pattern=dbt_project_pattern)
-
-    @staticmethod
-    def read_yml(dir: str, re_pattern: re.Pattern) -> dict:
-        files = [
-            obj
-            for obj in glob.glob(f"{dir}/**", recursive=False)
-            if re_pattern.fullmatch(obj)
-        ]
-        with open(files[0]) as file:
-            return yaml.safe_load(file)

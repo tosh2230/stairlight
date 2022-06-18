@@ -1,15 +1,20 @@
-from typing import Any, Dict, List
+from typing import List
 
 import pytest
 
-from src.stairlight.key import MapKey, MappingConfigKey
 from src.stairlight.map import Map, create_dict_key_list
-from src.stairlight.source.base import Template
+from src.stairlight.source.config import (
+    MappingConfig,
+    MappingConfigMappingTable,
+    StairlightConfig,
+)
+from src.stairlight.source.config_key import MapKey, MappingConfigKey
+from src.stairlight.source.template import Template
 
 
 @pytest.fixture(scope="session")
 def dependency_map(
-    stairlight_config: Dict[str, Any], mapping_config: Dict[str, Any]
+    stairlight_config: StairlightConfig, mapping_config: MappingConfig
 ) -> Map:
     dependency_map = Map(
         stairlight_config=stairlight_config, mapping_config=mapping_config
@@ -20,9 +25,11 @@ def dependency_map(
 
 class TestSuccess:
     def test_mapped(self, dependency_map: Map):
+        print(dependency_map.mapped)
         assert len(dependency_map.mapped) > 0
 
     def test_unmapped(self, dependency_map: Map):
+        print(dependency_map.unmapped)
         assert len(dependency_map.unmapped) > 0
 
     @pytest.mark.parametrize(
@@ -59,7 +66,7 @@ class TestSuccess:
         assert actual == expected
 
     def test_get_global_params(self, dependency_map: Map):
-        actual = dependency_map.get_global_params(key=MapKey.PARAMETERS)
+        actual = dependency_map.get_global_params()
         expected = {
             "DESTINATION_PROJECT": "PROJECT_GLOBAL",
             "params": {
@@ -71,24 +78,28 @@ class TestSuccess:
         assert actual == expected
 
     def test_merge_global_params_global_only(self, dependency_map: Map):
-        table_attributes = {
-            MappingConfigKey.TABLE_NAME: "PROJECT_g.DATASET_g.TABLE_g",
-        }
+        table_attributes = MappingConfigMappingTable(
+            **{
+                MappingConfigKey.TABLE_NAME: "PROJECT_g.DATASET_g.TABLE_g",
+            }
+        )
         actual = dependency_map.merge_global_params(table_attributes=table_attributes)
-        expected = dependency_map.get_global_params(key=MapKey.PARAMETERS)
+        expected = dependency_map.get_global_params()
         assert actual == expected
 
     def test_merge_global_params_by_table(self, dependency_map: Map):
-        table_attributes = {
-            MappingConfigKey.TABLE_NAME: "PROJECT_g.DATASET_g.TABLE_g",
-            MappingConfigKey.PARAMETERS: {
-                "params": {
-                    "PROJECT": "PROJECT_BY_TABLE",
-                    "DATASET": "DATASET_BY_TABLE",
-                    "TABLE": "TABLE_BY_TABLE",
+        table_attributes = MappingConfigMappingTable(
+            **{
+                MappingConfigKey.TABLE_NAME: "PROJECT_g.DATASET_g.TABLE_g",
+                MappingConfigKey.PARAMETERS: {
+                    "params": {
+                        "PROJECT": "PROJECT_BY_TABLE",
+                        "DATASET": "DATASET_BY_TABLE",
+                        "TABLE": "TABLE_BY_TABLE",
+                    },
                 },
-            },
-        }
+            }
+        )
         actual = dependency_map.merge_global_params(table_attributes=table_attributes)
         expected = {
             "DESTINATION_PROJECT": "PROJECT_GLOBAL",

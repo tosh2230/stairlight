@@ -1,18 +1,18 @@
 import re
-from typing import Any, Dict, Iterator, Optional
+from typing import Iterator, Optional
 
 from google.cloud import storage
 
-from ..config import get_config_value
-from ..key import StairlightConfigKey
-from .base import Template, TemplateSource, TemplateSourceType
-from .controller import GCS_URI_SCHEME
+from ..config import ConfigAttributeNotFoundException, MappingConfig, StairlightConfig
+from ..controller import GCS_URI_SCHEME
+from ..template import Template, TemplateSource, TemplateSourceType
+from .config import StairlightConfigIncludeGcs
 
 
 class GcsTemplate(Template):
     def __init__(
         self,
-        mapping_config: Dict[str, Any],
+        mapping_config: MappingConfig,
         key: str,
         bucket: Optional[str] = None,
         project: Optional[str] = None,
@@ -51,60 +51,42 @@ class GcsTemplate(Template):
 class GcsTemplateSource(TemplateSource):
     def __init__(
         self,
-        stairlight_config: Dict[str, Any],
-        mapping_config: Dict[str, Any],
-        source_attributes: Dict[str, Any],
+        stairlight_config: StairlightConfig,
+        mapping_config: MappingConfig,
+        include: StairlightConfigIncludeGcs,
     ) -> None:
         super().__init__(
             stairlight_config=stairlight_config,
             mapping_config=mapping_config,
-            source_attributes=source_attributes,
         )
-        self.source_type = TemplateSourceType.GCS
+        self._include = include
 
     def search_templates(self) -> Iterator[Template]:
         """Search SQL template files from GCS
 
-        Args:
-            source (dict): Source attributes of SQL template files
-
         Yields:
             Iterator[SQLTemplate]: SQL template file attributes
         """
-        project = get_config_value(
-            key=StairlightConfigKey.Gcs.PROJECT_ID,
-            target=self._source_attributes,
-            fail_if_not_found=False,
-            enable_logging=False,
-        )
-        bucket = get_config_value(
-            key=StairlightConfigKey.Gcs.BUCKET_NAME,
-            target=self._source_attributes,
-            fail_if_not_found=True,
-            enable_logging=False,
-        )
-        default_table_prefix = get_config_value(
-            key=StairlightConfigKey.DEFAULT_TABLE_PREFIX,
-            target=self._source_attributes,
-            fail_if_not_found=False,
-            enable_logging=False,
-        )
-        regex = get_config_value(
-            key=StairlightConfigKey.REGEX,
-            target=self._source_attributes,
-            fail_if_not_found=True,
-            enable_logging=False,
-        )
+        project = self._include.ProjectId
+        bucket_name = self._include.BucketName
 
-        client = storage.Client(credentials=None, project=project)
-        blobs = client.list_blobs(bucket)
+        if not bucket_name:
+            raise ConfigAttributeNotFoundException(
+                f"BucketName is not found. {self._include}"
+            )
+
+        client = storage.Client(credentials=None, project=self._include.ProjectId)
+        blobs = client.list_blobs(bucket_name)
         for blob in blobs:
             if (
                 not re.fullmatch(
-                    rf"{regex}",
+                    rf"{self._include.Regex}",
                     blob.name,
                 )
-            ) or self.is_excluded(source_type=self.source_type, key=blob.name):
+            ) or self.is_excluded(
+                source_type=TemplateSourceType(self._include.TemplateSourceType),
+                key=blob.name,
+            ):
                 self.logger.debug(f"{blob.name} is skipped.")
                 continue
 
@@ -112,8 +94,8 @@ class GcsTemplateSource(TemplateSource):
                 mapping_config=self._mapping_config,
                 key=blob.name,
                 project=project,
-                bucket=bucket,
-                default_table_prefix=default_table_prefix,
+                bucket=bucket_name,
+                default_table_prefix=self._include.DefaultTablePrefix,
             )
 
 

@@ -2,10 +2,13 @@ import os
 from typing import Any, Dict
 
 import pytest
+from sqlalchemy.exc import ArgumentError
 
-from src.stairlight.config import Configurator
-from src.stairlight.key import StairlightConfigKey
-from src.stairlight.source.redash import (
+from src.stairlight.configurator import Configurator
+from src.stairlight.source.config import MappingConfig, MappingConfigMappingTable
+from src.stairlight.source.config_key import StairlightConfigKey as SlKey
+from src.stairlight.source.redash.config import StairlightConfigIncludeRedash
+from src.stairlight.source.redash.template import (
     RedashTemplate,
     RedashTemplateSource,
     TemplateSourceType,
@@ -15,7 +18,7 @@ from src.stairlight.source.redash import (
 @pytest.mark.parametrize(
     "env_key, path",
     [
-        ("REDASH_DATABASE_URL", "src/stairlight/source/sql/redash_queries.sql"),
+        ("REDASH_DATABASE_URL", "src/stairlight/source/redash/sql/redash_queries.sql"),
     ],
 )
 class TestRedashTemplateSource:
@@ -23,21 +26,23 @@ class TestRedashTemplateSource:
     def redash_template_source(
         self,
         configurator: Configurator,
-        mapping_config: Dict[str, Any],
+        mapping_config: MappingConfig,
         env_key: str,
         path: str,
     ) -> RedashTemplateSource:
-        stairlight_config = configurator.read(prefix="stairlight_redash")
-        source_attributes = {
-            StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.REDASH.value,
-            StairlightConfigKey.Redash.DATABASE_URL_ENV_VAR: env_key,
-            StairlightConfigKey.Redash.DATA_SOURCE_NAME: "metadata",
-            StairlightConfigKey.Redash.QUERY_IDS: [1, 3, 5],
-        }
+        stairlight_config = configurator.read_stairlight(prefix="stairlight_redash")
+        _include = StairlightConfigIncludeRedash(
+            **{
+                SlKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.REDASH.value,
+                SlKey.Redash.DATABASE_URL_ENV_VAR: env_key,
+                SlKey.Redash.DATA_SOURCE_NAME: "metadata",
+                SlKey.Redash.QUERY_IDS: [1, 3, 5],
+            }
+        )
         return RedashTemplateSource(
             stairlight_config=stairlight_config,
             mapping_config=mapping_config,
-            source_attributes=source_attributes,
+            include=_include,
         )
 
     def test_build_query_string(
@@ -103,11 +108,13 @@ FROM
             "SELECT * FROM {{ table }}",
             "metadata",
             {"table": "dashboards"},
-            {
-                "Labels": {"Category": "Redash test"},
-                "Parameters": {"table": "dashboards"},
-                "TableName": "Copy of (#4) New Query",
-            },
+            MappingConfigMappingTable(
+                **{
+                    "TableName": "Copy of (#4) New Query",
+                    "Parameters": {"table": "dashboards"},
+                    "Labels": {"Category": "Redash test"},
+                }
+            ),
         ),
     ],
 )
@@ -123,7 +130,7 @@ class TestRedashTemplate:
         params: Dict[str, Any],
         mapped_table_attributes: Dict[str, Any],
     ) -> RedashTemplate:
-        mapping_config = configurator.read(prefix="mapping_redash")
+        mapping_config = configurator.read_mapping(prefix="mapping_redash")
         return RedashTemplate(
             mapping_config=mapping_config,
             query_id=query_id,
@@ -135,13 +142,13 @@ class TestRedashTemplate:
     def test_find_mapped_table_attributes(
         self,
         redash_template: RedashTemplate,
-        mapped_table_attributes: Dict[str, Any],
+        mapped_table_attributes: MappingConfigMappingTable,
     ):
         expected = mapped_table_attributes
-        actual = {}
+        actual: MappingConfigMappingTable
         for attribute in redash_template.find_mapped_table_attributes():
-            if attribute:
-                actual = attribute
+            actual = attribute
+            break
         assert actual == expected
 
     def test_get_template_str(self, redash_template: RedashTemplate):
@@ -149,3 +156,34 @@ class TestRedashTemplate:
 
     def test_render(self, redash_template, params: RedashTemplate):
         assert redash_template.render(params=params) == "SELECT * FROM dashboards"
+
+
+class TestRedashConfigKeyNotFound:
+    @pytest.fixture(scope="class")
+    def redash_template_source(
+        self,
+        configurator: Configurator,
+        mapping_config: MappingConfig,
+    ) -> RedashTemplateSource:
+        stairlight_config = configurator.read_stairlight(
+            prefix="stairlight_key_not_found"
+        )
+        _include = StairlightConfigIncludeRedash(
+            **{
+                SlKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.REDASH.value,
+            }
+        )
+        return RedashTemplateSource(
+            stairlight_config=stairlight_config,
+            mapping_config=mapping_config,
+            include=_include,
+        )
+
+    def test_search_templates(
+        self,
+        redash_template_source: RedashTemplateSource,
+    ):
+        iter = redash_template_source.search_templates()
+        with pytest.raises(ArgumentError) as exception:
+            next(iter)
+        assert exception

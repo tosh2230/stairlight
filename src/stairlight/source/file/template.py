@@ -1,16 +1,16 @@
 import pathlib
 import re
-from typing import Any, Dict, Iterator, Optional
+from typing import Iterator, Optional
 
-from ..config import get_config_value
-from ..key import StairlightConfigKey
-from .base import Template, TemplateSource, TemplateSourceType
+from ..config import ConfigAttributeNotFoundException, MappingConfig, StairlightConfig
+from ..template import Template, TemplateSource, TemplateSourceType
+from .config import StairlightConfigIncludeFile
 
 
 class FileTemplate(Template):
     def __init__(
         self,
-        mapping_config: Dict[str, Any],
+        mapping_config: MappingConfig,
         key: str,
         default_table_prefix: Optional[str] = None,
     ):
@@ -43,56 +43,41 @@ class FileTemplate(Template):
 class FileTemplateSource(TemplateSource):
     def __init__(
         self,
-        stairlight_config: Dict[str, Any],
-        mapping_config: Dict[str, Any],
-        source_attributes: Dict[str, Any],
+        stairlight_config: StairlightConfig,
+        mapping_config: MappingConfig,
+        include: StairlightConfigIncludeFile,
     ) -> None:
         super().__init__(
             stairlight_config=stairlight_config,
             mapping_config=mapping_config,
-            source_attributes=source_attributes,
         )
-        self.source_type = TemplateSourceType.FILE
+        self._include = include
 
     def search_templates(self) -> Iterator[Template]:
         """Search SQL template files from local file system
 
-        Args:
-            source (dict): Source attributes of SQL template files
-
         Yields:
-            Iterator[SQLTemplate]: SQL template file attributes
+            Iterator[Template]: SQL template file attributes
         """
-        path = get_config_value(
-            key=StairlightConfigKey.File.FILE_SYSTEM_PATH,
-            target=self._source_attributes,
-            fail_if_not_found=True,
-            enable_logging=False,
-        )
-        default_table_prefix = get_config_value(
-            key=StairlightConfigKey.DEFAULT_TABLE_PREFIX,
-            target=self._source_attributes,
-            fail_if_not_found=False,
-            enable_logging=False,
-        )
-        regex = get_config_value(
-            key=StairlightConfigKey.REGEX,
-            target=self._source_attributes,
-            fail_if_not_found=True,
-            enable_logging=False,
-        )
+        if not self._include.FileSystemPath:
+            raise ConfigAttributeNotFoundException(
+                f"FileSystemPath is not found. {self._include}"
+            )
 
-        path_obj = pathlib.Path(path)
+        path_obj = pathlib.Path(self._include.FileSystemPath)
         for p in path_obj.glob("**/*"):
             if (
                 (p.is_dir())
                 or (
                     not re.fullmatch(
-                        rf"{regex}",
+                        rf"{self._include.Regex}",
                         str(p),
                     )
                 )
-                or self.is_excluded(source_type=self.source_type, key=str(p))
+                or self.is_excluded(
+                    source_type=TemplateSourceType(self._include.TemplateSourceType),
+                    key=str(p),
+                )
             ):
                 self.logger.debug(f"{str(p)} is skipped.")
                 continue
@@ -100,5 +85,5 @@ class FileTemplateSource(TemplateSource):
             yield FileTemplate(
                 mapping_config=self._mapping_config,
                 key=str(p),
-                default_table_prefix=default_table_prefix,
+                default_table_prefix=self._include.DefaultTablePrefix,
             )
