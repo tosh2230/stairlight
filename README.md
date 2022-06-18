@@ -29,7 +29,7 @@ An end-to-end data lineage tool, detects table dependencies by SQL SELECT statem
 
 ## Installation
 
-This package is distributed on PyPI.
+This package is distributed on [PyPI](https://pypi.org/project/stairlight/).
 
 ```sh
 $ pip install stairlight
