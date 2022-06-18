@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="img/stairlight_white.png" width="400" alt="Stairlight">
+  <img src="https://raw.githubusercontent.com/tosh2230/stairlight/main/img/stairlight_white.png" width="400" alt="Stairlight">
 </div>
 
 -----------------
@@ -15,7 +15,7 @@
 An end-to-end data lineage tool, detects table dependencies by SQL SELECT statements.
 
 <div align="left">
-  <img src="drawio/concepts.drawio.png" width="800" alt="concepts">
+  <img src="https://raw.githubusercontent.com/tosh2230/stairlight/main/img/drawio/concepts.drawio.png" width="800" alt="concepts">
 </div>
 
 ## Supported Data Sources
@@ -156,13 +156,13 @@ $ stairlight
 #### Centralization
 
 <div align="left">
-  <img src="drawio/centralization.drawio.png" width="800" alt="centralization">
+  <img src="https://raw.githubusercontent.com/tosh2230/stairlight/main/img/drawio/centralization.drawio.png" width="800" alt="centralization">
 </div>
 
 #### Agents
 
 <div align="left">
-  <img src="drawio/agents.drawio.png" width="800" alt="agents">
+  <img src="https://raw.githubusercontent.com/tosh2230/stairlight/main/img/drawio/agents.drawio.png" width="800" alt="agents">
 </div>
 
 ## Configuration
