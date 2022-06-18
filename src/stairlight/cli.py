@@ -247,7 +247,7 @@ def create_parser() -> argparse.ArgumentParser:
     """
     description = (
         "An end-to-end data lineage tool, "
-        "detects table dependencies by SELECT queries. "
+        "detects table dependencies by SQL SELECT statements. "
         "Without positional arguments, "
         "return a table dependency map as JSON format."
     )

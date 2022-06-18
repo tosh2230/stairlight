@@ -12,16 +12,20 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square)](https://github.com/psf/black)
 [![CI](https://github.com/tosh2230/stairlight/actions/workflows/ci.yml/badge.svg)](https://github.com/tosh2230/stairlight/actions/workflows/ci.yml)
 
-An end-to-end data lineage tool, detects table dependencies by SELECT queries.
+An end-to-end data lineage tool, detects table dependencies by SQL SELECT statements.
+
+<div align="left">
+  <img src="drawio/concepts.drawio.png" width="800" alt="concepts">
+</div>
 
 ## Supported Data Sources
 
-- Local file system(with Python Pathlib module)
-- [Google Cloud Storage(GCS)](https://cloud.google.com/storage)
-    - Also available for [Google Cloud Composer](https://cloud.google.com/composer)
-- [Redash](https://redash.io/)
-- [dbt](https://www.getdbt.com/) (using `dbt compile` command internally)
-    - Google BigQuery
+| Data Source | | Remarks |
+| --- | --- | --- |
+| Local file system | | With Python Pathlib module |
+| [Google Cloud Storage(GCS)](https://cloud.google.com/storage) | | Also available for [Google Cloud Composer](https://cloud.google.com/composer) |
+| [Redash](https://redash.io/) | | |
+| [dbt](https://www.getdbt.com/) | Google BigQuery | Using `dbt compile` command internally |
 
 ## Installation
 
@@ -31,14 +35,14 @@ This package is distributed on PyPI.
 $ pip install stairlight
 ```
 
-(v0.4+) The base package is for Local file system only. Please set extras when reading from other data sources.
+(v0.4+) The base package is for local file system only. Please set extras when reading from other data sources.
 
-| TemplateSourceType | DataSource | Extra |
-| --- | --- | --- |
-| File | Local file system | - |
-| GCS | Google Cloud Storage | gcs |
-| Redash | Redash | redash |
-| dbt | dbt(Google Bigquery) | dbt-bigquery |
+| Data Source | | TemplateSourceType | Extra |
+| --- | --- | --- | --- |
+| Local file system | | File | - |
+| GCS | | GCS | gcs |
+| Redash | | Redash | redash |
+| dbt | Google Bigquery | dbt | dbt-bigquery |
 
 ```sh
 # e.g. Read from GCS and Redash
@@ -55,7 +59,7 @@ $ stairlight init
 './stairlight.yaml' has created.
 Please edit it to set your data sources.
 
-# Step 2: Map SQL queries and tables, and add metadata
+# Step 2: Map SQL statements and tables, and add metadata
 $ stairlight map
 './mapping_yyyyMMddhhmmss.yaml' has created.
 Please map undefined tables and parameters, and append to your latest configuration file.
@@ -68,14 +72,14 @@ $ stairlight
 
 ### Input
 
-- SQL `SELECT` queries
-- Configuration files (YAML)
-    - stairlight.yaml: SQL query locations and include/exclude conditions.
-    - mapping.yaml: Mapping SQL queries and tables.
+- SQL SELECT statements
+- Configuration YAML files
+    - stairlight.yaml: SQL statements locations and include/exclude conditions.
+    - mapping.yaml: Mapping SQL statements and tables.
 
 ### Output
 
-- Dependency map (JSON)
+- JSON dependency map
 
     <details>
 
@@ -147,96 +151,122 @@ $ stairlight
 
     </details>
 
+### Collecting patterns
+
+#### Centralization
+
+<div align="left">
+  <img src="drawio/centralization.drawio.png" width="800" alt="centralization">
+</div>
+
+#### Agents
+
+<div align="left">
+  <img src="drawio/agents.drawio.png" width="800" alt="agents">
+</div>
+
 ## Configuration
 
-Configuration files can be found [here](https://github.com/tosh2230/stairlight/tree/main/tests/config), used for unit test in CI.
+Configuration files can be found [here](https://github.com/tosh2230/stairlight/tree/main/tests/config), used for unit testing in CI.
 
 ### stairlight.yaml
 
-'stairlight.yaml' is for setting up Stairlight itself.
+'stairlight.yaml' is for setting up Stairlight itself. It is responsible for specifying SQL statements to be read.
 
-It is responsible for specifying the destination of SQL queries to be read, and for specifying data sources.
+`init` command creates a template of stairlight.yaml.
 
-```yaml
-Include:
-  - TemplateSourceType: File
-    FileSystemPath: "./tests/sql"
-    Regex: ".*/*.sql$"
-    DefaultTablePrefix: "PROJECT_A"
-  - TemplateSourceType: GCS
-    ProjectId: null
-    BucketName: stairlight
-    Regex: "^sql/.*/*.sql$"
-    DefaultTablePrefix: "PROJECT_A"
-  - TemplateSourceType: Redash
-    DatabaseUrlEnvironmentVariable: REDASH_DATABASE_URL
-    DataSourceName: BigQuery
-    QueryIds:
-      - 1
-      - 3
-      - 5
-  - TemplateSourceType: dbt
-    ProjectDir: tests/dbt/project_01
-    ProfilesDir: tests/dbt
-    Vars:
-      key_a: value_a
-      key_b: value_b
-Exclude:
-  - TemplateSourceType: File
-    Regex: "main/exclude.sql$"
-Settings:
-  MappingPrefix: "mapping"
-```
+  <details>
+
+  <summary>Example</summary>
+
+  ```yaml
+  Include:
+    - TemplateSourceType: File
+      FileSystemPath: "./tests/sql"
+      Regex: ".*/*.sql$"
+      DefaultTablePrefix: "PROJECT_A"
+    - TemplateSourceType: GCS
+      ProjectId: null
+      BucketName: stairlight
+      Regex: "^sql/.*/*.sql$"
+      DefaultTablePrefix: "PROJECT_A"
+    - TemplateSourceType: Redash
+      DatabaseUrlEnvironmentVariable: REDASH_DATABASE_URL
+      DataSourceName: BigQuery
+      QueryIds:
+        - 1
+        - 3
+        - 5
+    - TemplateSourceType: dbt
+      ProjectDir: tests/dbt/project_01
+      ProfilesDir: tests/dbt
+      Vars:
+        key_a: value_a
+        key_b: value_b
+  Exclude:
+    - TemplateSourceType: File
+      Regex: "main/exclude.sql$"
+  Settings:
+    MappingPrefix: "mapping"
+  ```
+
+  </details>
 
 ### mapping.yaml
 
-'mapping.yaml' is used to define relationships between input queries and tables.
+'mapping.yaml' is used to define relationships between input SELECT statements and table names.
 
-A template of this file can be created by `map` command, based on the configuration of 'stairlight.yaml'.
+`map` command creates a template of mapping.yaml, based on the configuration of stairlight.yaml.
 
-```yaml
-Global:
-  Parameters:
-    DESTINATION_PROJECT: stairlight
-    params:
-      PROJECT: 1234567890
-      DATASET: public
-      TABLE: taxirides
-Mapping:
-  - TemplateSourceType: File
-    FileSuffix: "tests/sql/main/union_same_table.sql"
-    Tables:
-      - TableName: "test_project.beam_streaming.taxirides_aggregation"
-        Parameters:
-          params:
-            source_table: source
-            destination_table: destination
-        IgnoreParameters:
-          - execution_date.add(days=1).isoformat()
-  - TemplateSourceType: GCS
-    Uri: "gs://stairlight/sql/one_line/one_line.sql"
-    Tables:
-      - TableName: "PROJECT_a.DATASET_b.TABLE_c"
-  - TemplateSourceType: Redash
-    QueryId: 5
-    DataSourceName: metadata
-    Tables:
-      - TableName: New Query
-        Parameters:
-          table: dashboards
-        Labels:
-          Category: Redash test
-  - TemplateSourceType: dbt
-    ProjectName: project_01
-    FileSuffix: tests/dbt/project_01/target/compiled/project_01/models/example/my_first_dbt_model.sql
-    Tables:
-      - TableName: dummy.dummy.my_first_dbt_model
-Metadata:
-  - TableName: "PROJECT_A.DATASET_A.TABLE_A"
-    Labels:
-      Source: Null
-      Test: a
-```
+  <details>
+
+  <summary>Example</summary>
+
+  ```yaml
+  Global:
+    Parameters:
+      DESTINATION_PROJECT: stairlight
+      params:
+        PROJECT: 1234567890
+        DATASET: public
+        TABLE: taxirides
+  Mapping:
+    - TemplateSourceType: File
+      FileSuffix: "tests/sql/main/union_same_table.sql"
+      Tables:
+        - TableName: "test_project.beam_streaming.taxirides_aggregation"
+          Parameters:
+            params:
+              source_table: source
+              destination_table: destination
+          IgnoreParameters:
+            - execution_date.add(days=1).isoformat()
+    - TemplateSourceType: GCS
+      Uri: "gs://stairlight/sql/one_line/one_line.sql"
+      Tables:
+        - TableName: "PROJECT_a.DATASET_b.TABLE_c"
+    - TemplateSourceType: Redash
+      QueryId: 5
+      DataSourceName: metadata
+      Tables:
+        - TableName: New Query
+          Parameters:
+            table: dashboards
+          Labels:
+            Category: Redash test
+    - TemplateSourceType: dbt
+      ProjectName: project_01
+      FileSuffix: tests/dbt/project_01/target/compiled/project_01/models/example/my_first_dbt_model.sql
+      Tables:
+        - TableName: dummy.dummy.my_first_dbt_model
+  Metadata:
+    - TableName: "PROJECT_A.DATASET_A.TABLE_A"
+      Labels:
+        Source: Null
+        Test: a
+  ```
+
+  </details>
 
 #### Global Section
 
@@ -246,9 +276,9 @@ This section is for global configurations.
 
 #### Mapping Section
 
-Mapping section is used to define relationships between queries and tables that created as a result of query execution.
+Mapping section is used to define relationships between input SELECT statements and tables that created as a result of query execution.
 
-`Parameters` attribute allows you to reflect settings in [jinja](https://jinja.palletsprojects.com/) template variables embedded in queries. If multiple settings are applied to a query using jinja template, the query will be read as if there were the same number of queries as the number of settings.
+`Parameters` attribute allows you to reflect settings in [jinja](https://jinja.palletsprojects.com/) template variables embedded in statements. If multiple settings are applied to a statement using jinja template, the statement will be read as if there were the same number of queries as the number of settings.
 
 In contrast, `IgnoreParameters` attribute handles a list to ignore when rendering queries.
 
@@ -256,13 +286,13 @@ In contrast, `IgnoreParameters` attribute handles a list to ignore when renderin
 
 This section is mainly used to set metadata to tables appears only in queries.
 
-## Command and Option
+## Commands and Options
 
 ```txt
 $ stairlight --help
 usage: stairlight [-h] [-c CONFIG] [--save SAVE] [--load LOAD] {init,check,up,down} ...
 
-An end-to-end data lineage tool, detects table dependencies by SELECT queries.
+An end-to-end data lineage tool, detects table dependencies by SQL SELECT statements.
 Without positional arguments, return a table dependency map as JSON format.
 
 positional arguments:
