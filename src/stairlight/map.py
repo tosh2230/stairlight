@@ -1,8 +1,14 @@
 from logging import getLogger
-from typing import Any, Dict, Iterator, List, Type
+from typing import Any, Dict, Iterator, List, OrderedDict, Type
 
 from .query import Query
-from .source.config_key import MapKey, MappingConfigKey, StairlightConfigKey
+from .source.config import (
+    MappingConfig,
+    MappingConfigGlobal,
+    MappingConfigMappingTable,
+    StairlightConfig,
+)
+from .source.config_key import MapKey, MappingConfigKey
 from .source.controller import get_template_source_class
 from .source.template import Template, TemplateSource, TemplateSourceType
 
@@ -14,15 +20,15 @@ class Map:
 
     def __init__(
         self,
-        stairlight_config: Dict[str, Any],
-        mapping_config: Dict[str, Any],
+        stairlight_config: StairlightConfig,
+        mapping_config: MappingConfig,
         mapped: Dict[str, Any] = None,
     ) -> None:
         """Manages functions related to dependency map objects
 
         Args:
-            stairlight_config (dict): Stairlight configuration
-            mapping_config (dict): Mapping configuration
+            stairlight_config (StairlightConfig): Stairlight configuration
+            mapping_config (MappingConfig): Mapping configuration
             mapped (dict, optional):
                 Mapped file attributes when a mapping configuration file loaded.
                 Defaults to {}.
@@ -32,87 +38,74 @@ class Map:
         else:
             self.mapped = {}
         self.unmapped: List[dict] = []
-        self.stairlight_config = stairlight_config
-        self.mapping_config = mapping_config
+        self._stairlight_config = stairlight_config
+        self._mapping_config = mapping_config
 
     def write(self) -> None:
         """Write a dependency map"""
-        for template_source in self.find_template_source(
-            stairlight_config=self.stairlight_config,
-            mapping_config=self.mapping_config,
-        ):
+        template_source: TemplateSource
+        for template_source in self.find_template_source():
             self.write_by_template_source(template_source=template_source)
 
-    @staticmethod
-    def find_template_source(
-        stairlight_config: Dict[str, Any], mapping_config: Dict[str, Any]
-    ) -> Iterator[TemplateSource]:
+    def find_template_source(self) -> Iterator[TemplateSource]:
         """find template source
-
-        Args:
-            stairlight_config (dict): Stairlight configuration
-            mapping_config (dict): Mapping configuration
 
         Yields:
             Iterator[TemplateSource]: Template source instance
         """
-        source_attributes: Dict[str, Any]
-        include_section: List[Dict[str, Any]] = stairlight_config.get(
-            StairlightConfigKey.INCLUDE_SECTION, []
-        )
-        for source_attributes in include_section:
-            template_source_type: str = source_attributes.get(
-                StairlightConfigKey.TEMPLATE_SOURCE_TYPE, ""
-            )
+        for include in self._stairlight_config.get_include():
             template_source: Type[TemplateSource] = get_template_source_class(
-                template_source_type=template_source_type
+                template_source_type=include.TemplateSourceType
             )
             if not template_source:
                 logger.warning(msg=f"Template source is not found: {type}")
                 continue
             yield template_source(
-                stairlight_config=stairlight_config,
-                mapping_config=mapping_config,
-                source_attributes=source_attributes,
+                stairlight_config=self._stairlight_config,
+                mapping_config=self._mapping_config,
+                **{"include": include},
             )
 
     def write_by_template_source(self, template_source: TemplateSource) -> None:
         """Write a dependency map by template source"""
         for template in template_source.search_templates():
-            if not self.mapping_config:
+            if not self._mapping_config:
                 self.add_unmapped_params(template=template)
             elif template.is_mapped():
                 for table_attributes in template.find_mapped_table_attributes():
-                    self.detect_unmapped_params(
+                    unmapped_params = self.detect_unmapped_params(
                         template=template, table_attributes=table_attributes
                     )
+                    if unmapped_params:
+                        self.add_unmapped_params(
+                            template=template, params=unmapped_params
+                        )
                     self.remap(template=template, table_attributes=table_attributes)
             else:
                 self.add_unmapped_params(template=template)
 
-    def remap(self, template: Template, table_attributes: Dict[str, Any]) -> None:
+    def remap(
+        self, template: Template, table_attributes: MappingConfigMappingTable
+    ) -> None:
         """Remap a dependency map
 
         Args:
             template (Template): SQL template
-            table_attributes (dict): Table attributes from mapping configuration
+            table_attributes (MappingConfigMappingTable):
+                Table attributes from mapping configuration
         """
         query_str: str = template.render(
             params=self.merge_global_params(table_attributes=table_attributes),
-            ignore_params=table_attributes.get(MappingConfigKey.IGNORE_PARAMETERS),
+            ignore_params=table_attributes.IgnoreParameters,
         )
         query = Query(
             query_str=query_str,
             default_table_prefix=template.default_table_prefix,
         )
 
-        downstairs: str = table_attributes.get(MappingConfigKey.TABLE_NAME, "")
-        mapping_labels: Dict[Any, Any] = table_attributes.get(
-            MappingConfigKey.LABELS, {}
-        )
-        metadata: List[Dict[Any, Any]] = self.mapping_config.get(
-            MappingConfigKey.METADATA_SECTION, []
-        )
+        downstairs: str = table_attributes.TableName
+        mapping_labels: Dict[str, Any] = table_attributes.Labels
+        metadata: List[Dict[str, Any]] = self._mapping_config.Metadata
 
         if downstairs not in self.mapped:
             self.mapped[downstairs] = {}
@@ -135,36 +128,28 @@ class Map:
                 }
             )
 
-    def get_global_params(self, key: str) -> Dict[str, Any]:
+    def get_global_params(self) -> Dict[str, Any]:
         """get global parameters in mapping.yaml
 
         Returns:
             dict: global parameters
         """
-        global_params: Dict[str, Any] = {}
-        global_section: Dict[str, Any] = self.mapping_config.get(
-            MappingConfigKey.GLOBAL_SECTION, {}
-        )
-        if MappingConfigKey.PARAMETERS in global_section:
-            global_params = global_section.get(key, {})
+        _global: MappingConfigGlobal = self._mapping_config.get_global()
+        return _global.Parameters
 
-        return global_params
-
-    def merge_global_params(self, table_attributes: Dict[str, Any]) -> Dict[str, Any]:
+    def merge_global_params(
+        self, table_attributes: MappingConfigMappingTable
+    ) -> Dict[str, Any]:
         """return a combination of global parameters and table parameters
 
         Args:
-            table_attributes (dict[str, Any]): table attributes
+            table_attributes (MappingConfigMappingTable): table attributes
 
         Returns:
             dict: combined parameters
         """
-        global_params: Dict[str, Any] = self.get_global_params(
-            key=MappingConfigKey.PARAMETERS
-        )
-        table_params: Dict[str, Any] = table_attributes.get(
-            MappingConfigKey.PARAMETERS, {}
-        )
+        global_params: Dict[str, Any] = self.get_global_params()
+        table_params: OrderedDict[str, Any] = table_attributes.Parameters
 
         # Table parameters are prioritized over global parameters
         return {**global_params, **table_params}
@@ -240,32 +225,30 @@ class Map:
         )
 
     def detect_unmapped_params(
-        self, template: Template, table_attributes: Dict[str, Any]
-    ) -> None:
+        self, template: Template, table_attributes: MappingConfigMappingTable
+    ) -> List[str]:
         """detect unmapped parameters in mapped files
 
         Args:
             template (Template): SQL template
-            table_attributes (dict): Table attributes from mapping configuration
+            table_attributes (MappingConfigMappingTable):
+                Table attributes from mapping configuration
         """
         template_str: str = template.get_template_str()
         template_params: List[str] = template.detect_jinja_params(template_str)
         if not template_params:
-            return
+            return []
 
         mapped_params_dict: Dict[str, Any] = self.merge_global_params(
             table_attributes=table_attributes
         )
         mapped_params: List[str] = create_dict_key_list(d=mapped_params_dict)
-        ignore_params: List[str] = table_attributes.get(
-            MappingConfigKey.IGNORE_PARAMETERS, []
-        )
-        diff_params: List[str] = list(
+        ignore_params: List[str] = table_attributes.IgnoreParameters
+        unmapped_params: List[str] = list(
             set(template_params) - set(mapped_params) - set(ignore_params)
         )
 
-        if diff_params:
-            self.add_unmapped_params(template=template, params=diff_params)
+        return unmapped_params
 
 
 def create_dict_key_list(d: Dict[str, Any], delimiter: str = ".") -> List[str]:

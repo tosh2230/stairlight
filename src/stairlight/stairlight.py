@@ -1,6 +1,5 @@
 import enum
 import json
-from dataclasses import asdict
 from logging import getLogger
 from typing import Any, Dict, List, Union
 
@@ -137,8 +136,8 @@ class StairLight:
     def _write_map(self) -> None:
         """write a dependency map"""
         dependency_map = Map(
-            stairlight_config=asdict(self._stairlight_config),
-            mapping_config=asdict(self._mapping_config),
+            stairlight_config=self._stairlight_config,
+            mapping_config=self._mapping_config,
         )
 
         dependency_map.write()

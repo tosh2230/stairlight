@@ -9,6 +9,7 @@ from src.stairlight.configurator import (
     STAIRLIGHT_CONFIG_PREFIX_DEFAULT,
     Configurator,
 )
+from src.stairlight.source.config import MappingConfig, StairlightConfig
 from src.stairlight.stairlight import StairLight
 
 
@@ -18,13 +19,13 @@ def configurator() -> Configurator:
 
 
 @pytest.fixture(scope="session")
-def stairlight_config(configurator: Configurator) -> dict:
-    return configurator.read(prefix=STAIRLIGHT_CONFIG_PREFIX_DEFAULT)
+def stairlight_config(configurator: Configurator) -> StairlightConfig:
+    return configurator.read_stairlight(prefix=STAIRLIGHT_CONFIG_PREFIX_DEFAULT)
 
 
 @pytest.fixture(scope="session")
-def mapping_config(configurator: Configurator) -> dict:
-    return configurator.read(prefix=MAPPING_CONFIG_PREFIX_DEFAULT)
+def mapping_config(configurator: Configurator) -> MappingConfig:
+    return configurator.read_mapping(prefix=MAPPING_CONFIG_PREFIX_DEFAULT)
 
 
 @pytest.fixture(scope="session")

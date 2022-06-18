@@ -2,7 +2,14 @@ from typing import Any, Dict, List
 
 import pytest
 
+from src.stairlight.configurator import Configurator
+from src.stairlight.source.config import (
+    ConfigAttributeNotFoundException,
+    MappingConfig,
+    StairlightConfig,
+)
 from src.stairlight.source.config_key import StairlightConfigKey
+from src.stairlight.source.gcs.config import StairlightConfigIncludeGcs
 from src.stairlight.source.gcs.template import (
     GCS_URI_SCHEME,
     GcsTemplate,
@@ -15,19 +22,21 @@ class TestGcsTemplateSource:
     @pytest.fixture(scope="class")
     def gcs_template_source(
         self,
-        stairlight_config: Dict[str, Any],
-        mapping_config: Dict[str, Any],
+        stairlight_config: StairlightConfig,
+        mapping_config: MappingConfig,
     ) -> GcsTemplateSource:
-        source_attributes = {
-            StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.GCS.value,
-            StairlightConfigKey.Gcs.PROJECT_ID: None,
-            StairlightConfigKey.Gcs.BUCKET_NAME: "stairlight",
-            StairlightConfigKey.REGEX: "sql/.*/*.sql",
-        }
+        _include = StairlightConfigIncludeGcs(
+            **{
+                StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.GCS.value,
+                StairlightConfigKey.Gcs.PROJECT_ID: None,
+                StairlightConfigKey.Gcs.BUCKET_NAME: "stairlight",
+                StairlightConfigKey.REGEX: "sql/.*/*.sql",
+            }
+        )
         return GcsTemplateSource(
             stairlight_config=stairlight_config,
             mapping_config=mapping_config,
-            source_attributes=source_attributes,
+            include=_include,
         )
 
     def test_search_templates(self, gcs_template_source: GcsTemplateSource):
@@ -59,7 +68,7 @@ class TestGcsTemplate:
     @pytest.fixture(scope="function")
     def gcs_template(
         self,
-        mapping_config: Dict[str, Any],
+        mapping_config: MappingConfig,
         bucket: str,
         key: str,
         params: Dict[str, Any],
@@ -102,3 +111,37 @@ class TestGcsTemplate:
     ):
         actual = gcs_template.render(params=params, ignore_params=ignore_params)
         assert expected in actual
+
+
+class TestGcsConfigKeyNotFound:
+    @pytest.fixture(scope="class")
+    def gcs_template_source(
+        self,
+        configurator: Configurator,
+        mapping_config: MappingConfig,
+    ) -> GcsTemplateSource:
+        stairlight_config = configurator.read_stairlight(
+            prefix="stairlight_key_not_found"
+        )
+        _include = StairlightConfigIncludeGcs(
+            **{
+                StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.GCS.value,
+                StairlightConfigKey.REGEX: ".*/*.sql",
+            }
+        )
+        return GcsTemplateSource(
+            stairlight_config=stairlight_config,
+            mapping_config=mapping_config,
+            include=_include,
+        )
+
+    def test_search_templates(
+        self,
+        gcs_template_source: GcsTemplateSource,
+    ):
+        iter = gcs_template_source.search_templates()
+        with pytest.raises(ConfigAttributeNotFoundException) as exception:
+            next(iter)
+        assert exception.value.args[0] == (
+            f"BucketName is not found. {gcs_template_source._include}"
+        )

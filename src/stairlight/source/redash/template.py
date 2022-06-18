@@ -1,12 +1,15 @@
 import os
+from dataclasses import asdict
 from logging import getLogger
 from typing import Any, Dict, Iterator, List
 
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine.row import Row
 
-from ..config_key import MappingConfigKey, StairlightConfigKey, get_config_value
+from ..config import MappingConfig, MappingConfigMappingTable, StairlightConfig
+from ..config_key import StairlightConfigKey
 from ..template import Template, TemplateSource, TemplateSourceType
+from .config import StairlightConfigIncludeRedash
 
 logger = getLogger(__name__)
 
@@ -14,7 +17,7 @@ logger = getLogger(__name__)
 class RedashTemplate(Template):
     def __init__(
         self,
-        mapping_config: Dict[str, Any],
+        mapping_config: MappingConfig,
         query_id: int,
         query_name: str,
         query_str: str = "",
@@ -30,19 +33,22 @@ class RedashTemplate(Template):
         self.uri = query_name
         self.data_source_name = data_source_name
 
-    def find_mapped_table_attributes(self) -> Iterator[Dict[str, Any]]:
+    def find_mapped_table_attributes(self) -> Iterator[MappingConfigMappingTable]:
         """Get mapped tables as iterator
 
         Yields:
             Iterator[dict]: Mapped table attributes
         """
-        for mapping in self._mapping_config.get(MappingConfigKey.MAPPING_SECTION, {}):
+        mapping: Any
+        for mapping in self._mapping_config.get_mapping():
+            if mapping.TemplateSourceType != self.source_type.value:
+                continue
+
             if (
-                mapping.get(MappingConfigKey.Redash.QUERY_ID) == self.query_id
-                and mapping.get(MappingConfigKey.Redash.DATA_SOURCE_NAME)
-                == self.data_source_name
+                mapping.DataSourceName == self.data_source_name
+                and mapping.QueryId == self.query_id
             ):
-                for table_attributes in mapping.get(MappingConfigKey.TABLES):
+                for table_attributes in mapping.get_table():
                     yield table_attributes
                 break
 
@@ -57,37 +63,25 @@ class RedashTemplate(Template):
 class RedashTemplateSource(TemplateSource):
     def __init__(
         self,
-        stairlight_config: Dict[str, Any],
-        mapping_config: Dict[str, Any],
-        source_attributes: Dict[str, Any],
+        stairlight_config: StairlightConfig,
+        mapping_config: MappingConfig,
+        include: StairlightConfigIncludeRedash,
     ) -> None:
         super().__init__(
             stairlight_config=stairlight_config,
             mapping_config=mapping_config,
-            source_attributes=source_attributes,
         )
-        self.source_type = TemplateSourceType.REDASH
+        self._include = include
         self.where_clause: List[str] = []
         self.conditions: Dict[str, Any] = self.make_conditions()
 
     def make_conditions(self) -> Dict[str, Any]:
-        data_source_name = get_config_value(
-            key=StairlightConfigKey.Redash.DATA_SOURCE_NAME,
-            target=self._source_attributes,
-            fail_if_not_found=True,
-            enable_logging=False,
-        )
-        query_ids = get_config_value(
-            key=StairlightConfigKey.Redash.QUERY_IDS,
-            target=self._source_attributes,
-            fail_if_not_found=True,
-            enable_logging=False,
-        )
+        query_ids = self._include.QueryIds
         return {
             StairlightConfigKey.Redash.DATA_SOURCE_NAME: {
                 "key": StairlightConfigKey.Redash.DATA_SOURCE_NAME,
                 "query": "data_sources.name = :data_source",
-                "parameters": data_source_name,
+                "parameters": self._include.DataSourceName,
             },
             StairlightConfigKey.Redash.QUERY_IDS: {
                 "key": StairlightConfigKey.Redash.QUERY_IDS,
@@ -133,7 +127,7 @@ class RedashTemplateSource(TemplateSource):
     def build_query_string(self, path: str) -> str:
         base_query_string = self.read_query_from_file(path=path)
         for condition in self.conditions.values():
-            if self._source_attributes.get(condition["key"]):
+            if condition["key"] in asdict(self._include).keys():
                 self.where_clause.append(condition["query"])
         return base_query_string + "WHERE " + " AND ".join(self.where_clause)
 
@@ -142,12 +136,7 @@ class RedashTemplateSource(TemplateSource):
             return f.read()
 
     def get_connection_str(self) -> str:
-        environment_variable_name = get_config_value(
-            key=StairlightConfigKey.Redash.DATABASE_URL_ENV_VAR,
-            target=self._source_attributes,
-            fail_if_not_found=True,
-            enable_logging=False,
-        )
+        environment_variable_name = self._include.DatabaseUrlEnvironmentVariable
         connection_str = os.environ.get(environment_variable_name, "")
         if not connection_str:
             logger.error(f"{environment_variable_name} is not found.")

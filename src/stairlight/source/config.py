@@ -3,16 +3,16 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, Iterator, List, OrderedDict, Type
 
 from .config_key import MapKey
-from .template import TemplateSourceType
 
 logger = logging.getLogger()
 
 
-@dataclass
-class StairlightConfig:
-    Include: List[OrderedDict]
-    Exclude: List[OrderedDict]
-    Settings: OrderedDict
+class ConfigAttributeNotFoundException(Exception):
+    def __init__(self, msg: str) -> None:
+        self.msg = msg
+
+    def __str__(self) -> str:
+        return self.msg
 
 
 @dataclass
@@ -32,8 +32,51 @@ class StairlightConfigSettings:
 
 
 @dataclass
+class StairlightConfig:
+    Include: List[Dict[str, Any]] = field(default_factory=list)
+    Exclude: List[Dict[str, Any]] = field(default_factory=list)
+    Settings: OrderedDict = field(default_factory=OrderedDict)
+
+    @staticmethod
+    def select_config_include(source_type: str) -> Type[StairlightConfigInclude]:
+        from .template import TemplateSourceType
+
+        config_include: Type[StairlightConfigInclude] = None
+
+        # Avoid to occur circular imports
+        if source_type == TemplateSourceType.FILE.value:
+            from .file.config import StairlightConfigIncludeFile
+
+            config_include = StairlightConfigIncludeFile
+        elif source_type == TemplateSourceType.GCS.value:
+            from .gcs.config import StairlightConfigIncludeGcs
+
+            config_include = StairlightConfigIncludeGcs
+        elif source_type == TemplateSourceType.REDASH.value:
+            from .redash.config import StairlightConfigIncludeRedash
+
+            config_include = StairlightConfigIncludeRedash
+        elif source_type == TemplateSourceType.DBT.value:
+            from .dbt.config import StairlightConfigIncludeDbt
+
+            config_include = StairlightConfigIncludeDbt
+        return config_include
+
+    def get_include(self) -> Iterator[StairlightConfigInclude]:
+        for _include in self.Include:
+            config = self.select_config_include(
+                source_type=_include.get(MapKey.TEMPLATE_SOURCE_TYPE)
+            )
+            yield config(**_include)
+
+    def get_exclude(self) -> Iterator[StairlightConfigExclude]:
+        for _exclude in self.Exclude:
+            yield StairlightConfigExclude(**_exclude)
+
+
+@dataclass
 class MappingConfigGlobal:
-    Parameters: Dict[str, Any]
+    Parameters: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -41,13 +84,13 @@ class MappingConfigMappingTable:
     TableName: str
     IgnoreParameters: List[str] = field(default_factory=list)
     Parameters: OrderedDict = field(default_factory=OrderedDict)
-    Labels: Dict[str, Any] = field(default_factory=OrderedDict)
+    Labels: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
 class MappingConfigMapping:
     TemplateSourceType: str
-    Tables: List[OrderedDict]
+    Tables: List[OrderedDict] = field(default_factory=list)
 
     def get_table(self) -> Iterator[MappingConfigMappingTable]:
         for _table in self.Tables:
@@ -57,14 +100,14 @@ class MappingConfigMapping:
 @dataclass
 class MappingConfigMetadata:
     TableName: str = None
-    Labels: Dict[str, Any] = field(default_factory=OrderedDict)
+    Labels: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
 class MappingConfig:
-    Global: OrderedDict
-    Mapping: List[OrderedDict]
-    Metadata: List[OrderedDict]
+    Global: OrderedDict = field(default_factory=OrderedDict)
+    Mapping: List[OrderedDict] = field(default_factory=list)
+    Metadata: List[Dict[str, Any]] = field(default_factory=list)
 
     def get_global(self) -> MappingConfigGlobal:
         return MappingConfigGlobal(**self.Global)
@@ -82,6 +125,8 @@ class MappingConfig:
 
     @staticmethod
     def select_mapping_config(source_type: str) -> Type[MappingConfigMapping]:
+        from .template import TemplateSourceType
+
         mapping_config: Type[MappingConfigMapping] = None
 
         # Avoid to occur circular imports

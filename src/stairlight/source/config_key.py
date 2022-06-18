@@ -1,6 +1,6 @@
 import logging
 from abc import ABC
-from typing import Any, Dict
+from typing import Any
 
 logger = logging.getLogger()
 
@@ -95,27 +95,3 @@ class MapKey(Key):
 
     TEMPLATE = "Template"
     PARAMETERS = "Parameters"
-
-
-class ConfigKeyNotFoundException(Exception):
-    def __init__(self, msg: str) -> None:
-        self.msg = msg
-
-    def __str__(self) -> str:
-        return self.msg
-
-
-def get_config_value(
-    key: str,
-    target: Dict[Any, Any],
-    fail_if_not_found: bool = False,
-    enable_logging: bool = False,
-) -> Any:
-    value = target.get(key)
-    if not value:
-        msg = f"{key} is not found in the configuration: {target}"
-        if fail_if_not_found:
-            raise ConfigKeyNotFoundException(msg=msg)
-        if enable_logging:
-            logger.warning(msg=msg)
-    return value

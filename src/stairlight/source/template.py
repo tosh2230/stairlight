@@ -7,7 +7,7 @@ from typing import Any, Dict, Iterator, List, Optional
 from jinja2 import BaseLoader, Environment
 from jinja2.exceptions import UndefinedError
 
-from .config_key import MappingConfigKey, StairlightConfigKey
+from .config import MappingConfig, MappingConfigMappingTable, StairlightConfig
 
 
 class TemplateSourceType(enum.Enum):
@@ -27,7 +27,7 @@ class Template(ABC):
 
     def __init__(
         self,
-        mapping_config: Dict[str, Any],
+        mapping_config: MappingConfig,
         key: str,
         source_type: TemplateSourceType,
         bucket: Optional[str] = None,
@@ -62,24 +62,28 @@ class Template(ABC):
         self.project_name = project_name
         self.uri = ""
 
-    def find_mapped_table_attributes(self) -> Iterator[Dict[str, Any]]:
+    def find_mapped_table_attributes(self) -> Iterator[MappingConfigMappingTable]:
         """Get mapped tables as iterator
 
         Yields:
             Iterator[dict]: Mapped table attributes
         """
-        mapping: Dict[str, Any]
-        for mapping in self._mapping_config.get(MappingConfigKey.MAPPING_SECTION, {}):
-            has_suffix = False
-            if self.key and mapping.get(MappingConfigKey.File.FILE_SUFFIX):
-                has_suffix = self.key.endswith(
-                    mapping.get(MappingConfigKey.File.FILE_SUFFIX, "")
-                )
-            if has_suffix or self.uri == mapping.get(MappingConfigKey.Gcs.URI):
-                table_attributes: Dict[str, Any]
-                for table_attributes in mapping.get(MappingConfigKey.TABLES, {}):
-                    yield table_attributes
-                break
+        mapping: Any
+        for mapping in self._mapping_config.get_mapping():
+            not_found: bool = True
+            if mapping.TemplateSourceType == TemplateSourceType.FILE.value:
+                if self.key.endswith(mapping.FileSuffix):
+                    not_found = False
+            elif mapping.TemplateSourceType == TemplateSourceType.GCS.value:
+                if self.uri == mapping.Uri:
+                    not_found = False
+
+            if not_found:
+                continue
+
+            for table_attributes in mapping.get_table():
+                yield table_attributes
+            break
 
     def is_mapped(self) -> bool:
         """Check if the template is set to mapping configuration
@@ -214,9 +218,9 @@ class TemplateSource(ABC):
 
     def __init__(
         self,
-        stairlight_config: Dict[str, Any],
-        mapping_config: Dict[str, Any],
-        source_attributes: Dict[str, Any],
+        stairlight_config: StairlightConfig,
+        mapping_config: MappingConfig,
+        **kwargs,
     ) -> None:
         """SQL template source
 
@@ -227,7 +231,6 @@ class TemplateSource(ABC):
         """
         self._stairlight_config = stairlight_config
         self._mapping_config = mapping_config
-        self._source_attributes = source_attributes
 
     @abstractmethod
     def search_templates(self) -> Iterator[Template]:
@@ -249,13 +252,10 @@ class TemplateSource(ABC):
             bool: Return True if the specified file is out of scope
         """
         result = False
-        exclude_list = self._stairlight_config.get(StairlightConfigKey.EXCLUDE_SECTION)
-        if not exclude_list:
-            return result
-        for exclude in exclude_list:
-            if source_type.value == exclude.get(
-                StairlightConfigKey.TEMPLATE_SOURCE_TYPE
-            ) and re.search(rf"{exclude.get(StairlightConfigKey.REGEX)}", key):
+        for exclude in self._stairlight_config.get_exclude():
+            if source_type == TemplateSourceType(
+                exclude.TemplateSourceType
+            ) and re.search(rf"{exclude.Regex}", key):
                 result = True
                 break
         return result

@@ -19,7 +19,9 @@ class TestSuccess:
     @pytest.fixture(scope="class")
     def file_template(self, configurator: Configurator) -> FileTemplate:
         return FileTemplate(
-            mapping_config=configurator.read(prefix=MAPPING_CONFIG_PREFIX_DEFAULT),
+            mapping_config=configurator.read_mapping(
+                prefix=MAPPING_CONFIG_PREFIX_DEFAULT
+            ),
             key="tests/sql/main/test_undefined.sql",
         )
 
@@ -41,7 +43,9 @@ class TestSuccess:
     @pytest.fixture(scope="class")
     def gcs_template(self, configurator: Configurator) -> GcsTemplate:
         return GcsTemplate(
-            mapping_config=configurator.read(prefix=MAPPING_CONFIG_PREFIX_DEFAULT),
+            mapping_config=configurator.read_mapping(
+                prefix=MAPPING_CONFIG_PREFIX_DEFAULT
+            ),
             bucket="stairlight",
             key="tests/sql/gcs/one_line/one_line.sql",
         )
@@ -66,7 +70,9 @@ class TestSuccess:
     @pytest.fixture(scope="class")
     def redash_template(self, configurator: Configurator) -> RedashTemplate:
         return RedashTemplate(
-            mapping_config=configurator.read(prefix=MAPPING_CONFIG_PREFIX_DEFAULT),
+            mapping_config=configurator.read_mapping(
+                prefix=MAPPING_CONFIG_PREFIX_DEFAULT
+            ),
             query_id=5,
             query_name="Copy of (#4) New Query",
             query_str="SELECT * FROM {{ table }}",
@@ -92,7 +98,9 @@ class TestSuccess:
     @pytest.fixture(scope="class")
     def dbt_template(self, configurator: Configurator) -> DbtTemplate:
         return DbtTemplate(
-            mapping_config=configurator.read(prefix=MAPPING_CONFIG_PREFIX_DEFAULT),
+            mapping_config=configurator.read_mapping(
+                prefix=MAPPING_CONFIG_PREFIX_DEFAULT
+            ),
             key="tests/dbt/project_01/target/compiled/project_01/a/example_a.sql",
             project_name="project_01",
         )

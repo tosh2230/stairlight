@@ -9,21 +9,19 @@ from src.stairlight.configurator import (
     Configurator,
 )
 from src.stairlight.source.config_key import (
-    ConfigKeyNotFoundException,
     MapKey,
     MappingConfigKey,
     StairlightConfigKey,
-    get_config_value,
 )
 from src.stairlight.source.file.template import FileTemplate
 
 
 class TestSuccess:
-    def test_read_map(self, configurator: Configurator):
-        assert configurator.read(prefix=MAPPING_CONFIG_PREFIX_DEFAULT)
+    def test_read_mapping(self, configurator: Configurator):
+        assert configurator.read_mapping(prefix=MAPPING_CONFIG_PREFIX_DEFAULT)
 
-    def test_read_sql(self, configurator: Configurator):
-        assert configurator.read(prefix=STAIRLIGHT_CONFIG_PREFIX_DEFAULT)
+    def test_read_stairlight(self, configurator: Configurator):
+        assert configurator.read_stairlight(prefix=STAIRLIGHT_CONFIG_PREFIX_DEFAULT)
 
     def test_create_stairlight_file(
         self, configurator: Configurator, stairlight_template_prefix: str
@@ -49,15 +47,12 @@ class TestSuccess:
             StairlightConfigKey.SETTING_SECTION,
         ]
 
-    def test_get_config_value(self):
-        actual = get_config_value(key="a", target={"a": "c"})
-        expected = "c"
-        assert actual == expected
-
     @pytest.fixture(scope="class")
     def file_template(self, configurator: Configurator) -> FileTemplate:
         return FileTemplate(
-            mapping_config=configurator.read(prefix=MAPPING_CONFIG_PREFIX_DEFAULT),
+            mapping_config=configurator.read_mapping(
+                prefix=MAPPING_CONFIG_PREFIX_DEFAULT
+            ),
             key="tests/sql/main/test_undefined.sql",
         )
 
@@ -119,9 +114,3 @@ class TestSuccess:
             unmapped_templates=unmapped_templates
         )
         assert actual == expected
-
-
-class TestFailure:
-    def test_get_config_value(self):
-        with pytest.raises(ConfigKeyNotFoundException):
-            _ = get_config_value(key="a", target={"b": "c"}, fail_if_not_found=True)

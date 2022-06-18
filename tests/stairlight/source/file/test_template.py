@@ -3,10 +3,13 @@ from typing import Any, Dict
 import pytest
 
 from src.stairlight.configurator import Configurator
-from src.stairlight.source.config_key import (
-    ConfigKeyNotFoundException,
-    StairlightConfigKey,
+from src.stairlight.source.config import (
+    ConfigAttributeNotFoundException,
+    MappingConfig,
+    StairlightConfig,
 )
+from src.stairlight.source.config_key import StairlightConfigKey
+from src.stairlight.source.file.config import StairlightConfigIncludeFile
 from src.stairlight.source.file.template import (
     FileTemplate,
     FileTemplateSource,
@@ -26,20 +29,22 @@ class TestFileTemplateSource:
     @pytest.fixture(scope="function")
     def file_template_source(
         self,
-        stairlight_config: Dict[str, Any],
-        mapping_config: Dict[str, Any],
+        stairlight_config: StairlightConfig,
+        mapping_config: MappingConfig,
         key: str,
         expected_is_excluded: bool,
     ) -> FileTemplateSource:
-        source_attributes = {
-            StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.FILE.value,
-            StairlightConfigKey.File.FILE_SYSTEM_PATH: "./tests/sql",
-            StairlightConfigKey.REGEX: ".*/*.sql",
-        }
+        _include = StairlightConfigIncludeFile(
+            **{
+                StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.FILE.value,
+                StairlightConfigKey.File.FILE_SYSTEM_PATH: "./tests/sql",
+                StairlightConfigKey.REGEX: ".*/*.sql",
+            }
+        )
         return FileTemplateSource(
             stairlight_config=stairlight_config,
             mapping_config=mapping_config,
-            source_attributes=source_attributes,
+            include=_include,
         )
 
     def test_search_templates(
@@ -76,18 +81,20 @@ class TestFileTemplateSourceNoExclude:
     def file_template_source(
         self,
         configurator: Configurator,
-        mapping_config: Dict[str, Any],
+        mapping_config: MappingConfig,
     ) -> FileTemplateSource:
-        stairlight_config = configurator.read(prefix="stairlight_no_exclude")
-        source_attributes = {
-            StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.FILE.value,
-            StairlightConfigKey.File.FILE_SYSTEM_PATH: "./tests/sql",
-            StairlightConfigKey.REGEX: ".*/*.sql",
-        }
+        stairlight_config = configurator.read_stairlight(prefix="stairlight_no_exclude")
+        _include = StairlightConfigIncludeFile(
+            **{
+                StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.FILE.value,
+                StairlightConfigKey.File.FILE_SYSTEM_PATH: "./tests/sql",
+                StairlightConfigKey.REGEX: ".*/*.sql",
+            }
+        )
         return FileTemplateSource(
             stairlight_config=stairlight_config,
             mapping_config=mapping_config,
-            source_attributes=source_attributes,
+            include=_include,
         )
 
     def test_is_excluded(
@@ -103,22 +110,26 @@ class TestFileTemplateSourceNoExclude:
         assert actual == expected_is_excluded
 
 
-class TestFileTemplateKeyNotFound:
+class TestFileConfigKeyNotFound:
     @pytest.fixture(scope="class")
     def file_template_source(
         self,
         configurator: Configurator,
-        mapping_config: Dict[str, Any],
+        mapping_config: MappingConfig,
     ) -> FileTemplateSource:
-        stairlight_config = configurator.read(prefix="stairlight_key_not_found")
-        source_attributes = {
-            StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.FILE.value,
-            StairlightConfigKey.REGEX: ".*/*.sql",
-        }
+        stairlight_config = configurator.read_stairlight(
+            prefix="stairlight_key_not_found"
+        )
+        _include = StairlightConfigIncludeFile(
+            **{
+                StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.FILE.value,
+                StairlightConfigKey.REGEX: ".*/*.sql",
+            }
+        )
         return FileTemplateSource(
             stairlight_config=stairlight_config,
             mapping_config=mapping_config,
-            source_attributes=source_attributes,
+            include=_include,
         )
 
     def test_search_templates(
@@ -126,8 +137,11 @@ class TestFileTemplateKeyNotFound:
         file_template_source: FileTemplateSource,
     ):
         iter = file_template_source.search_templates()
-        with pytest.raises(ConfigKeyNotFoundException):
+        with pytest.raises(ConfigAttributeNotFoundException) as exception:
             next(iter)
+        assert exception.value.args[0] == (
+            f"FileSystemPath is not found. {file_template_source._include}"
+        )
 
 
 @pytest.mark.parametrize(
@@ -140,7 +154,7 @@ class TestFileTemplateMapped:
     @pytest.fixture(scope="function")
     def file_template(
         self,
-        mapping_config: Dict[str, Any],
+        mapping_config: MappingConfig,
         key: str,
     ):
         return FileTemplate(
@@ -165,7 +179,11 @@ class TestFileTemplateMapped:
 )
 class TestFileTemplateNotMapped:
     @pytest.fixture(scope="function")
-    def file_template(self, mapping_config, key):
+    def file_template(
+        self,
+        mapping_config: MappingConfig,
+        key: str,
+    ):
         return FileTemplate(
             mapping_config=mapping_config,
             key=key,
@@ -203,7 +221,11 @@ class TestFileTemplateNotMapped:
 )
 class TestFileTemplateRender:
     @pytest.fixture(scope="function")
-    def file_template(self, mapping_config, key) -> FileTemplate:
+    def file_template(
+        self,
+        mapping_config: MappingConfig,
+        key: str,
+    ) -> FileTemplate:
         return FileTemplate(
             mapping_config=mapping_config,
             key=key,
@@ -244,7 +266,11 @@ class TestFileTemplateRender:
 )
 class TestFileTemplateRenderException:
     @pytest.fixture(scope="function")
-    def file_template(self, mapping_config, key):
+    def file_template(
+        self,
+        mapping_config: MappingConfig,
+        key: str,
+    ):
         return FileTemplate(
             mapping_config=mapping_config,
             key=key,

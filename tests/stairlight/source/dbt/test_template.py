@@ -2,7 +2,9 @@ from typing import Any, Dict, List
 
 import pytest
 
+from src.stairlight.source.config import MappingConfig, StairlightConfig
 from src.stairlight.source.config_key import StairlightConfigKey
+from src.stairlight.source.dbt.config import StairlightConfigIncludeDbt
 from src.stairlight.source.dbt.template import (
     DbtTemplate,
     DbtTemplateSource,
@@ -21,7 +23,7 @@ class TestDbtTemplate:
     @pytest.fixture(scope="function")
     def dbt_template(
         self,
-        mapping_config: Dict[str, Any],
+        mapping_config: MappingConfig,
         key: str,
     ):
         return DbtTemplate(
@@ -59,8 +61,8 @@ class TestDbtTemplateSource:
     @pytest.fixture(scope="function")
     def dbt_template_source(
         self,
-        stairlight_config: Dict[str, Any],
-        mapping_config: Dict[str, Any],
+        stairlight_config: StairlightConfig,
+        mapping_config: MappingConfig,
         project_dir: str,
         profiles_dir: str,
         target: str,
@@ -68,17 +70,19 @@ class TestDbtTemplateSource:
         profile: str,
         project_name: str,
     ) -> DbtTemplateSource:
-        source_attributes = {
-            StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.DBT.value,
-            StairlightConfigKey.Dbt.PROJECT_DIR: project_dir,
-            StairlightConfigKey.Dbt.PROFILES_DIR: profiles_dir,
-            StairlightConfigKey.Dbt.TARGET: target,
-            StairlightConfigKey.Dbt.VARS: vars,
-        }
+        _include = StairlightConfigIncludeDbt(
+            **{
+                StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.DBT.value,
+                StairlightConfigKey.Dbt.PROJECT_DIR: project_dir,
+                StairlightConfigKey.Dbt.PROFILES_DIR: profiles_dir,
+                StairlightConfigKey.Dbt.TARGET: target,
+                StairlightConfigKey.Dbt.VARS: vars,
+            }
+        )
         return DbtTemplateSource(
             stairlight_config=stairlight_config,
             mapping_config=mapping_config,
-            source_attributes=source_attributes,
+            include=_include,
         )
 
     def test_execute_dbt_compile(
