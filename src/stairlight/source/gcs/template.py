@@ -97,12 +97,3 @@ class GcsTemplateSource(TemplateSource):
                 bucket=bucket_name,
                 default_table_prefix=self._include.DefaultTablePrefix,
             )
-
-
-def get_gcs_blob(gcs_uri: str) -> storage.Blob:
-    bucket_name = gcs_uri.replace(GCS_URI_SCHEME, "").split("/")[0]
-    key = gcs_uri.replace(f"{GCS_URI_SCHEME}{bucket_name}/", "")
-
-    client = storage.Client(credentials=None, project=None)
-    bucket = client.get_bucket(bucket_name)
-    return bucket.blob(key)
