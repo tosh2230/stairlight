@@ -25,7 +25,7 @@ runs:
       shell: bash
     - name: Install dependencies
       run: |
-        poetry install --extras "gcs redash dbt-bigquery"
+        poetry install --extras "gcs redash dbt-bigquery s3"
       shell: bash
     - name: Setup Google Cloud
       uses: "google-github-actions/setup-gcloud@v0"
