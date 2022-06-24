@@ -180,7 +180,7 @@ class Map:
             MapKey.LINES: [],
         }
 
-        if template.source_type == TemplateSourceType.GCS:
+        if template.source_type in (TemplateSourceType.GCS, TemplateSourceType.S3):
             upstairs_values[MapKey.BUCKET_NAME] = template.bucket
         elif template.source_type == TemplateSourceType.REDASH:
             upstairs_values[MapKey.DATA_SOURCE_NAME] = template.data_source_name

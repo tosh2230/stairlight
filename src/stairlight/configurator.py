@@ -24,6 +24,7 @@ from .source.dbt.config import StairlightConfigIncludeDbt
 from .source.file.config import StairlightConfigIncludeFile
 from .source.gcs.config import StairlightConfigIncludeGcs
 from .source.redash.config import StairlightConfigIncludeRedash
+from .source.s3.config import StairlightConfigIncludeS3
 from .source.template import Template
 
 logger = logging.getLogger()
@@ -143,6 +144,7 @@ class Configurator:
                         OrderedDict(asdict(StairlightConfigIncludeGcs())),
                         OrderedDict(asdict(StairlightConfigIncludeRedash())),
                         OrderedDict(asdict(StairlightConfigIncludeDbt())),
+                        OrderedDict(asdict(StairlightConfigIncludeS3())),
                     ],
                     Exclude=[OrderedDict(asdict(StairlightConfigExclude()))],
                     Settings=OrderedDict(asdict(StairlightConfigSettings())),

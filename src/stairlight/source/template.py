@@ -75,7 +75,10 @@ class Template(ABC):
             if mapping.TemplateSourceType == TemplateSourceType.FILE.value:
                 if self.key.endswith(mapping.FileSuffix):
                     not_found = False
-            elif mapping.TemplateSourceType == TemplateSourceType.GCS.value:
+            elif mapping.TemplateSourceType in (
+                TemplateSourceType.GCS.value,
+                TemplateSourceType.S3.value,
+            ):
                 if self.uri == mapping.Uri:
                     not_found = False
 

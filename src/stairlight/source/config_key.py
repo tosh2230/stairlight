@@ -45,6 +45,9 @@ class StairlightConfigKey(Key):
         TARGET = "Target"
         VARS = "Vars"
 
+    class S3(Key):
+        BUCKET_NAME = "BucketName"
+
 
 class MappingConfigKey(Key):
     GLOBAL_SECTION = "Global"
@@ -72,6 +75,10 @@ class MappingConfigKey(Key):
     class Dbt(Key):
         FILE_SUFFIX = "FileSuffix"
         PROJECT_NAME = "ProjectName"
+
+    class S3(Key):
+        URI = "Uri"
+        BUCKET_NAME = "BucketName"
 
 
 class DbtProjectKey(Key):

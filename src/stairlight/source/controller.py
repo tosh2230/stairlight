@@ -13,6 +13,7 @@ from .dbt.config import MappingConfigMappingDbt
 from .file.config import MappingConfigMappingFile
 from .gcs.config import MappingConfigMappingGcs
 from .redash.config import MappingConfigMappingRedash
+from .s3.config import MappingConfigMappingS3
 from .template import Template, TemplateSource, TemplateSourceType
 
 GCS_URI_SCHEME = "gs://"
@@ -47,6 +48,10 @@ def get_template_source_class(template_source_type: str) -> Type[TemplateSource]
         if not find_spec("DbtTemplateSource"):
             from .dbt.template import DbtTemplateSource
         template_source = DbtTemplateSource
+    elif template_source_type == TemplateSourceType.S3.value:
+        if not find_spec("S3TemplateSource"):
+            from .s3.template import S3TemplateSource
+        template_source = S3TemplateSource
     return template_source
 
 
@@ -87,6 +92,11 @@ def collect_mapping_attributes(
             FileSuffix=template.key,
             Tables=tables,
         )
+    elif template.source_type == TemplateSourceType.S3:
+        mapping = MappingConfigMappingS3(
+            Uri=template.uri,
+            Tables=tables,
+        )
 
     return mapping
 
@@ -119,9 +129,9 @@ class SaveMapController:
         elif self.save_file.startswith(S3_URI_SCHEME):
             self._save_map_s3()
         else:
-            self._save_map_fs()
+            self._save_map_file()
 
-    def _save_map_fs(self) -> None:
+    def _save_map_file(self) -> None:
         """Save mapped results to file system"""
         with open(self.save_file, "w") as f:
             json.dump(self._mapped, f, indent=2)
@@ -150,10 +160,10 @@ class LoadMapController:
         elif self.load_file.startswith(S3_URI_SCHEME):
             loaded_map = self._load_map_s3()
         else:
-            loaded_map = self._load_map_fs()
+            loaded_map = self._load_map_file()
         return loaded_map
 
-    def _load_map_fs(self) -> dict:
+    def _load_map_file(self) -> dict:
         """Load mapped results from file system"""
         if not os.path.exists(self.load_file):
             logger.error(f"{self.load_file} is not found.")

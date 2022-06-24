@@ -15,7 +15,7 @@ class StairlightConfigIncludeS3(StairlightConfigInclude):
 
 
 @dataclass
-class MappingConfigMappingGcs(MappingConfigMapping):
+class MappingConfigMappingS3(MappingConfigMapping):
     TemplateSourceType: str = source_type.S3.value
     Uri: str = None
     Tables: List[OrderedDict[str, Any]] = field(default_factory=list)

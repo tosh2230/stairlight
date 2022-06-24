@@ -44,8 +44,9 @@ class S3Template(Template):
             str: Template string
         """
         template_str: str = ""
-        object = self.s3.Object(bucket_name=self.bucket, key=self.key)
-        body = object.get("Body")
+        s3_bucket = self.s3.Bucket(self.bucket)
+        object = s3_bucket.Object(self.key).get()
+        body = object["Body"]
         if body:
             template_str = body.read().decode("utf-8")
         return template_str

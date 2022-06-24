@@ -60,6 +60,10 @@ class StairlightConfig:
             from .dbt.config import StairlightConfigIncludeDbt
 
             config_include = StairlightConfigIncludeDbt
+        elif source_type == TemplateSourceType.S3.value:
+            from .s3.config import StairlightConfigIncludeS3
+
+            config_include = StairlightConfigIncludeS3
         return config_include
 
     def get_include(self) -> Iterator[StairlightConfigInclude]:
@@ -146,4 +150,8 @@ class MappingConfig:
             from .dbt.config import MappingConfigMappingDbt
 
             mapping_config = MappingConfigMappingDbt
+        elif source_type == TemplateSourceType.S3.value:
+            from .s3.config import MappingConfigMappingS3
+
+            mapping_config = MappingConfigMappingS3
         return mapping_config
