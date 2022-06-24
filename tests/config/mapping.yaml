@@ -122,21 +122,21 @@ Mapping:
   - TemplateSourceType: S3
     Uri: "s3://stairlight/sql/one_line/one_line.sql"
     Tables:
-      - TableName: "PROJECT_a.DATASET_b.TABLE_c"
+      - TableName: "PROJECT_as.DATASET_bs.TABLE_cs"
   - TemplateSourceType: S3
     Uri: "s3://stairlight/sql/cte/cte_multi_line.sql"
     Tables:
-      - TableName: "PROJECT_d.DATASET_e.TABLE_f"
+      - TableName: "PROJECT_ds.DATASET_es.TABLE_fs"
         IgnoreParameters:
           - execution_date.add(days=1).isoformat()
         Parameters:
           params:
-            PROJECT: PROJECT_g
-            DATASET: DATASET_h
-            TABLE: TABLE_i
+            PROJECT: PROJECT_gs
+            DATASET: DATASET_hs
+            TABLE: TABLE_is
         Labels:
           Source: s3
-          Test: b
+          Test: c
 Metadata:
   - TableName: "PROJECT_A.DATASET_A.TABLE_A"
     Labels:

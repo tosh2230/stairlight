@@ -141,6 +141,7 @@ class TestStairLight:
             "PROJECT_D.DATASET_E.TABLE_F",
             "PROJECT_G.DATASET_H.TABLE_I",
             "PROJECT_d.DATASET_e.TABLE_f",
+            "PROJECT_ds.DATASET_es.TABLE_fs",
         ]
 
     def test_down_recursive_verbose(self):
@@ -171,6 +172,7 @@ class TestStairLight:
             "PROJECT_D.DATASET_E.TABLE_F",
             "PROJECT_G.DATASET_H.TABLE_I",
             "PROJECT_d.DATASET_e.TABLE_f",
+            "PROJECT_ds.DATASET_es.TABLE_fs",
             "PROJECT_j.DATASET_k.TABLE_l",
         ]
 
@@ -186,6 +188,7 @@ class TestStairLight:
             f"{tests_abspath}/sql/main/cte_multi_line.sql",
             f"{tests_abspath}/sql/main/one_line_1.sql",
             "gs://stairlight/sql/cte/cte_multi_line.sql",
+            "s3://stairlight/sql/cte/cte_multi_line.sql",
         ]
 
     def test_create_relative_map_up(self):
