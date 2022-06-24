@@ -16,10 +16,7 @@ from src.stairlight.source.config_key import (
 from src.stairlight.source.file.template import FileTemplate
 
 
-class TestSuccess:
-    def test_read_mapping(self, configurator: Configurator):
-        assert configurator.read_mapping(prefix=MAPPING_CONFIG_PREFIX_DEFAULT)
-
+class TestStairlightConfig:
     def test_read_stairlight(self, configurator: Configurator):
         assert configurator.read_stairlight(prefix=STAIRLIGHT_CONFIG_PREFIX_DEFAULT)
 
@@ -31,14 +28,6 @@ class TestSuccess:
         )
         assert os.path.exists(file_name)
 
-    def test_create_mapping_file(
-        self, configurator: Configurator, mapping_template_prefix: str
-    ):
-        file_name = configurator.create_mapping_file(
-            unmapped=[], prefix=mapping_template_prefix
-        )
-        assert os.path.exists(file_name)
-
     def test_build_stairlight_config(self, configurator: Configurator):
         stairlight_template = configurator.build_stairlight_config()
         assert list(stairlight_template.keys()) == [
@@ -47,6 +36,21 @@ class TestSuccess:
             StairlightConfigKey.SETTING_SECTION,
         ]
 
+
+class TestMappingConfig:
+    def test_read_mapping(self, configurator: Configurator):
+        assert configurator.read_mapping(prefix=MAPPING_CONFIG_PREFIX_DEFAULT)
+
+    def test_create_mapping_file(
+        self, configurator: Configurator, mapping_template_prefix: str
+    ):
+        file_name = configurator.create_mapping_file(
+            unmapped=[], prefix=mapping_template_prefix
+        )
+        assert os.path.exists(file_name)
+
+
+class TestBuildMappingConfigFile:
     @pytest.fixture(scope="class")
     def file_template(self, configurator: Configurator) -> FileTemplate:
         return FileTemplate(
@@ -114,3 +118,19 @@ class TestSuccess:
             unmapped_templates=unmapped_templates
         )
         assert actual == expected
+
+
+class TestBuildMappingConfigGcs:
+    pass
+
+
+class TestBuildMappingConfigRedash:
+    pass
+
+
+class TestBuildMappingConfigDbt:
+    pass
+
+
+class TestBuildMappingConfigS3:
+    pass
