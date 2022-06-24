@@ -28,5 +28,5 @@ test-report:
 	@rm -r htmlcov
 	@make install
 	@poetry run pytest tests/stairlight -v --cov=src --cov-report=html
-setup-gcs:
+setup-test:
 	@poetry run python scripts/setup_test.py
