@@ -23,31 +23,31 @@ An end-to-end data lineage tool, detects table dependencies by SQL SELECT statem
 | Data Source | Remarks |
 | --- | --- |
 | Local file system | With Python Pathlib module |
-| [Google Cloud Storage(GCS)](https://cloud.google.com/storage) | | Also available for [Google Cloud Composer](https://cloud.google.com/composer) |
-| [Redash](https://redash.io/) | |
+| [Amazon S3](https://aws.amazon.com/s3/) | |
+| [Google Cloud Storage](https://cloud.google.com/storage) | Also available for [Google Cloud Composer](https://cloud.google.com/composer) |
 | [dbt](https://www.getdbt.com/) - [Google BigQuery](https://cloud.google.com/bigquery) | Using `dbt compile` command internally |
+| [Redash](https://redash.io/) | |
 
 ## Installation
 
 This package is distributed on [PyPI](https://pypi.org/project/stairlight/).
 
 ```sh
+# The base package is for local file system only.
 $ pip install stairlight
-```
 
-(v0.4+) The base package is for local file system only. Please set extras when reading from other data sources.
+# Set extras when detecting from other data sources.
+# e.g. Amazon S3 and Google Cloud Storage
+$ pip install "stairlight[s3, gcs]"
+```
 
 | Data Source | TemplateSourceType | Extra |
 | --- | --- | --- |
 | Local file system | File | - |
-| GCS | GCS | gcs |
-| Redash | Redash | redash |
+| Amazon S3 | S3 | s3 |
+| Google Cloud Storage | GCS | gcs |
 | dbt - Google Bigquery | dbt | dbt-bigquery |
-
-```sh
-# e.g. Read from GCS and Redash
-$ pip install "stairlight[gcs,redash]"
-```
+| Redash | Redash | redash |
 
 ## Getting Started
 
@@ -59,7 +59,7 @@ $ stairlight init
 './stairlight.yaml' has created.
 Please edit it to set your data sources.
 
-# Step 2: Map SQL statements and tables, and add metadata
+# Step 2: Map your SQL statements and tables, and add metadata
 $ stairlight map
 './mapping_yyyyMMddhhmmss.yaml' has created.
 Please map undefined tables and parameters, and append to your latest configuration file.
