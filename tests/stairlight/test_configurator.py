@@ -1,6 +1,6 @@
 import os
-from typing import Any
 from collections import OrderedDict
+from typing import Any
 
 import pytest
 
@@ -10,15 +10,12 @@ from src.stairlight.configurator import (
     Configurator,
     create_nested_dict,
 )
-from src.stairlight.source.controller import (
-    GCS_URI_SCHEME,
-    S3_URI_SCHEME,
-)
 from src.stairlight.source.config_key import (
     MapKey,
     MappingConfigKey,
     StairlightConfigKey,
 )
+from src.stairlight.source.controller import GCS_URI_SCHEME, S3_URI_SCHEME
 from src.stairlight.source.dbt.template import DbtTemplate
 from src.stairlight.source.file.template import FileTemplate
 from src.stairlight.source.gcs.template import GcsTemplate
