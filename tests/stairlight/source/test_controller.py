@@ -17,7 +17,7 @@ from src.stairlight.source.s3.template import S3Template, S3TemplateSource
 from src.stairlight.source.template import TemplateSourceType
 
 
-class TestFile:
+class TestControlFile:
     @pytest.fixture(scope="class")
     def file_template(self, configurator: Configurator) -> FileTemplate:
         return FileTemplate(
@@ -48,7 +48,7 @@ class TestFile:
         assert actual == expected
 
 
-class TestGcs:
+class TestControlGcs:
     @pytest.fixture(scope="class")
     def gcs_template(self, configurator: Configurator) -> GcsTemplate:
         return GcsTemplate(
@@ -82,7 +82,7 @@ class TestGcs:
         assert actual == expected
 
 
-class TestRedash:
+class TestControlRedash:
     @pytest.fixture(scope="class")
     def redash_template(self, configurator: Configurator) -> RedashTemplate:
         return RedashTemplate(
@@ -117,7 +117,7 @@ class TestRedash:
         assert actual == expected
 
 
-class TestDbt:
+class TestControlDbt:
     @pytest.fixture(scope="class")
     def dbt_template(self, configurator: Configurator) -> DbtTemplate:
         return DbtTemplate(
@@ -152,7 +152,7 @@ class TestDbt:
         assert actual == expected
 
 
-class TestS3:
+class TestControlS3:
     @pytest.fixture(scope="class")
     def s3_template(self, configurator: Configurator) -> S3Template:
         return S3Template(
@@ -184,25 +184,3 @@ class TestS3:
             MappingConfigKey.TEMPLATE_SOURCE_TYPE: "S3",
         }
         assert actual == expected
-
-
-class TestSaveMapController:
-    def test_save_file(self):
-        pass
-
-    def test_save_gcs(self):
-        pass
-
-    def test_save_s3(self):
-        pass
-
-
-class TestLoadMapController:
-    def test_load_file(self):
-        pass
-
-    def test_load_gcs(self):
-        pass
-
-    def test_load_s3(self):
-        pass
