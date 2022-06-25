@@ -34,6 +34,7 @@ class TestSuccess:
             TemplateSourceType.FILE.value,
             TemplateSourceType.GCS.value,
             TemplateSourceType.DBT.value,
+            TemplateSourceType.S3.value,
         ],
     )
     def test_mapped_items(self, dependency_map: Map, template_source_type: str):
