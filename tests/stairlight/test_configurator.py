@@ -1,6 +1,6 @@
 import os
 from collections import OrderedDict
-from typing import Any
+from typing import Any, Dict
 
 import pytest
 
@@ -468,7 +468,7 @@ class TestBuildMappingConfigS3:
     ],
 )
 def test_create_nested_dict(params, expected):
-    actual: dict[str, Any] = {}
+    actual: Dict[str, Any] = {}
     for param in params:
         splitted_params = param.split(".")
         create_nested_dict(keys=splitted_params, results=actual)

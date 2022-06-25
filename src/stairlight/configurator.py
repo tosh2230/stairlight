@@ -219,7 +219,7 @@ class Configurator:
 
 def create_nested_dict(
     keys: List[str],
-    results: dict[str, Any],
+    results: Dict[str, Any],
     density: int = 0,
     default_value: Any = None,
 ) -> None:
