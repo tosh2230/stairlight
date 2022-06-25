@@ -174,7 +174,9 @@ class TestBuildMappingConfigGcs:
                         }
                     )
                 ],
-                MappingConfigKey.Gcs.URI: f"{GCS_URI_SCHEME}{gcs_template.bucket}/{gcs_template.key}",
+                MappingConfigKey.Gcs.URI: (
+                    f"{GCS_URI_SCHEME}{gcs_template.bucket}/{gcs_template.key}"
+                ),
             }
         )
 
@@ -225,7 +227,9 @@ class TestBuildMappingConfigRedash:
         global_value: OrderedDict = OrderedDict({MappingConfigKey.PARAMETERS: {}})
         mapping_value = OrderedDict(
             {
-                MappingConfigKey.TEMPLATE_SOURCE_TYPE: redash_template.source_type.value,
+                MappingConfigKey.TEMPLATE_SOURCE_TYPE: (
+                    redash_template.source_type.value
+                ),
                 MappingConfigKey.TABLES: [
                     OrderedDict(
                         {
@@ -276,7 +280,10 @@ class TestBuildMappingConfigDbt:
             mapping_config=configurator.read_mapping(
                 prefix=MAPPING_CONFIG_PREFIX_DEFAULT
             ),
-            key="tests/dbt/project_01/target/compiled/project_01/models/example/my_first_dbt_model.sql",
+            key=(
+                "tests/dbt/project_01/target/compiled/project_01/"
+                "models/example/my_first_dbt_model.sql"
+            ),
             project_name="project_01",
         )
 
@@ -317,7 +324,10 @@ class TestBuildMappingConfigDbt:
                     )
                 ],
                 MappingConfigKey.Dbt.PROJECT_NAME: "project_01",
-                MappingConfigKey.Dbt.FILE_SUFFIX: "tests/dbt/project_01/target/compiled/project_01/models/example/my_first_dbt_model.sql",
+                MappingConfigKey.Dbt.FILE_SUFFIX: (
+                    "tests/dbt/project_01/target/compiled/project_01/models/"
+                    "example/my_first_dbt_model.sql"
+                ),
             }
         )
 
@@ -388,7 +398,9 @@ class TestBuildMappingConfigS3:
                         }
                     )
                 ],
-                MappingConfigKey.Gcs.URI: f"{S3_URI_SCHEME}{s3_template.bucket}/{s3_template.key}",
+                MappingConfigKey.Gcs.URI: (
+                    f"{S3_URI_SCHEME}{s3_template.bucket}/{s3_template.key}"
+                ),
             }
         )
 

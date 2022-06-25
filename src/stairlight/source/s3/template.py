@@ -1,5 +1,5 @@
 import re
-from typing import Any, Iterator, Optional
+from typing import Iterator, Optional
 
 import boto3
 
