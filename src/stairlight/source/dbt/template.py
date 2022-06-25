@@ -1,4 +1,5 @@
 import glob
+import os
 import pathlib
 import re
 import shlex
@@ -120,13 +121,15 @@ class DbtTemplateSource(TemplateSource):
         dbt_project_pattern = re.compile(f"^{project_dir}/{self.DBT_PROJECT_YAML}$")
         return self.read_yml(dir=project_dir, re_pattern=dbt_project_pattern)
 
-    @staticmethod
-    def read_yml(dir: str, re_pattern: re.Pattern) -> dict:
+    def read_yml(self, dir: str, re_pattern: re.Pattern) -> dict:
         files = [
             obj
             for obj in glob.glob(f"{dir}/**", recursive=False)
             if re_pattern.fullmatch(obj)
         ]
+        if not files:
+            self.logger.error(f"Not found: {re_pattern} in {os.getcwd()}")
+            exit()
         with open(files[0]) as file:
             return yaml.safe_load(file)
 

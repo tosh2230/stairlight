@@ -71,7 +71,10 @@ class Template(ABC):
         mapping: Any
         for mapping in self._mapping_config.get_mapping():
             not_found: bool = True
-            if mapping.TemplateSourceType == TemplateSourceType.FILE.value:
+            if mapping.TemplateSourceType in (
+                TemplateSourceType.FILE.value,
+                TemplateSourceType.DBT.value,
+            ):
                 if self.key.endswith(mapping.FileSuffix):
                     not_found = False
             elif mapping.TemplateSourceType == TemplateSourceType.GCS.value:
