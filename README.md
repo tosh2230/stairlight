@@ -145,6 +145,24 @@ $ stairlight
             }
           ]
         }
+      },
+      "PROJECT_as.DATASET_bs.TABLE_cs": {
+        "PROJECT_A.DATASET_A.TABLE_A": {
+          "TemplateSourceType": "S3",
+          "Key": "sql/one_line/one_line.sql",
+          "Uri": "s3://stairlight/sql/one_line/one_line.sql",
+          "Lines": [
+            {
+              "LineNumber": 1,
+              "LineString": "SELECT * FROM PROJECT_A.DATASET_A.TABLE_A WHERE 1 = 1"
+            }
+          ],
+          "BucketName": "stairlight",
+          "Labels": {
+            "Source": null,
+            "Test": "a"
+          }
+        }
       }
     }
     ```
@@ -203,6 +221,10 @@ Configuration files can be found [here](https://github.com/tosh2230/stairlight/t
       Vars:
         key_a: value_a
         key_b: value_b
+    - TemplateSourceType: S3
+      BucketName: stairlight
+      Regex: "^sql/.*/*.sql$"
+      DefaultTablePrefix: "PROJECT_A"
   Exclude:
     - TemplateSourceType: File
       Regex: "main/exclude.sql$"
@@ -259,6 +281,10 @@ Configuration files can be found [here](https://github.com/tosh2230/stairlight/t
       FileSuffix: tests/dbt/project_01/target/compiled/project_01/models/example/my_first_dbt_model.sql
       Tables:
         - TableName: dummy.dummy.my_first_dbt_model
+    - TemplateSourceType: S3
+      Uri: "s3://stairlight/sql/one_line/one_line.sql"
+      Tables:
+        - TableName: "PROJECT_as.DATASET_bs.TABLE_cs"
   Metadata:
     - TableName: "PROJECT_A.DATASET_A.TABLE_A"
       Labels:
@@ -286,7 +312,7 @@ In contrast, `IgnoreParameters` attribute handles a list to ignore when renderin
 
 This section is mainly used to set metadata to tables appears only in queries.
 
-## Commands and Options
+## Arguments and Options
 
 ```txt
 $ stairlight --help
@@ -307,8 +333,11 @@ optional arguments:
   -c CONFIG, --config CONFIG
                         set Stairlight configuration directory
   -q, --quiet           keep silence
-  --save SAVE           file path where results will be saved(File system or GCS)
-  --load LOAD           file path in which results are saved(File system or GCS), can be specified multiple times
+  --save SAVE           A file path where map results will be saved.
+                        You can choose from local file system, GCS, S3.
+  --load LOAD           A file path where map results are saved.
+                        You can choose from local file system, GCS, S3.
+                        It can be specified multiple times.
 ```
 
 ### init
@@ -349,16 +378,19 @@ optional arguments:
   -c CONFIG, --config CONFIG
                         set Stairlight configuration directory
   -q, --quiet           keep silence
-  --save SAVE           file path where results will be saved(File system or GCS)
-  --load LOAD           file path in which results are saved(File system or GCS), can be specified multiple times
+  --save SAVE           A file path where map results will be saved.
+                        You can choose from local file system, GCS, S3.
+  --load LOAD           A file path where map results are saved.
+                        You can choose from local file system, GCS, S3.
+                        It can be specified multiple times.
   -t TABLE, --table TABLE
                         table names that Stairlight searches for, can be specified
                         multiple times. e.g. -t PROJECT_a.DATASET_b.TABLE_c -t
                         PROJECT_d.DATASET_e.TABLE_f
   -l LABEL, --label LABEL
-                        labels set for the table in mapping configuration, can be
-                        specified multiple times. The separator between key and value
-                        should be a colon(:). e.g. -l key_1:value_1 -l key_2:value_2
+                        labels set for the table in mapping configuration, can be specified multiple times.
+                        The separator between key and value should be a colon(:).
+                        e.g. -l key_1:value_1 -l key_2:value_2
   -o {table,file}, --output {table,file}
                         output type
   -v, --verbose         return verbose results
