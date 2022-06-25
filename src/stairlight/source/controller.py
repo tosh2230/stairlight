@@ -6,7 +6,10 @@ from pathlib import Path
 from typing import Any, Dict, List, OrderedDict, Type
 
 import boto3
+from botocore.response import StreamingBody
 from google.cloud import storage
+from mypy_boto3_s3.service_resource import Object, S3ServiceResource
+from mypy_boto3_s3.type_defs import GetObjectOutputTypeDef
 
 from .config import MappingConfigMapping
 from .dbt.config import MappingConfigMappingDbt
@@ -110,11 +113,11 @@ def get_gcs_blob(uri: str) -> storage.Blob:
     return bucket.blob(key)
 
 
-def get_s3_object(uri: str) -> Any:
+def get_s3_object(uri: str) -> Object:
     bucket_name = uri.replace(S3_URI_SCHEME, "").split("/")[0]
     key = uri.replace(f"{S3_URI_SCHEME}{bucket_name}/", "")
 
-    s3 = boto3.resource("s3")
+    s3: S3ServiceResource = boto3.resource("s3")
     return s3.Object(bucket_name=bucket_name, key=key)
 
 
@@ -145,8 +148,8 @@ class SaveMapController:
         )
 
     def _save_map_s3(self) -> None:
-        object = get_s3_object(uri=self.save_file)
-        _ = object.put(Body=json.dumps(obj=self._mapped, indent=2))
+        _object: Object = get_s3_object(uri=self.save_file)
+        _ = _object.put(Body=json.dumps(obj=self._mapped, indent=2))
 
 
 class LoadMapController:
@@ -181,8 +184,9 @@ class LoadMapController:
 
     def _load_map_s3(self) -> dict:
         """Load mapped results from Amazon S3"""
-        object = get_s3_object(uri=self.load_file)
-        body = object.get("Body")
+        _object: Object = get_s3_object(uri=self.load_file)
+        object_output: GetObjectOutputTypeDef = _object.get()
+        body: StreamingBody = object_output["Body"]
         if not body:
             logger.error(f"{self.load_file} is not found.")
             exit()
