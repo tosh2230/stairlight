@@ -1,4 +1,4 @@
-from typing import List
+from typing import Dict, List
 
 import pytest
 
@@ -9,7 +9,7 @@ from src.stairlight.source.config import (
     StairlightConfig,
 )
 from src.stairlight.source.config_key import MapKey, MappingConfigKey
-from src.stairlight.source.template import Template
+from src.stairlight.source.template import Template, TemplateSourceType
 
 
 @pytest.fixture(scope="session")
@@ -27,6 +27,29 @@ class TestSuccess:
     def test_mapped(self, dependency_map: Map):
         print(dependency_map.mapped)
         assert len(dependency_map.mapped) > 0
+
+    @pytest.mark.parametrize(
+        "template_source_type",
+        [
+            TemplateSourceType.FILE.value,
+            TemplateSourceType.GCS.value,
+            TemplateSourceType.DBT.value,
+        ],
+    )
+    def test_mapped_items(self, dependency_map: Map, template_source_type: str):
+        found: bool = False
+        upstairs_items: Dict
+        upstairs_attributes: Dict
+        for _, upstairs_items in dependency_map.mapped.items():
+            for _, upstairs_attributes in upstairs_items.items():
+                if (
+                    upstairs_attributes.get(MapKey.TEMPLATE_SOURCE_TYPE)
+                    == template_source_type
+                ):
+                    found = True
+                    break
+
+        assert found
 
     def test_unmapped(self, dependency_map: Map):
         print(dependency_map.unmapped)
