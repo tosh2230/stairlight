@@ -5,22 +5,14 @@ from logging import getLogger
 from pathlib import Path
 from typing import Any, Dict, List, OrderedDict, Type
 
-import boto3
-from botocore.response import StreamingBody
-from google.cloud import storage
-from mypy_boto3_s3.service_resource import Object, S3ServiceResource
-from mypy_boto3_s3.type_defs import GetObjectOutputTypeDef
-
 from .config import MappingConfigMapping
+from .config_key import GCS_URI_SCHEME, S3_URI_SCHEME
 from .dbt.config import MappingConfigMappingDbt
 from .file.config import MappingConfigMappingFile
 from .gcs.config import MappingConfigMappingGcs
 from .redash.config import MappingConfigMappingRedash
 from .s3.config import MappingConfigMappingS3
 from .template import Template, TemplateSource, TemplateSourceType
-
-GCS_URI_SCHEME = "gs://"
-S3_URI_SCHEME = "s3://"
 
 logger = getLogger(__name__)
 
@@ -104,23 +96,6 @@ def collect_mapping_attributes(
     return mapping
 
 
-def get_gcs_blob(uri: str) -> storage.Blob:
-    bucket_name = uri.replace(GCS_URI_SCHEME, "").split("/")[0]
-    key = uri.replace(f"{GCS_URI_SCHEME}{bucket_name}/", "")
-
-    client = storage.Client(credentials=None, project=None)
-    bucket = client.get_bucket(bucket_name)
-    return bucket.blob(key)
-
-
-def get_s3_object(uri: str) -> Object:
-    bucket_name = uri.replace(S3_URI_SCHEME, "").split("/")[0]
-    key = uri.replace(f"{S3_URI_SCHEME}{bucket_name}/", "")
-
-    s3: S3ServiceResource = boto3.resource("s3")
-    return s3.Object(bucket_name=bucket_name, key=key)
-
-
 class SaveMapController:
     def __init__(self, save_file: str, mapped: Dict[str, Any]) -> None:
         self.save_file = save_file
@@ -141,13 +116,21 @@ class SaveMapController:
 
     def _save_map_gcs(self) -> None:
         """Save mapped results to Google Cloud Storage"""
-        blob = get_gcs_blob(uri=self.save_file)
+        from google.cloud.storage import Blob
+
+        from .gcs.map import get_gcs_blob
+
+        blob: Blob = get_gcs_blob(uri=self.save_file)
         blob.upload_from_string(
             data=json.dumps(obj=self._mapped, indent=2),
             content_type="application/json",
         )
 
     def _save_map_s3(self) -> None:
+        from mypy_boto3_s3.service_resource import Object
+
+        from .s3.map import get_s3_object
+
         _object: Object = get_s3_object(uri=self.save_file)
         _ = _object.put(Body=json.dumps(obj=self._mapped, indent=2))
 
@@ -176,7 +159,11 @@ class LoadMapController:
 
     def _load_map_gcs(self) -> dict:
         """Load mapped results from Google Cloud Storage"""
-        blob = get_gcs_blob(uri=self.load_file)
+        from google.cloud.storage import Blob
+
+        from .gcs.map import get_gcs_blob
+
+        blob: Blob = get_gcs_blob(uri=self.load_file)
         if not blob.exists():
             logger.error(f"{self.load_file} is not found.")
             exit()
@@ -184,6 +171,12 @@ class LoadMapController:
 
     def _load_map_s3(self) -> dict:
         """Load mapped results from Amazon S3"""
+        from botocore.response import StreamingBody
+        from mypy_boto3_s3.service_resource import Object
+        from mypy_boto3_s3.type_defs import GetObjectOutputTypeDef
+
+        from .s3.map import get_s3_object
+
         _object: Object = get_s3_object(uri=self.load_file)
         object_output: GetObjectOutputTypeDef = _object.get()
         body: StreamingBody = object_output["Body"]

@@ -5,6 +5,10 @@ from typing import Any
 logger = logging.getLogger()
 
 
+GCS_URI_SCHEME = "gs://"
+S3_URI_SCHEME = "s3://"
+
+
 class Key(ABC):
     def __init__(self) -> None:
         super().__init__()
