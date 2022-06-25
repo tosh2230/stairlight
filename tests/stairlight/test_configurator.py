@@ -1,4 +1,5 @@
 import os
+from typing import Any
 from collections import OrderedDict
 
 import pytest
@@ -7,13 +8,22 @@ from src.stairlight.configurator import (
     MAPPING_CONFIG_PREFIX_DEFAULT,
     STAIRLIGHT_CONFIG_PREFIX_DEFAULT,
     Configurator,
+    create_nested_dict,
+)
+from src.stairlight.source.controller import (
+    GCS_URI_SCHEME,
+    S3_URI_SCHEME,
 )
 from src.stairlight.source.config_key import (
     MapKey,
     MappingConfigKey,
     StairlightConfigKey,
 )
+from src.stairlight.source.dbt.template import DbtTemplate
 from src.stairlight.source.file.template import FileTemplate
+from src.stairlight.source.gcs.template import GcsTemplate
+from src.stairlight.source.redash.template import RedashTemplate
+from src.stairlight.source.s3.template import S3Template
 
 
 class TestStairlightConfig:
@@ -121,16 +131,336 @@ class TestBuildMappingConfigFile:
 
 
 class TestBuildMappingConfigGcs:
-    pass
+    @pytest.fixture(scope="class")
+    def gcs_template(self, configurator: Configurator) -> GcsTemplate:
+        return GcsTemplate(
+            mapping_config=configurator.read_mapping(
+                prefix=MAPPING_CONFIG_PREFIX_DEFAULT
+            ),
+            bucket="stairlight",
+            key="sql/cte/cte_multi_line.sql",
+        )
+
+    def test_build_mapping_config(
+        self, configurator: Configurator, gcs_template: GcsTemplate
+    ):
+        unmapped_templates = [
+            {
+                MapKey.TEMPLATE: gcs_template,
+                MapKey.PARAMETERS: [
+                    "params.PROJECT",
+                    "params.DATASET",
+                    "params.TABLE",
+                ],
+            }
+        ]
+
+        global_value: OrderedDict = OrderedDict({MappingConfigKey.PARAMETERS: {}})
+        mapping_value = OrderedDict(
+            {
+                MappingConfigKey.TEMPLATE_SOURCE_TYPE: gcs_template.source_type.value,
+                MappingConfigKey.TABLES: [
+                    OrderedDict(
+                        {
+                            MappingConfigKey.TABLE_NAME: "cte_multi_line",
+                            MappingConfigKey.IGNORE_PARAMETERS: [],
+                            MappingConfigKey.PARAMETERS: OrderedDict(
+                                {
+                                    "params": {
+                                        "PROJECT": None,
+                                        "DATASET": None,
+                                        "TABLE": None,
+                                    }
+                                }
+                            ),
+                            MappingConfigKey.LABELS: OrderedDict(),
+                        }
+                    )
+                ],
+                MappingConfigKey.Gcs.URI: f"{GCS_URI_SCHEME}{gcs_template.bucket}/{gcs_template.key}",
+            }
+        )
+
+        metadata_value: OrderedDict = OrderedDict(
+            {
+                MappingConfigKey.TABLE_NAME: None,
+                MappingConfigKey.LABELS: {},
+            }
+        )
+
+        expected = OrderedDict(
+            {
+                MappingConfigKey.GLOBAL_SECTION: global_value,
+                MappingConfigKey.MAPPING_SECTION: [mapping_value],
+                MappingConfigKey.METADATA_SECTION: [metadata_value],
+            }
+        )
+        actual = configurator.build_mapping_config(
+            unmapped_templates=unmapped_templates
+        )
+        assert actual == expected
 
 
 class TestBuildMappingConfigRedash:
-    pass
+    @pytest.fixture(scope="class")
+    def redash_template(self, configurator: Configurator) -> RedashTemplate:
+        return RedashTemplate(
+            mapping_config=configurator.read_mapping(prefix="mapping_redash"),
+            query_id=5,
+            query_name="redash_test_query",
+            data_source_name="redash_test_data",
+        )
+
+    def test_build_mapping_config(
+        self, configurator: Configurator, redash_template: RedashTemplate
+    ):
+        unmapped_templates = [
+            {
+                MapKey.TEMPLATE: redash_template,
+                MapKey.PARAMETERS: [
+                    "params.PROJECT",
+                    "params.DATASET",
+                    "params.TABLE",
+                ],
+            }
+        ]
+
+        global_value: OrderedDict = OrderedDict({MappingConfigKey.PARAMETERS: {}})
+        mapping_value = OrderedDict(
+            {
+                MappingConfigKey.TEMPLATE_SOURCE_TYPE: redash_template.source_type.value,
+                MappingConfigKey.TABLES: [
+                    OrderedDict(
+                        {
+                            MappingConfigKey.TABLE_NAME: "redash_test_query",
+                            MappingConfigKey.IGNORE_PARAMETERS: [],
+                            MappingConfigKey.PARAMETERS: OrderedDict(
+                                {
+                                    "params": {
+                                        "PROJECT": None,
+                                        "DATASET": None,
+                                        "TABLE": None,
+                                    }
+                                }
+                            ),
+                            MappingConfigKey.LABELS: OrderedDict(),
+                        }
+                    )
+                ],
+                MappingConfigKey.Redash.QUERY_ID: 5,
+                MappingConfigKey.Redash.DATA_SOURCE_NAME: "redash_test_data",
+            }
+        )
+
+        metadata_value: OrderedDict = OrderedDict(
+            {
+                MappingConfigKey.TABLE_NAME: None,
+                MappingConfigKey.LABELS: {},
+            }
+        )
+
+        expected = OrderedDict(
+            {
+                MappingConfigKey.GLOBAL_SECTION: global_value,
+                MappingConfigKey.MAPPING_SECTION: [mapping_value],
+                MappingConfigKey.METADATA_SECTION: [metadata_value],
+            }
+        )
+        actual = configurator.build_mapping_config(
+            unmapped_templates=unmapped_templates
+        )
+        assert actual == expected
 
 
 class TestBuildMappingConfigDbt:
-    pass
+    @pytest.fixture(scope="class")
+    def dbt_template(self, configurator: Configurator) -> DbtTemplate:
+        return DbtTemplate(
+            mapping_config=configurator.read_mapping(
+                prefix=MAPPING_CONFIG_PREFIX_DEFAULT
+            ),
+            key="tests/dbt/project_01/target/compiled/project_01/models/example/my_first_dbt_model.sql",
+            project_name="project_01",
+        )
+
+    def test_build_mapping_config(
+        self, configurator: Configurator, dbt_template: DbtTemplate
+    ):
+        unmapped_templates = [
+            {
+                MapKey.TEMPLATE: dbt_template,
+                MapKey.PARAMETERS: [
+                    "params.PROJECT",
+                    "params.DATASET",
+                    "params.TABLE",
+                ],
+            }
+        ]
+
+        global_value: OrderedDict = OrderedDict({MappingConfigKey.PARAMETERS: {}})
+        mapping_value = OrderedDict(
+            {
+                MappingConfigKey.TEMPLATE_SOURCE_TYPE: dbt_template.source_type.value,
+                MappingConfigKey.TABLES: [
+                    OrderedDict(
+                        {
+                            MappingConfigKey.TABLE_NAME: "my_first_dbt_model",
+                            MappingConfigKey.IGNORE_PARAMETERS: [],
+                            MappingConfigKey.PARAMETERS: OrderedDict(
+                                {
+                                    "params": {
+                                        "PROJECT": None,
+                                        "DATASET": None,
+                                        "TABLE": None,
+                                    }
+                                }
+                            ),
+                            MappingConfigKey.LABELS: OrderedDict(),
+                        }
+                    )
+                ],
+                MappingConfigKey.Dbt.PROJECT_NAME: "project_01",
+                MappingConfigKey.Dbt.FILE_SUFFIX: "tests/dbt/project_01/target/compiled/project_01/models/example/my_first_dbt_model.sql",
+            }
+        )
+
+        metadata_value: OrderedDict = OrderedDict(
+            {
+                MappingConfigKey.TABLE_NAME: None,
+                MappingConfigKey.LABELS: {},
+            }
+        )
+
+        expected = OrderedDict(
+            {
+                MappingConfigKey.GLOBAL_SECTION: global_value,
+                MappingConfigKey.MAPPING_SECTION: [mapping_value],
+                MappingConfigKey.METADATA_SECTION: [metadata_value],
+            }
+        )
+        actual = configurator.build_mapping_config(
+            unmapped_templates=unmapped_templates
+        )
+        assert actual == expected
 
 
 class TestBuildMappingConfigS3:
-    pass
+    @pytest.fixture(scope="class")
+    def s3_template(self, configurator: Configurator) -> S3Template:
+        return S3Template(
+            mapping_config=configurator.read_mapping(
+                prefix=MAPPING_CONFIG_PREFIX_DEFAULT
+            ),
+            bucket="stairlight",
+            key="sql/cte/cte_multi_line.sql",
+        )
+
+    def test_build_mapping_config(
+        self, configurator: Configurator, s3_template: S3Template
+    ):
+        unmapped_templates = [
+            {
+                MapKey.TEMPLATE: s3_template,
+                MapKey.PARAMETERS: [
+                    "params.PROJECT",
+                    "params.DATASET",
+                    "params.TABLE",
+                ],
+            }
+        ]
+
+        global_value: OrderedDict = OrderedDict({MappingConfigKey.PARAMETERS: {}})
+        mapping_value = OrderedDict(
+            {
+                MappingConfigKey.TEMPLATE_SOURCE_TYPE: s3_template.source_type.value,
+                MappingConfigKey.TABLES: [
+                    OrderedDict(
+                        {
+                            MappingConfigKey.TABLE_NAME: "cte_multi_line",
+                            MappingConfigKey.IGNORE_PARAMETERS: [],
+                            MappingConfigKey.PARAMETERS: OrderedDict(
+                                {
+                                    "params": {
+                                        "PROJECT": None,
+                                        "DATASET": None,
+                                        "TABLE": None,
+                                    }
+                                }
+                            ),
+                            MappingConfigKey.LABELS: OrderedDict(),
+                        }
+                    )
+                ],
+                MappingConfigKey.Gcs.URI: f"{S3_URI_SCHEME}{s3_template.bucket}/{s3_template.key}",
+            }
+        )
+
+        metadata_value: OrderedDict = OrderedDict(
+            {
+                MappingConfigKey.TABLE_NAME: None,
+                MappingConfigKey.LABELS: {},
+            }
+        )
+
+        expected = OrderedDict(
+            {
+                MappingConfigKey.GLOBAL_SECTION: global_value,
+                MappingConfigKey.MAPPING_SECTION: [mapping_value],
+                MappingConfigKey.METADATA_SECTION: [metadata_value],
+            }
+        )
+        actual = configurator.build_mapping_config(
+            unmapped_templates=unmapped_templates
+        )
+        assert actual == expected
+
+
+@pytest.mark.parametrize(
+    "params, expected",
+    [
+        (
+            [
+                "params.PROJECT",
+                "params.DATASET",
+                "params.TABLE",
+            ],
+            {
+                "params": {
+                    "PROJECT": None,
+                    "DATASET": None,
+                    "TABLE": None,
+                }
+            },
+        ),
+        (
+            [
+                "params.A.PROJECT_A",
+                "params.A.DATASET_A",
+                "params.A.TABLE_A",
+                "params.B.PROJECT_B",
+                "params.B.DATASET_B",
+                "params.B.TABLE_B",
+            ],
+            {
+                "params": {
+                    "A": {
+                        "PROJECT_A": None,
+                        "DATASET_A": None,
+                        "TABLE_A": None,
+                    },
+                    "B": {
+                        "PROJECT_B": None,
+                        "DATASET_B": None,
+                        "TABLE_B": None,
+                    },
+                }
+            },
+        ),
+    ],
+)
+def test_create_nested_dict(params, expected):
+    actual: dict[str, Any] = {}
+    for param in params:
+        splitted_params = param.split(".")
+        create_nested_dict(keys=splitted_params, results=actual)
+    assert actual == expected

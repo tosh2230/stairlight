@@ -218,13 +218,16 @@ class Configurator:
 
 
 def create_nested_dict(
-    keys: List[str], results: OrderedDict, density: int = 0, default_value: Any = None
+    keys: List[str],
+    results: dict[str, Any],
+    density: int = 0,
+    default_value: Any = None,
 ) -> None:
     """create nested dict from list
 
     Args:
         keys (list): Dict keys
-        results (OrderedDict): Nested dict
+        results (dict[str, Any]): Nested dict
         density (int, optional): Density. Defaults to 0.
         default_value (any, optional): Default dict value. Defaults to None.
     """
