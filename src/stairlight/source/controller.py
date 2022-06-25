@@ -5,14 +5,19 @@ from logging import getLogger
 from pathlib import Path
 from typing import Any, Dict, List, OrderedDict, Type
 
+import boto3
+from google.cloud import storage
+
 from .config import MappingConfigMapping
 from .dbt.config import MappingConfigMappingDbt
 from .file.config import MappingConfigMappingFile
 from .gcs.config import MappingConfigMappingGcs
 from .redash.config import MappingConfigMappingRedash
+from .s3.config import MappingConfigMappingS3
 from .template import Template, TemplateSource, TemplateSourceType
 
 GCS_URI_SCHEME = "gs://"
+S3_URI_SCHEME = "s3://"
 
 logger = getLogger(__name__)
 
@@ -43,6 +48,10 @@ def get_template_source_class(template_source_type: str) -> Type[TemplateSource]
         if not find_spec("DbtTemplateSource"):
             from .dbt.template import DbtTemplateSource
         template_source = DbtTemplateSource
+    elif template_source_type == TemplateSourceType.S3.value:
+        if not find_spec("S3TemplateSource"):
+            from .s3.template import S3TemplateSource
+        template_source = S3TemplateSource
     return template_source
 
 
@@ -83,8 +92,30 @@ def collect_mapping_attributes(
             FileSuffix=template.key,
             Tables=tables,
         )
+    elif template.source_type == TemplateSourceType.S3:
+        mapping = MappingConfigMappingS3(
+            Uri=template.uri,
+            Tables=tables,
+        )
 
     return mapping
+
+
+def get_gcs_blob(uri: str) -> storage.Blob:
+    bucket_name = uri.replace(GCS_URI_SCHEME, "").split("/")[0]
+    key = uri.replace(f"{GCS_URI_SCHEME}{bucket_name}/", "")
+
+    client = storage.Client(credentials=None, project=None)
+    bucket = client.get_bucket(bucket_name)
+    return bucket.blob(key)
+
+
+def get_s3_object(uri: str) -> Any:
+    bucket_name = uri.replace(S3_URI_SCHEME, "").split("/")[0]
+    key = uri.replace(f"{S3_URI_SCHEME}{bucket_name}/", "")
+
+    s3 = boto3.resource("s3")
+    return s3.Object(bucket_name=bucket_name, key=key)
 
 
 class SaveMapController:
@@ -95,23 +126,27 @@ class SaveMapController:
     def save(self) -> None:
         if self.save_file.startswith(GCS_URI_SCHEME):
             self._save_map_gcs()
+        elif self.save_file.startswith(S3_URI_SCHEME):
+            self._save_map_s3()
         else:
-            self._save_map_fs()
+            self._save_map_file()
 
-    def _save_map_fs(self) -> None:
+    def _save_map_file(self) -> None:
         """Save mapped results to file system"""
         with open(self.save_file, "w") as f:
             json.dump(self._mapped, f, indent=2)
 
     def _save_map_gcs(self) -> None:
         """Save mapped results to Google Cloud Storage"""
-        from .gcs.template import get_gcs_blob
-
-        blob = get_gcs_blob(self.save_file)
+        blob = get_gcs_blob(uri=self.save_file)
         blob.upload_from_string(
             data=json.dumps(obj=self._mapped, indent=2),
             content_type="application/json",
         )
+
+    def _save_map_s3(self) -> None:
+        object = get_s3_object(uri=self.save_file)
+        _ = object.put(Body=json.dumps(obj=self._mapped, indent=2))
 
 
 class LoadMapController:
@@ -122,11 +157,13 @@ class LoadMapController:
         loaded_map = {}
         if self.load_file.startswith(GCS_URI_SCHEME):
             loaded_map = self._load_map_gcs()
+        elif self.load_file.startswith(S3_URI_SCHEME):
+            loaded_map = self._load_map_s3()
         else:
-            loaded_map = self._load_map_fs()
+            loaded_map = self._load_map_file()
         return loaded_map
 
-    def _load_map_fs(self) -> dict:
+    def _load_map_file(self) -> dict:
         """Load mapped results from file system"""
         if not os.path.exists(self.load_file):
             logger.error(f"{self.load_file} is not found.")
@@ -136,10 +173,17 @@ class LoadMapController:
 
     def _load_map_gcs(self) -> dict:
         """Load mapped results from Google Cloud Storage"""
-        from .gcs.template import get_gcs_blob
-
-        blob = get_gcs_blob(self.load_file)
+        blob = get_gcs_blob(uri=self.load_file)
         if not blob.exists():
             logger.error(f"{self.load_file} is not found.")
             exit()
         return json.loads(blob.download_as_string())
+
+    def _load_map_s3(self) -> dict:
+        """Load mapped results from Amazon S3"""
+        object = get_s3_object(uri=self.load_file)
+        body = object.get("Body")
+        if not body:
+            logger.error(f"{self.load_file} is not found.")
+            exit()
+        return json.loads(body.read().decode("utf-8"))

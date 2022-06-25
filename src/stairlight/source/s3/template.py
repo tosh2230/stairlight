@@ -1,15 +1,15 @@
 import re
 from typing import Iterator, Optional
 
-from google.cloud import storage
+import boto3
 
 from ..config import ConfigAttributeNotFoundException, MappingConfig, StairlightConfig
-from ..controller import GCS_URI_SCHEME
+from ..controller import S3_URI_SCHEME
 from ..template import Template, TemplateSource, TemplateSourceType
-from .config import StairlightConfigIncludeGcs
+from .config import StairlightConfigIncludeS3
 
 
-class GcsTemplate(Template):
+class S3Template(Template):
     def __init__(
         self,
         mapping_config: MappingConfig,
@@ -21,12 +21,13 @@ class GcsTemplate(Template):
         super().__init__(
             mapping_config=mapping_config,
             key=key,
-            source_type=TemplateSourceType.GCS,
+            source_type=TemplateSourceType.S3,
             bucket=bucket,
             project=project,
             default_table_prefix=default_table_prefix,
         )
         self.uri = self.get_uri()
+        self.s3 = boto3.resource("s3")
 
     def get_uri(self) -> str:
         """Get uri from file path
@@ -34,35 +35,39 @@ class GcsTemplate(Template):
         Returns:
             str: uri
         """
-        return f"{GCS_URI_SCHEME}{self.bucket}/{self.key}"
+        return f"{S3_URI_SCHEME}{self.bucket}/{self.key}"
 
     def get_template_str(self) -> str:
-        """Get template string that read from a file in GCS
+        """Get template string that read from a file in S3
 
         Returns:
             str: Template string
         """
-        client = storage.Client(credentials=None, project=self.project)
-        bucket = client.get_bucket(self.bucket)
-        blob = bucket.blob(self.key)
-        return blob.download_as_bytes().decode("utf-8")
+        template_str: str = ""
+        s3_bucket = self.s3.Bucket(self.bucket)
+        object = s3_bucket.Object(self.key).get()
+        body = object["Body"]
+        if body:
+            template_str = body.read().decode("utf-8")
+        return template_str
 
 
-class GcsTemplateSource(TemplateSource):
+class S3TemplateSource(TemplateSource):
     def __init__(
         self,
         stairlight_config: StairlightConfig,
         mapping_config: MappingConfig,
-        include: StairlightConfigIncludeGcs,
+        include: StairlightConfigIncludeS3,
     ) -> None:
         super().__init__(
             stairlight_config=stairlight_config,
             mapping_config=mapping_config,
         )
         self._include = include
+        self.s3 = boto3.resource("s3")
 
     def search_templates(self) -> Iterator[Template]:
-        """Search SQL template files from GCS
+        """Search SQL template files from S3
 
         Yields:
             Iterator[SQLTemplate]: SQL template file attributes
@@ -75,24 +80,23 @@ class GcsTemplateSource(TemplateSource):
                 f"BucketName is not found. {self._include}"
             )
 
-        client = storage.Client(credentials=None, project=self._include.ProjectId)
-        blobs = client.list_blobs(bucket_name)
-        for blob in blobs:
+        objects = self.s3.Bucket(bucket_name).objects.all()
+        for object in objects:
             if (
                 not re.fullmatch(
                     rf"{self._include.Regex}",
-                    blob.name,
+                    object.key,
                 )
             ) or self.is_excluded(
                 source_type=TemplateSourceType(self._include.TemplateSourceType),
-                key=blob.name,
+                key=object.key,
             ):
-                self.logger.debug(f"{blob.name} is skipped.")
+                self.logger.debug(f"{object.key} is skipped.")
                 continue
 
-            yield GcsTemplate(
+            yield S3Template(
                 mapping_config=self._mapping_config,
-                key=blob.name,
+                key=object.key,
                 project=project,
                 bucket=bucket_name,
                 default_table_prefix=self._include.DefaultTablePrefix,

@@ -24,6 +24,7 @@ from .source.dbt.config import StairlightConfigIncludeDbt
 from .source.file.config import StairlightConfigIncludeFile
 from .source.gcs.config import StairlightConfigIncludeGcs
 from .source.redash.config import StairlightConfigIncludeRedash
+from .source.s3.config import StairlightConfigIncludeS3
 from .source.template import Template
 
 logger = logging.getLogger()
@@ -143,6 +144,7 @@ class Configurator:
                         OrderedDict(asdict(StairlightConfigIncludeGcs())),
                         OrderedDict(asdict(StairlightConfigIncludeRedash())),
                         OrderedDict(asdict(StairlightConfigIncludeDbt())),
+                        OrderedDict(asdict(StairlightConfigIncludeS3())),
                     ],
                     Exclude=[OrderedDict(asdict(StairlightConfigExclude()))],
                     Settings=OrderedDict(asdict(StairlightConfigSettings())),
@@ -216,13 +218,16 @@ class Configurator:
 
 
 def create_nested_dict(
-    keys: List[str], results: OrderedDict, density: int = 0, default_value: Any = None
+    keys: List[str],
+    results: Dict[str, Any],
+    density: int = 0,
+    default_value: Any = None,
 ) -> None:
     """create nested dict from list
 
     Args:
         keys (list): Dict keys
-        results (OrderedDict): Nested dict
+        results (dict[str, Any]): Nested dict
         density (int, optional): Density. Defaults to 0.
         default_value (any, optional): Default dict value. Defaults to None.
     """

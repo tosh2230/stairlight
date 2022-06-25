@@ -14,6 +14,11 @@ Include:
     Vars:
       key_a: value_a
       key_b: value_b
+  - TemplateSourceType: S3
+    ProjectId: null
+    BucketName: stairlight
+    Regex: "^sql/.*/*.sql$"
+    DefaultTablePrefix: "PROJECT_A"
 Exclude:
   - TemplateSourceType: File
     Regex: "main/exclude.sql$"

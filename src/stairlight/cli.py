@@ -168,7 +168,12 @@ def set_save_load_parser(parser: argparse.ArgumentParser) -> None:
     """
     parser.add_argument(
         "--save",
-        help="file path where results will be saved(File system or GCS)",
+        help=textwrap.dedent(
+            """\
+            A file path where map results will be saved.
+            You can choose from local file system, GCS, S3.
+        """
+        ),
         type=str,
         default=None,
     )
@@ -176,8 +181,9 @@ def set_save_load_parser(parser: argparse.ArgumentParser) -> None:
         "--load",
         help=textwrap.dedent(
             """\
-            file path in which results are saved(File system or GCS),
-            can be specified multiple times
+            A file path where map results are saved.
+            You can choose from local file system, GCS, S3.
+            It can be specified multiple times.
         """
         ),
         action="append",

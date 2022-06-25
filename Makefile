@@ -1,5 +1,5 @@
 VERSION := $(shell grep -E '^version = *.' pyproject.toml | sed -e 's/version = //g')
-EXTRAS = gcs,redash,dbt-bigquery
+EXTRAS = gcs,redash,dbt-bigquery,s3
 
 lint:
 	poetry run flake8 src tests
@@ -28,5 +28,5 @@ test-report:
 	@rm -r htmlcov
 	@make install
 	@poetry run pytest tests/stairlight -v --cov=src --cov-report=html
-setup-gcs:
+setup-test:
 	@poetry run python scripts/setup_test.py

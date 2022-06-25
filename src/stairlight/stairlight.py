@@ -441,7 +441,7 @@ class StairLight:
         return relative_map
 
     def find_tables_by_labels(self, target_labels: List[str]) -> List[str]:
-        """Find tables to search by labels
+        """Find tables by labels
 
         Args:
             target_labels (list[str]): Target labels
@@ -454,17 +454,23 @@ class StairLight:
         # "mapping" section in mapping.yaml
         for mapping in self._mapping_config.get_mapping():
             for mapping_table in mapping.get_table():
-                if self.is_target_label_found(
-                    target_labels=target_labels,
-                    configured_labels=mapping_table.Labels,
+                if (
+                    mapping_table.TableName not in tables_to_search
+                    and self.is_target_label_found(
+                        target_labels=target_labels,
+                        configured_labels=mapping_table.Labels,
+                    )
                 ):
                     tables_to_search.append(mapping_table.TableName)
 
         # "metadata" section in mapping.yaml
         for metadata in self._mapping_config.get_metadata():
-            if self.is_target_label_found(
-                target_labels=target_labels,
-                configured_labels=metadata.Labels,
+            if (
+                metadata.TableName not in tables_to_search
+                and self.is_target_label_found(
+                    target_labels=target_labels,
+                    configured_labels=metadata.Labels,
+                )
             ):
                 tables_to_search.append(metadata.TableName)
 

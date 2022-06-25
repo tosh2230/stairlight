@@ -17,6 +17,7 @@ class TemplateSourceType(enum.Enum):
     GCS = "GCS"
     REDASH = "Redash"
     DBT = "dbt"
+    S3 = "S3"
 
     def __str__(self):
         return self.name
@@ -77,7 +78,10 @@ class Template(ABC):
             ):
                 if self.key.endswith(mapping.FileSuffix):
                     not_found = False
-            elif mapping.TemplateSourceType == TemplateSourceType.GCS.value:
+            elif mapping.TemplateSourceType in (
+                TemplateSourceType.GCS.value,
+                TemplateSourceType.S3.value,
+            ):
                 if self.uri == mapping.Uri:
                     not_found = False
 
