@@ -2,6 +2,13 @@ import re
 from typing import Iterator, Optional
 
 import boto3
+from botocore.response import StreamingBody
+from mypy_boto3_s3.service_resource import (
+    Bucket,
+    BucketObjectsCollection,
+    S3ServiceResource,
+)
+from mypy_boto3_s3.type_defs import GetObjectOutputTypeDef
 
 from ..config import ConfigAttributeNotFoundException, MappingConfig, StairlightConfig
 from ..controller import S3_URI_SCHEME
@@ -26,8 +33,8 @@ class S3Template(Template):
             project=project,
             default_table_prefix=default_table_prefix,
         )
-        self.uri = self.get_uri()
-        self.s3 = boto3.resource("s3")
+        self.uri: str = self.get_uri()
+        self.s3: S3ServiceResource = boto3.resource("s3")
 
     def get_uri(self) -> str:
         """Get uri from file path
@@ -44,9 +51,9 @@ class S3Template(Template):
             str: Template string
         """
         template_str: str = ""
-        s3_bucket = self.s3.Bucket(self.bucket)
-        object = s3_bucket.Object(self.key).get()
-        body = object["Body"]
+        s3_bucket: Bucket = self.s3.Bucket(self.bucket)
+        object_output: GetObjectOutputTypeDef = s3_bucket.Object(self.key).get()
+        body: StreamingBody = object_output["Body"]
         if body:
             template_str = body.read().decode("utf-8")
         return template_str
@@ -64,7 +71,7 @@ class S3TemplateSource(TemplateSource):
             mapping_config=mapping_config,
         )
         self._include = include
-        self.s3 = boto3.resource("s3")
+        self.s3: S3ServiceResource = boto3.resource("s3")
 
     def search_templates(self) -> Iterator[Template]:
         """Search SQL template files from S3
@@ -80,7 +87,7 @@ class S3TemplateSource(TemplateSource):
                 f"BucketName is not found. {self._include}"
             )
 
-        objects = self.s3.Bucket(bucket_name).objects.all()
+        objects: BucketObjectsCollection = self.s3.Bucket(bucket_name).objects.all()
         for object in objects:
             if (
                 not re.fullmatch(
