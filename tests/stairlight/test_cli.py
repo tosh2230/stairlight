@@ -57,7 +57,7 @@ class TestSuccess:
         message = cli_main.command_check(
             stairlight=stairlight_check_no_file_found, args=self.parser.parse_args([])
         )
-        assert message == "Templates are not found."
+        assert not message
 
     def test_command_up_table(self, stairlight_save: StairLight):
         args = self.parser.parse_args(

@@ -19,10 +19,7 @@ def command_init(stairlight: StairLight, args: argparse.Namespace) -> str:
     message = ""
     stairlight_template_file = stairlight.init()
     if stairlight_template_file:
-        message = (
-            f"'{stairlight_template_file}' has created.\n"
-            "Please edit it to set your data sources."
-        )
+        message = stairlight_template_file
     return message
 
 
@@ -39,13 +36,7 @@ def command_check(stairlight: StairLight, args: argparse.Namespace) -> str:
     message = ""
     mapping_template_file = stairlight.check()
     if mapping_template_file:
-        message = (
-            f"'{mapping_template_file}' has created.\n"
-            "Please map undefined tables and parameters, "
-            "and append to your latest configuration file."
-        )
-    elif not stairlight.unmapped:
-        message = "Templates are not found."
+        message = mapping_template_file
 
     return message
 
@@ -321,7 +312,7 @@ def main() -> None:
             exit(f"'{args.config}/stairlight.y(a)ml' is not found.")
         result = stairlight.mapped
 
-    if args.quiet:
+    if args.quiet or not result:
         return
 
     if result and isinstance(result, str):
