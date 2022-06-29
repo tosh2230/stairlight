@@ -22,9 +22,9 @@ An end-to-end data lineage tool, detects table dependencies by SQL SELECT statem
 
 | Data Source | Remarks |
 | --- | --- |
-| Local file system | With Python Pathlib module |
+| Local file system | Python Pathlib module |
 | [Amazon S3](https://aws.amazon.com/s3/) | |
-| [Google Cloud Storage](https://cloud.google.com/storage) | Also available for [Google Cloud Composer](https://cloud.google.com/composer) |
+| [Google Cloud Storage](https://cloud.google.com/storage) | Available for [Google Cloud Composer](https://cloud.google.com/composer) |
 | [dbt](https://www.getdbt.com/) - [Google BigQuery](https://cloud.google.com/bigquery) | Using `dbt compile` command internally |
 | [Redash](https://redash.io/) | |
 
@@ -54,17 +54,13 @@ $ pip install "stairlight[s3, gcs]"
 There are 3 steps to use.
 
 ```sh
-# Step 1: Initialize and set data location settings
+# 1: Initialize and set your data source settings
 $ stairlight init
-'./stairlight.yaml' has created.
-Please edit it to set your data sources.
 
-# Step 2: Map your SQL statements and tables, and add metadata
+# 2: Map your SQL statements and tables
 $ stairlight map
-'./mapping_yyyyMMddhhmmss.yaml' has created.
-Please map undefined tables and parameters, and append to your latest configuration file.
 
-# Step 3: Get a table dependency map
+# 3: Get table dependencies
 $ stairlight
 ```
 
@@ -75,99 +71,107 @@ $ stairlight
 - SQL SELECT statements
 - Configuration YAML files
     - stairlight.yaml: SQL statements locations and include/exclude conditions.
-    - mapping.yaml: Mapping SQL statements and tables.
+    - mapping.yaml: For mapping SQL statements and tables.
 
 ### Output
 
-- JSON dependency map
+Stairlight outputs table dependencies as JSON format.
 
-    <details>
+Top-level keys are table names, and values represents tables that are the data source for each key's table.
 
-    <summary>Example</summary>
+<details>
 
-    ```json
-    {
-      "PROJECT_d.DATASET_e.TABLE_f": {
-        "PROJECT_j.DATASET_k.TABLE_l": {
-          "TemplateSourceType": "File",
-          "Key": "tests/sql/main/one_line_2.sql",
-          "Uri": "/foo/bar/stairlight/tests/sql/main/one_line_2.sql",
-          "Lines": [
-            {
-              "LineNumber": 1,
-              "LineString": "SELECT * FROM PROJECT_j.DATASET_k.TABLE_l WHERE 1 = 1"
-            }
-          ]
+<summary>Example</summary>
+
+```json
+{
+  "test_project.beam_streaming.taxirides_aggregation": {
+    "test_project.beam_streaming.taxirides_realtime": {
+      "TemplateSourceType": "File",
+      "Key": "tests/sql/main/union_same_table.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/main/union_same_table.sql",
+      "Lines": [
+        {
+          "LineNumber": 6,
+          "LineString": "    test_project.beam_streaming.taxirides_realtime"
         },
-        "PROJECT_C.DATASET_C.TABLE_C": {
-          "TemplateSourceType": "GCS",
-          "Key": "sql/cte/cte_multi_line.sql",
-          "Uri": "gs://stairlight/sql/cte/cte_multi_line.sql",
-          "Lines": [
-            {
-              "LineNumber": 6,
-              "LineString": "        PROJECT_C.DATASET_C.TABLE_C"
-            }
-          ],
-          "BucketName": "stairlight",
-          "Labels": {
-            "Source": "gcs",
-            "Test": "b"
-          }
+        {
+          "LineNumber": 15,
+          "LineString": "    test_project.beam_streaming.taxirides_realtime"
         }
-      },
-      "AggregateSales": {
-        "PROJECT_e.DATASET_e.TABLE_e": {
-          "TemplateSourceType": "Redash",
-          "Key": 5,
-          "Uri": "AggregateSales",
-          "Lines": [
-            {
-              "LineNumber": 1,
-              "LineString": "SELECT service, SUM(total_amount) FROM PROJECT_e.DATASET_e.TABLE_e GROUP BY service"
-            }
-          ],
-          "DataSourceName": "BigQuery",
-          "Labels": {
-            "Category": "Sales"
-          }
+      ]
+    }
+  },
+  "PROJECT_a.DATASET_b.TABLE_c": {
+    "PROJECT_A.DATASET_A.TABLE_A": {
+      "TemplateSourceType": "GCS",
+      "Key": "sql/one_line/one_line.sql",
+      "Uri": "gs://stairlight/sql/one_line/one_line.sql",
+      "Lines": [
+        {
+          "LineNumber": 1,
+          "LineString": "SELECT * FROM PROJECT_A.DATASET_A.TABLE_A WHERE 1 = 1"
         }
-      },
-      "dummy.dummy.example_b": {
-        "PROJECT_t.DATASET_t.TABLE_t": {
-          "TemplateSourceType": "dbt",
-          "Key": "tests/dbt/project_01/target/compiled/project_01/models/b/example_b.sql",
-          "Uri": "/foo/bar/stairlight/tests/dbt/project_01/target/compiled/project_01/models/b/example_b.sql",
-          "Lines": [
-            {
-              "LineNumber": 1,
-              "LineString": "select * from PROJECT_t.DATASET_t.TABLE_t where value_a = 0 and value_b = 0"
-            }
-          ]
-        }
-      },
-      "PROJECT_as.DATASET_bs.TABLE_cs": {
-        "PROJECT_A.DATASET_A.TABLE_A": {
-          "TemplateSourceType": "S3",
-          "Key": "sql/one_line/one_line.sql",
-          "Uri": "s3://stairlight/sql/one_line/one_line.sql",
-          "Lines": [
-            {
-              "LineNumber": 1,
-              "LineString": "SELECT * FROM PROJECT_A.DATASET_A.TABLE_A WHERE 1 = 1"
-            }
-          ],
-          "BucketName": "stairlight",
-          "Labels": {
-            "Source": null,
-            "Test": "a"
-          }
-        }
+      ],
+      "BucketName": "stairlight",
+      "Labels": {
+        "Source": null,
+        "Test": "a"
       }
     }
-    ```
+  },
+  "AggregateSales": {
+    "PROJECT_e.DATASET_e.TABLE_e": {
+      "TemplateSourceType": "Redash",
+      "Key": 5,
+      "Uri": "AggregateSales",
+      "Lines": [
+        {
+          "LineNumber": 1,
+          "LineString": "SELECT service, SUM(total_amount) FROM PROJECT_e.DATASET_e.TABLE_e GROUP BY service"
+        }
+      ],
+      "DataSourceName": "BigQuery",
+      "Labels": {
+        "Category": "Sales"
+      }
+    }
+  },
+  "dummy.dummy.example_b": {
+    "PROJECT_t.DATASET_t.TABLE_t": {
+      "TemplateSourceType": "dbt",
+      "Key": "tests/dbt/project_01/target/compiled/project_01/models/b/example_b.sql",
+      "Uri": "/foo/bar/stairlight/tests/dbt/project_01/target/compiled/project_01/models/b/example_b.sql",
+      "Lines": [
+        {
+          "LineNumber": 1,
+          "LineString": "select * from PROJECT_t.DATASET_t.TABLE_t where value_a = 0 and value_b = 0"
+        }
+      ]
+    }
+  },
+  "PROJECT_as.DATASET_bs.TABLE_cs": {
+    "PROJECT_A.DATASET_A.TABLE_A": {
+      "TemplateSourceType": "S3",
+      "Key": "sql/one_line/one_line.sql",
+      "Uri": "s3://stairlight/sql/one_line/one_line.sql",
+      "Lines": [
+        {
+          "LineNumber": 1,
+          "LineString": "SELECT * FROM PROJECT_A.DATASET_A.TABLE_A WHERE 1 = 1"
+        }
+      ],
+      "BucketName": "stairlight",
+      "Labels": {
+        "Source": null,
+        "Test": "a"
+      }
+    }
+  }
+}
+```
 
-    </details>
+</details>
 
 ### Collecting patterns
 
@@ -185,132 +189,133 @@ $ stairlight
 
 ## Configuration
 
-Configuration files can be found [here](https://github.com/tosh2230/stairlight/tree/main/tests/config), used for unit testing in CI.
+Examples can be found [here](https://github.com/tosh2230/stairlight/tree/main/tests/config), used for unit testing in CI.
 
 ### stairlight.yaml
 
 'stairlight.yaml' is for setting up Stairlight itself. It is responsible for specifying SQL statements to be read.
 
-`init` command creates a template of stairlight.yaml.
+`stairlight init` creates a template of stairlight.yaml.
 
-  <details>
+<details>
 
-  <summary>Example</summary>
+<summary>Example</summary>
 
-  ```yaml
-  Include:
-    - TemplateSourceType: File
-      FileSystemPath: "./tests/sql"
-      Regex: ".*/*.sql$"
-      DefaultTablePrefix: "PROJECT_A"
-    - TemplateSourceType: GCS
-      ProjectId: null
-      BucketName: stairlight
-      Regex: "^sql/.*/*.sql$"
-      DefaultTablePrefix: "PROJECT_A"
-    - TemplateSourceType: Redash
-      DatabaseUrlEnvironmentVariable: REDASH_DATABASE_URL
-      DataSourceName: BigQuery
-      QueryIds:
-        - 1
-        - 3
-        - 5
-    - TemplateSourceType: dbt
-      ProjectDir: tests/dbt/project_01
-      ProfilesDir: tests/dbt
-      Vars:
-        key_a: value_a
-        key_b: value_b
-    - TemplateSourceType: S3
-      BucketName: stairlight
-      Regex: "^sql/.*/*.sql$"
-      DefaultTablePrefix: "PROJECT_A"
-  Exclude:
-    - TemplateSourceType: File
-      Regex: "main/exclude.sql$"
-  Settings:
-    MappingPrefix: "mapping"
-  ```
+```yaml
+Include:
+  - TemplateSourceType: File
+    FileSystemPath: "./tests/sql"
+    Regex: ".*/*.sql$"
+    DefaultTablePrefix: "PROJECT_A"
+  - TemplateSourceType: GCS
+    ProjectId: null
+    BucketName: stairlight
+    Regex: "^sql/.*/*.sql$"
+    DefaultTablePrefix: "PROJECT_A"
+  - TemplateSourceType: Redash
+    DatabaseUrlEnvironmentVariable: REDASH_DATABASE_URL
+    DataSourceName: BigQuery
+    QueryIds:
+      - 1
+      - 3
+      - 5
+  - TemplateSourceType: dbt
+    ProjectDir: tests/dbt/project_01
+    ProfilesDir: tests/dbt
+    Vars:
+      key_a: value_a
+      key_b: value_b
+  - TemplateSourceType: S3
+    BucketName: stairlight
+    Regex: "^sql/.*/*.sql$"
+    DefaultTablePrefix: "PROJECT_A"
+Exclude:
+  - TemplateSourceType: File
+    Regex: "main/exclude.sql$"
+Settings:
+  MappingPrefix: "mapping"
+```
 
-  </details>
+</details>
 
 ### mapping.yaml
 
-'mapping.yaml' is used to define relationships between input SELECT statements and table names.
+'mapping.yaml' is used to define relationships between input SELECT statements and tables.
 
-`map` command creates a template of mapping.yaml, based on the configuration of stairlight.yaml.
+`stairlight map` creates a template of mapping.yaml and attempts to read from data sources specified in stairlight.yaml.
+If successfully read, it outputs settings that have not yet configured in an existing 'mapping.yaml' file.
 
-  <details>
+<details>
 
-  <summary>Example</summary>
+<summary>Example</summary>
 
-  ```yaml
-  Global:
-    Parameters:
-      DESTINATION_PROJECT: stairlight
-      params:
-        PROJECT: 1234567890
-        DATASET: public
-        TABLE: taxirides
-  Mapping:
-    - TemplateSourceType: File
-      FileSuffix: "tests/sql/main/union_same_table.sql"
-      Tables:
-        - TableName: "test_project.beam_streaming.taxirides_aggregation"
-          Parameters:
-            params:
-              source_table: source
-              destination_table: destination
-          IgnoreParameters:
-            - execution_date.add(days=1).isoformat()
-    - TemplateSourceType: GCS
-      Uri: "gs://stairlight/sql/one_line/one_line.sql"
-      Tables:
-        - TableName: "PROJECT_a.DATASET_b.TABLE_c"
-    - TemplateSourceType: Redash
-      QueryId: 5
-      DataSourceName: metadata
-      Tables:
-        - TableName: New Query
-          Parameters:
-            table: dashboards
-          Labels:
-            Category: Redash test
-    - TemplateSourceType: dbt
-      ProjectName: project_01
-      FileSuffix: tests/dbt/project_01/target/compiled/project_01/models/example/my_first_dbt_model.sql
-      Tables:
-        - TableName: dummy.dummy.my_first_dbt_model
-    - TemplateSourceType: S3
-      Uri: "s3://stairlight/sql/one_line/one_line.sql"
-      Tables:
-        - TableName: "PROJECT_as.DATASET_bs.TABLE_cs"
-  Metadata:
-    - TableName: "PROJECT_A.DATASET_A.TABLE_A"
-      Labels:
-        Source: Null
-        Test: a
-  ```
+```yaml
+Global:
+  Parameters:
+    DESTINATION_PROJECT: stairlight
+    params:
+      PROJECT: 1234567890
+      DATASET: public
+      TABLE: taxirides
+Mapping:
+  - TemplateSourceType: File
+    FileSuffix: "tests/sql/main/union_same_table.sql"
+    Tables:
+      - TableName: "test_project.beam_streaming.taxirides_aggregation"
+        Parameters:
+          params:
+            source_table: source
+            destination_table: destination
+        IgnoreParameters:
+          - execution_date.add(days=1).isoformat()
+  - TemplateSourceType: GCS
+    Uri: "gs://stairlight/sql/one_line/one_line.sql"
+    Tables:
+      - TableName: "PROJECT_a.DATASET_b.TABLE_c"
+  - TemplateSourceType: Redash
+    QueryId: 5
+    DataSourceName: metadata
+    Tables:
+      - TableName: New Query
+        Parameters:
+          table: dashboards
+        Labels:
+          Category: Redash test
+  - TemplateSourceType: dbt
+    ProjectName: project_01
+    FileSuffix: tests/dbt/project_01/target/compiled/project_01/models/example/my_first_dbt_model.sql
+    Tables:
+      - TableName: dummy.dummy.my_first_dbt_model
+  - TemplateSourceType: S3
+    Uri: "s3://stairlight/sql/one_line/one_line.sql"
+    Tables:
+      - TableName: "PROJECT_as.DATASET_bs.TABLE_cs"
+Metadata:
+  - TableName: "PROJECT_A.DATASET_A.TABLE_A"
+    Labels:
+      Source: Null
+      Test: a
+```
 
-  </details>
+</details>
 
 #### Global Section
 
 This section is for global configurations.
 
-`Parameters` attribute is used to set common parameters. If conflicts has occurred with `Parameters` attributes in mapping section, mapping section's parameters will be used in preference to global.
+`Parameters` is used to set common parameters. If conflicts has occurred with `Parameters` in mapping section, mapping section's parameters will be used in preference to global.
 
 #### Mapping Section
 
 Mapping section is used to define relationships between input SELECT statements and tables that created as a result of query execution.
 
-`Parameters` attribute allows you to reflect settings in [jinja](https://jinja.palletsprojects.com/) template variables embedded in statements. If multiple settings are applied to a statement using jinja template, the statement will be read as if there were the same number of queries as the number of settings.
+`Parameters` allows you to reflect settings in [jinja](https://jinja.palletsprojects.com/) template variables embedded in statements. If multiple settings are applied to a statement using jinja template, the statement will be read as if there were the same number of queries as the number of settings.
 
-In contrast, `IgnoreParameters` attribute handles a list to ignore when rendering queries.
+In contrast, `IgnoreParameters` handles a list to ignore when rendering queries.
 
 #### Metadata Section
 
-This section is mainly used to set metadata to tables appears only in queries.
+This section is used to set metadata to tables that appears only in queries.
 
 ## Arguments and Options
 
@@ -342,7 +347,7 @@ optional arguments:
 
 ### init
 
-`init` creates a new Stairlight configuration file.
+`stairlight init` creates a new Stairlight configuration file.
 
 ```txt
 $ stairlight init --help
@@ -357,12 +362,12 @@ optional arguments:
 
 ### map(check)
 
-`map` creates new configuration file about undefined mappings.`check` is an alias.
-The option specification is the same as `init`.
+`stairlight map` creates a new configuration file about undefined settings. `stairlight check` is an alias.
+Options are the same as `stairlight init`.
 
 ### up
 
-`up` outputs a list of tables or SQL files located upstream from the specified table.
+`stairlight up` outputs tables or SQL files located upstream(upstairs) from the specified table.
 
 - Use table(`-t`, `--table`) or label(`-l`, `--label`) option to specify tables to search.
 - Recursive option(`-r`, `--recursive`) is set, Stairlight will find tables recursively and output as a list.
@@ -399,8 +404,8 @@ optional arguments:
 
 ### down
 
-`down` outputs a list of tables or SQL files located downstream from the specified table.
-The option specification is the same as `up`.
+`stairlight down` outputs tables or SQL files located downstream(downstairs) from the specified table.
+Options are the same as `stairlight up`.
 
 ## Use as a library
 
