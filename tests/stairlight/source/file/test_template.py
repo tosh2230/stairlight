@@ -19,132 +19,6 @@ from src.stairlight.source.template import RenderingTemplateException
 
 
 @pytest.mark.parametrize(
-    "key, expected_is_excluded",
-    [
-        ("tests/sql/main/one_line_no_project.sql", False),
-        ("tests/sql/main/exclude.sql", True),
-    ],
-)
-class TestFileTemplateSource:
-    @pytest.fixture(scope="function")
-    def file_template_source(
-        self,
-        stairlight_config: StairlightConfig,
-        mapping_config: MappingConfig,
-        key: str,
-        expected_is_excluded: bool,
-    ) -> FileTemplateSource:
-        _include = StairlightConfigIncludeFile(
-            **{
-                StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.FILE.value,
-                StairlightConfigKey.File.FILE_SYSTEM_PATH: "./tests/sql",
-                StairlightConfigKey.REGEX: ".*/*.sql",
-            }
-        )
-        return FileTemplateSource(
-            stairlight_config=stairlight_config,
-            mapping_config=mapping_config,
-            include=_include,
-        )
-
-    def test_search_templates(
-        self,
-        file_template_source: FileTemplateSource,
-    ):
-        result = []
-        for file in file_template_source.search_templates():
-            result.append(file)
-        assert len(result) > 0
-
-    def test_is_excluded(
-        self,
-        file_template_source: FileTemplateSource,
-        key: str,
-        expected_is_excluded: bool,
-    ):
-        actual = file_template_source.is_excluded(
-            source_type=TemplateSourceType.FILE,
-            key=key,
-        )
-        assert actual == expected_is_excluded
-
-
-@pytest.mark.parametrize(
-    "key, expected_is_excluded",
-    [
-        ("tests/sql/main/one_line_no_project.sql", False),
-        ("tests/sql/main/exclude.sql", False),
-    ],
-)
-class TestFileTemplateSourceNoExclude:
-    @pytest.fixture(scope="class")
-    def file_template_source(
-        self,
-        configurator: Configurator,
-        mapping_config: MappingConfig,
-    ) -> FileTemplateSource:
-        stairlight_config = configurator.read_stairlight(prefix="stairlight_no_exclude")
-        _include = StairlightConfigIncludeFile(
-            **{
-                StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.FILE.value,
-                StairlightConfigKey.File.FILE_SYSTEM_PATH: "./tests/sql",
-                StairlightConfigKey.REGEX: ".*/*.sql",
-            }
-        )
-        return FileTemplateSource(
-            stairlight_config=stairlight_config,
-            mapping_config=mapping_config,
-            include=_include,
-        )
-
-    def test_is_excluded(
-        self,
-        file_template_source: FileTemplateSource,
-        key: str,
-        expected_is_excluded: bool,
-    ):
-        actual = file_template_source.is_excluded(
-            source_type=TemplateSourceType.FILE,
-            key=key,
-        )
-        assert actual == expected_is_excluded
-
-
-class TestFileConfigKeyNotFound:
-    @pytest.fixture(scope="class")
-    def file_template_source(
-        self,
-        configurator: Configurator,
-        mapping_config: MappingConfig,
-    ) -> FileTemplateSource:
-        stairlight_config = configurator.read_stairlight(
-            prefix="stairlight_key_not_found"
-        )
-        _include = StairlightConfigIncludeFile(
-            **{
-                StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.FILE.value,
-                StairlightConfigKey.REGEX: ".*/*.sql",
-            }
-        )
-        return FileTemplateSource(
-            stairlight_config=stairlight_config,
-            mapping_config=mapping_config,
-            include=_include,
-        )
-
-    def test_search_templates(
-        self,
-        file_template_source: FileTemplateSource,
-    ):
-        iter = file_template_source.search_templates()
-        with pytest.raises(ConfigAttributeNotFoundException) as exception:
-            next(iter)
-        assert exception.value.args[0] == (
-            f"FileSystemPath is not found. {file_template_source._include}"
-        )
-
-
-@pytest.mark.parametrize(
     "key",
     [
         "tests/sql/main/cte_multi_line_params.sql",
@@ -288,4 +162,130 @@ class TestFileTemplateRenderException:
             f"'execution_date' is undefined, "
             f"source_type: {file_template.source_type}, "
             f"key: {key}"
+        )
+
+
+@pytest.mark.parametrize(
+    "key, expected_is_excluded",
+    [
+        ("tests/sql/main/one_line_no_project.sql", False),
+        ("tests/sql/main/exclude.sql", True),
+    ],
+)
+class TestFileTemplateSource:
+    @pytest.fixture(scope="function")
+    def file_template_source(
+        self,
+        stairlight_config: StairlightConfig,
+        mapping_config: MappingConfig,
+        key: str,
+        expected_is_excluded: bool,
+    ) -> FileTemplateSource:
+        _include = StairlightConfigIncludeFile(
+            **{
+                StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.FILE.value,
+                StairlightConfigKey.File.FILE_SYSTEM_PATH: "./tests/sql",
+                StairlightConfigKey.REGEX: ".*/*.sql",
+            }
+        )
+        return FileTemplateSource(
+            stairlight_config=stairlight_config,
+            mapping_config=mapping_config,
+            include=_include,
+        )
+
+    def test_search_templates(
+        self,
+        file_template_source: FileTemplateSource,
+    ):
+        result = []
+        for file in file_template_source.search_templates():
+            result.append(file)
+        assert len(result) > 0
+
+    def test_is_excluded(
+        self,
+        file_template_source: FileTemplateSource,
+        key: str,
+        expected_is_excluded: bool,
+    ):
+        actual = file_template_source.is_excluded(
+            source_type=TemplateSourceType.FILE,
+            key=key,
+        )
+        assert actual == expected_is_excluded
+
+
+@pytest.mark.parametrize(
+    "key, expected_is_excluded",
+    [
+        ("tests/sql/main/one_line_no_project.sql", False),
+        ("tests/sql/main/exclude.sql", False),
+    ],
+)
+class TestFileTemplateSourceNoExclude:
+    @pytest.fixture(scope="class")
+    def file_template_source(
+        self,
+        configurator: Configurator,
+        mapping_config: MappingConfig,
+    ) -> FileTemplateSource:
+        stairlight_config = configurator.read_stairlight(prefix="stairlight_no_exclude")
+        _include = StairlightConfigIncludeFile(
+            **{
+                StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.FILE.value,
+                StairlightConfigKey.File.FILE_SYSTEM_PATH: "./tests/sql",
+                StairlightConfigKey.REGEX: ".*/*.sql",
+            }
+        )
+        return FileTemplateSource(
+            stairlight_config=stairlight_config,
+            mapping_config=mapping_config,
+            include=_include,
+        )
+
+    def test_is_excluded(
+        self,
+        file_template_source: FileTemplateSource,
+        key: str,
+        expected_is_excluded: bool,
+    ):
+        actual = file_template_source.is_excluded(
+            source_type=TemplateSourceType.FILE,
+            key=key,
+        )
+        assert actual == expected_is_excluded
+
+
+class TestFileTemplateSourceConfigKeyNotFound:
+    @pytest.fixture(scope="class")
+    def file_template_source(
+        self,
+        configurator: Configurator,
+        mapping_config: MappingConfig,
+    ) -> FileTemplateSource:
+        stairlight_config = configurator.read_stairlight(
+            prefix="stairlight_key_not_found"
+        )
+        _include = StairlightConfigIncludeFile(
+            **{
+                StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.FILE.value,
+                StairlightConfigKey.REGEX: ".*/*.sql",
+            }
+        )
+        return FileTemplateSource(
+            stairlight_config=stairlight_config,
+            mapping_config=mapping_config,
+            include=_include,
+        )
+
+    def test_search_templates(
+        self,
+        file_template_source: FileTemplateSource,
+    ):
+        iter = file_template_source.search_templates()
+        with pytest.raises(ConfigAttributeNotFoundException) as exception:
+            next(iter)
+        assert exception.value.args[0] == (
+            f"FileSystemPath is not found. {file_template_source._include}"
         )

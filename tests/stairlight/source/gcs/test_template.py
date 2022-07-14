@@ -18,34 +18,6 @@ from src.stairlight.source.gcs.template import (
 )
 
 
-class TestGcsTemplateSource:
-    @pytest.fixture(scope="class")
-    def gcs_template_source(
-        self,
-        stairlight_config: StairlightConfig,
-        mapping_config: MappingConfig,
-    ) -> GcsTemplateSource:
-        _include = StairlightConfigIncludeGcs(
-            **{
-                StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.GCS.value,
-                StairlightConfigKey.Gcs.PROJECT_ID: None,
-                StairlightConfigKey.Gcs.BUCKET_NAME: "stairlight",
-                StairlightConfigKey.REGEX: "sql/.*/*.sql",
-            }
-        )
-        return GcsTemplateSource(
-            stairlight_config=stairlight_config,
-            mapping_config=mapping_config,
-            include=_include,
-        )
-
-    def test_search_templates(self, gcs_template_source: GcsTemplateSource):
-        result = []
-        for file in gcs_template_source.search_templates():
-            result.append(file)
-        assert len(result) > 0
-
-
 @pytest.mark.parametrize(
     "bucket, key, params, expected, ignore_params",
     [
@@ -113,7 +85,35 @@ class TestGcsTemplate:
         assert expected in actual
 
 
-class TestGcsConfigKeyNotFound:
+class TestGcsTemplateSource:
+    @pytest.fixture(scope="class")
+    def gcs_template_source(
+        self,
+        stairlight_config: StairlightConfig,
+        mapping_config: MappingConfig,
+    ) -> GcsTemplateSource:
+        _include = StairlightConfigIncludeGcs(
+            **{
+                StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.GCS.value,
+                StairlightConfigKey.Gcs.PROJECT_ID: None,
+                StairlightConfigKey.Gcs.BUCKET_NAME: "stairlight",
+                StairlightConfigKey.REGEX: "sql/.*/*.sql",
+            }
+        )
+        return GcsTemplateSource(
+            stairlight_config=stairlight_config,
+            mapping_config=mapping_config,
+            include=_include,
+        )
+
+    def test_search_templates(self, gcs_template_source: GcsTemplateSource):
+        result = []
+        for file in gcs_template_source.search_templates():
+            result.append(file)
+        assert len(result) > 0
+
+
+class TestGcsTemplateSourceConfigKeyNotFound:
     @pytest.fixture(scope="class")
     def gcs_template_source(
         self,

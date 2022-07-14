@@ -18,33 +18,6 @@ from src.stairlight.source.s3.template import (
 )
 
 
-class TestS3TemplateSource:
-    @pytest.fixture(scope="class")
-    def s3_template_source(
-        self,
-        stairlight_config: StairlightConfig,
-        mapping_config: MappingConfig,
-    ) -> S3TemplateSource:
-        _include = StairlightConfigIncludeS3(
-            **{
-                StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.S3.value,
-                StairlightConfigKey.S3.BUCKET_NAME: "stairlight",
-                StairlightConfigKey.REGEX: "sql/.*/*.sql",
-            }
-        )
-        return S3TemplateSource(
-            stairlight_config=stairlight_config,
-            mapping_config=mapping_config,
-            include=_include,
-        )
-
-    def test_search_templates(self, s3_template_source: S3TemplateSource):
-        result = []
-        for file in s3_template_source.search_templates():
-            result.append(file)
-        assert len(result) > 0
-
-
 @pytest.mark.parametrize(
     "bucket, key, params, expected, ignore_params",
     [
@@ -112,7 +85,34 @@ class TestS3Template:
         assert expected in actual
 
 
-class TestS3ConfigKeyNotFound:
+class TestS3TemplateSource:
+    @pytest.fixture(scope="class")
+    def s3_template_source(
+        self,
+        stairlight_config: StairlightConfig,
+        mapping_config: MappingConfig,
+    ) -> S3TemplateSource:
+        _include = StairlightConfigIncludeS3(
+            **{
+                StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.S3.value,
+                StairlightConfigKey.S3.BUCKET_NAME: "stairlight",
+                StairlightConfigKey.REGEX: "sql/.*/*.sql",
+            }
+        )
+        return S3TemplateSource(
+            stairlight_config=stairlight_config,
+            mapping_config=mapping_config,
+            include=_include,
+        )
+
+    def test_search_templates(self, s3_template_source: S3TemplateSource):
+        result = []
+        for file in s3_template_source.search_templates():
+            result.append(file)
+        assert len(result) > 0
+
+
+class TestS3TemplateSourceConfigKeyNotFound:
     @pytest.fixture(scope="class")
     def s3_template_source(
         self,

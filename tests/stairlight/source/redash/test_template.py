@@ -16,6 +16,68 @@ from src.stairlight.source.redash.template import (
 
 
 @pytest.mark.parametrize(
+    (
+        "query_id, query_name, query_str, "
+        "data_source_name, params, mapped_table_attributes"
+    ),
+    [
+        (
+            5,
+            "Copy of (#4) New Query",
+            "SELECT * FROM {{ table }}",
+            "metadata",
+            {"table": "dashboards"},
+            MappingConfigMappingTable(
+                **{
+                    "TableName": "Copy of (#4) New Query",
+                    "Parameters": {"table": "dashboards"},
+                    "Labels": {"Category": "Redash test"},
+                }
+            ),
+        ),
+    ],
+)
+class TestRedashTemplate:
+    @pytest.fixture(scope="function")
+    def redash_template(
+        self,
+        configurator: Configurator,
+        query_id: int,
+        query_name: str,
+        query_str: str,
+        data_source_name: str,
+        params: Dict[str, Any],
+        mapped_table_attributes: Dict[str, Any],
+    ) -> RedashTemplate:
+        mapping_config = configurator.read_mapping(prefix="mapping_redash")
+        return RedashTemplate(
+            mapping_config=mapping_config,
+            query_id=query_id,
+            query_name=query_name,
+            query_str=query_str,
+            data_source_name=data_source_name,
+        )
+
+    def test_find_mapped_table_attributes(
+        self,
+        redash_template: RedashTemplate,
+        mapped_table_attributes: MappingConfigMappingTable,
+    ):
+        expected = mapped_table_attributes
+        actual: MappingConfigMappingTable
+        for attribute in redash_template.find_mapped_table_attributes():
+            actual = attribute
+            break
+        assert actual == expected
+
+    def test_get_template_str(self, redash_template: RedashTemplate):
+        assert redash_template.get_template_str() == "SELECT * FROM {{ table }}"
+
+    def test_render(self, redash_template, params: RedashTemplate):
+        assert redash_template.render(params=params) == "SELECT * FROM dashboards"
+
+
+@pytest.mark.parametrize(
     "env_key, path",
     [
         ("REDASH_DATABASE_URL", "src/stairlight/source/redash/sql/redash_queries.sql"),
@@ -96,69 +158,7 @@ FROM
         assert actual == expected
 
 
-@pytest.mark.parametrize(
-    (
-        "query_id, query_name, query_str, "
-        "data_source_name, params, mapped_table_attributes"
-    ),
-    [
-        (
-            5,
-            "Copy of (#4) New Query",
-            "SELECT * FROM {{ table }}",
-            "metadata",
-            {"table": "dashboards"},
-            MappingConfigMappingTable(
-                **{
-                    "TableName": "Copy of (#4) New Query",
-                    "Parameters": {"table": "dashboards"},
-                    "Labels": {"Category": "Redash test"},
-                }
-            ),
-        ),
-    ],
-)
-class TestRedashTemplate:
-    @pytest.fixture(scope="function")
-    def redash_template(
-        self,
-        configurator: Configurator,
-        query_id: int,
-        query_name: str,
-        query_str: str,
-        data_source_name: str,
-        params: Dict[str, Any],
-        mapped_table_attributes: Dict[str, Any],
-    ) -> RedashTemplate:
-        mapping_config = configurator.read_mapping(prefix="mapping_redash")
-        return RedashTemplate(
-            mapping_config=mapping_config,
-            query_id=query_id,
-            query_name=query_name,
-            query_str=query_str,
-            data_source_name=data_source_name,
-        )
-
-    def test_find_mapped_table_attributes(
-        self,
-        redash_template: RedashTemplate,
-        mapped_table_attributes: MappingConfigMappingTable,
-    ):
-        expected = mapped_table_attributes
-        actual: MappingConfigMappingTable
-        for attribute in redash_template.find_mapped_table_attributes():
-            actual = attribute
-            break
-        assert actual == expected
-
-    def test_get_template_str(self, redash_template: RedashTemplate):
-        assert redash_template.get_template_str() == "SELECT * FROM {{ table }}"
-
-    def test_render(self, redash_template, params: RedashTemplate):
-        assert redash_template.render(params=params) == "SELECT * FROM dashboards"
-
-
-class TestRedashConfigKeyNotFound:
+class TestRedashTemplateSourceConfigKeyNotFound:
     @pytest.fixture(scope="class")
     def redash_template_source(
         self,
