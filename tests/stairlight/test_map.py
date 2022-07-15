@@ -23,6 +23,7 @@ def dependency_map(
     return dependency_map
 
 
+@pytest.mark.integration
 class TestSuccess:
     def test_mapped(self, dependency_map: Map):
         print(dependency_map.mapped)
@@ -33,6 +34,7 @@ class TestSuccess:
         [
             TemplateSourceType.FILE.value,
             TemplateSourceType.GCS.value,
+            # TemplateSourceType.REDASH.value,
             TemplateSourceType.DBT.value,
             TemplateSourceType.S3.value,
         ],
@@ -52,7 +54,7 @@ class TestSuccess:
 
         assert found
 
-    def test_unmapped(self, dependency_map: Map):
+    def test_unmapped_size(self, dependency_map: Map):
         print(dependency_map.unmapped)
         assert len(dependency_map.unmapped) > 0
 
@@ -136,6 +138,7 @@ class TestSuccess:
         assert actual == expected
 
 
+@pytest.mark.integration
 class TestSuccessNoMetadata:
     def test_find_unmapped_params(self, dependency_map: Map):
         assert dependency_map.unmapped

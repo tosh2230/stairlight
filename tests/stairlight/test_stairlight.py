@@ -45,6 +45,7 @@ class TestSearchDirection:
         assert SearchDirection.DOWN.value == "Downstairs"
 
 
+@pytest.mark.integration
 class TestStairLight:
     stairlight = StairLight(config_dir="tests/config")
     stairlight.create_map()
