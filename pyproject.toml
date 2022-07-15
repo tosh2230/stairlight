@@ -35,6 +35,7 @@ types-PyYAML = "^6.0.8"
 pytest = "^7.0.0"
 pytest-cov = "^3.0.0"
 pytest-mock = "^3.8.1"
+moto = {extras = ["s3"], version = "^3.1.16"}
 
 [tool.black]
 line-length = 88
@@ -55,6 +56,9 @@ stairlight = "stairlight.cli:main"
 addopts = "-rsxX -l --strict-markers"
 norecursedirs = "*.egg .* _darcs build CVS dist node_modules venv {arch} img scripts src"
 xfail_strict = true
+markers = [
+    "integration"
+]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
