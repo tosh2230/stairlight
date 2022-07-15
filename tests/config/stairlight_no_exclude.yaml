@@ -3,10 +3,5 @@ Include:
     FileSystemPath: "./tests/sql"
     Regex: ".*/*.sql$"
     DefaultTablePrefix: "PROJECT_A"
-  - TemplateSourceType: GCS
-    ProjectId: null
-    BucketName: stairlight
-    Regex: "^sql/.*/*.sql$"
-    DefaultTablePrefix: "PROJECT_A"
 Settings:
   MappingPrefix: "mapping"
