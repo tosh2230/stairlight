@@ -66,19 +66,7 @@ class FileTemplateSource(TemplateSource):
 
         path_obj = pathlib.Path(self._include.FileSystemPath)
         for p in path_obj.glob("**/*"):
-            if (
-                (p.is_dir())
-                or (
-                    not re.fullmatch(
-                        rf"{self._include.Regex}",
-                        str(p),
-                    )
-                )
-                or self.is_excluded(
-                    source_type=TemplateSourceType(self._include.TemplateSourceType),
-                    key=str(p),
-                )
-            ):
+            if self.is_skipped(p=p):
                 self.logger.debug(f"{str(p)} is skipped.")
                 continue
 
@@ -87,3 +75,13 @@ class FileTemplateSource(TemplateSource):
                 key=str(p),
                 default_table_prefix=self._include.DefaultTablePrefix,
             )
+
+    def is_skipped(self, p: pathlib.Path):
+        return (
+            p.is_dir()
+            or not re.fullmatch(rf"{self._include.Regex}", str(p))
+            or self.is_excluded(
+                source_type=TemplateSourceType(self._include.TemplateSourceType),
+                key=str(p),
+            )
+        )

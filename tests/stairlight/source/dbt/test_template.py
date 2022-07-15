@@ -115,16 +115,14 @@ class TestDbtTemplateSource:
     def test_concat_dbt_model_path_str(
         self,
         dbt_template_source: DbtTemplateSource,
-        project_dir,
-        project_name,
+        project_dir: str,
+        project_name: str,
     ):
-        dbt_project_config = dbt_template_source.read_dbt_project_yml(
-            project_dir=project_dir
-        )
         expected = f"{project_dir}/target/compiled/{project_name}/models/"
         actual = dbt_template_source.concat_dbt_model_path_str(
             project_dir=project_dir,
-            dbt_project_config=dbt_project_config,
+            target_path="target",
+            project_name=project_name,
             model_path="models",
         )
         assert expected == actual
@@ -141,7 +139,6 @@ class TestDbtTemplateSource:
 
     def test_search_templates(
         self,
-        dbt_template_source: DbtTemplateSource,
         dbt_templates: List[DbtTemplate],
     ):
         assert len(dbt_templates) > 0
