@@ -19,54 +19,30 @@ from src.stairlight.source.template import RenderingTemplateException
 
 
 @pytest.mark.parametrize(
-    "key",
+    ("key", "expected_is_mapped"),
     [
-        "tests/sql/main/cte_multi_line_params.sql",
+        ("tests/sql/main/cte_multi_line_params.sql", True),
+        ("tests/sql/main/undefined.sql", False),
+        ("tests/sql/gcs/cte/cte_multi_line.sql", False),
     ],
 )
-class TestFileTemplateMapped:
+class TestFileTemplate:
     @pytest.fixture(scope="function")
     def file_template(
         self,
         mapping_config: MappingConfig,
         key: str,
+        expected_is_mapped: bool,
     ):
         return FileTemplate(
             mapping_config=mapping_config,
             key=key,
         )
 
-    def test_is_mapped(self, file_template: FileTemplate):
-        assert file_template.is_mapped()
+    def test_is_mapped(self, file_template: FileTemplate, expected_is_mapped: bool):
+        assert file_template.is_mapped() == expected_is_mapped
 
     def test_detect_jinja_params(self, file_template: FileTemplate):
-        template_str = file_template.get_template_str()
-        assert len(file_template.detect_jinja_params(template_str)) > 0
-
-
-@pytest.mark.parametrize(
-    "key",
-    [
-        "tests/sql/main/undefined.sql",
-        "tests/sql/gcs/cte/cte_multi_line.sql",
-    ],
-)
-class TestFileTemplateNotMapped:
-    @pytest.fixture(scope="function")
-    def file_template(
-        self,
-        mapping_config: MappingConfig,
-        key: str,
-    ):
-        return FileTemplate(
-            mapping_config=mapping_config,
-            key=key,
-        )
-
-    def test_is_mapped(self, file_template):
-        assert not file_template.is_mapped()
-
-    def test_detect_jinja_params(self, file_template):
         template_str = file_template.get_template_str()
         assert len(file_template.detect_jinja_params(template_str)) > 0
 
