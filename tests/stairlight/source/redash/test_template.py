@@ -17,8 +17,12 @@ from src.stairlight.source.redash.template import (
 
 @pytest.mark.parametrize(
     (
-        "query_id, query_name, query_str, "
-        "data_source_name, params, mapped_table_attributes"
+        "query_id",
+        "query_name",
+        "query_str",
+        "data_source_name",
+        "params",
+        "mapped_table_attributes",
     ),
     [
         (
@@ -106,6 +110,24 @@ class TestRedashTemplateSource:
             mapping_config=mapping_config,
             include=_include,
         )
+
+    def test_make_conditions(
+        self,
+        redash_template_source: RedashTemplateSource,
+    ):
+        expected = {
+            "DataSourceName": {
+                "key": "DataSourceName",
+                "query": "data_sources.name = :data_source",
+                "parameters": "metadata",
+            },
+            "QueryIds": {
+                "key": "QueryIds",
+                "query": "queries.id IN :query_ids",
+                "parameters": (1, 3, 5),
+            },
+        }
+        assert redash_template_source.make_conditions() == expected
 
     def test_build_query_string(
         self,
