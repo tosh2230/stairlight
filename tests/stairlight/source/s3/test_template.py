@@ -1,8 +1,8 @@
 from typing import Any, Dict, List
 
 import boto3
-from moto import mock_s3
 import pytest
+from moto import mock_s3
 
 from src.stairlight.configurator import Configurator
 from src.stairlight.source.config import (
