@@ -1,5 +1,5 @@
 import re
-from typing import Iterator, Optional
+from typing import Any, Iterator, Optional
 
 from google.cloud import storage
 
@@ -76,17 +76,9 @@ class GcsTemplateSource(TemplateSource):
             )
 
         client = storage.Client(credentials=None, project=self._include.ProjectId)
-        blobs = client.list_blobs(bucket_name)
+        blobs: Any = client.list_blobs(bucket_name)
         for blob in blobs:
-            if (
-                not re.fullmatch(
-                    rf"{self._include.Regex}",
-                    blob.name,
-                )
-            ) or self.is_excluded(
-                source_type=TemplateSourceType(self._include.TemplateSourceType),
-                key=blob.name,
-            ):
+            if self.is_skipped(blob=blob):
                 self.logger.debug(f"{blob.name} is skipped.")
                 continue
 
@@ -97,3 +89,12 @@ class GcsTemplateSource(TemplateSource):
                 bucket=bucket_name,
                 default_table_prefix=self._include.DefaultTablePrefix,
             )
+
+    def is_skipped(self, blob: Any) -> bool:
+        return not re.fullmatch(
+            rf"{self._include.Regex}",
+            blob.name,
+        ) or self.is_excluded(
+            source_type=TemplateSourceType(self._include.TemplateSourceType),
+            key=blob.name,
+        )
