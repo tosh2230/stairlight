@@ -5,6 +5,8 @@ import pytest
 from src.stairlight.configurator import MAPPING_CONFIG_PREFIX_DEFAULT, Configurator
 from src.stairlight.source.config_key import MappingConfigKey
 from src.stairlight.source.controller import (
+    LoadMapController,
+    SaveMapController,
     collect_mapping_attributes,
     get_default_table_name,
     get_template_source_class,
@@ -184,3 +186,56 @@ class TestControlS3:
             MappingConfigKey.TEMPLATE_SOURCE_TYPE: "S3",
         }
         assert actual == expected
+
+
+class TestSaveMapController:
+    def test_save_type_file(self, mocker):
+        mocker.patch(
+            "src.stairlight.source.controller.SaveMapController._save_map_file"
+        )
+        save_map_controller = SaveMapController(
+            save_file="tests/results/file_test.json",
+            mapped={},
+        )
+        save_map_controller.save()
+
+    def test_save_type_gcs(self, mocker):
+        mocker.patch("src.stairlight.source.controller.SaveMapController._save_map_gcs")
+        save_map_controller = SaveMapController(
+            save_file="gs://stairlight/results/gcs_test.json",
+            mapped={},
+        )
+        save_map_controller.save()
+
+    def test_save_type_s3(self, mocker):
+        mocker.patch("src.stairlight.source.controller.SaveMapController._save_map_s3")
+        save_map_controller = SaveMapController(
+            save_file="s3://stairlight/results/s3_test.json",
+            mapped={},
+        )
+        save_map_controller.save()
+
+
+class TestLoadMapController:
+    def test_load_type_file(self, mocker):
+        mocker.patch(
+            "src.stairlight.source.controller.LoadMapController._load_map_file"
+        )
+        load_map_controller = LoadMapController(
+            load_file="tests/results/file_test.json",
+        )
+        load_map_controller.load()
+
+    def test_load_type_gcs(self, mocker):
+        mocker.patch("src.stairlight.source.controller.LoadMapController._load_map_gcs")
+        load_map_controller = LoadMapController(
+            load_file="gs://stairlight/results/gcs_test.json",
+        )
+        load_map_controller.load()
+
+    def test_load_type_s3(self, mocker):
+        mocker.patch("src.stairlight.source.controller.LoadMapController._load_map_s3")
+        load_map_controller = LoadMapController(
+            load_file="s3://stairlight/results/s3_test.json",
+        )
+        load_map_controller.load()
