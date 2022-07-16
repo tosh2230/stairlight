@@ -25,6 +25,11 @@ from src.stairlight.source.template import RenderingTemplateException
         ("tests/sql/main/undefined.sql", False),
         ("tests/sql/gcs/cte/cte_multi_line.sql", False),
     ],
+    ids=[
+        "tests/sql/main/cte_multi_line_params.sql",
+        "tests/sql/main/undefined.sql",
+        "tests/sql/gcs/cte/cte_multi_line.sql",
+    ],
 )
 class TestFileTemplate:
     @pytest.fixture(scope="function")
@@ -66,7 +71,16 @@ class TestFileTemplate:
                 "params.main_table",
             ],
         ),
-        ("tests/sql/query/nested_join.sql", None, "PROJECT_B.DATASET_B.TABLE_B", []),
+        (
+            "tests/sql/query/nested_join.sql",
+            None,
+            "PROJECT_B.DATASET_B.TABLE_B",
+            [],
+        ),
+    ],
+    ids=[
+        "tests/sql/main/cte_multi_line_params.sql",
+        "tests/sql/query/nested_join.sql",
     ],
 )
 class TestFileTemplateRender:
@@ -113,6 +127,7 @@ class TestFileTemplateRender:
             },
         ),
     ],
+    ids=["tests/sql/main/cte_multi_line.sql"],
 )
 class TestFileTemplateRenderException:
     @pytest.fixture(scope="function")
@@ -146,6 +161,10 @@ class TestFileTemplateRenderException:
     [
         ("tests/sql/main/one_line_no_project.sql", False),
         ("tests/sql/main/exclude.sql", True),
+    ],
+    ids=[
+        "tests/sql/main/one_line_no_project.sql",
+        "tests/sql/main/exclude.sql",
     ],
 )
 class TestFileTemplateSource:
@@ -197,6 +216,10 @@ class TestFileTemplateSource:
     [
         ("tests/sql/main/one_line_no_project.sql", False),
         ("tests/sql/main/exclude.sql", False),
+    ],
+    ids=[
+        "tests/sql/main/one_line_no_project.sql",
+        "tests/sql/main/exclude.sql",
     ],
 )
 class TestFileTemplateSourceNoExclude:

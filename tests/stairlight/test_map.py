@@ -79,6 +79,12 @@ class TestSuccess:
                 ],
             ),
         ],
+        ids=[
+            "tests/sql/main/cte_multi_line.sql",
+            "tests/sql/main/one_line_1.sql",
+            "tests/sql/main/undefined.sql",
+            "tests/sql/main/undefined_part.sql",
+        ],
     )
     def test_find_unmapped_params(
         self, dependency_map: Map, key: str, expected: List[str]

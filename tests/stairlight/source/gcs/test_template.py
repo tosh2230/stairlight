@@ -55,6 +55,7 @@ def patch_list_blob(mocker, gcs_blob_factory) -> None:
             "PROJECT_g.DATASET_h.TABLE_i",
         ),
     ],
+    ids=["stairlight/sql/cte/cte_multi_line.sql"],
 )
 class TestGcsTemplate:
     @pytest.fixture(scope="function")

@@ -39,6 +39,7 @@ BUCKET_NAME = "stairlight"
             "PROJECT_g.DATASET_h.TABLE_i",
         ),
     ],
+    ids=["stairlight/sql/cte/cte_multi_line.sql"],
 )
 class TestS3Template:
     @pytest.fixture(scope="function")

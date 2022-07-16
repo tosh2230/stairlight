@@ -40,6 +40,7 @@ from src.stairlight.source.redash.template import (
             ),
         ),
     ],
+    ids=[5],
 )
 class TestRedashTemplate:
     @pytest.fixture(scope="function")
@@ -90,6 +91,7 @@ class TestRedashTemplate:
             "postgresql://postgres:testpassword@testhost/postgres",
         ),
     ],
+    ids=["queries"],
 )
 class TestRedashTemplateSource:
     @pytest.fixture(scope="function")
