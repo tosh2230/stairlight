@@ -25,8 +25,7 @@ install-test:
 	@make install
 	@make test
 test-report:
-	@rm -r htmlcov
-	@make install
+	-@rm -r htmlcov
 	@poetry run pytest tests/stairlight -v --cov=src --cov-report=html
 setup-test:
 	@poetry run python scripts/setup_test.py

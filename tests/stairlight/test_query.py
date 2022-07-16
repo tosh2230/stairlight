@@ -228,6 +228,16 @@ class TestSuccess:
                 ],
             ),
         ],
+        ids=[
+            "tests/sql/query/cte_one_line.sql",
+            "tests/sql/query/cte_multi_line.sql",
+            "tests/sql/query/nested_join.sql",
+            "tests/sql/query/union_same_table.sql",
+            "tests/sql/query/cte_multi_tables_01.sql",
+            "tests/sql/query/cte_multi_tables_02.sql",
+            "tests/sql/query/backtick_each_elements.sql",
+            "tests/sql/query/backtick_whole_element.sql",
+        ],
     )
     def test_detect_upstairs_attributes(self, file, expected):
         with open(file) as f:
@@ -244,6 +254,11 @@ class TestSuccess:
             ("DATASET_d.TABLE_d", "PROJECT_A", "PROJECT_A.DATASET_d.TABLE_d"),
             ("TABLE_d", "PROJECT_A.DATASET_A", "PROJECT_A.DATASET_A.TABLE_d"),
             ("PROJECT_d.DATASET_d.TABLE_d", "PROJECT_A", "PROJECT_d.DATASET_d.TABLE_d"),
+        ],
+        ids=[
+            "DATASET_d.TABLE_d",
+            "TABLE_d",
+            "PROJECT_d.DATASET_d.TABLE_d",
         ],
     )
     def test_solve_table_prefix(

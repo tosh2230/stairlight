@@ -1,5 +1,5 @@
 import os
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import pytest
 from sqlalchemy.exc import ArgumentError
@@ -16,90 +16,13 @@ from src.stairlight.source.redash.template import (
 
 
 @pytest.mark.parametrize(
-    "env_key, path",
-    [
-        ("REDASH_DATABASE_URL", "src/stairlight/source/redash/sql/redash_queries.sql"),
-    ],
-)
-class TestRedashTemplateSource:
-    @pytest.fixture(scope="function")
-    def redash_template_source(
-        self,
-        configurator: Configurator,
-        mapping_config: MappingConfig,
-        env_key: str,
-        path: str,
-    ) -> RedashTemplateSource:
-        stairlight_config = configurator.read_stairlight(prefix="stairlight_redash")
-        _include = StairlightConfigIncludeRedash(
-            **{
-                SlKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.REDASH.value,
-                SlKey.Redash.DATABASE_URL_ENV_VAR: env_key,
-                SlKey.Redash.DATA_SOURCE_NAME: "metadata",
-                SlKey.Redash.QUERY_IDS: [1, 3, 5],
-            }
-        )
-        return RedashTemplateSource(
-            stairlight_config=stairlight_config,
-            mapping_config=mapping_config,
-            include=_include,
-        )
-
-    def test_build_query_string(
-        self,
-        redash_template_source: RedashTemplateSource,
-        path: str,
-    ):
-        expected = """SELECT
-    queries.id,
-    queries.name,
-    queries.query,
-    data_sources.name
-FROM
-    queries
-    INNER JOIN data_sources
-        ON queries.data_source_id = data_sources.id
-WHERE data_sources.name = :data_source AND queries.id IN :query_ids"""
-
-        actual = redash_template_source.build_query_string(path=path)
-        assert actual == expected
-
-    def test_read_query_from_file(
-        self,
-        redash_template_source: RedashTemplateSource,
-        path: str,
-    ):
-        expected = """SELECT
-    queries.id,
-    queries.name,
-    queries.query,
-    data_sources.name
-FROM
-    queries
-    INNER JOIN data_sources
-        ON queries.data_source_id = data_sources.id
-"""
-
-        actual = redash_template_source.read_query_from_file(path=path)
-        assert actual == expected
-
-    def test_get_connection_str(
-        self,
-        monkeypatch,
-        redash_template_source: RedashTemplateSource,
-        env_key: str,
-    ):
-        expected = "postgresql://postgres:testpassword@testhost/postgres"
-        envs = {env_key: expected}
-        monkeypatch.setattr(os, "environ", envs)
-        actual = redash_template_source.get_connection_str()
-        assert actual == expected
-
-
-@pytest.mark.parametrize(
     (
-        "query_id, query_name, query_str, "
-        "data_source_name, params, mapped_table_attributes"
+        "query_id",
+        "query_name",
+        "query_str",
+        "data_source_name",
+        "params",
+        "mapped_table_attributes",
     ),
     [
         (
@@ -117,6 +40,7 @@ FROM
             ),
         ),
     ],
+    ids=[5],
 )
 class TestRedashTemplate:
     @pytest.fixture(scope="function")
@@ -158,7 +82,102 @@ class TestRedashTemplate:
         assert redash_template.render(params=params) == "SELECT * FROM dashboards"
 
 
-class TestRedashConfigKeyNotFound:
+@pytest.mark.parametrize(
+    ("env_key", "path", "expected_conn_str"),
+    [
+        (
+            "REDASH_DATABASE_URL",
+            "src/stairlight/source/redash/sql/redash_queries.sql",
+            "postgresql://postgres:testpassword@testhost/postgres",
+        ),
+    ],
+    ids=["queries"],
+)
+class TestRedashTemplateSource:
+    @pytest.fixture(scope="function")
+    def redash_template_source(
+        self,
+        configurator: Configurator,
+        mapping_config: MappingConfig,
+        env_key: str,
+        path: str,
+        expected_conn_str: str,
+    ) -> RedashTemplateSource:
+        stairlight_config = configurator.read_stairlight(prefix="stairlight_redash")
+        _include = StairlightConfigIncludeRedash(
+            **{
+                SlKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.REDASH.value,
+                SlKey.Redash.DATABASE_URL_ENV_VAR: env_key,
+                SlKey.Redash.DATA_SOURCE_NAME: "metadata",
+                SlKey.Redash.QUERY_IDS: [1, 3, 5],
+            }
+        )
+        return RedashTemplateSource(
+            stairlight_config=stairlight_config,
+            mapping_config=mapping_config,
+            include=_include,
+        )
+
+    def test_search_templates(
+        self,
+        mocker,
+        redash_template_source: RedashTemplateSource,
+    ):
+        mocker.patch(
+            (
+                "src.stairlight.source.redash.template"
+                ".RedashTemplateSource.get_redash_queries"
+            ),
+            return_value=[
+                ["test_id", "test_name", "test_str", "test_data_source_name"]
+            ],
+        )
+        templates: List[RedashTemplate] = []
+        for template in redash_template_source.search_templates():
+            templates.append(template)
+        assert len(templates) > 0
+
+    def test_get_redash_queries(
+        self,
+        mocker,
+        redash_template_source: RedashTemplateSource,
+    ):
+        mocker.patch("src.stairlight.source.redash.template.create_engine")
+        _ = redash_template_source.get_redash_queries()
+
+    def test_build_query_string_data_source(
+        self,
+        redash_template_source: RedashTemplateSource,
+        path: str,
+    ):
+        expected = redash_template_source.WHERE_CLAUSE_TEMPLATES[
+            SlKey.Redash.DATA_SOURCE_NAME
+        ]
+        actual = redash_template_source.build_query_string(path=path)
+        assert expected in actual
+
+    def test_build_query_string_query_ids(
+        self,
+        redash_template_source: RedashTemplateSource,
+        path: str,
+    ):
+        expected = redash_template_source.WHERE_CLAUSE_TEMPLATES[SlKey.Redash.QUERY_IDS]
+        actual = redash_template_source.build_query_string(path=path)
+        assert expected in actual
+
+    def test_get_connection_str(
+        self,
+        monkeypatch,
+        redash_template_source: RedashTemplateSource,
+        env_key: str,
+        expected_conn_str: str,
+    ):
+        monkeypatch.setattr(os, "environ", {env_key: expected_conn_str})
+        actual = redash_template_source.get_connection_str()
+        assert actual == expected_conn_str
+
+
+class TestRedashTemplateSourceConfigKeyNotFound:
     @pytest.fixture(scope="class")
     def redash_template_source(
         self,

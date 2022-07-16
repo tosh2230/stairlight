@@ -82,32 +82,38 @@ class DbtTemplateSource(TemplateSource):
             vars=self._include.Vars,
         )
 
-        for model_path in dbt_project_config[DbtProjectKey.MODEL_PATHS]:
+        target_path = dbt_project_config[DbtProjectKey.TARGET_PATH]
+        project_name = dbt_project_config[DbtProjectKey.PROJECT_NAME]
+        model_paths = dbt_project_config[DbtProjectKey.MODEL_PATHS]
+
+        for model_path in model_paths:
             dbt_model_path_str = self.concat_dbt_model_path_str(
                 project_dir=project_dir,
-                dbt_project_config=dbt_project_config,
+                target_path=target_path,
+                project_name=project_name,
                 model_path=model_path,
             )
             dbt_model_path = pathlib.Path(dbt_model_path_str)
-            for obj in dbt_model_path.glob("**/*"):
-                if (
-                    (obj.is_dir())
-                    or (self.REGEX_SCHEMA_TEST_FILE.fullmatch(str(obj)))
-                    or self.is_excluded(
-                        source_type=TemplateSourceType(
-                            self._include.TemplateSourceType
-                        ),
-                        key=str(obj),
-                    )
-                ):
-                    self.logger.debug(f"{str(obj)} is skipped.")
+            for p in dbt_model_path.glob("**/*"):
+                if self.is_skipped(p=p):
+                    self.logger.debug(f"{str(p)} is skipped.")
                     continue
 
                 yield DbtTemplate(
                     mapping_config=self._mapping_config,
-                    key=str(obj),
-                    project_name=dbt_project_config[DbtProjectKey.PROJECT_NAME],
+                    key=str(p),
+                    project_name=project_name,
                 )
+
+    def is_skipped(self, p: pathlib.Path):
+        return (
+            p.is_dir()
+            or self.REGEX_SCHEMA_TEST_FILE.fullmatch(str(p))
+            or self.is_excluded(
+                source_type=TemplateSourceType(self._include.TemplateSourceType),
+                key=str(p),
+            )
+        )
 
     def read_dbt_project_yml(self, project_dir: str) -> dict:
         """Read dbt_project.yml
@@ -136,37 +142,54 @@ class DbtTemplateSource(TemplateSource):
     @staticmethod
     def concat_dbt_model_path_str(
         project_dir: str,
-        dbt_project_config: Dict[str, Any],
+        target_path: str,
+        project_name: str,
         model_path: pathlib.Path,
     ) -> str:
         return (
             f"{project_dir}/"
-            f"{dbt_project_config[DbtProjectKey.TARGET_PATH]}/"
+            f"{target_path}/"
             "compiled/"
-            f"{dbt_project_config[DbtProjectKey.PROJECT_NAME]}/"
+            f"{project_name}/"
             f"{model_path}/"
         )
 
     @staticmethod
+    def build_dbt_compile_command(
+        project_dir: str,
+        profiles_dir: str,
+        profile: str = None,
+        target: str = None,
+        vars: Dict[str, Any] = None,
+    ):
+        command = (
+            "dbt compile"
+            f" --project-dir {project_dir}"
+            f" --profiles-dir {profiles_dir}"
+        )
+        if profile:
+            command += f" --profile {profile}"
+        if target:
+            command += f" --target {target}"
+        if vars:
+            command += f" --vars '{vars}'"
+        return command
+
     def execute_dbt_compile(
+        self,
         project_dir: str,
         profiles_dir: str,
         profile: str = None,
         target: str = None,
         vars: Dict[str, Any] = None,
     ) -> int:
-        command = (
-            "dbt compile "
-            f"--project-dir {project_dir} "
-            f"--profiles-dir {profiles_dir} "
+        command = self.build_dbt_compile_command(
+            project_dir=project_dir,
+            profiles_dir=profiles_dir,
+            profile=profile,
+            target=target,
+            vars=vars,
         )
-        if profile:
-            command += f"--profile {profile} "
-        if target:
-            command += f"--target {target} "
-        if vars:
-            command += f"--vars '{vars}' "
-
         proc = subprocess.run(
             args=shlex.split(command),
             shell=False,

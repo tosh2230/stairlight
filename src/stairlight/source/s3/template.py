@@ -6,6 +6,7 @@ from botocore.response import StreamingBody
 from mypy_boto3_s3.service_resource import (
     Bucket,
     BucketObjectsCollection,
+    ObjectSummary,
     S3ServiceResource,
 )
 from mypy_boto3_s3.type_defs import GetObjectOutputTypeDef
@@ -88,23 +89,24 @@ class S3TemplateSource(TemplateSource):
             )
 
         objects: BucketObjectsCollection = self.s3.Bucket(bucket_name).objects.all()
-        for object in objects:
-            if (
-                not re.fullmatch(
-                    rf"{self._include.Regex}",
-                    object.key,
-                )
-            ) or self.is_excluded(
-                source_type=TemplateSourceType(self._include.TemplateSourceType),
-                key=object.key,
-            ):
-                self.logger.debug(f"{object.key} is skipped.")
+        for obj in objects:
+            if self.is_skipped(obj=obj):
+                self.logger.debug(f"{obj.key} is skipped.")
                 continue
 
             yield S3Template(
                 mapping_config=self._mapping_config,
-                key=object.key,
+                key=obj.key,
                 project=project,
                 bucket=bucket_name,
                 default_table_prefix=self._include.DefaultTablePrefix,
             )
+
+    def is_skipped(self, obj: ObjectSummary) -> bool:
+        return not re.fullmatch(
+            rf"{self._include.Regex}",
+            obj.key,
+        ) or self.is_excluded(
+            source_type=TemplateSourceType(self._include.TemplateSourceType),
+            key=obj.key,
+        )

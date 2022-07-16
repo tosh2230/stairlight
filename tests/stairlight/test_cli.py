@@ -39,6 +39,7 @@ class TestSuccess:
         )
         assert len(message) > 0
 
+    @pytest.mark.integration
     def test_command_check(self, stairlight_save: StairLight):
         message = cli_main.command_check(
             stairlight=stairlight_save, args=self.parser.parse_args([])
@@ -59,6 +60,7 @@ class TestSuccess:
         )
         assert not message
 
+    @pytest.mark.integration
     def test_command_up_table(self, stairlight_save: StairLight):
         args = self.parser.parse_args(
             [
@@ -74,6 +76,7 @@ class TestSuccess:
         results = cli_main.command_up(stairlight=stairlight_save, args=args)
         assert len(results) > 0
 
+    @pytest.mark.integration
     def test_command_up_label(self, stairlight_save: StairLight):
         args = self.parser.parse_args(
             [
@@ -89,6 +92,7 @@ class TestSuccess:
         results = cli_main.command_up(stairlight=stairlight_save, args=args)
         assert len(results) > 0
 
+    @pytest.mark.integration
     def test_command_down_table(self, stairlight_save: StairLight):
         args = self.parser.parse_args(
             [
@@ -100,6 +104,7 @@ class TestSuccess:
         results = cli_main.command_down(stairlight=stairlight_save, args=args)
         assert len(results) > 0
 
+    @pytest.mark.integration
     def test_command_down_label(self, stairlight_save: StairLight):
         args = self.parser.parse_args(
             [
@@ -120,12 +125,14 @@ class TestSuccess:
             actual = results[0]
         assert actual.get("PROJECT_J.DATASET_K.TABLE_L")
 
+    @pytest.mark.integration
     def test_main(self, monkeypatch, capfd):
         monkeypatch.setattr("sys.argv", ["", "-c", "tests/config"])
         cli_main.main()
         out, err = capfd.readouterr()
         assert len(out) > 0 and len(err) == 0
 
+    @pytest.mark.integration
     def test_main_quiet(self, monkeypatch, capfd):
         monkeypatch.setattr("sys.argv", ["", "-c", "tests/config", "-q"])
         cli_main.main()

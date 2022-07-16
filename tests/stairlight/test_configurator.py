@@ -466,6 +466,7 @@ class TestBuildMappingConfigS3:
             },
         ),
     ],
+    ids=["single_dot", "double_dots"],
 )
 def test_create_nested_dict(params, expected):
     actual: Dict[str, Any] = {}

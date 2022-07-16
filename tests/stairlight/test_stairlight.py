@@ -14,7 +14,7 @@ from tests.conftest import teardown_rm_file
 
 
 @pytest.fixture(scope="session")
-def stairlight_load_and_save() -> Iterator[StairLight]:
+def stairlight_merge() -> Iterator[StairLight]:
     load_files = [
         "./tests/results/file_01.json",
         "./tests/results/file_02.json",
@@ -45,6 +45,7 @@ class TestSearchDirection:
         assert SearchDirection.DOWN.value == "Downstairs"
 
 
+@pytest.mark.integration
 class TestStairLight:
     stairlight = StairLight(config_dir="tests/config")
     stairlight.create_map()
@@ -243,9 +244,9 @@ class TestStairLight:
         )
         assert not stairlight_load.check()
 
-    def test_multiple_load_and_save(self, stairlight_load_and_save: StairLight):
-        stairlight_load_and_save.load_map()
-        actual: Dict[str, Any] = stairlight_load_and_save.mapped
+    def test_merge(self, stairlight_merge: StairLight):
+        stairlight_merge.load_map()
+        actual: Dict[str, Any] = stairlight_merge.mapped
         with open("tests/results/merged.json", "r") as f:
             expected: Dict[str, Any] = json.load(f)
         assert actual == expected
