@@ -82,9 +82,13 @@ class TestRedashTemplate:
 
 
 @pytest.mark.parametrize(
-    "env_key, path",
+    ("env_key", "path", "expected_conn_str"),
     [
-        ("REDASH_DATABASE_URL", "src/stairlight/source/redash/sql/redash_queries.sql"),
+        (
+            "REDASH_DATABASE_URL",
+            "src/stairlight/source/redash/sql/redash_queries.sql",
+            "postgresql://postgres:testpassword@testhost/postgres",
+        ),
     ],
 )
 class TestRedashTemplateSource:
@@ -95,6 +99,7 @@ class TestRedashTemplateSource:
         mapping_config: MappingConfig,
         env_key: str,
         path: str,
+        expected_conn_str: str,
     ) -> RedashTemplateSource:
         stairlight_config = configurator.read_stairlight(prefix="stairlight_redash")
         _include = StairlightConfigIncludeRedash(
@@ -111,73 +116,36 @@ class TestRedashTemplateSource:
             include=_include,
         )
 
-    def test_make_conditions(
-        self,
-        redash_template_source: RedashTemplateSource,
-    ):
-        expected = {
-            "DataSourceName": {
-                "key": "DataSourceName",
-                "query": "data_sources.name = :data_source",
-                "parameters": "metadata",
-            },
-            "QueryIds": {
-                "key": "QueryIds",
-                "query": "queries.id IN :query_ids",
-                "parameters": (1, 3, 5),
-            },
-        }
-        assert redash_template_source.make_conditions() == expected
-
-    def test_build_query_string(
+    def test_build_query_string_data_source(
         self,
         redash_template_source: RedashTemplateSource,
         path: str,
     ):
-        expected = """SELECT
-    queries.id,
-    queries.name,
-    queries.query,
-    data_sources.name
-FROM
-    queries
-    INNER JOIN data_sources
-        ON queries.data_source_id = data_sources.id
-WHERE data_sources.name = :data_source AND queries.id IN :query_ids"""
-
+        expected = redash_template_source.WHERE_CLAUSE_TEMPLATES[
+            SlKey.Redash.DATA_SOURCE_NAME
+        ]
         actual = redash_template_source.build_query_string(path=path)
-        assert actual == expected
+        assert expected in actual
 
-    def test_read_query_from_file(
+    def test_build_query_string_query_ids(
         self,
         redash_template_source: RedashTemplateSource,
         path: str,
     ):
-        expected = """SELECT
-    queries.id,
-    queries.name,
-    queries.query,
-    data_sources.name
-FROM
-    queries
-    INNER JOIN data_sources
-        ON queries.data_source_id = data_sources.id
-"""
-
-        actual = redash_template_source.read_query_from_file(path=path)
-        assert actual == expected
+        expected = redash_template_source.WHERE_CLAUSE_TEMPLATES[SlKey.Redash.QUERY_IDS]
+        actual = redash_template_source.build_query_string(path=path)
+        assert expected in actual
 
     def test_get_connection_str(
         self,
         monkeypatch,
         redash_template_source: RedashTemplateSource,
         env_key: str,
+        expected_conn_str: str,
     ):
-        expected = "postgresql://postgres:testpassword@testhost/postgres"
-        envs = {env_key: expected}
-        monkeypatch.setattr(os, "environ", envs)
+        monkeypatch.setattr(os, "environ", {env_key: expected_conn_str})
         actual = redash_template_source.get_connection_str()
-        assert actual == expected
+        assert actual == expected_conn_str
 
 
 class TestRedashTemplateSourceConfigKeyNotFound:

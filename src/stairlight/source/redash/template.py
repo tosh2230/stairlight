@@ -61,6 +61,12 @@ class RedashTemplate(Template):
 
 
 class RedashTemplateSource(TemplateSource):
+    REDASH_QUERIES = "sql/redash_queries.sql"
+    WHERE_CLAUSE_TEMPLATES = {
+        StairlightConfigKey.Redash.DATA_SOURCE_NAME: "data_sources.name = :data_source",
+        StairlightConfigKey.Redash.QUERY_IDS: "queries.id IN :query_ids",
+    }
+
     def __init__(
         self,
         stairlight_config: StairlightConfig,
@@ -73,26 +79,12 @@ class RedashTemplateSource(TemplateSource):
         )
         self._include = include
         self.where_clause: List[str] = []
-        self.conditions: Dict[str, Any] = self.make_conditions()
-
-    def make_conditions(self) -> Dict[str, Any]:
-        query_ids = self._include.QueryIds
-        return {
-            StairlightConfigKey.Redash.DATA_SOURCE_NAME: {
-                "key": StairlightConfigKey.Redash.DATA_SOURCE_NAME,
-                "query": "data_sources.name = :data_source",
-                "parameters": self._include.DataSourceName,
-            },
-            StairlightConfigKey.Redash.QUERY_IDS: {
-                "key": StairlightConfigKey.Redash.QUERY_IDS,
-                "query": "queries.id IN :query_ids",
-                "parameters": (tuple(query_ids) if query_ids else None),
-            },
-        }
+        self.conditions: Dict[str, Any] = {}
 
     def search_templates(self) -> Iterator[Template]:
-        results = self.get_queries_from_redash()
+        results = self.get_redash_queries()
         for result in results:
+            # see columns "src/stairlight/source/redash/sql/redash_queries.sql"
             yield RedashTemplate(
                 mapping_config=self._mapping_config,
                 query_id=result[0],
@@ -101,37 +93,33 @@ class RedashTemplateSource(TemplateSource):
                 data_source_name=result[3],
             )
 
-    def get_queries_from_redash(self) -> List[Row]:
-        sql_file_name = "sql/redash_queries.sql"
+    def get_redash_queries(self) -> List[Row]:
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        query_text = text(
-            self.build_query_string(path=f"{current_dir}/{sql_file_name}")
+        query_text = self.build_query_string(
+            path=f"{current_dir}/{self.REDASH_QUERIES}"
         )
+        data_source = self._include.DataSourceName
+        query_ids = tuple(self._include.QueryIds) if self._include.QueryIds else None
 
-        data_source_condition: Dict[str, Any] = self.conditions.get(
-            StairlightConfigKey.Redash.DATA_SOURCE_NAME, {}
-        )
-        query_ids_condition: Dict[str, Any] = self.conditions.get(
-            StairlightConfigKey.Redash.QUERY_IDS, {}
-        )
         connection_str = self.get_connection_str()
         engine = create_engine(connection_str)
         queries = engine.execute(
-            query_text,
-            data_source=data_source_condition.get("parameters", ""),
-            query_ids=query_ids_condition.get("parameters", []),
-        ).fetchall()
-
-        return queries
+            text(query_text),
+            data_source=data_source,
+            query_ids=query_ids,
+        )
+        return queries.fetchall()
 
     def build_query_string(self, path: str) -> str:
-        base_query_string = self.read_query_from_file(path=path)
-        for condition in self.conditions.values():
-            if condition["key"] in asdict(self._include).keys():
-                self.where_clause.append(condition["query"])
-        return base_query_string + "WHERE " + " AND ".join(self.where_clause)
+        where_clauses: list[str] = []
+        for key, value in self.WHERE_CLAUSE_TEMPLATES.items():
+            if key in asdict(self._include).keys():
+                where_clauses.append(value)
 
-    def read_query_from_file(self, path: str) -> str:
+        base_query_string = self.read_query_string(path=path)
+        return base_query_string + "WHERE " + " AND ".join(where_clauses)
+
+    def read_query_string(self, path: str) -> str:
         with open(path, "r", encoding="utf-8") as f:
             return f.read()
 
