@@ -17,7 +17,10 @@ from src.stairlight.source.template import Template
     "key",
     [
         "tests/dbt/project_01/target/compiled/project_01/a/example_a.sql",
-        "tests/dbt/project_02/target/compiled/project_02/example/my_first_dbt_model.sql",
+        (
+            "tests/dbt/project_02/target/compiled/"
+            "project_02/example/my_first_dbt_model.sql"
+        ),
     ],
     ids=[
         "example_a.sql",
