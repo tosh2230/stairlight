@@ -111,7 +111,7 @@ class RedashTemplateSource(TemplateSource):
         return queries.fetchall()
 
     def build_query_string(self, path: str) -> str:
-        where_clauses: list[str] = []
+        where_clauses: List[str] = []
         for key, value in self.WHERE_CLAUSE_TEMPLATES.items():
             if key in asdict(self._include).keys():
                 where_clauses.append(value)

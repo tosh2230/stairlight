@@ -1,5 +1,5 @@
 import os
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import pytest
 from sqlalchemy.exc import ArgumentError
@@ -130,7 +130,7 @@ class TestRedashTemplateSource:
                 ["test_id", "test_name", "test_str", "test_data_source_name"]
             ],
         )
-        templates: list[RedashTemplate] = []
+        templates: List[RedashTemplate] = []
         for template in redash_template_source.search_templates():
             templates.append(template)
         assert len(templates) > 0
