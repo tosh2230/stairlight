@@ -116,6 +116,33 @@ class TestRedashTemplateSource:
             include=_include,
         )
 
+    def test_search_templates(
+        self,
+        mocker,
+        redash_template_source: RedashTemplateSource,
+    ):
+        mocker.patch(
+            (
+                "src.stairlight.source.redash.template"
+                ".RedashTemplateSource.get_redash_queries"
+            ),
+            return_value=[
+                ["test_id", "test_name", "test_str", "test_data_source_name"]
+            ],
+        )
+        templates: list[RedashTemplate] = []
+        for template in redash_template_source.search_templates():
+            templates.append(template)
+        assert len(templates) > 0
+
+    def test_get_redash_queries(
+        self,
+        mocker,
+        redash_template_source: RedashTemplateSource,
+    ):
+        mocker.patch("src.stairlight.source.redash.template.create_engine")
+        _ = redash_template_source.get_redash_queries()
+
     def test_build_query_string_data_source(
         self,
         redash_template_source: RedashTemplateSource,
