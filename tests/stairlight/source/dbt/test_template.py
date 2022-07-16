@@ -17,6 +17,11 @@ from src.stairlight.source.template import Template
     "key",
     [
         "tests/dbt/project_01/target/compiled/project_01/a/example_a.sql",
+        "tests/dbt/project_02/target/compiled/project_02/example/my_first_dbt_model.sql",
+    ],
+    ids=[
+        "example_a.sql",
+        "my_first_dbt_model.sql",
     ],
 )
 class TestDbtTemplate:
@@ -37,7 +42,15 @@ class TestDbtTemplate:
 
 
 @pytest.mark.parametrize(
-    "project_dir, profiles_dir, target, vars, profile, project_name",
+    (
+        "project_dir",
+        "profiles_dir",
+        "target",
+        "vars",
+        "profile",
+        "project_name",
+        "expected_command",
+    ),
     [
         (
             "tests/dbt/project_01",
@@ -46,6 +59,14 @@ class TestDbtTemplate:
             {"key_a": "value_a", "key_b": "value_b"},
             "profile_01",
             "project_01",
+            (
+                "dbt compile"
+                " --project-dir {}"
+                " --profiles-dir {}"
+                " --profile {}"
+                " --target {}"
+                " --vars '{}'"
+            ),
         ),
         (
             "tests/dbt/project_02",
@@ -54,7 +75,18 @@ class TestDbtTemplate:
             {},
             "profile_02",
             "project_02",
+            (
+                "dbt compile"
+                " --project-dir {}"
+                " --profiles-dir {}"
+                " --profile {}"
+                " --target {}"
+            ),
         ),
+    ],
+    ids=[
+        "project_01",
+        "project_02",
     ],
 )
 class TestDbtTemplateSource:
@@ -69,6 +101,7 @@ class TestDbtTemplateSource:
         vars: Dict[str, Any],
         profile: str,
         project_name: str,
+        expected_command: str,
     ) -> DbtTemplateSource:
         _include = StairlightConfigIncludeDbt(
             **{
@@ -85,23 +118,30 @@ class TestDbtTemplateSource:
             include=_include,
         )
 
-    def test_execute_dbt_compile(
-        self,
-        dbt_template_source: DbtTemplateSource,
-        project_dir: str,
-        profiles_dir: str,
-        profile: str,
-        target: str,
-        vars: Dict[str, Any],
-    ):
-        actual = dbt_template_source.execute_dbt_compile(
-            project_dir=project_dir,
-            profiles_dir=profiles_dir,
-            profile=profile,
-            target=target,
-            vars=vars,
+    @pytest.fixture(scope="function")
+    def dbt_templates(
+        self, mocker, dbt_template_source: DbtTemplateSource
+    ) -> List[Template]:
+        mocker.patch(
+            "src.stairlight.source.dbt.template.DbtTemplateSource.execute_dbt_compile"
         )
-        assert actual == 0
+        dbt_templates: List[Template] = []
+        for dbt_template in dbt_template_source.search_templates():
+            dbt_templates.append(dbt_template)
+        return dbt_templates
+
+    def test_search_templates(self, dbt_templates: List[Template]):
+        assert len(dbt_templates) > 0
+
+    def test_search_templates_schema_not_exists(
+        self, dbt_template_source: DbtTemplateSource, dbt_templates: List[DbtTemplate]
+    ):
+        re_matched = [
+            dbt_template.key
+            for dbt_template in dbt_templates
+            if dbt_template_source.REGEX_SCHEMA_TEST_FILE.fullmatch(dbt_template.key)
+        ]
+        assert not re_matched
 
     def test_read_dbt_project_yml(
         self,
@@ -127,30 +167,43 @@ class TestDbtTemplateSource:
         )
         assert expected == actual
 
-    @pytest.fixture(scope="function")
-    def dbt_templates(
+    def test_build_dbt_compile_command(
         self,
         dbt_template_source: DbtTemplateSource,
-    ) -> List[Template]:
-        dbt_templates: List[Template] = []
-        for dbt_template in dbt_template_source.search_templates():
-            dbt_templates.append(dbt_template)
-        return dbt_templates
-
-    def test_search_templates(
-        self,
-        dbt_templates: List[DbtTemplate],
+        project_dir: str,
+        profiles_dir: str,
+        profile: str,
+        target: str,
+        vars: Dict[str, Any],
+        expected_command: str,
     ):
-        assert len(dbt_templates) > 0
+        expected = expected_command.format(
+            project_dir, profiles_dir, profile, target, vars
+        )
+        actual = dbt_template_source.build_dbt_compile_command(
+            project_dir=project_dir,
+            profiles_dir=profiles_dir,
+            profile=profile,
+            target=target,
+            vars=vars,
+        )
+        assert actual == expected
 
-    def test_not_exists_schema(
+    def test_execute_dbt_compile(
         self,
+        mocker,
         dbt_template_source: DbtTemplateSource,
-        dbt_templates: List[DbtTemplate],
+        project_dir: str,
+        profiles_dir: str,
+        profile: str,
+        target: str,
+        vars: Dict[str, Any],
     ):
-        re_matched = [
-            dbt_template.key
-            for dbt_template in dbt_templates
-            if dbt_template_source.REGEX_SCHEMA_TEST_FILE.fullmatch(dbt_template.key)
-        ]
-        assert not re_matched
+        mocker.patch("src.stairlight.source.dbt.template.subprocess.run")
+        _ = dbt_template_source.execute_dbt_compile(
+            project_dir=project_dir,
+            profiles_dir=profiles_dir,
+            profile=profile,
+            target=target,
+            vars=vars,
+        )

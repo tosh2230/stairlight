@@ -155,25 +155,41 @@ class DbtTemplateSource(TemplateSource):
         )
 
     @staticmethod
+    def build_dbt_compile_command(
+        project_dir: str,
+        profiles_dir: str,
+        profile: str = None,
+        target: str = None,
+        vars: Dict[str, Any] = None,
+    ):
+        command = (
+            "dbt compile"
+            f" --project-dir {project_dir}"
+            f" --profiles-dir {profiles_dir}"
+        )
+        if profile:
+            command += f" --profile {profile}"
+        if target:
+            command += f" --target {target}"
+        if vars:
+            command += f" --vars '{vars}'"
+        return command
+
     def execute_dbt_compile(
+        self,
         project_dir: str,
         profiles_dir: str,
         profile: str = None,
         target: str = None,
         vars: Dict[str, Any] = None,
     ) -> int:
-        command = (
-            "dbt compile "
-            f"--project-dir {project_dir} "
-            f"--profiles-dir {profiles_dir} "
+        command = self.build_dbt_compile_command(
+            project_dir=project_dir,
+            profiles_dir=profiles_dir,
+            profile=profile,
+            target=target,
+            vars=vars,
         )
-        if profile:
-            command += f"--profile {profile} "
-        if target:
-            command += f"--target {target} "
-        if vars:
-            command += f"--vars '{vars}' "
-
         proc = subprocess.run(
             args=shlex.split(command),
             shell=False,
