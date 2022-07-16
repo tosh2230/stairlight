@@ -1,4 +1,5 @@
 from typing import Any, Dict, List
+import pathlib
 
 import pytest
 
@@ -127,6 +128,11 @@ class TestDbtTemplateSource:
     ) -> List[Template]:
         mocker.patch(
             "src.stairlight.source.dbt.template.DbtTemplateSource.execute_dbt_compile"
+        )
+        dummy_file = "tests/dbt/project_01/models/a/example_a.sql"
+        mocker.patch(
+            "src.stairlight.source.dbt.template.pathlib.Path.glob",
+            return_value=[pathlib.Path(dummy_file)],
         )
         dbt_templates: List[Template] = []
         for dbt_template in dbt_template_source.search_templates():
