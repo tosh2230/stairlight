@@ -47,6 +47,8 @@ class Map:
         for template_source in self.find_template_source():
             self.write_by_template_source(template_source=template_source)
 
+        self.mapped = {k: v for k, v in self.mapped.items() if v != {}}
+
     def find_template_source(self) -> Iterator[TemplateSource]:
         """find template source
 

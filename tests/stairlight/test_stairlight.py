@@ -56,6 +56,9 @@ class TestStairLight:
     def test_mapped(self):
         assert self.stairlight.mapped
 
+    def test_mapped_exclude_empty_value(self):
+        assert "dummy.dummy.my_first_dbt_model" not in self.stairlight.mapped.keys()
+
     def test_unmapped(self):
         file_keys = [
             unmapped_file.get(MapKey.TEMPLATE)
