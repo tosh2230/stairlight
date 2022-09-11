@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import re
-from typing import Iterator, List
+from typing import Iterator
 
 from .source.config import MapKey
 
@@ -49,7 +51,7 @@ class Query:
                     MapKey.LINE_STRING: self.query_str.splitlines()[line_index],
                 }
 
-    def parse_and_get_upstairs_tables(self) -> List[str]:
+    def parse_and_get_upstairs_tables(self) -> list[str]:
         """Parse query and get upstairs tables
 
         Returns:
@@ -57,7 +59,7 @@ class Query:
         """
         # Get Common-Table-Expressions(CTE) from query string
         cte_pattern = r"(?:with|,)\s*(\w+)\s+as\s*"
-        cte_alias: List[str] = re.findall(cte_pattern, self.query_str, re.IGNORECASE)
+        cte_alias: list[str] = re.findall(cte_pattern, self.query_str, re.IGNORECASE)
 
         # Search a boundary line number that main query starts
         boundary_num: int = 0
@@ -73,7 +75,7 @@ class Query:
 
         # Exclude table alias from main query
         table_pattern = r"(?:from|join)\s+([`.\-\w]+)"
-        main_tables_with_alias: List[str] = re.findall(
+        main_tables_with_alias: list[str] = re.findall(
             table_pattern, query_group["main"], re.IGNORECASE
         )
         main_tables = [
@@ -81,7 +83,7 @@ class Query:
         ]
 
         # Exclude table alias from CTEs
-        cte_tables_with_alias: List[str] = re.findall(
+        cte_tables_with_alias: list[str] = re.findall(
             table_pattern, query_group["cte"], re.IGNORECASE
         )
         cte_tables = [

@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 import glob
 import os
 import pathlib
 import re
 import shlex
 import subprocess
-from typing import Any, Dict, Iterator, List
+from typing import Any, Iterator
 
 import yaml
 
@@ -17,7 +19,7 @@ from .config import StairlightConfigIncludeDbt
 class DbtTemplate(Template):
     def __init__(
         self,
-        mapping_config: MappingConfig,
+        mapping_config: MappingConfig | None,
         key: str,
         project_name: str,
     ):
@@ -47,7 +49,7 @@ class DbtTemplate(Template):
             return f.read()
 
     def render(
-        self, params: Dict[str, Any] = None, ignore_params: List[str] = None
+        self, params: dict[str, Any] = None, ignore_params: list[str] = None
     ) -> str:
         return self.get_template_str()
 
@@ -69,14 +71,20 @@ class DbtTemplateSource(TemplateSource):
         self._include = include
 
     def search_templates(self) -> Iterator[Template]:
-        project_dir: str = self._include.ProjectDir
-        dbt_project_config: Dict[str, Any] = self.read_dbt_project_yml(
+        if not self._include:
+            return None
+
+        project_dir: str | None = self._include.ProjectDir
+        profiles_dir: str | None = self._include.ProfilesDir
+        if not project_dir or not profiles_dir:
+            return None
+
+        dbt_project_config: dict[str, Any] = self.read_dbt_project_yml(
             project_dir=project_dir
         )
-
         _ = self.execute_dbt_compile(
             project_dir=project_dir,
-            profiles_dir=self._include.ProfilesDir,
+            profiles_dir=profiles_dir,
             profile=dbt_project_config.get(DbtProjectKey.PROFILE),
             target=self._include.Target,
             vars=self._include.Vars,
@@ -160,7 +168,7 @@ class DbtTemplateSource(TemplateSource):
         profiles_dir: str,
         profile: str = None,
         target: str = None,
-        vars: Dict[str, Any] = None,
+        vars: dict[str, Any] = None,
     ):
         command = (
             "dbt compile"
@@ -181,7 +189,7 @@ class DbtTemplateSource(TemplateSource):
         profiles_dir: str,
         profile: str = None,
         target: str = None,
-        vars: Dict[str, Any] = None,
+        vars: dict[str, Any] = None,
     ) -> int:
         command = self.build_dbt_compile_command(
             project_dir=project_dir,

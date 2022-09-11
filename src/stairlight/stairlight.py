@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import enum
 import json
 from logging import getLogger
-from typing import Any, Dict, List, Union
+from typing import Any
 
 from .configurator import (
     MAPPING_CONFIG_PREFIX_DEFAULT,
@@ -43,9 +45,9 @@ class SearchDirection(enum.Enum):
 class Node:
     """A Node of singly-linked list"""
 
-    def __init__(self, val: str, next: "Node" = None):
+    def __init__(self, val: str):
         self.val: str = val
-        self.next: "Node" = None
+        self.next: "Node" | None = None
 
 
 class StairLight:
@@ -54,7 +56,7 @@ class StairLight:
     def __init__(
         self,
         config_dir: str = ".",
-        load_files: List[str] = None,
+        load_files: list[str] = None,
         save_file: str = "",
     ) -> None:
         """Table dependency detector
@@ -70,9 +72,9 @@ class StairLight:
         self.load_files = load_files
         self.save_file: str = save_file
         self._configurator = Configurator(dir=config_dir)
-        self._mapped: Dict[str, Any] = {}
-        self._unmapped: List[Dict[str, Any]] = []
-        self._mapping_config: MappingConfig = None
+        self._mapped: dict[str, Any] = {}
+        self._unmapped: list[dict[str, Any]] = []
+        self._mapping_config: MappingConfig | None = None
         self._stairlight_config: StairlightConfig = self._configurator.read_stairlight(
             prefix=STAIRLIGHT_CONFIG_PREFIX_DEFAULT
         )
@@ -91,7 +93,7 @@ class StairLight:
             self.save_map()
 
     @property
-    def mapped(self) -> Dict[str, Any]:
+    def mapped(self) -> dict[str, Any]:
         """Return mapped
 
         Returns:
@@ -100,7 +102,7 @@ class StairLight:
         return self._mapped
 
     @property
-    def unmapped(self) -> List[Dict[str, Any]]:
+    def unmapped(self) -> list[dict[str, Any]]:
         """Return unmapped
 
         Returns:
@@ -204,7 +206,7 @@ class StairLight:
         recursive: bool = False,
         verbose: bool = False,
         response_type: str = ResponseType.TABLE.value,
-    ) -> Union[List[str], Dict[str, Any]]:
+    ) -> list[str] | dict[str, Any]:
         """Search upstream nodes
 
         Args:
@@ -215,7 +217,7 @@ class StairLight:
                 Response type. Defaults to ResponseType.TABLE.value.
 
         Returns:
-            Union[list[str], dict]: Search results
+            list[str] | dict: Search results
         """
         return self.search(
             table_name=table_name,
@@ -231,7 +233,7 @@ class StairLight:
         recursive=False,
         verbose=False,
         response_type=ResponseType.TABLE.value,
-    ) -> Union[List[str], Dict[str, Any]]:
+    ) -> list[str] | dict[str, Any]:
         """Search downstream nodes
 
         Args:
@@ -242,7 +244,7 @@ class StairLight:
                 Response type. Defaults to ResponseType.TABLE.value.
 
         Returns:
-            Union[list[str], dict]: Search results
+            list[str] | dict: Search results
         """
         return self.search(
             table_name=table_name,
@@ -259,7 +261,7 @@ class StairLight:
         verbose: bool,
         response_type: str,
         direction: SearchDirection,
-    ) -> Union[List[str], Dict[str, Any]]:
+    ) -> list[str] | dict[str, Any]:
         """Search nodes
 
         Args:
@@ -270,7 +272,7 @@ class StairLight:
             direction (SearchDirection): Search direction
 
         Returns:
-            Union[list[str], dict]: Search results
+            list[str] | dict: Search results
         """
         if verbose:
             return self.search_verbose(
@@ -298,7 +300,7 @@ class StairLight:
         table_name: str,
         recursive: bool,
         direction: SearchDirection,
-        searched_tables: List[str],
+        searched_tables: list[str],
         head: bool,
     ) -> dict:
         """Search nodes and return verbose results
@@ -316,7 +318,7 @@ class StairLight:
         relative_map = self.create_relative_map(
             table_name=table_name, direction=direction
         )
-        response: Dict[str, Any] = {table_name: {}}
+        response: dict[str, Any] = {table_name: {}}
         if not relative_map:
             return response
 
@@ -361,9 +363,9 @@ class StairLight:
         recursive: bool,
         response_type: str,
         direction: SearchDirection,
-        searched_tables: List[str],
+        searched_tables: list[str],
         head: bool,
-    ) -> List[str]:
+    ) -> list[str]:
         """Search nodes and return simple results
 
         Args:
@@ -380,7 +382,7 @@ class StairLight:
         relative_map = self.create_relative_map(
             table_name=table_name, direction=direction
         )
-        response: List[str] = []
+        response: list[str] = []
         if not relative_map:
             return response
 
@@ -422,7 +424,7 @@ class StairLight:
 
     def create_relative_map(
         self, table_name: str, direction: SearchDirection
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Create a relative map for the specified direction
 
         Args:
@@ -432,7 +434,7 @@ class StairLight:
         Returns:
             dict: Relative map
         """
-        relative_map: Dict[str, Any] = {}
+        relative_map: dict[str, Any] = {}
         if direction == SearchDirection.UP:
             relative_map = self._mapped.get(table_name, {})
         elif direction == SearchDirection.DOWN:
@@ -440,7 +442,7 @@ class StairLight:
                 relative_map[key] = self._mapped[key][table_name]
         return relative_map
 
-    def find_tables_by_labels(self, target_labels: List[str]) -> List[str]:
+    def find_tables_by_labels(self, target_labels: list[str]) -> list[str]:
         """Find tables by labels
 
         Args:
@@ -449,9 +451,12 @@ class StairLight:
         Returns:
             list[str]: Tables to search
         """
-        tables_to_search: List[str] = []
+        tables_to_search: list[str] = []
 
         # "mapping" section in mapping.yaml
+        if not self._mapping_config:
+            return tables_to_search
+
         for mapping in self._mapping_config.get_mapping():
             for mapping_table in mapping.get_table():
                 if (
@@ -478,7 +483,7 @@ class StairLight:
 
     @staticmethod
     def is_target_label_found(
-        target_labels: List[str], configured_labels: Dict[str, Any]
+        target_labels: list[str], configured_labels: dict[str, Any]
     ) -> bool:
         found_count: int = 0
         configured_label_key: str
@@ -496,7 +501,7 @@ class StairLight:
         return found_count == len(target_labels)
 
 
-def is_cyclic(tables: List[str]) -> bool:
+def is_cyclic(tables: list[str]) -> bool:
     """Floyd's cycle-finding algorithm
 
     Args:
@@ -505,23 +510,27 @@ def is_cyclic(tables: List[str]) -> bool:
     Returns:
         bool: Table dependencies are cyclic or not
     """
-    nodes: Dict[str, Node] = {}
+    nodes: dict[str, Node] = {}
     for table in tables:
         if table not in nodes.keys():
             nodes[table] = Node(table)
     for i, table in enumerate(tables):
         if not nodes[table].next and i < len(tables) - 1:
             nodes[table].next = nodes[tables[i + 1]]
+
+    slow: Node | None
+    fast: Node | None
     slow = fast = nodes[tables[0]]
     while fast and fast.next:
-        slow = slow.next
+        if slow:
+            slow = slow.next
         fast = fast.next.next
         if slow == fast:
             return True
     return False
 
 
-def deep_merge(org: Dict[str, Any], add: Dict[str, Any]) -> Dict[str, Any]:
+def deep_merge(org: dict[str, Any], add: dict[str, Any]) -> dict[str, Any]:
     """Merge nested dicts
 
     Args:
@@ -531,9 +540,9 @@ def deep_merge(org: Dict[str, Any], add: Dict[str, Any]) -> Dict[str, Any]:
     Returns:
         dict: merged dict
     """
-    new: Dict[str, Any] = org
+    new: dict[str, Any] = org
     for add_key, add_value in add.items():
-        org_value: Dict[str, Any] = org.get(add_key, {})
+        org_value: dict[str, Any] = org.get(add_key, {})
         if add_key not in org:
             new[add_key] = add_value
         elif isinstance(add_value, dict):

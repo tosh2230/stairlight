@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import pathlib
 import re
-from typing import Iterator, Optional
+from typing import Iterator
 
 from ..config import ConfigAttributeNotFoundException, MappingConfig, StairlightConfig
 from ..template import Template, TemplateSource, TemplateSourceType
@@ -12,7 +14,7 @@ class FileTemplate(Template):
         self,
         mapping_config: MappingConfig,
         key: str,
-        default_table_prefix: Optional[str] = None,
+        default_table_prefix: str | None = None,
     ):
         super().__init__(
             mapping_config=mapping_config,

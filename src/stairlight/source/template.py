@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 import enum
 import re
 from abc import ABC, abstractmethod
 from logging import getLogger
-from typing import Any, Dict, Iterator, List, Optional
+from typing import Any, Iterator
 
 from jinja2 import BaseLoader, Environment
 from jinja2.exceptions import UndefinedError
@@ -31,12 +33,12 @@ class Template(ABC):
         mapping_config: MappingConfig,
         key: str,
         source_type: TemplateSourceType,
-        bucket: Optional[str] = None,
-        project: Optional[str] = None,
-        default_table_prefix: Optional[str] = None,
-        data_source_name: Optional[str] = None,
-        query_id: Optional[int] = None,
-        project_name: Optional[str] = None,
+        bucket: str | None = None,
+        project: str | None = None,
+        default_table_prefix: str | None = None,
+        data_source_name: str | None = None,
+        query_id: int | None = None,
+        project_name: str | None = None,
     ):
         """SQL template
 
@@ -124,7 +126,7 @@ class Template(ABC):
         source_type: TemplateSourceType,
         key: str,
         template_str: str,
-        params: Dict[str, Any],
+        params: dict[str, Any],
     ) -> str:
         """Render query string from template string
 
@@ -154,7 +156,7 @@ class Template(ABC):
 
     @staticmethod
     def ignore_params_from_template_str(
-        template_str: str, ignore_params: List[str]
+        template_str: str, ignore_params: list[str]
     ) -> str:
         """ignore parameters from template string
 
@@ -183,7 +185,7 @@ class Template(ABC):
         """Get template strings that read from template source"""
         return ""
 
-    def render(self, params: Dict[str, Any], ignore_params: List[str] = None) -> str:
+    def render(self, params: dict[str, Any], ignore_params: list[str] = None) -> str:
         """Render SQL query string from a jinja template on Redash queries
         Args:
             params (dict[str, Any]): Jinja parameters

@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 import json
 import os
 from importlib.util import find_spec
 from logging import getLogger
 from pathlib import Path
-from typing import Any, Dict, List, OrderedDict, Type
+from typing import Any, OrderedDict, Type
 
 from .config import MappingConfigMapping
 from .config_key import GCS_URI_SCHEME, S3_URI_SCHEME
@@ -61,7 +63,7 @@ def get_default_table_name(template: Template) -> str:
 
 def collect_mapping_attributes(
     template: Template,
-    tables: List[OrderedDict[str, Any]],
+    tables: list[OrderedDict[str, Any]],
 ) -> MappingConfigMapping:
     mapping: MappingConfigMapping
 
@@ -97,7 +99,7 @@ def collect_mapping_attributes(
 
 
 class SaveMapController:
-    def __init__(self, save_file: str, mapped: Dict[str, Any]) -> None:
+    def __init__(self, save_file: str, mapped: dict[str, Any]) -> None:
         self.save_file = save_file
         self._mapped = mapped
 

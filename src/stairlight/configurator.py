@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 import glob
 import logging
 import re
 from collections import OrderedDict
 from dataclasses import asdict
 from datetime import datetime, timezone
-from typing import Any, Dict, List
+from typing import Any
 
 import yaml
 
@@ -45,25 +47,45 @@ class Configurator:
     def read_stairlight(
         self, prefix: str = STAIRLIGHT_CONFIG_PREFIX_DEFAULT
     ) -> StairlightConfig:
+        """Read stairlight configurations from yaml
+
+        Args:
+            prefix (str, optional):
+                Prefix of the configuration file name.
+                Defaults to STAIRLIGHT_CONFIG_PREFIX_DEFAULT.
+
+        Returns:
+            StairlightConfig: Stairlight configurations
+        """
         config = self.read(prefix=prefix)
         return StairlightConfig(**config)
 
     def read_mapping(
         self, prefix: str = MAPPING_CONFIG_PREFIX_DEFAULT
     ) -> MappingConfig:
+        """Read mapping configurations from yaml
+
+        Args:
+            prefix (str, optional):
+                Prefix of the configuration file name.
+                Defaults to MAPPING_CONFIG_PREFIX_DEFAULT.
+
+        Returns:
+            MappingConfig: Mapping configurations
+        """
         config = self.read(prefix=prefix)
         return MappingConfig(**config)
 
-    def read(self, prefix: str) -> Dict[str, Any]:
+    def read(self, prefix: str) -> dict[str, Any]:
         """Read a configuration file
 
         Args:
             prefix (str): Configuration file name prefix
 
         Returns:
-            dict: Results from reading configuration file
+            dict: configurations
         """
-        config: Dict[str, Any] = {}
+        config: dict[str, Any] = {}
         pattern = f"^{self.dir}/{prefix}.ya?ml$"
         config_file = [
             p
@@ -94,7 +116,7 @@ class Configurator:
 
     def create_mapping_file(
         self,
-        unmapped: List[Dict[str, Any]],
+        unmapped: list[dict[str, Any]],
         prefix: str = MAPPING_CONFIG_PREFIX_DEFAULT,
     ) -> str:
         """Create a mapping template file
@@ -134,7 +156,7 @@ class Configurator:
         """Create a OrderedDict object for file 'stairlight.config'
 
         Returns:
-            OrderedDict: stairlight.config template
+            OrderedDict: Template dict for stairlight.yaml
         """
         return OrderedDict(
             asdict(
@@ -153,30 +175,30 @@ class Configurator:
         )
 
     def build_mapping_config(
-        self, unmapped_templates: List[Dict[str, Any]]
+        self, unmapped_templates: list[dict[str, Any]]
     ) -> OrderedDict:
         """Create a OrderedDict for mapping.yaml
 
         Args:
-            unmapped_templates (list[dict]): unmapped settings that Stairlight detects
+            unmapped_templates (list[dict]): Unmapped settings that Stairlight detects
 
         Returns:
-            OrderedDict: mapping.yaml template
+            OrderedDict: Template dict for mapping.yaml
         """
         # List(instead of Set) because OrderedDict is not hashable
-        parameters_set: List[OrderedDict] = []
-        global_parameters: Dict[str, Any] = {}
+        parameters_set: list[OrderedDict] = []
+        global_parameters: dict[str, Any] = {}
 
         # Mapping section
-        mappings: List[MappingConfigMapping] = []
-        unmapped_template: Dict[str, Any]
+        mappings: list[MappingConfigMapping] = []
+        unmapped_template: dict[str, Any]
         for unmapped_template in unmapped_templates:
             # Tables.Parameters
             parameters: OrderedDict = OrderedDict()
             template: Template = unmapped_template[MapKey.TEMPLATE]
 
             if MapKey.PARAMETERS in unmapped_template:
-                undefined_params: List[str] = unmapped_template.get(
+                undefined_params: list[str] = unmapped_template.get(
                     MapKey.PARAMETERS, []
                 )
                 for undefined_param in undefined_params:
@@ -218,8 +240,8 @@ class Configurator:
 
 
 def create_nested_dict(
-    keys: List[str],
-    results: Dict[str, Any],
+    keys: list[str],
+    results: dict[str, Any],
     density: int = 0,
     default_value: Any = None,
 ) -> None:

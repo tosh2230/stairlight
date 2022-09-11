@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import logging
 from dataclasses import dataclass, field
-from typing import Any, Dict, Iterator, List, OrderedDict, Type
+from typing import Any, Iterator, OrderedDict, Type
 
 from .config_key import MapKey
 
@@ -22,26 +24,26 @@ class StairlightConfigInclude:
 
 @dataclass
 class StairlightConfigExclude:
-    TemplateSourceType: str = None
-    Regex: str = None
+    TemplateSourceType: str | None = None
+    Regex: str | None = None
 
 
 @dataclass
 class StairlightConfigSettings:
-    MappingPrefix: str = None
+    MappingPrefix: str | None = None
 
 
 @dataclass
 class StairlightConfig:
-    Include: List[Dict[str, Any]] = field(default_factory=list)
-    Exclude: List[Dict[str, Any]] = field(default_factory=list)
+    Include: list[dict[str, Any]] = field(default_factory=list)
+    Exclude: list[dict[str, Any]] = field(default_factory=list)
     Settings: OrderedDict = field(default_factory=OrderedDict)
 
     @staticmethod
     def select_config_include(source_type: str) -> Type[StairlightConfigInclude]:
         from .template import TemplateSourceType
 
-        config_include: Type[StairlightConfigInclude] = None
+        config_include: Type[StairlightConfigInclude] = StairlightConfigInclude
 
         # Avoid to occur circular imports
         if source_type == TemplateSourceType.FILE.value:
@@ -69,7 +71,7 @@ class StairlightConfig:
     def get_include(self) -> Iterator[StairlightConfigInclude]:
         for _include in self.Include:
             config = self.select_config_include(
-                source_type=_include.get(MapKey.TEMPLATE_SOURCE_TYPE)
+                source_type=str(_include.get(MapKey.TEMPLATE_SOURCE_TYPE))
             )
             yield config(**_include)
 
@@ -80,21 +82,21 @@ class StairlightConfig:
 
 @dataclass
 class MappingConfigGlobal:
-    Parameters: Dict[str, Any] = field(default_factory=dict)
+    Parameters: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
 class MappingConfigMappingTable:
     TableName: str
-    IgnoreParameters: List[str] = field(default_factory=list)
+    IgnoreParameters: list[str] = field(default_factory=list)
     Parameters: OrderedDict = field(default_factory=OrderedDict)
-    Labels: Dict[str, Any] = field(default_factory=dict)
+    Labels: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
 class MappingConfigMapping:
     TemplateSourceType: str
-    Tables: List[OrderedDict] = field(default_factory=list)
+    Tables: list[OrderedDict] = field(default_factory=list)
 
     def get_table(self) -> Iterator[MappingConfigMappingTable]:
         for _table in self.Tables:
@@ -103,15 +105,15 @@ class MappingConfigMapping:
 
 @dataclass
 class MappingConfigMetadata:
-    TableName: str = None
-    Labels: Dict[str, Any] = field(default_factory=dict)
+    TableName: str | None = None
+    Labels: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
 class MappingConfig:
     Global: OrderedDict = field(default_factory=OrderedDict)
-    Mapping: List[OrderedDict] = field(default_factory=list)
-    Metadata: List[Dict[str, Any]] = field(default_factory=list)
+    Mapping: list[OrderedDict] = field(default_factory=list)
+    Metadata: list[dict[str, Any]] = field(default_factory=list)
 
     def get_global(self) -> MappingConfigGlobal:
         return MappingConfigGlobal(**self.Global)
@@ -119,7 +121,7 @@ class MappingConfig:
     def get_mapping(self) -> Iterator[MappingConfigMapping]:
         for _mapping in self.Mapping:
             mapping_config = self.select_mapping_config(
-                source_type=_mapping.get(MapKey.TEMPLATE_SOURCE_TYPE)
+                source_type=str(_mapping.get(MapKey.TEMPLATE_SOURCE_TYPE))
             )
             yield mapping_config(**_mapping)
 
@@ -131,7 +133,7 @@ class MappingConfig:
     def select_mapping_config(source_type: str) -> Type[MappingConfigMapping]:
         from .template import TemplateSourceType
 
-        mapping_config: Type[MappingConfigMapping] = None
+        mapping_config: Type[MappingConfigMapping] = MappingConfigMapping
 
         # Avoid to occur circular imports
         if source_type == TemplateSourceType.FILE.value:
