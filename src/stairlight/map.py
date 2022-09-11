@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from logging import getLogger
-from typing import Any, Dict, Iterator, List, OrderedDict, Type
+from typing import Any, Iterator, OrderedDict, Type
 
 from .query import Query
 from .source.config import (
@@ -22,22 +24,22 @@ class Map:
         self,
         stairlight_config: StairlightConfig,
         mapping_config: MappingConfig,
-        mapped: Dict[str, Any] = None,
+        mapped: dict[str, Any] | None = None,
     ) -> None:
         """Manages functions related to dependency map objects
 
         Args:
-            stairlight_config (StairlightConfig): Stairlight configuration
-            mapping_config (MappingConfig): Mapping configuration
-            mapped (dict, optional):
-                Mapped file attributes when a mapping configuration file loaded.
-                Defaults to {}.
+            stairlight_config (StairlightConfig): Stairlight configurations.
+            mapping_config (MappingConfig):
+                Mapping configurations.
+            mapped (dict[str, Any], optional):
+                Mapped table attributes. Defaults to None.
         """
         if mapped:
             self.mapped = mapped
         else:
             self.mapped = {}
-        self.unmapped: List[dict] = []
+        self.unmapped: list[dict] = []
         self._stairlight_config = stairlight_config
         self._mapping_config = mapping_config
 
@@ -69,7 +71,11 @@ class Map:
             )
 
     def write_by_template_source(self, template_source: TemplateSource) -> None:
-        """Write a dependency map by template source"""
+        """Write a dependency map by template source
+
+        Args:
+            template_source (TemplateSource): Template source
+        """
         for template in template_source.search_templates():
             if not self._mapping_config:
                 self.add_unmapped_params(template=template)
@@ -92,7 +98,7 @@ class Map:
         """Remap a dependency map
 
         Args:
-            template (Template): SQL template
+            template (Template): Query template
             table_attributes (MappingConfigMappingTable):
                 Table attributes from mapping configuration
         """
@@ -106,8 +112,9 @@ class Map:
         )
 
         downstairs: str = table_attributes.TableName
-        mapping_labels: Dict[str, Any] = table_attributes.Labels
-        metadata: List[Dict[str, Any]] = self._mapping_config.Metadata
+        mapping_labels: dict[str, Any] = table_attributes.Labels
+        if self._mapping_config:
+            metadata: list[dict[str, Any]] = self._mapping_config.Metadata
 
         if downstairs not in self.mapped:
             self.mapped[downstairs] = {}
@@ -130,27 +137,29 @@ class Map:
                 }
             )
 
-    def get_global_params(self) -> Dict[str, Any]:
+    def get_global_params(self) -> dict[str, Any]:
         """get global parameters in mapping.yaml
 
         Returns:
-            dict: global parameters
+            dict[str, Any]: Global parameters
         """
-        _global: MappingConfigGlobal = self._mapping_config.get_global()
-        return _global.Parameters
+        if self._mapping_config:
+            _global: MappingConfigGlobal = self._mapping_config.get_global()
+            return _global.Parameters
+        return {}
 
     def merge_global_params(
         self, table_attributes: MappingConfigMappingTable
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """return a combination of global parameters and table parameters
 
         Args:
             table_attributes (MappingConfigMappingTable): table attributes
 
         Returns:
-            dict: combined parameters
+            dict[str, Any]: Combined global parameters
         """
-        global_params: Dict[str, Any] = self.get_global_params()
+        global_params: dict[str, Any] = self.get_global_params()
         table_params: OrderedDict[str, Any] = table_attributes.Parameters
 
         # Table parameters are prioritized over global parameters
@@ -159,22 +168,22 @@ class Map:
     @staticmethod
     def create_upstairs_value(
         template: Template,
-        mapping_labels: Dict[str, Any],
-        metadata: List[Dict[str, Any]],
+        mapping_labels: dict[str, Any],
+        metadata: list[dict[str, Any]],
         upstairs: str,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """create upstairs table information
 
         Args:
             template (Template): Template class
-            mapping_labels (dict): labels in mapping section
-            metadata (list[str]): metadata
-            upstairs (str): upstairs table name
+            mapping_labels (dict[str, Any]): Labels in mapping section
+            metadata (list[dict[str, Any]]): Metadata
+            upstairs (str): Upstairs table's Name
 
         Returns:
-            dict: upstairs table information
+            dict[str, Any]: upstairs table information
         """
-        metadata_labels: List[Dict[str, Any]] = []
+        metadata_labels: list[dict[str, Any]] = []
         upstairs_values = {
             MapKey.TEMPLATE_SOURCE_TYPE: template.source_type.value,
             MapKey.KEY: template.key,
@@ -209,12 +218,14 @@ class Map:
             }
         return upstairs_values
 
-    def add_unmapped_params(self, template: Template, params: List[str] = None) -> None:
+    def add_unmapped_params(
+        self, template: Template, params: list[str] | None = None
+    ) -> None:
         """add to the list of unmapped params
 
         Args:
-            template (Template): SQL template
-            params (dict, optional): Jinja parameters
+            template (Template): Query template
+            params (list[str], optional): Jinja parameters
         """
         if not params:
             template_str = template.get_template_str()
@@ -228,39 +239,42 @@ class Map:
 
     def detect_unmapped_params(
         self, template: Template, table_attributes: MappingConfigMappingTable
-    ) -> List[str]:
+    ) -> list[str]:
         """detect unmapped parameters in mapped files
 
         Args:
-            template (Template): SQL template
+            template (Template): Query template
             table_attributes (MappingConfigMappingTable):
                 Table attributes from mapping configuration
+
+        Returns:
+            list[str]: Unmapped parameters
         """
         template_str: str = template.get_template_str()
-        template_params: List[str] = template.detect_jinja_params(template_str)
+        template_params: list[str] = template.detect_jinja_params(template_str)
         if not template_params:
             return []
 
-        mapped_params_dict: Dict[str, Any] = self.merge_global_params(
+        mapped_params_dict: dict[str, Any] = self.merge_global_params(
             table_attributes=table_attributes
         )
-        mapped_params: List[str] = create_dict_key_list(d=mapped_params_dict)
-        ignore_params: List[str] = table_attributes.IgnoreParameters
-        unmapped_params: List[str] = list(
+        mapped_params: list[str] = create_dict_key_list(d=mapped_params_dict)
+        ignore_params: list[str] = table_attributes.IgnoreParameters
+        unmapped_params: list[str] = list(
             set(template_params) - set(mapped_params) - set(ignore_params)
         )
 
         return unmapped_params
 
 
-def create_dict_key_list(d: Dict[str, Any], delimiter: str = ".") -> List[str]:
+def create_dict_key_list(d: dict[str, Any], delimiter: str = ".") -> list[str]:
     """combine nested dictionary keys and converts to a list
 
     Args:
-        d (dict): dict[str, Any]
+        d (dict[str, Any]): dict
 
     Returns:
-        list: results
+        list[str]: key-combined and list-converted results
     """
     results = []
     for key, value in d.items():

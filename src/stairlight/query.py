@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import re
-from typing import Iterator, List
+from typing import Iterator
 
 from .source.config import MapKey
 
@@ -11,7 +13,7 @@ class Query:
         """SQL query
 
         Args:
-            query_str (str, optional): SQL query string. Defaults to None.
+            query_str (str): Query statement.
             default_table_prefix (str, optional):
                 If project or dataset that configured table have are omitted,
                 it will be complement this prefix. Defaults to None.
@@ -20,7 +22,7 @@ class Query:
         self.default_table_prefix = default_table_prefix
 
     def detect_upstairs_attributes(self) -> Iterator[dict]:
-        """Parse a SQL query string and detect upstream table attributes
+        """Parse a query statement and detect upstream table attributes
 
         Yields:
             Iterator[dict]: upstream table attributes
@@ -49,15 +51,15 @@ class Query:
                     MapKey.LINE_STRING: self.query_str.splitlines()[line_index],
                 }
 
-    def parse_and_get_upstairs_tables(self) -> List[str]:
+    def parse_and_get_upstairs_tables(self) -> list[str]:
         """Parse query and get upstairs tables
 
         Returns:
-            set: upstairs table set
+            list[str]: A list of upstairs tables
         """
         # Get Common-Table-Expressions(CTE) from query string
         cte_pattern = r"(?:with|,)\s*(\w+)\s+as\s*"
-        cte_alias: List[str] = re.findall(cte_pattern, self.query_str, re.IGNORECASE)
+        cte_alias: list[str] = re.findall(cte_pattern, self.query_str, re.IGNORECASE)
 
         # Search a boundary line number that main query starts
         boundary_num: int = 0
@@ -73,7 +75,7 @@ class Query:
 
         # Exclude table alias from main query
         table_pattern = r"(?:from|join)\s+([`.\-\w]+)"
-        main_tables_with_alias: List[str] = re.findall(
+        main_tables_with_alias: list[str] = re.findall(
             table_pattern, query_group["main"], re.IGNORECASE
         )
         main_tables = [
@@ -81,7 +83,7 @@ class Query:
         ]
 
         # Exclude table alias from CTEs
-        cte_tables_with_alias: List[str] = re.findall(
+        cte_tables_with_alias: list[str] = re.findall(
             table_pattern, query_group["cte"], re.IGNORECASE
         )
         cte_tables = [
@@ -103,7 +105,7 @@ def solve_table_prefix(table: str, default_table_prefix: str) -> str:
             it will be complement this prefix. Defaults to None.
 
     Returns:
-        str: Solved table name
+        str: Solved table name.
     """
     solved_name = table
     if table.count(".") <= 1:

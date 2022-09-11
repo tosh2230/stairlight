@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import re
-from typing import Iterator, Optional
+from typing import Iterator
 
 import boto3
 from botocore.response import StreamingBody
@@ -22,9 +24,9 @@ class S3Template(Template):
         self,
         mapping_config: MappingConfig,
         key: str,
-        bucket: Optional[str] = None,
-        project: Optional[str] = None,
-        default_table_prefix: Optional[str] = None,
+        bucket: str | None = None,
+        project: str | None = None,
+        default_table_prefix: str | None = None,
     ):
         super().__init__(
             mapping_config=mapping_config,
@@ -52,6 +54,9 @@ class S3Template(Template):
             str: Template string
         """
         template_str: str = ""
+        if not self.bucket:
+            return template_str
+
         s3_bucket: Bucket = self.s3.Bucket(self.bucket)
         object_output: GetObjectOutputTypeDef = s3_bucket.Object(self.key).get()
         body: StreamingBody = object_output["Body"]
@@ -103,6 +108,14 @@ class S3TemplateSource(TemplateSource):
             )
 
     def is_skipped(self, obj: ObjectSummary) -> bool:
+        """Check the target object is skipped or not
+
+        Args:
+            obj (ObjectSummary): Object
+
+        Returns:
+            bool: Is skipped or not
+        """
         return not re.fullmatch(
             rf"{self._include.Regex}",
             obj.key,

@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 import json
 import os
 from importlib.util import find_spec
 from logging import getLogger
 from pathlib import Path
-from typing import Any, Dict, List, OrderedDict, Type
+from typing import Any, OrderedDict, Type
 
 from .config import MappingConfigMapping
 from .config_key import GCS_URI_SCHEME, S3_URI_SCHEME
@@ -18,7 +20,7 @@ logger = getLogger(__name__)
 
 
 def get_template_source_class(template_source_type: str) -> Type[TemplateSource]:
-    """Get template source class
+    """Get a template source class for dynamic importing
 
     Args:
         template_source_type (str): Template source type
@@ -51,6 +53,14 @@ def get_template_source_class(template_source_type: str) -> Type[TemplateSource]
 
 
 def get_default_table_name(template: Template) -> str:
+    """Get a default table name
+
+    Args:
+        template (Template): Query template
+
+    Returns:
+        str: Default table name
+    """
     default_table_name: str = ""
     if template.source_type == TemplateSourceType.REDASH:
         default_table_name = template.uri
@@ -61,8 +71,17 @@ def get_default_table_name(template: Template) -> str:
 
 def collect_mapping_attributes(
     template: Template,
-    tables: List[OrderedDict[str, Any]],
+    tables: list[OrderedDict[str, Any]],
 ) -> MappingConfigMapping:
+    """Collect attributes from a mapping section
+
+    Args:
+        template (Template): Query template
+        tables (list[OrderedDict[str, Any]]): Tables
+
+    Returns:
+        MappingConfigMapping: Attributes of a mapping section
+    """
     mapping: MappingConfigMapping
 
     if template.source_type == TemplateSourceType.FILE:
@@ -97,11 +116,12 @@ def collect_mapping_attributes(
 
 
 class SaveMapController:
-    def __init__(self, save_file: str, mapped: Dict[str, Any]) -> None:
+    def __init__(self, save_file: str, mapped: dict[str, Any]) -> None:
         self.save_file = save_file
         self._mapped = mapped
 
     def save(self) -> None:
+        """Save mapped results"""
         if self.save_file.startswith(GCS_URI_SCHEME):
             self._save_map_gcs()
         elif self.save_file.startswith(S3_URI_SCHEME):
@@ -127,6 +147,7 @@ class SaveMapController:
         )
 
     def _save_map_s3(self) -> None:
+        """Save mapped results to Amazon S3"""
         from mypy_boto3_s3.service_resource import Object
 
         from .s3.map import get_s3_object
@@ -140,6 +161,11 @@ class LoadMapController:
         self.load_file = load_file
 
     def load(self) -> dict:
+        """Load mapped results
+
+        Returns:
+            dict: Loaded map
+        """
         loaded_map = {}
         if self.load_file.startswith(GCS_URI_SCHEME):
             loaded_map = self._load_map_gcs()

@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import argparse
 import json
 import textwrap
-from typing import Any, Callable, Dict, List, Union
+from typing import Any, Callable
 
 from stairlight.stairlight import ResponseType, StairLight
 
@@ -43,7 +45,7 @@ def command_check(stairlight: StairLight, args: argparse.Namespace) -> str:
 
 def command_up(
     stairlight: StairLight, args: argparse.Namespace
-) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
+) -> dict[str, Any] | list[dict[str, Any]]:
     """Execute up command
 
     Args:
@@ -51,7 +53,7 @@ def command_up(
         args (argparse.Namespace): CLI arguments
 
     Returns:
-        Union[dict, list]: Upstairs results
+        dict[str, Any] | list[dict[str, Any]]: Upstairs results
     """
     return search(
         func=stairlight.up,
@@ -62,7 +64,7 @@ def command_up(
 
 def command_down(
     stairlight: StairLight, args: argparse.Namespace
-) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
+) -> dict[str, Any] | list[dict[str, Any]]:
     """Execute down command
 
     Args:
@@ -70,7 +72,7 @@ def command_down(
         args (argparse.Namespace): CLI arguments
 
     Returns:
-        Union[dict, list[dict]]: Downstairs results
+        dict[str, Any] | list[dict[str, Any]]: Downstairs results
     """
     return search(
         func=stairlight.down,
@@ -80,17 +82,17 @@ def command_down(
 
 
 def search(
-    func: Callable, args: argparse.Namespace, tables: Union[str, List[str]]
-) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
+    func: Callable, args: argparse.Namespace, tables: str | list[str]
+) -> dict[str, Any] | list[dict[str, Any]]:
     """Search tables by executing stairlight.up() or stairlight.down()
 
     Args:
         func (Callable): Either stairlight.up() or stairlight.down()
         args (argparse.Namespace): CLI arguments
-        tables (Union[str, list[str]]): Tables to search
+        tables (str | list[str]): Tables to search
 
     Returns:
-        Union[dict, list[dict]]: Results
+        dict[str, Any] | list[dict[str, Any]]: Results
     """
     results = []
     for table_name in tables:
@@ -109,7 +111,7 @@ def search(
 
 def find_tables_to_search(
     stairlight: StairLight, args: argparse.Namespace
-) -> List[str]:
+) -> list[str]:
     """Find tables to search
 
     Args:
@@ -272,7 +274,7 @@ def create_parser() -> argparse.ArgumentParser:
 
     # up
     parser_up = subparsers.add_parser(
-        "up", help="return upstairs ( table | SQL file ) list"
+        "up", help="return upstairs ( table | file ) list"
     )
     parser_up.set_defaults(handler=command_up)
     set_general_parser(parser=parser_up)
@@ -281,7 +283,7 @@ def create_parser() -> argparse.ArgumentParser:
 
     # down
     parser_down = subparsers.add_parser(
-        "down", help="return downstairs ( table | SQL file ) list"
+        "down", help="return downstairs ( table | file ) list"
     )
     parser_down.set_defaults(handler=command_down)
     set_general_parser(parser=parser_down)

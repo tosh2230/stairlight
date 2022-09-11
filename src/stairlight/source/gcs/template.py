@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import re
-from typing import Any, Iterator, Optional
+from typing import Any, Iterator
 
 from google.cloud import storage
 
@@ -14,9 +16,9 @@ class GcsTemplate(Template):
         self,
         mapping_config: MappingConfig,
         key: str,
-        bucket: Optional[str] = None,
-        project: Optional[str] = None,
-        default_table_prefix: Optional[str] = None,
+        bucket: str | None = None,
+        project: str | None = None,
+        default_table_prefix: str | None = None,
     ):
         super().__init__(
             mapping_config=mapping_config,
@@ -91,6 +93,14 @@ class GcsTemplateSource(TemplateSource):
             )
 
     def is_skipped(self, blob: Any) -> bool:
+        """Check the target path is skipped or not
+
+        Args:
+            blob (Any): Blob
+
+        Returns:
+            bool: Is skipped or not
+        """
         return not re.fullmatch(
             rf"{self._include.Regex}",
             blob.name,

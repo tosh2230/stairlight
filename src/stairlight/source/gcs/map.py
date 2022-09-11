@@ -4,6 +4,14 @@ from ..config_key import GCS_URI_SCHEME
 
 
 def get_gcs_blob(uri: str) -> Blob:
+    """Get a Google Cloud Storage blob
+
+    Args:
+        uri (str): URI
+
+    Returns:
+        Blob: Blob
+    """
     bucket_name = uri.replace(GCS_URI_SCHEME, "").split("/")[0]
     key = uri.replace(f"{GCS_URI_SCHEME}{bucket_name}/", "")
 
