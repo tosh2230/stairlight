@@ -13,7 +13,7 @@ class Query:
         """SQL query
 
         Args:
-            query_str (str, optional): SQL query string. Defaults to None.
+            query_str (str): Query statement.
             default_table_prefix (str, optional):
                 If project or dataset that configured table have are omitted,
                 it will be complement this prefix. Defaults to None.
@@ -22,7 +22,7 @@ class Query:
         self.default_table_prefix = default_table_prefix
 
     def detect_upstairs_attributes(self) -> Iterator[dict]:
-        """Parse a SQL query string and detect upstream table attributes
+        """Parse a query statement and detect upstream table attributes
 
         Yields:
             Iterator[dict]: upstream table attributes
@@ -55,7 +55,7 @@ class Query:
         """Parse query and get upstairs tables
 
         Returns:
-            set: upstairs table set
+            list[str]: A list of upstairs tables
         """
         # Get Common-Table-Expressions(CTE) from query string
         cte_pattern = r"(?:with|,)\s*(\w+)\s+as\s*"
@@ -105,7 +105,7 @@ def solve_table_prefix(table: str, default_table_prefix: str) -> str:
             it will be complement this prefix. Defaults to None.
 
     Returns:
-        str: Solved table name
+        str: Solved table name.
     """
     solved_name = table
     if table.count(".") <= 1:

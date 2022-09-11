@@ -93,6 +93,14 @@ class GcsTemplateSource(TemplateSource):
             )
 
     def is_skipped(self, blob: Any) -> bool:
+        """Check the target path is skipped or not
+
+        Args:
+            blob (Any): Blob
+
+        Returns:
+            bool: Is skipped or not
+        """
         return not re.fullmatch(
             rf"{self._include.Regex}",
             blob.name,

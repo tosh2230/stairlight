@@ -79,6 +79,14 @@ class FileTemplateSource(TemplateSource):
             )
 
     def is_skipped(self, p: pathlib.Path):
+        """Check the target path is skipped or not
+
+        Args:
+            p (pathlib.Path): Path
+
+        Returns:
+            _type_: Is skipped or not
+        """
         return (
             p.is_dir()
             or not re.fullmatch(rf"{self._include.Regex}", str(p))

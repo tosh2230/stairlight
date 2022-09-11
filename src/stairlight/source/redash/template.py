@@ -61,6 +61,10 @@ class RedashTemplate(Template):
         """
         return self.query_str
 
+    def get_uri(self) -> str:
+        """Get uri"""
+        return super().get_uri()
+
 
 class RedashTemplateSource(TemplateSource):
     REDASH_QUERIES = "sql/redash_queries.sql"
@@ -84,6 +88,11 @@ class RedashTemplateSource(TemplateSource):
         self.conditions: dict[str, Any] = {}
 
     def search_templates(self) -> Iterator[Template]:
+        """Search query template files
+
+        Yields:
+            Iterator[Template]: Attributes of query template files
+        """
         results = self.get_redash_queries()
         for result in results:
             # see columns "src/stairlight/source/redash/sql/redash_queries.sql"
@@ -96,6 +105,11 @@ class RedashTemplateSource(TemplateSource):
             )
 
     def get_redash_queries(self) -> list[Row]:
+        """Get Redash queries
+
+        Returns:
+            list[Row]: Queries
+        """
         current_dir = os.path.dirname(os.path.abspath(__file__))
         query_text = self.build_query_string(
             path=f"{current_dir}/{self.REDASH_QUERIES}"
@@ -113,6 +127,14 @@ class RedashTemplateSource(TemplateSource):
         return queries.fetchall()
 
     def build_query_string(self, path: str) -> str:
+        """Build a query string
+
+        Args:
+            path (str): Path
+
+        Returns:
+            str: Query string
+        """
         where_clauses: list[str] = []
         for key, value in self.WHERE_CLAUSE_TEMPLATES.items():
             if key in asdict(self._include).keys():
@@ -122,10 +144,23 @@ class RedashTemplateSource(TemplateSource):
         return base_query_string + "WHERE " + " AND ".join(where_clauses)
 
     def read_query_string(self, path: str) -> str:
+        """Read a query string
+
+        Args:
+            path (str): Path
+
+        Returns:
+            str: Query string
+        """
         with open(path, "r", encoding="utf-8") as f:
             return f.read()
 
     def get_connection_str(self) -> str:
+        """Get a database connection string
+
+        Returns:
+            str: Connection string
+        """
         environment_variable_name = self._include.DatabaseUrlEnvironmentVariable
         connection_str = os.environ.get(environment_variable_name, "")
         if not connection_str:

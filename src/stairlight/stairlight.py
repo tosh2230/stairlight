@@ -23,7 +23,7 @@ logger = getLogger(__name__)
 
 
 class ResponseType(enum.Enum):
-    """Enum: Execution result type of up/down command"""
+    """Enum: Execution result type of up|down command"""
 
     TABLE: str = "table"
     FILE: str = "file"
@@ -51,7 +51,7 @@ class Node:
 
 
 class StairLight:
-    """Table dependency detector"""
+    """A table dependency detector"""
 
     def __init__(
         self,
@@ -59,7 +59,7 @@ class StairLight:
         load_files: list[str] = None,
         save_file: str = "",
     ) -> None:
-        """Table dependency detector
+        """A table dependency detector
 
         Args:
             config_dir (str, optional):
@@ -111,7 +111,7 @@ class StairLight:
         return self._unmapped
 
     def has_stairlight_config(self) -> bool:
-        """Exists stairlight configuration file or not
+        """Exists a stairlight configuration file or not
 
         Returns:
             bool: Exists stairlight configuration file or not
@@ -119,7 +119,7 @@ class StairLight:
         return self._stairlight_config is not None
 
     def _set_config(self) -> None:
-        """Set config"""
+        """Set configurations"""
         if not self._stairlight_config:
             logger.warning(f"{STAIRLIGHT_CONFIG_PREFIX_DEFAULT}.y(a)ml' is not found.")
             return
@@ -136,7 +136,7 @@ class StairLight:
         )
 
     def _write_map(self) -> None:
-        """write a dependency map"""
+        """Write a dependency map"""
         dependency_map = Map(
             stairlight_config=self._stairlight_config,
             mapping_config=self._mapping_config,
@@ -217,7 +217,7 @@ class StairLight:
                 Response type. Defaults to ResponseType.TABLE.value.
 
         Returns:
-            list[str] | dict: Search results
+            list[str] | dict[str, Any]: Search results
         """
         return self.search(
             table_name=table_name,
@@ -244,7 +244,7 @@ class StairLight:
                 Response type. Defaults to ResponseType.TABLE.value.
 
         Returns:
-            list[str] | dict: Search results
+            list[str] | dict[str, Any]: Search results
         """
         return self.search(
             table_name=table_name,
@@ -272,7 +272,7 @@ class StairLight:
             direction (SearchDirection): Search direction
 
         Returns:
-            list[str] | dict: Search results
+            list[str] | dict[str, Any]: Search results
         """
         if verbose:
             return self.search_verbose(
@@ -477,7 +477,7 @@ class StairLight:
                     configured_labels=metadata.Labels,
                 )
             ):
-                tables_to_search.append(metadata.TableName)
+                tables_to_search.append(str(metadata.TableName))
 
         return tables_to_search
 
@@ -485,6 +485,15 @@ class StairLight:
     def is_target_label_found(
         target_labels: list[str], configured_labels: dict[str, Any]
     ) -> bool:
+        """Return a target label found or not.
+
+        Args:
+            target_labels (list[str]): Target labels
+            configured_labels (dict[str, Any]): Labels in configurations
+
+        Returns:
+            bool: A target label found or not.
+        """
         found_count: int = 0
         configured_label_key: str
         configured_label_value: str
@@ -508,7 +517,7 @@ def is_cyclic(tables: list[str]) -> bool:
         tables (list[str]): Detected tables
 
     Returns:
-        bool: Table dependencies are cyclic or not
+        bool: The table dependency is cyclic or not
     """
     nodes: dict[str, Node] = {}
     for table in tables:
@@ -534,11 +543,11 @@ def deep_merge(org: dict[str, Any], add: dict[str, Any]) -> dict[str, Any]:
     """Merge nested dicts
 
     Args:
-        org (dict[str, Any]): original dict
-        add (dict[str, Any]): dict to add
+        org (dict[str, Any]): Original dict
+        add (dict[str, Any]): Dict to add
 
     Returns:
-        dict: merged dict
+        dict: Merged dict
     """
     new: dict[str, Any] = org
     for add_key, add_value in add.items():

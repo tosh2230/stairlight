@@ -41,6 +41,14 @@ class StairlightConfig:
 
     @staticmethod
     def select_config_include(source_type: str) -> Type[StairlightConfigInclude]:
+        """Select a data class of include section by source type
+
+        Args:
+            source_type (str): Source type
+
+        Returns:
+            Type[StairlightConfigInclude]: Include section
+        """
         from .template import TemplateSourceType
 
         config_include: Type[StairlightConfigInclude] = StairlightConfigInclude
@@ -69,6 +77,11 @@ class StairlightConfig:
         return config_include
 
     def get_include(self) -> Iterator[StairlightConfigInclude]:
+        """Get attributes of a include section
+
+        Yields:
+            Iterator[StairlightConfigInclude]: Include section
+        """
         for _include in self.Include:
             config = self.select_config_include(
                 source_type=str(_include.get(MapKey.TEMPLATE_SOURCE_TYPE))
@@ -76,6 +89,11 @@ class StairlightConfig:
             yield config(**_include)
 
     def get_exclude(self) -> Iterator[StairlightConfigExclude]:
+        """Get attributes of a exclude section
+
+        Yields:
+            Iterator[StairlightConfigExclude]: Exclude section
+        """
         for _exclude in self.Exclude:
             yield StairlightConfigExclude(**_exclude)
 
@@ -116,9 +134,19 @@ class MappingConfig:
     Metadata: list[dict[str, Any]] = field(default_factory=list)
 
     def get_global(self) -> MappingConfigGlobal:
+        """Get a global section
+
+        Returns:
+            MappingConfigGlobal: Global section
+        """
         return MappingConfigGlobal(**self.Global)
 
     def get_mapping(self) -> Iterator[MappingConfigMapping]:
+        """Get a mapping section
+
+        Yields:
+            Iterator[MappingConfigMapping]: Mapping section
+        """
         for _mapping in self.Mapping:
             mapping_config = self.select_mapping_config(
                 source_type=str(_mapping.get(MapKey.TEMPLATE_SOURCE_TYPE))
@@ -126,11 +154,24 @@ class MappingConfig:
             yield mapping_config(**_mapping)
 
     def get_metadata(self) -> Iterator[MappingConfigMetadata]:
+        """Get a metadata section
+
+        Yields:
+            Iterator[MappingConfigMetadata]: Metadata section
+        """
         for _metadata in self.Metadata:
             yield MappingConfigMetadata(**_metadata)
 
     @staticmethod
     def select_mapping_config(source_type: str) -> Type[MappingConfigMapping]:
+        """Select a mapping data class from source type
+
+        Args:
+            source_type (str): Source type
+
+        Returns:
+            Type[MappingConfigMapping]: Mapping section
+        """
         from .template import TemplateSourceType
 
         mapping_config: Type[MappingConfigMapping] = MappingConfigMapping

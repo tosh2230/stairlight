@@ -108,6 +108,14 @@ class S3TemplateSource(TemplateSource):
             )
 
     def is_skipped(self, obj: ObjectSummary) -> bool:
+        """Check the target object is skipped or not
+
+        Args:
+            obj (ObjectSummary): Object
+
+        Returns:
+            bool: Is skipped or not
+        """
         return not re.fullmatch(
             rf"{self._include.Regex}",
             obj.key,

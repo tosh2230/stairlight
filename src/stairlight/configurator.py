@@ -40,7 +40,7 @@ class Configurator:
         """Configuration class
 
         Args:
-            path (str): Configuration file path
+            dir (str): A directory that Configuration files exists.
         """
         self.dir = dir
 
@@ -80,7 +80,7 @@ class Configurator:
         """Read a configuration file
 
         Args:
-            prefix (str): Configuration file name prefix
+            prefix (str): Prefix of configuration file name.
 
         Returns:
             dict: configurations
@@ -103,7 +103,9 @@ class Configurator:
         """Create a Stairlight template file
 
         Args:
-            prefix (str, optional): File prefix. Defaults to STAIRLIGHT_CONFIG_PREFIX.
+            prefix (str, optional):
+                Prefix of the configuration file name.
+                Defaults to STAIRLIGHT_CONFIG_PREFIX.
 
         Returns:
             str: Created file name
@@ -123,10 +125,12 @@ class Configurator:
 
         Args:
             unmapped (list[dict]): Unmapped results
-            prefix (str, optional): File prefix. Defaults to MAPPING_CONFIG_PREFIX.
+            prefix (str, optional):
+                Prefix of the configuration file name.
+                Defaults to MAPPING_CONFIG_PREFIX.
 
         Returns:
-            str: Mapping template file
+            str: Created file name
         """
         now = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
         template_file_name = f"{self.dir}/{prefix}_{now}.yaml"
@@ -145,15 +149,22 @@ class Configurator:
     def represent_odict(
         dumper: yaml.Dumper, odict: OrderedDict
     ) -> yaml.nodes.MappingNode:
-        """Create a OrderedDict object for dumping a YAML file
-        in order of OrderedDict"""
+        """Set for dumping a YAML file in order of OrderedDict
+
+        Args:
+            dumper (yaml.Dumper): Dumper
+            odict (OrderedDict): Ordered dict
+
+        Returns:
+            yaml.nodes.MappingNode: Mapping node
+        """
         return dumper.represent_mapping(
             tag="tag:yaml.org,2002:map", mapping=odict.items()
         )
 
     @staticmethod
     def build_stairlight_config() -> OrderedDict:
-        """Create a OrderedDict object for file 'stairlight.config'
+        """Create a OrderedDict object for stairlight configurations
 
         Returns:
             OrderedDict: Template dict for stairlight.yaml
@@ -177,10 +188,11 @@ class Configurator:
     def build_mapping_config(
         self, unmapped_templates: list[dict[str, Any]]
     ) -> OrderedDict:
-        """Create a OrderedDict for mapping.yaml
+        """Create a OrderedDict object for mapping configurations
 
         Args:
-            unmapped_templates (list[dict]): Unmapped settings that Stairlight detects
+            unmapped_templates (list[dict[str, Any]]):
+                Unmapped settings that Stairlight detects
 
         Returns:
             OrderedDict: Template dict for mapping.yaml
@@ -248,9 +260,9 @@ def create_nested_dict(
     """create nested dict from list
 
     Args:
-        keys (list): Dict keys
+        keys (list[str]): Dict keys
         results (dict[str, Any]): Nested dict
-        density (int, optional): Density. Defaults to 0.
+        density (int, optional): Density of the dict. Defaults to 0.
         default_value (any, optional): Default dict value. Defaults to None.
     """
     key = keys[density]

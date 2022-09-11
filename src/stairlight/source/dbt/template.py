@@ -51,6 +51,15 @@ class DbtTemplate(Template):
     def render(
         self, params: dict[str, Any] = None, ignore_params: list[str] = None
     ) -> str:
+        """Render a query statement from a jinja template
+
+        Args:
+            params (dict[str, Any]): Jinja parameters
+            ignore_params (list[str]): Ignore parameters. Defaults to None.
+
+        Returns:
+            str: Query statement
+        """
         return self.get_template_str()
 
 
@@ -71,6 +80,11 @@ class DbtTemplateSource(TemplateSource):
         self._include = include
 
     def search_templates(self) -> Iterator[Template]:
+        """Search query template files
+
+        Yields:
+            Iterator[Template]: Attributes of query template files
+        """
         if not self._include:
             return None
 
@@ -113,10 +127,21 @@ class DbtTemplateSource(TemplateSource):
                     project_name=project_name,
                 )
 
-    def is_skipped(self, p: pathlib.Path):
+    def is_skipped(self, p: pathlib.Path) -> bool:
+        """Check the target path is skipped or not
+
+        Args:
+            p (pathlib.Path): Path
+
+        Returns:
+            bool: Is skipped or not
+        """
+        is_matched = False
+        if self.REGEX_SCHEMA_TEST_FILE.fullmatch(str(p)):
+            is_matched = True
         return (
             p.is_dir()
-            or self.REGEX_SCHEMA_TEST_FILE.fullmatch(str(p))
+            or is_matched
             or self.is_excluded(
                 source_type=TemplateSourceType(self._include.TemplateSourceType),
                 key=str(p),
@@ -136,6 +161,15 @@ class DbtTemplateSource(TemplateSource):
         return self.read_yml(dir=project_dir, re_pattern=dbt_project_pattern)
 
     def read_yml(self, dir: str, re_pattern: re.Pattern) -> dict:
+        """Read DBT settings from a yml file
+
+        Args:
+            dir (str): Directory
+            re_pattern (re.Pattern): Regular expression pattern
+
+        Returns:
+            dict: Results
+        """
         files = [
             obj
             for obj in glob.glob(f"{dir}/**", recursive=False)
@@ -154,6 +188,17 @@ class DbtTemplateSource(TemplateSource):
         project_name: str,
         model_path: pathlib.Path,
     ) -> str:
+        """Return DBT model path
+
+        Args:
+            project_dir (str): DBT project directory
+            target_path (str): DBT target
+            project_name (str): DBT project
+            model_path (pathlib.Path): DBT model path
+
+        Returns:
+            str: DBT model path
+        """
         return (
             f"{project_dir}/"
             f"{target_path}/"
@@ -169,7 +214,19 @@ class DbtTemplateSource(TemplateSource):
         profile: str = None,
         target: str = None,
         vars: dict[str, Any] = None,
-    ):
+    ) -> str:
+        """Build a DBT compile command
+
+        Args:
+            project_dir (str): DBT project directory
+            profiles_dir (str): DBT profile directory
+            profile (str, optional): DBT profile. Defaults to None.
+            target (str, optional): DBT target. Defaults to None.
+            vars (dict[str, Any], optional): DBT variables. Defaults to None.
+
+        Returns:
+            str: DBT compile command
+        """
         command = (
             "dbt compile"
             f" --project-dir {project_dir}"
@@ -191,6 +248,18 @@ class DbtTemplateSource(TemplateSource):
         target: str = None,
         vars: dict[str, Any] = None,
     ) -> int:
+        """Execute dbt compile
+
+        Args:
+            project_dir (str): DBT project directory
+            profiles_dir (str): DBT profile directory
+            profile (str, optional): DBT profile. Defaults to None.
+            target (str, optional): DBT target. Defaults to None.
+            vars (dict[str, Any], optional): DBT variables. Defaults to None.
+
+        Returns:
+            int: Return code
+        """
         command = self.build_dbt_compile_command(
             project_dir=project_dir,
             profiles_dir=profiles_dir,

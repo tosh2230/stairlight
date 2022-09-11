@@ -274,7 +274,7 @@ def create_parser() -> argparse.ArgumentParser:
 
     # up
     parser_up = subparsers.add_parser(
-        "up", help="return upstairs ( table | SQL file ) list"
+        "up", help="return upstairs ( table | file ) list"
     )
     parser_up.set_defaults(handler=command_up)
     set_general_parser(parser=parser_up)
@@ -283,7 +283,7 @@ def create_parser() -> argparse.ArgumentParser:
 
     # down
     parser_down = subparsers.add_parser(
-        "down", help="return downstairs ( table | SQL file ) list"
+        "down", help="return downstairs ( table | file ) list"
     )
     parser_down.set_defaults(handler=command_down)
     set_general_parser(parser=parser_down)

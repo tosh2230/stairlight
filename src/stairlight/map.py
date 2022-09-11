@@ -23,17 +23,17 @@ class Map:
     def __init__(
         self,
         stairlight_config: StairlightConfig,
-        mapping_config: MappingConfig | None,
+        mapping_config: MappingConfig,
         mapped: dict[str, Any] | None = None,
     ) -> None:
         """Manages functions related to dependency map objects
 
         Args:
-            stairlight_config (StairlightConfig): Stairlight configuration
-            mapping_config (MappingConfig): Mapping configuration
-            mapped (dict, optional):
-                Mapped file attributes when a mapping configuration file loaded.
-                Defaults to {}.
+            stairlight_config (StairlightConfig): Stairlight configurations.
+            mapping_config (MappingConfig):
+                Mapping configurations.
+            mapped (dict[str, Any], optional):
+                Mapped table attributes. Defaults to None.
         """
         if mapped:
             self.mapped = mapped
@@ -71,7 +71,11 @@ class Map:
             )
 
     def write_by_template_source(self, template_source: TemplateSource) -> None:
-        """Write a dependency map by template source"""
+        """Write a dependency map by template source
+
+        Args:
+            template_source (TemplateSource): Template source
+        """
         for template in template_source.search_templates():
             if not self._mapping_config:
                 self.add_unmapped_params(template=template)
@@ -94,7 +98,7 @@ class Map:
         """Remap a dependency map
 
         Args:
-            template (Template): SQL template
+            template (Template): Query template
             table_attributes (MappingConfigMappingTable):
                 Table attributes from mapping configuration
         """
@@ -137,7 +141,7 @@ class Map:
         """get global parameters in mapping.yaml
 
         Returns:
-            dict: global parameters
+            dict[str, Any]: Global parameters
         """
         if self._mapping_config:
             _global: MappingConfigGlobal = self._mapping_config.get_global()
@@ -153,7 +157,7 @@ class Map:
             table_attributes (MappingConfigMappingTable): table attributes
 
         Returns:
-            dict: combined parameters
+            dict[str, Any]: Combined global parameters
         """
         global_params: dict[str, Any] = self.get_global_params()
         table_params: OrderedDict[str, Any] = table_attributes.Parameters
@@ -172,9 +176,9 @@ class Map:
 
         Args:
             template (Template): Template class
-            mapping_labels (dict): labels in mapping section
-            metadata (list[str]): metadata
-            upstairs (str): upstairs table name
+            mapping_labels (dict[str, Any]): Labels in mapping section
+            metadata (list[dict[str, Any]]): Metadata
+            upstairs (str): Upstairs table's Name
 
         Returns:
             dict[str, Any]: upstairs table information
@@ -220,7 +224,7 @@ class Map:
         """add to the list of unmapped params
 
         Args:
-            template (Template): SQL template
+            template (Template): Query template
             params (list[str], optional): Jinja parameters
         """
         if not params:
@@ -239,7 +243,7 @@ class Map:
         """detect unmapped parameters in mapped files
 
         Args:
-            template (Template): SQL template
+            template (Template): Query template
             table_attributes (MappingConfigMappingTable):
                 Table attributes from mapping configuration
 
@@ -267,10 +271,10 @@ def create_dict_key_list(d: dict[str, Any], delimiter: str = ".") -> list[str]:
     """combine nested dictionary keys and converts to a list
 
     Args:
-        d (dict): dict[str, Any]
+        d (dict[str, Any]): dict
 
     Returns:
-        list: key-combined and list-converted results
+        list[str]: key-combined and list-converted results
     """
     results = []
     for key, value in d.items():

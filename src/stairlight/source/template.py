@@ -13,7 +13,7 @@ from .config import MappingConfig, MappingConfigMappingTable, StairlightConfig
 
 
 class TemplateSourceType(enum.Enum):
-    """SQL template source type"""
+    """Query template source type"""
 
     FILE = "File"
     GCS = "GCS"
@@ -26,7 +26,7 @@ class TemplateSourceType(enum.Enum):
 
 
 class Template(ABC):
-    """Base SQL template"""
+    """Base query template"""
 
     def __init__(
         self,
@@ -40,19 +40,30 @@ class Template(ABC):
         query_id: int | None = None,
         project_name: str | None = None,
     ):
-        """SQL template
+        """Query template
 
         Args:
             mapping_config (dict[str, Any]): Mapping configuration
-            key (str): SQL file key
-            source_type (SourceType): Source type
-            bucket (Optional[str], optional):
-                Bucket name where SQL file saved.Defaults to None.
-            project (Optional[str], optional):
-                Project name where SQL file saved.Defaults to None.
-            default_table_prefix (Optional[str], optional):
+            key (str): A key of query statement.
+            source_type (SourceType): Source type.
+            bucket (str, optional):
+                A name of object storage bucket where query statements saved.
+                Defaults to None.
+            project (str, optional):
+                A project name of Google Cloud where query statements saved.
+                Defaults to None.
+            default_table_prefix (str, optional):
                 If project or dataset that configured table have are omitted,
                 it will be complement this prefix. Defaults to None.
+            data_source_name (str, optional):
+                Data source name. It's only used in a Redash template.
+                Defaults to None.
+            query_id (int, optional):
+                Query id. It's only used in a Redash template.
+                Defaults to None.
+            project_name (str, optional):
+                Project name. It's only used in a DBT template.
+                Defaults to None.
         """
         self._mapping_config = mapping_config
         self.key = key
@@ -98,7 +109,7 @@ class Template(ABC):
         """Check if the template is set to mapping configuration
 
         Returns:
-            bool: Is set or not
+            bool: Is mapped or not
         """
         result = False
         for _ in self.find_mapped_table_attributes():
@@ -108,10 +119,10 @@ class Template(ABC):
 
     @staticmethod
     def detect_jinja_params(template_str: str) -> list:
-        """Get jinja parameters
+        """Detect jinja parameters from template string
 
         Args:
-            template_str (str): File string
+            template_str (str): Template string
 
         Returns:
             list: Jinja parameters
@@ -134,7 +145,7 @@ class Template(ABC):
             source_type (str): source type
             key (str): key path
             template_str (str): template string
-            params (dict[str, Any]): parameters
+            params (dict[str, Any]): Jinja parameters
 
         Raises:
             RenderingTemplateException: class RenderingTemplateException
@@ -176,22 +187,23 @@ class Template(ABC):
             )
         return replaced_str
 
+    @abstractmethod
     def get_uri(self) -> str:
         """Get uri"""
-        return ""
+        pass
 
     @abstractmethod
     def get_template_str(self) -> str:
         """Get template strings that read from template source"""
-        return ""
+        pass
 
     def render(self, params: dict[str, Any], ignore_params: list[str] = None) -> str:
-        """Render SQL query string from a jinja template on Redash queries
+        """Render a query statement from a jinja template
         Args:
             params (dict[str, Any]): Jinja parameters
-            ignore_params (list[str]): Ignore parameters
+            ignore_params (list[str]): Ignore parameters. Defaults to None.
         Returns:
-            str: SQL query string
+            str: Query statement
         """
         if not ignore_params:
             ignore_params = []
@@ -213,6 +225,12 @@ class Template(ABC):
 
 
 class RenderingTemplateException(Exception):
+    """Exception when failing to render jinja templates.
+
+    Args:
+        Exception (_type_): Exception
+    """
+
     def __init__(self, *args: object) -> None:
         super().__init__(*args)
 
@@ -243,10 +261,10 @@ class TemplateSource(ABC):
 
     @abstractmethod
     def search_templates(self) -> Iterator[Template]:
-        """Search SQL template files
+        """Search query template files
 
         Yields:
-            Iterator[SQLTemplate]: SQL template file attributes
+            Iterator[Template]: Attributes of query template files
         """
         pass
 
@@ -255,7 +273,7 @@ class TemplateSource(ABC):
 
         Args:
             source_type (TemplateSourceType): SQL template source type
-            key (str): SQL template file key
+            key (str): Query template file key
 
         Returns:
             bool: Return True if the specified file is out of scope
