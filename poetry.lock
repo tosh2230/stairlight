@@ -667,12 +667,12 @@ protobuf = "<4.0.0dev"
 six = ">=1.13.0,<2.0.0dev"
 
 [package.extras]
-all = ["google-cloud-bigquery-storage (>=1.0.0,<2.0.0dev)", "grpcio (>=1.32.0,<2.0dev)", "pyarrow (>=1.0.0,<2.0dev)", "pandas (>=0.23.0)", "tqdm (>=4.7.4,<5.0.0dev)", "opentelemetry-api (==0.9b0)", "opentelemetry-sdk (==0.9b0)", "opentelemetry-instrumentation (==0.9b0)", "pyarrow (>=0.16.0,<0.17.0dev)", "pyarrow (>=1.0.0,<2.0de)"]
+all = ["google-cloud-bigquery-storage (>=1.0.0,<2.0.0dev)", "grpcio (>=1.32.0,<2.0dev)", "pyarrow (>=1.0.0,<2.0dev)", "pandas (>=0.23.0)", "tqdm (>=4.7.4,<5.0.0dev)", "opentelemetry-api (==0.9b0)", "opentelemetry-sdk (==0.9b0)", "opentelemetry-instrumentation (==0.9b0)", "pyarrow (>=0.16.0,<0.17.0dev)", "pyarrow (>=1.0.0,<2.0dev)"]
 bqstorage = ["google-cloud-bigquery-storage (>=1.0.0,<2.0.0dev)", "grpcio (>=1.32.0,<2.0dev)", "pyarrow (>=1.0.0,<2.0dev)"]
 fastparquet = ["fastparquet", "python-snappy", "llvmlite (<=0.31.0)", "llvmlite (<=0.34.0)"]
 opentelemetry = ["opentelemetry-api (==0.9b0)", "opentelemetry-sdk (==0.9b0)", "opentelemetry-instrumentation (==0.9b0)"]
 pandas = ["pandas (>=0.23.0)"]
-pyarrow = ["pyarrow (>=0.16.0,<0.17.0dev)", "pyarrow (>=1.0.0,<2.0de)"]
+pyarrow = ["pyarrow (>=0.16.0,<0.17.0dev)", "pyarrow (>=1.0.0,<2.0dev)"]
 tqdm = ["tqdm (>=4.7.4,<5.0.0dev)"]
 
 [[package]]
