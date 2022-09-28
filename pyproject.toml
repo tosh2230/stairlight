@@ -19,7 +19,7 @@ dbt-core = { version = "^1.1", optional = true }
 dbt-bigquery = { version = "^1.1", optional = true }
 protobuf = { version = "^3.20.2", optional = true }
 boto3 = { version = "^1.24.14", optional = true }
-boto3-stubs = { version = "^1.24.17", extras = ["s3"] }
+boto3-stubs = { version = "^1.24.17", optional = true }
 
 [tool.poetry.extras]
 gcs = ["google-cloud-storage"]
