@@ -24,10 +24,13 @@ google-cloud-bigquery = { version = "^2.0", optional = true }
 protobuf = { version = "^3.20.2", optional = true }
 boto3 = { version = "^1.24.14", optional = true }
 
+# To avoid not in poetry.lock metadata
+networkx = { version = ">=2.3,<2.8.1", optional = true }
+
 [tool.poetry.extras]
 gcs = ["google-cloud-storage", "protobuf"]
 redash = ["psycopg2", "SQLAlchemy"]
-dbt-bigquery = ["dbt-core", "dbt-bigquery", "google-cloud-bigquery", "protobuf"]
+dbt-bigquery = ["dbt-core", "dbt-bigquery", "google-cloud-bigquery", "protobuf", "networkx"]
 s3 = ["boto3", "boto3-stubs"]
 
 [tool.poetry.dev-dependencies]
