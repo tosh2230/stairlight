@@ -12,7 +12,7 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square)](https://github.com/psf/black)
 [![CI](https://github.com/tosh2230/stairlight/actions/workflows/ci.yml/badge.svg)](https://github.com/tosh2230/stairlight/actions/workflows/ci.yml)
 
-An end-to-end data lineage tool, detects table dependencies by SQL SELECT statements.
+An end-to-end data lineage tool, detects table dependencies from SQL statements.
 
 <div align="left">
   <img src="https://raw.githubusercontent.com/tosh2230/stairlight/main/img/drawio/concepts.drawio.png" width="800" alt="concepts">
@@ -23,7 +23,7 @@ An end-to-end data lineage tool, detects table dependencies by SQL SELECT statem
 | Data Source | Remarks |
 | --- | --- |
 | Local file system | Python Pathlib module |
-| [Amazon S3](https://aws.amazon.com/s3/) | |
+| [Amazon S3](https://aws.amazon.com/s3/) | Available for [Amazon Managed Workflows for Apache Airflow (MWAA)](https://aws.amazon.com/managed-workflows-for-apache-airflow/) |
 | [Google Cloud Storage](https://cloud.google.com/storage) | Available for [Google Cloud Composer](https://cloud.google.com/composer) |
 | [dbt](https://www.getdbt.com/) - [Google BigQuery](https://cloud.google.com/bigquery) | Using `dbt compile` command internally |
 | [Redash](https://redash.io/) | |
@@ -68,7 +68,7 @@ $ stairlight
 
 ### Input
 
-- SQL SELECT statements
+- SQL statements
 - Configuration YAML files
     - stairlight.yaml: SQL statements locations and include/exclude conditions.
     - mapping.yaml: For mapping SQL statements and tables.
