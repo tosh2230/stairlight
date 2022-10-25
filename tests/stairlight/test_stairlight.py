@@ -255,6 +255,15 @@ class TestStairLight:
         assert actual == expected
 
 
+@pytest.mark.integration
+class TestStairLightNoConfig:
+    stairlight = StairLight(config_dir="none")
+    stairlight.create_map()
+
+    def test_has_stairlight_config(self):
+        assert not self.stairlight.has_stairlight_config()
+
+
 class TestIsCyclic:
     def test_cyclic_each(self):
         node_list = ["1", "2", "1", "2", "1", "2", "1", "2"]
