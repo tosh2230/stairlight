@@ -116,7 +116,7 @@ class StairLight:
         Returns:
             bool: Exists stairlight configuration file or not
         """
-        return self._stairlight_config is not None
+        return len(self._stairlight_config.Include) > 0
 
     def _set_config(self) -> None:
         """Set configurations"""

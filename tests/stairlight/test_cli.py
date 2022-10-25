@@ -37,7 +37,7 @@ class TestSuccess:
         message = cli_main.command_init(
             stairlight=stairlight_init, args=self.parser.parse_args([])
         )
-        assert len(message) > 0
+        assert len(message) > 0 and "already exists" not in message
 
     @pytest.mark.integration
     def test_command_check(self, stairlight_save: StairLight):
