@@ -35,7 +35,7 @@ tests_no_zope = ["coverage[toml] (>=5.0.2)", "hypothesis", "pympler", "pytest (>
 
 [[package]]
 name = "babel"
-version = "2.10.3"
+version = "2.11.0"
 description = "Internationalization utilities"
 category = "main"
 optional = true
@@ -46,11 +46,11 @@ pytz = ">=2015.7"
 
 [[package]]
 name = "black"
-version = "22.8.0"
+version = "22.10.0"
 description = "The uncompromising code formatter."
 category = "dev"
 optional = false
-python-versions = ">=3.6.2"
+python-versions = ">=3.7"
 
 [package.dependencies]
 click = ">=8.0.0"
@@ -69,14 +69,14 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "boto3"
-version = "1.24.82"
+version = "1.25.5"
 description = "The AWS SDK for Python"
 category = "main"
 optional = false
 python-versions = ">= 3.7"
 
 [package.dependencies]
-botocore = ">=1.27.82,<1.28.0"
+botocore = ">=1.28.5,<1.29.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.6.0,<0.7.0"
 
@@ -421,7 +421,7 @@ xray = ["mypy-boto3-xray (>=1.25.0,<1.26.0)"]
 
 [[package]]
 name = "botocore"
-version = "1.27.82"
+version = "1.28.5"
 description = "Low-level, data-driven core of boto 3."
 category = "main"
 optional = false
@@ -437,7 +437,7 @@ crt = ["awscrt (==0.14.0)"]
 
 [[package]]
 name = "botocore-stubs"
-version = "1.27.82"
+version = "1.28.5"
 description = "Type annotations and code completion for botocore"
 category = "main"
 optional = false
@@ -520,7 +520,7 @@ toml = ["tomli"]
 
 [[package]]
 name = "cryptography"
-version = "38.0.1"
+version = "38.0.2"
 description = "cryptography is a package which provides cryptographic recipes and primitives to Python developers."
 category = "dev"
 optional = false
@@ -555,7 +555,7 @@ protobuf = ">=3.13.0,<4"
 
 [[package]]
 name = "dbt-core"
-version = "1.2.1"
+version = "1.2.2"
 description = "With dbt, data analysts and engineers can build analytics the way engineers build applications."
 category = "main"
 optional = true
@@ -628,7 +628,7 @@ python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 
 [[package]]
 name = "google-api-core"
-version = "1.33.1"
+version = "1.33.2"
 description = "Google API client core library"
 category = "main"
 optional = true
@@ -639,7 +639,7 @@ google-auth = ">=1.25.0,<3.0dev"
 googleapis-common-protos = ">=1.56.2,<2.0dev"
 grpcio = {version = ">=1.33.2,<2.0dev", optional = true, markers = "extra == \"grpc\""}
 grpcio-status = {version = ">=1.33.2,<2.0dev", optional = true, markers = "extra == \"grpc\""}
-protobuf = ">=3.20.1,<4.0.0dev"
+protobuf = ">=3.19.5,<3.20.0 || >3.20.0,<3.20.1 || >3.20.1,<4.0.0dev"
 requests = ">=2.18.0,<3.0.0dev"
 
 [package.extras]
@@ -765,18 +765,19 @@ grpc = ["grpcio (>=1.0.0,<2.0.0dev)"]
 
 [[package]]
 name = "greenlet"
-version = "1.1.3"
+version = "2.0.0"
 description = "Lightweight in-process concurrent programming"
 category = "main"
 optional = true
 python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*"
 
 [package.extras]
-docs = ["sphinx"]
+docs = ["sphinx", "docutils (<0.18)"]
+test = ["objgraph", "faulthandler"]
 
 [[package]]
 name = "grpcio"
-version = "1.49.1"
+version = "1.50.0"
 description = "HTTP/2-based RPC framework"
 category = "main"
 optional = true
@@ -786,7 +787,7 @@ python-versions = ">=3.7"
 six = ">=1.5.2"
 
 [package.extras]
-protobuf = ["grpcio-tools (>=1.49.1)"]
+protobuf = ["grpcio-tools (>=1.50.0)"]
 
 [[package]]
 name = "grpcio-status"
@@ -1162,7 +1163,7 @@ testing = ["google-api-core[grpc] (>=1.31.5)"]
 
 [[package]]
 name = "protobuf"
-version = "3.20.2"
+version = "3.20.3"
 description = "Protocol Buffers"
 category = "main"
 optional = true
@@ -1170,7 +1171,7 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "psycopg2"
-version = "2.9.3"
+version = "2.9.5"
 description = "psycopg2 - Python-PostgreSQL Database Adapter"
 category = "main"
 optional = true
@@ -1232,7 +1233,7 @@ diagrams = ["railroad-diagrams", "jinja2"]
 
 [[package]]
 name = "pyrsistent"
-version = "0.18.1"
+version = "0.19.1"
 description = "Persistent/Functional/Immutable data structures"
 category = "main"
 optional = true
@@ -1276,7 +1277,7 @@ testing = ["virtualenv", "pytest-xdist", "six", "process-tests", "hunter", "fiel
 
 [[package]]
 name = "pytest-mock"
-version = "3.9.0"
+version = "3.10.0"
 description = "Thin-wrapper around the mock package for easier use with pytest"
 category = "dev"
 optional = false
@@ -1323,7 +1324,7 @@ python-versions = "*"
 
 [[package]]
 name = "pytz"
-version = "2022.2.1"
+version = "2022.6"
 description = "World timezone definitions, modern and historical"
 category = "main"
 optional = false
@@ -1357,19 +1358,21 @@ use_chardet_on_py3 = ["chardet (>=3.0.2,<6)"]
 
 [[package]]
 name = "responses"
-version = "0.21.0"
+version = "0.22.0"
 description = "A utility library for mocking out the `requests` Python library."
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 
 [package.dependencies]
-requests = ">=2.0,<3.0"
+requests = ">=2.22.0,<3.0"
+toml = "*"
+types-toml = "*"
 typing-extensions = {version = "*", markers = "python_version < \"3.8\""}
 urllib3 = ">=1.25.10"
 
 [package.extras]
-tests = ["pytest (>=7.0.0)", "coverage (>=6.0.0)", "pytest-cov", "pytest-asyncio", "pytest-localserver", "flake8", "types-mock", "types-requests", "mypy"]
+tests = ["pytest (>=7.0.0)", "coverage (>=6.0.0)", "pytest-cov", "pytest-asyncio", "pytest-httpserver", "flake8", "types-requests", "mypy"]
 
 [[package]]
 name = "rsa"
@@ -1406,7 +1409,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
 
 [[package]]
 name = "sqlalchemy"
-version = "1.4.41"
+version = "1.4.42"
 description = "Database Abstraction Library"
 category = "main"
 optional = true
@@ -1454,6 +1457,14 @@ optional = true
 python-versions = "*"
 
 [[package]]
+name = "toml"
+version = "0.10.2"
+description = "Python Library for Tom's Obvious, Minimal Language"
+category = "dev"
+optional = false
+python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
+
+[[package]]
 name = "tomli"
 version = "2.0.1"
 description = "A lil' TOML parser"
@@ -1471,7 +1482,7 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "types-awscrt"
-version = "0.14.6"
+version = "0.15.1"
 description = "Type annotations and code completion for awscrt"
 category = "main"
 optional = false
@@ -1479,7 +1490,7 @@ python-versions = ">=3.7,<4.0"
 
 [[package]]
 name = "types-pyyaml"
-version = "6.0.12"
+version = "6.0.12.1"
 description = "Typing stubs for PyYAML"
 category = "dev"
 optional = false
@@ -1494,8 +1505,16 @@ optional = false
 python-versions = ">=3.7,<4.0"
 
 [[package]]
+name = "types-toml"
+version = "0.10.8"
+description = "Typing stubs for toml"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "typing-extensions"
-version = "4.3.0"
+version = "4.4.0"
 description = "Backported and Experimental Type Hints for Python 3.7+"
 category = "main"
 optional = false
@@ -1535,15 +1554,15 @@ python-versions = ">=3.4"
 
 [[package]]
 name = "zipp"
-version = "3.8.1"
+version = "3.10.0"
 description = "Backport of pathlib-compatible object wrapper for zip files"
 category = "main"
 optional = false
 python-versions = ">=3.7"
 
 [package.extras]
-docs = ["sphinx", "jaraco.packaging (>=9)", "rst.linker (>=1.9)", "jaraco.tidelift (>=1.4)"]
-testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-cov", "pytest-enabler (>=1.3)", "jaraco.itertools", "func-timeout", "pytest-black (>=0.3.7)", "pytest-mypy (>=0.9.1)"]
+docs = ["sphinx (>=3.5)", "jaraco.packaging (>=9)", "rst.linker (>=1.9)", "furo", "jaraco.tidelift (>=1.4)"]
+testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "flake8 (<5)", "pytest-cov", "pytest-enabler (>=1.3)", "jaraco.itertools", "func-timeout", "jaraco.functools", "more-itertools", "pytest-black (>=0.3.7)", "pytest-mypy (>=0.9.1)"]
 
 [extras]
 dbt-bigquery = ["dbt-core", "dbt-bigquery", "google-cloud-bigquery", "protobuf", "networkx"]
@@ -1562,10 +1581,7 @@ agate = [
     {file = "agate-1.6.3.tar.gz", hash = "sha256:e0f2f813f7e12311a4cdccc97d6ba0a6781e9c1aa8eca0ab00d5931c0113a308"},
 ]
 attrs = []
-babel = [
-    {file = "Babel-2.10.3-py3-none-any.whl", hash = "sha256:ff56f4892c1c4bf0d814575ea23471c230d544203c7748e8c68f0089478d48eb"},
-    {file = "Babel-2.10.3.tar.gz", hash = "sha256:7614553711ee97490f732126dc077f8d0ae084ebc6a96e23db1482afabdb2c51"},
-]
+babel = []
 black = []
 boto3 = []
 boto3-stubs = []
@@ -1903,19 +1919,7 @@ platformdirs = []
 pluggy = []
 proto-plus = []
 protobuf = []
-psycopg2 = [
-    {file = "psycopg2-2.9.3-cp310-cp310-win32.whl", hash = "sha256:083707a696e5e1c330af2508d8fab36f9700b26621ccbcb538abe22e15485362"},
-    {file = "psycopg2-2.9.3-cp310-cp310-win_amd64.whl", hash = "sha256:d3ca6421b942f60c008f81a3541e8faf6865a28d5a9b48544b0ee4f40cac7fca"},
-    {file = "psycopg2-2.9.3-cp36-cp36m-win32.whl", hash = "sha256:9572e08b50aed176ef6d66f15a21d823bb6f6d23152d35e8451d7d2d18fdac56"},
-    {file = "psycopg2-2.9.3-cp36-cp36m-win_amd64.whl", hash = "sha256:a81e3866f99382dfe8c15a151f1ca5fde5815fde879348fe5a9884a7c092a305"},
-    {file = "psycopg2-2.9.3-cp37-cp37m-win32.whl", hash = "sha256:cb10d44e6694d763fa1078a26f7f6137d69f555a78ec85dc2ef716c37447e4b2"},
-    {file = "psycopg2-2.9.3-cp37-cp37m-win_amd64.whl", hash = "sha256:4295093a6ae3434d33ec6baab4ca5512a5082cc43c0505293087b8a46d108461"},
-    {file = "psycopg2-2.9.3-cp38-cp38-win32.whl", hash = "sha256:34b33e0162cfcaad151f249c2649fd1030010c16f4bbc40a604c1cb77173dcf7"},
-    {file = "psycopg2-2.9.3-cp38-cp38-win_amd64.whl", hash = "sha256:0762c27d018edbcb2d34d51596e4346c983bd27c330218c56c4dc25ef7e819bf"},
-    {file = "psycopg2-2.9.3-cp39-cp39-win32.whl", hash = "sha256:8cf3878353cc04b053822896bc4922b194792df9df2f1ad8da01fb3043602126"},
-    {file = "psycopg2-2.9.3-cp39-cp39-win_amd64.whl", hash = "sha256:06f32425949bd5fe8f625c49f17ebb9784e1e4fe928b7cce72edc36fb68e4c0c"},
-    {file = "psycopg2-2.9.3.tar.gz", hash = "sha256:8e841d1bf3434da985cc5ef13e6f75c8981ced601fd70cc6bf33351b91562981"},
-]
+psycopg2 = []
 pyasn1 = []
 pyasn1-modules = []
 pycodestyle = []
@@ -1954,6 +1958,7 @@ text-unidecode = [
     {file = "text-unidecode-1.3.tar.gz", hash = "sha256:bad6603bb14d279193107714b288be206cac565dfa49aa5b105294dd5c4aab93"},
     {file = "text_unidecode-1.3-py2.py3-none-any.whl", hash = "sha256:1311f10e8b895935241623731c2ba64f4c455287888b18189350b67134a822e8"},
 ]
+toml = []
 tomli = [
     {file = "tomli-2.0.1-py3-none-any.whl", hash = "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc"},
     {file = "tomli-2.0.1.tar.gz", hash = "sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f"},
@@ -1962,6 +1967,7 @@ typed-ast = []
 types-awscrt = []
 types-pyyaml = []
 types-s3transfer = []
+types-toml = []
 typing-extensions = []
 urllib3 = []
 werkzeug = [
