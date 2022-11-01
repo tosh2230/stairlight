@@ -39,7 +39,7 @@ flake8 = "^4.0.1"
 isort = "^5.9.3"
 mypy = "^0.961"
 types-PyYAML = "^6.0.8"
-pytest = "^7.0.0"
+pytest = "^7.2.0"
 pytest-cov = "^3.0.0"
 pytest-mock = "^3.8.1"
 moto = {extras = ["s3"], version = "^3.1.16"}
