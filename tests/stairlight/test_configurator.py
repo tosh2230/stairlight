@@ -81,7 +81,6 @@ class TestBuildMappingConfigFile:
             }
         ]
 
-        global_value: OrderedDict = OrderedDict({MappingConfigKey.PARAMETERS: {}})
         mapping_value = OrderedDict(
             {
                 MappingConfigKey.TEMPLATE_SOURCE_TYPE: file_template.source_type.value,
@@ -89,7 +88,6 @@ class TestBuildMappingConfigFile:
                     OrderedDict(
                         {
                             MappingConfigKey.TABLE_NAME: "test_undefined",
-                            MappingConfigKey.IGNORE_PARAMETERS: [],
                             MappingConfigKey.PARAMETERS: OrderedDict(
                                 {
                                     "params": {
@@ -99,7 +97,6 @@ class TestBuildMappingConfigFile:
                                     }
                                 }
                             ),
-                            MappingConfigKey.LABELS: OrderedDict(),
                         }
                     )
                 ],
@@ -107,18 +104,9 @@ class TestBuildMappingConfigFile:
             }
         )
 
-        metadata_value: OrderedDict = OrderedDict(
-            {
-                MappingConfigKey.TABLE_NAME: None,
-                MappingConfigKey.LABELS: OrderedDict(),
-            }
-        )
-
         expected = OrderedDict(
             {
-                MappingConfigKey.GLOBAL_SECTION: global_value,
                 MappingConfigKey.MAPPING_SECTION: [mapping_value],
-                MappingConfigKey.METADATA_SECTION: [metadata_value],
             }
         )
         actual = configurator.build_mapping_config(
@@ -152,7 +140,6 @@ class TestBuildMappingConfigGcs:
             }
         ]
 
-        global_value: OrderedDict = OrderedDict({MappingConfigKey.PARAMETERS: {}})
         mapping_value = OrderedDict(
             {
                 MappingConfigKey.TEMPLATE_SOURCE_TYPE: gcs_template.source_type.value,
@@ -160,7 +147,6 @@ class TestBuildMappingConfigGcs:
                     OrderedDict(
                         {
                             MappingConfigKey.TABLE_NAME: "cte_multi_line",
-                            MappingConfigKey.IGNORE_PARAMETERS: [],
                             MappingConfigKey.PARAMETERS: OrderedDict(
                                 {
                                     "params": {
@@ -170,7 +156,6 @@ class TestBuildMappingConfigGcs:
                                     }
                                 }
                             ),
-                            MappingConfigKey.LABELS: OrderedDict(),
                         }
                     )
                 ],
@@ -180,18 +165,9 @@ class TestBuildMappingConfigGcs:
             }
         )
 
-        metadata_value: OrderedDict = OrderedDict(
-            {
-                MappingConfigKey.TABLE_NAME: None,
-                MappingConfigKey.LABELS: {},
-            }
-        )
-
         expected = OrderedDict(
             {
-                MappingConfigKey.GLOBAL_SECTION: global_value,
                 MappingConfigKey.MAPPING_SECTION: [mapping_value],
-                MappingConfigKey.METADATA_SECTION: [metadata_value],
             }
         )
         actual = configurator.build_mapping_config(
@@ -224,7 +200,6 @@ class TestBuildMappingConfigRedash:
             }
         ]
 
-        global_value: OrderedDict = OrderedDict({MappingConfigKey.PARAMETERS: {}})
         mapping_value = OrderedDict(
             {
                 MappingConfigKey.TEMPLATE_SOURCE_TYPE: (
@@ -234,7 +209,6 @@ class TestBuildMappingConfigRedash:
                     OrderedDict(
                         {
                             MappingConfigKey.TABLE_NAME: "redash_test_query",
-                            MappingConfigKey.IGNORE_PARAMETERS: [],
                             MappingConfigKey.PARAMETERS: OrderedDict(
                                 {
                                     "params": {
@@ -244,7 +218,6 @@ class TestBuildMappingConfigRedash:
                                     }
                                 }
                             ),
-                            MappingConfigKey.LABELS: OrderedDict(),
                         }
                     )
                 ],
@@ -253,18 +226,9 @@ class TestBuildMappingConfigRedash:
             }
         )
 
-        metadata_value: OrderedDict = OrderedDict(
-            {
-                MappingConfigKey.TABLE_NAME: None,
-                MappingConfigKey.LABELS: {},
-            }
-        )
-
         expected = OrderedDict(
             {
-                MappingConfigKey.GLOBAL_SECTION: global_value,
                 MappingConfigKey.MAPPING_SECTION: [mapping_value],
-                MappingConfigKey.METADATA_SECTION: [metadata_value],
             }
         )
         actual = configurator.build_mapping_config(
@@ -301,7 +265,6 @@ class TestBuildMappingConfigDbt:
             }
         ]
 
-        global_value: OrderedDict = OrderedDict({MappingConfigKey.PARAMETERS: {}})
         mapping_value = OrderedDict(
             {
                 MappingConfigKey.TEMPLATE_SOURCE_TYPE: dbt_template.source_type.value,
@@ -309,7 +272,6 @@ class TestBuildMappingConfigDbt:
                     OrderedDict(
                         {
                             MappingConfigKey.TABLE_NAME: "my_first_dbt_model",
-                            MappingConfigKey.IGNORE_PARAMETERS: [],
                             MappingConfigKey.PARAMETERS: OrderedDict(
                                 {
                                     "params": {
@@ -319,7 +281,6 @@ class TestBuildMappingConfigDbt:
                                     }
                                 }
                             ),
-                            MappingConfigKey.LABELS: OrderedDict(),
                         }
                     )
                 ],
@@ -331,18 +292,9 @@ class TestBuildMappingConfigDbt:
             }
         )
 
-        metadata_value: OrderedDict = OrderedDict(
-            {
-                MappingConfigKey.TABLE_NAME: None,
-                MappingConfigKey.LABELS: {},
-            }
-        )
-
         expected = OrderedDict(
             {
-                MappingConfigKey.GLOBAL_SECTION: global_value,
                 MappingConfigKey.MAPPING_SECTION: [mapping_value],
-                MappingConfigKey.METADATA_SECTION: [metadata_value],
             }
         )
         actual = configurator.build_mapping_config(
@@ -376,7 +328,6 @@ class TestBuildMappingConfigS3:
             }
         ]
 
-        global_value: OrderedDict = OrderedDict({MappingConfigKey.PARAMETERS: {}})
         mapping_value = OrderedDict(
             {
                 MappingConfigKey.TEMPLATE_SOURCE_TYPE: s3_template.source_type.value,
@@ -384,7 +335,6 @@ class TestBuildMappingConfigS3:
                     OrderedDict(
                         {
                             MappingConfigKey.TABLE_NAME: "cte_multi_line",
-                            MappingConfigKey.IGNORE_PARAMETERS: [],
                             MappingConfigKey.PARAMETERS: OrderedDict(
                                 {
                                     "params": {
@@ -394,7 +344,6 @@ class TestBuildMappingConfigS3:
                                     }
                                 }
                             ),
-                            MappingConfigKey.LABELS: OrderedDict(),
                         }
                     )
                 ],
@@ -404,18 +353,9 @@ class TestBuildMappingConfigS3:
             }
         )
 
-        metadata_value: OrderedDict = OrderedDict(
-            {
-                MappingConfigKey.TABLE_NAME: None,
-                MappingConfigKey.LABELS: {},
-            }
-        )
-
         expected = OrderedDict(
             {
-                MappingConfigKey.GLOBAL_SECTION: global_value,
                 MappingConfigKey.MAPPING_SECTION: [mapping_value],
-                MappingConfigKey.METADATA_SECTION: [metadata_value],
             }
         )
         actual = configurator.build_mapping_config(
