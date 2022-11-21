@@ -100,15 +100,15 @@ class StairlightConfig:
 
 @dataclass
 class MappingConfigGlobal:
-    Parameters: dict[str, Any] = field(default_factory=dict)
+    Parameters: dict[str, Any] | None = None
 
 
 @dataclass
 class MappingConfigMappingTable:
     TableName: str
-    IgnoreParameters: list[str] = field(default_factory=list)
-    Parameters: OrderedDict = field(default_factory=OrderedDict)
-    Labels: dict[str, Any] = field(default_factory=dict)
+    IgnoreParameters: list[str] | None = None
+    Parameters: OrderedDict | None = None
+    Labels: dict[str, Any] | None = None
 
 
 @dataclass
@@ -129,9 +129,9 @@ class MappingConfigMetadata:
 
 @dataclass
 class MappingConfig:
-    Global: OrderedDict = field(default_factory=OrderedDict)
+    Global: OrderedDict | None = None
     Mapping: list[OrderedDict] = field(default_factory=list)
-    Metadata: list[dict[str, Any]] = field(default_factory=list)
+    Metadata: list[dict[str, Any]] | None = None
 
     def get_global(self) -> MappingConfigGlobal:
         """Get a global section

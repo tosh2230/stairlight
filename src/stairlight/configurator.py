@@ -12,10 +12,8 @@ import yaml
 
 from .source.config import (
     MappingConfig,
-    MappingConfigGlobal,
     MappingConfigMapping,
     MappingConfigMappingTable,
-    MappingConfigMetadata,
     StairlightConfig,
     StairlightConfigExclude,
     StairlightConfigSettings,
@@ -197,10 +195,6 @@ class Configurator:
         Returns:
             OrderedDict: Template dict for mapping.yaml
         """
-        # List(instead of Set) because OrderedDict is not hashable
-        parameters_set: list[OrderedDict] = []
-        global_parameters: dict[str, Any] = {}
-
         # Mapping section
         mappings: list[MappingConfigMapping] = []
         unmapped_template: dict[str, Any]
@@ -210,26 +204,23 @@ class Configurator:
             template: Template = unmapped_template[MapKey.TEMPLATE]
 
             if MapKey.PARAMETERS in unmapped_template:
-                undefined_params: list[str] = unmapped_template.get(
-                    MapKey.PARAMETERS, []
-                )
+                undefined_params: list[str] = unmapped_template.get(MapKey.PARAMETERS)
                 for undefined_param in undefined_params:
                     splitted_params = undefined_param.split(".")
                     create_nested_dict(keys=splitted_params, results=parameters)
 
-                if parameters in parameters_set:
-                    global_parameters.update(parameters)
-                else:
-                    parameters_set.append(parameters)
+            # To avoid outputting empty fields
+            if len(parameters) == 0:
+                parameters = None
 
+            mapping_table = MappingConfigMappingTable(
+                TableName=get_default_table_name(template=template),
+                Parameters=parameters,
+            )
             table = OrderedDict(
                 asdict(
-                    MappingConfigMappingTable(
-                        TableName=get_default_table_name(template=template),
-                        Parameters=parameters,
-                        IgnoreParameters=[],
-                        Labels=OrderedDict(),
-                    )
+                    mapping_table,
+                    dict_factory=dict_factory,
                 )
             )
             mapping: MappingConfigMapping = collect_mapping_attributes(
@@ -238,17 +229,17 @@ class Configurator:
             )
             mappings.append(mapping)
 
-        return OrderedDict(
-            asdict(
-                MappingConfig(
-                    Global=OrderedDict(
-                        asdict(MappingConfigGlobal(Parameters=global_parameters))
-                    ),
-                    Mapping=[OrderedDict(asdict(mapping)) for mapping in mappings],
-                    Metadata=[OrderedDict(asdict(MappingConfigMetadata()))],
-                )
-            )
+        mapping_config = asdict(
+            MappingConfig(
+                Mapping=[OrderedDict(asdict(mapping)) for mapping in mappings],
+            ),
+            dict_factory=dict_factory,
         )
+        return OrderedDict(mapping_config)
+
+
+def dict_factory(d):
+    return {k: v for (k, v) in d if v is not None}
 
 
 def create_nested_dict(
