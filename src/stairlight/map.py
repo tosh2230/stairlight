@@ -160,7 +160,9 @@ class Map:
             dict[str, Any]: Combined global parameters
         """
         global_params: dict[str, Any] = self.get_global_params()
-        table_params: OrderedDict[str, Any] = table_attributes.Parameters
+        table_params: OrderedDict[str, Any] = (
+            table_attributes.Parameters or OrderedDict()
+        )
 
         # Table parameters are prioritized over global parameters
         return {**global_params, **table_params}
@@ -259,7 +261,7 @@ class Map:
             table_attributes=table_attributes
         )
         mapped_params: list[str] = create_dict_key_list(d=mapped_params_dict)
-        ignore_params: list[str] = table_attributes.IgnoreParameters
+        ignore_params: list[str] = table_attributes.IgnoreParameters or []
         unmapped_params: list[str] = list(
             set(template_params) - set(mapped_params) - set(ignore_params)
         )
