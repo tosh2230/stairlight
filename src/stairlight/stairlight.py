@@ -497,6 +497,8 @@ class StairLight:
         found_count: int = 0
         configured_label_key: str
         configured_label_value: str
+        if not configured_labels:
+            return False
         for configured_label_key, configured_label_value in configured_labels.items():
             for target_label in target_labels:
                 target_label_key = target_label.split(":")[0]
