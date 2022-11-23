@@ -61,25 +61,27 @@ class Query:
         cte_pattern = r"(?:with|,)\s*(\w+)\s+as\s*"
         cte_alias: list[str] = re.findall(cte_pattern, self.query_str, re.IGNORECASE)
 
-        # Search a boundary line number that main query starts
+        # Search a boundary line number that a main query starts
         boundary_num: int = 0
         main_pattern = r"\)[;\s]*select" if any(cte_alias) else r"select"
         main_search_result = re.search(main_pattern, self.query_str, re.IGNORECASE)
         if main_search_result:
             boundary_num = main_search_result.start()
 
-        # Split query to main and CTE
+        # Split the query to a main query and CTEs
         query_group = {}
         query_group["main"] = self.query_str[boundary_num:].strip()
         query_group["cte"] = self.query_str[:boundary_num].strip()
 
-        # Exclude table alias from main query
+        # Exclude table aliases from the main
         table_pattern = r"(?:from|join)\s+([`.\-\w]+)"
         main_tables_with_alias: list[str] = re.findall(
             table_pattern, query_group["main"], re.IGNORECASE
         )
         main_tables = [
-            table for table in main_tables_with_alias if table not in cte_alias
+            table
+            for table in main_tables_with_alias
+            if table not in cte_alias and table.upper() != "UNNEST"
         ]
 
         # Exclude table alias from CTEs

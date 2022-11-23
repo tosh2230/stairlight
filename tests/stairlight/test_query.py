@@ -227,6 +227,16 @@ class TestSuccess:
                     },
                 ],
             ),
+            (
+                "tests/sql/query/google_bigquery_unnest_in_exists.sql",
+                [
+                    {
+                        MapKey.TABLE_NAME: "PROJECT_d.DATASET_e.TABLE_f",
+                        MapKey.LINE_NUMBER: 5,
+                        MapKey.LINE_STRING: "    PROJECT_d.DATASET_e.TABLE_f",
+                    },
+                ],
+            ),
         ],
         ids=[
             "tests/sql/query/cte_one_line.sql",
@@ -237,6 +247,7 @@ class TestSuccess:
             "tests/sql/query/cte_multi_tables_02.sql",
             "tests/sql/query/backtick_each_elements.sql",
             "tests/sql/query/backtick_whole_element.sql",
+            "tests/sql/query/google_bigquery_unnest_in_exists.sql",
         ],
     )
     def test_detect_upstairs_attributes(self, file, expected):
