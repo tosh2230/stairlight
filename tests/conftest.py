@@ -29,6 +29,11 @@ def mapping_config(configurator: Configurator) -> MappingConfig:
 
 
 @pytest.fixture(scope="session")
+def mapping_config_single(configurator: Configurator) -> MappingConfig:
+    return configurator.read_mapping(prefix="mapping_single")
+
+
+@pytest.fixture(scope="session")
 def tests_abspath() -> str:
     return os.path.dirname(os.path.abspath(__file__))
 

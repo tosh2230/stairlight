@@ -139,7 +139,11 @@ class MappingConfig:
         Returns:
             MappingConfigGlobal: Global section
         """
-        return MappingConfigGlobal(**self.Global)
+        if self.Global:
+            mapping_config_global = MappingConfigGlobal(**self.Global)
+        else:
+            mapping_config_global = MappingConfigGlobal()
+        return mapping_config_global
 
     def get_mapping(self) -> Iterator[MappingConfigMapping]:
         """Get a mapping section

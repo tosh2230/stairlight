@@ -143,10 +143,12 @@ class Map:
         Returns:
             dict[str, Any]: Global parameters
         """
+        global_params: dict[str, Any] = {}
         if self._mapping_config:
             _global: MappingConfigGlobal = self._mapping_config.get_global()
-            return _global.Parameters
-        return {}
+            if _global.Parameters:
+                global_params = _global.Parameters
+        return global_params
 
     def merge_global_params(
         self, table_attributes: MappingConfigMappingTable

@@ -23,6 +23,17 @@ def dependency_map(
     return dependency_map
 
 
+@pytest.fixture(scope="session")
+def dependency_map_single(
+    stairlight_config: StairlightConfig, mapping_config_single: MappingConfig
+) -> Map:
+    dependency_map = Map(
+        stairlight_config=stairlight_config, mapping_config=mapping_config_single
+    )
+    dependency_map.write()
+    return dependency_map
+
+
 @pytest.mark.integration
 class TestSuccess:
     def test_mapped(self, dependency_map: Map):
@@ -109,12 +120,23 @@ class TestSuccess:
         }
         assert actual == expected
 
-    def test_merge_global_params_global_only(self, dependency_map: Map):
+    def test_get_global_params_if_params_none(self, dependency_map_single: Map):
+        actual = dependency_map_single.get_global_params()
+        assert actual == {}
+
+    def test_merge_global_params_if_global_none(self, dependency_map_single: Map):
+        expected = {"params": None}
         table_attributes = MappingConfigMappingTable(
-            **{
-                MappingConfigKey.TABLE_NAME: "PROJECT_g.DATASET_g.TABLE_g",
-            }
+            TableName="PROJECT_A.DATASET_B.TABLE_C",
+            Parameters=expected,
         )
+        actual = dependency_map_single.merge_global_params(
+            table_attributes=table_attributes
+        )
+        assert actual == expected
+
+    def test_merge_global_params_if_only_global(self, dependency_map: Map):
+        table_attributes = MappingConfigMappingTable(TableName="")
         actual = dependency_map.merge_global_params(table_attributes=table_attributes)
         expected = dependency_map.get_global_params()
         assert actual == expected
