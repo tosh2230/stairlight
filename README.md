@@ -15,7 +15,7 @@
 An end-to-end data lineage tool, detects table dependencies from SQL statements.
 
 <div align="left">
-  <img src="https://raw.githubusercontent.com/tosh2230/stairlight/main/img/drawio/concepts.drawio.png" width="800" alt="concepts">
+  <img src="https://raw.githubusercontent.com/tosh2230/stairlight/main/img/drawio/concepts.drawio.png" width="1080" alt="concepts">
 </div>
 
 ## Supported Data Sources
