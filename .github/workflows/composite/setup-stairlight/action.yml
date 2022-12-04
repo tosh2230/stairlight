@@ -40,12 +40,12 @@ runs:
         aws-secret-access-key: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
         aws-region: ap-northeast-1
     - name: Setup Google Cloud
-      uses: "google-github-actions/setup-gcloud@v0"
+      uses: "google-github-actions/setup-gcloud@v1"
       with:
         project_id: ${{ inputs.GCP_PROJECT_ID }}
     - id: auth
       name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v0
+      uses: google-github-actions/auth@v1
       with:
         create_credentials_file: true
         workload_identity_provider: ${{ inputs.GCP_WORKLOAD_IDP }}
