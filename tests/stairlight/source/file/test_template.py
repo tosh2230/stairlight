@@ -53,7 +53,7 @@ class TestFileTemplate:
 
 
 @pytest.mark.parametrize(
-    "key, params, expected_table, expected_params",
+    ("key", "params", "ignore_params", "expected_table", "detected_params"),
     [
         (
             "tests/sql/main/cte_multi_line_params.sql",
@@ -64,6 +64,7 @@ class TestFileTemplate:
                     "sub_table_02": "PROJECT_V.DATASET_W.TABLE_X",
                 }
             },
+            [],
             "PROJECT_P.DATASET_Q.TABLE_R",
             [
                 "params.sub_table_01",
@@ -72,14 +73,62 @@ class TestFileTemplate:
             ],
         ),
         (
+            "tests/sql/main/cte_multi_line.sql",
+            {
+                "params": {
+                    "PROJECT": "PROJECT_g",
+                    "DATASET": "DATASET_h",
+                    "TABLE": "TABLE_i",
+                }
+            },
+            [
+                "execution_date.add(days=1).isoformat()",
+                "execution_date.add(days=2).isoformat()",
+            ],
+            "PROJECT_g.DATASET_h.TABLE_i",
+            [
+                "execution_date.add(days=1).isoformat()",
+                "execution_date.add(days=2).isoformat()",
+                "params.PROJECT",
+                "params.DATASET",
+                "params.TABLE",
+            ],
+        ),
+        (
+            "tests/sql/main/params_with_default_value.sql",
+            {
+                "params": {
+                    "main_table": "PROJECT_P.DATASET_Q.TABLE_R",
+                    "sub_table_01": "PROJECT_S.DATASET_T.TABLE_U",
+                    "sub_table_02": "PROJECT_V.DATASET_W.TABLE_X",
+                }
+            },
+            [
+                "params.target_column | default('\"top\"')",
+                'params.target_column or "top"',
+            ],
+            "PROJECT_P.DATASET_Q.TABLE_R",
+            [
+                "params.sub_table_01",
+                "params.sub_table_02",
+                "params.main_table",
+                "params.target_column | default('\"top\"')",
+                'params.target_column_2 or "top"',
+                'params.target_column_2 or "latest"',
+            ],
+        ),
+        (
             "tests/sql/query/nested_join.sql",
             None,
+            [],
             "PROJECT_B.DATASET_B.TABLE_B",
             [],
         ),
     ],
     ids=[
         "tests/sql/main/cte_multi_line_params.sql",
+        "tests/sql/main/cte_multi_line.sql",
+        "tests/sql/main/params_with_default_value.sql",
         "tests/sql/query/nested_join.sql",
     ],
 )
@@ -96,25 +145,49 @@ class TestFileTemplateRender:
         )
 
     def test_render(
-        self, file_template: FileTemplate, params, expected_table, expected_params
+        self,
+        file_template: FileTemplate,
+        params,
+        ignore_params,
+        expected_table,
+        detected_params,
     ):
-        actual = file_template.render(params=params)
+        actual = file_template.render(
+            params=params,
+            ignore_params=ignore_params,
+        )
         assert expected_table in actual
 
     def test_detect_jinja_params(
         self,
         file_template: FileTemplate,
         params,
+        ignore_params,
         expected_table,
-        expected_params,
+        detected_params,
     ):
         template_str = file_template.get_template_str()
         actual = file_template.detect_jinja_params(template_str=template_str)
-        assert actual == expected_params
+        assert actual == detected_params
+
+    def test_ignore_params_from_template_str(
+        self,
+        file_template: FileTemplate,
+        params,
+        ignore_params,
+        expected_table,
+        detected_params,
+    ):
+        template_str = file_template.get_template_str()
+        actual = file_template.ignore_params_from_template_str(
+            template_str=template_str,
+            ignore_params=ignore_params,
+        )
+        assert all(ignore_param not in actual for ignore_param in ignore_params)
 
 
 @pytest.mark.parametrize(
-    "key, params",
+    ("key", "params"),
     [
         (
             "tests/sql/main/cte_multi_line.sql",
@@ -157,7 +230,7 @@ class TestFileTemplateRenderException:
 
 
 @pytest.mark.parametrize(
-    "key, expected_is_excluded",
+    ("key", "expected_is_excluded"),
     [
         ("tests/sql/main/one_line_no_project.sql", False),
         ("tests/sql/main/exclude.sql", True),
@@ -212,7 +285,7 @@ class TestFileTemplateSource:
 
 
 @pytest.mark.parametrize(
-    "key, expected_is_excluded",
+    ("key", "expected_is_excluded"),
     [
         ("tests/sql/main/one_line_no_project.sql", False),
         ("tests/sql/main/exclude.sql", False),

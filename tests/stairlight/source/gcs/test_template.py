@@ -38,7 +38,7 @@ def patch_list_blob(mocker, gcs_blob_factory) -> None:
 
 
 @pytest.mark.parametrize(
-    "bucket, key, local_file_path, params, ignore_params, expected",
+    ("bucket", "key", "local_file_path", "params", "ignore_params", "expected"),
     [
         (
             "stairlight",
