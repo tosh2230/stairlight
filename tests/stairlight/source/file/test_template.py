@@ -53,7 +53,7 @@ class TestFileTemplate:
 
 
 @pytest.mark.parametrize(
-    "key, params, expected_table, expected_params",
+    "key, params, ignore_params, expected_table, expected_params",
     [
         (
             "tests/sql/main/cte_multi_line_params.sql",
@@ -64,6 +64,7 @@ class TestFileTemplate:
                     "sub_table_02": "PROJECT_V.DATASET_W.TABLE_X",
                 }
             },
+            [],
             "PROJECT_P.DATASET_Q.TABLE_R",
             [
                 "params.sub_table_01",
@@ -72,14 +73,38 @@ class TestFileTemplate:
             ],
         ),
         (
+            "tests/sql/main/cte_multi_line.sql",
+            {
+                "params": {
+                    "PROJECT": "PROJECT_g",
+                    "DATASET": "DATASET_h",
+                    "TABLE": "TABLE_i",
+                }
+            },
+            [
+                "execution_date.add(days=1).isoformat()",
+                "execution_date.add(days=2).isoformat()",
+            ],
+            "PROJECT_g.DATASET_h.TABLE_i",
+            [
+                "execution_date.add(days=1).isoformat()",
+                "execution_date.add(days=2).isoformat()",
+                "params.PROJECT",
+                "params.DATASET",
+                "params.TABLE",
+            ],
+        ),
+        (
             "tests/sql/query/nested_join.sql",
             None,
+            [],
             "PROJECT_B.DATASET_B.TABLE_B",
             [],
         ),
     ],
     ids=[
         "tests/sql/main/cte_multi_line_params.sql",
+        "tests/sql/main/cte_multi_line.sql",
         "tests/sql/query/nested_join.sql",
     ],
 )
@@ -96,15 +121,24 @@ class TestFileTemplateRender:
         )
 
     def test_render(
-        self, file_template: FileTemplate, params, expected_table, expected_params
+        self,
+        file_template: FileTemplate,
+        params,
+        ignore_params,
+        expected_table,
+        expected_params,
     ):
-        actual = file_template.render(params=params)
+        actual = file_template.render(
+            params=params,
+            ignore_params=ignore_params,
+        )
         assert expected_table in actual
 
     def test_detect_jinja_params(
         self,
         file_template: FileTemplate,
         params,
+        ignore_params,
         expected_table,
         expected_params,
     ):
