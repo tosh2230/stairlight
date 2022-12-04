@@ -30,7 +30,7 @@ class TestSuccess:
         ]
 
     @pytest.mark.parametrize(
-        "file, expected",
+        ("file", "expected"),
         [
             (
                 "tests/sql/query/cte_one_line.sql",
@@ -260,7 +260,7 @@ class TestSuccess:
         assert actual == expected
 
     @pytest.mark.parametrize(
-        "table, default_table_prefix, expected",
+        ("table", "default_table_prefix", "expected"),
         [
             ("DATASET_d.TABLE_d", "PROJECT_A", "PROJECT_A.DATASET_d.TABLE_d"),
             ("TABLE_d", "PROJECT_A.DATASET_A", "PROJECT_A.DATASET_A.TABLE_d"),

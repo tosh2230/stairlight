@@ -53,7 +53,7 @@ class TestFileTemplate:
 
 
 @pytest.mark.parametrize(
-    "key, params, ignore_params, expected_table, expected_params",
+    ("key", "params", "ignore_params", "expected_table", "expected_params"),
     [
         (
             "tests/sql/main/cte_multi_line_params.sql",
@@ -163,7 +163,7 @@ class TestFileTemplateRender:
 
 
 @pytest.mark.parametrize(
-    "key, params",
+    ("key", "params"),
     [
         (
             "tests/sql/main/cte_multi_line.sql",
@@ -206,7 +206,7 @@ class TestFileTemplateRenderException:
 
 
 @pytest.mark.parametrize(
-    "key, expected_is_excluded",
+    ("key", "expected_is_excluded"),
     [
         ("tests/sql/main/one_line_no_project.sql", False),
         ("tests/sql/main/exclude.sql", True),
@@ -261,7 +261,7 @@ class TestFileTemplateSource:
 
 
 @pytest.mark.parametrize(
-    "key, expected_is_excluded",
+    ("key", "expected_is_excluded"),
     [
         ("tests/sql/main/one_line_no_project.sql", False),
         ("tests/sql/main/exclude.sql", False),

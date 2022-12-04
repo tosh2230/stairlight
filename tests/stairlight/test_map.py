@@ -70,7 +70,7 @@ class TestSuccess:
         assert len(dependency_map.unmapped) > 0
 
     @pytest.mark.parametrize(
-        "key, expected",
+        ("key", "expected"),
         [
             ("tests/sql/main/cte_multi_line.sql", []),
             ("tests/sql/main/one_line_1.sql", []),

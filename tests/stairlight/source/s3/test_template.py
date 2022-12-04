@@ -23,7 +23,7 @@ BUCKET_NAME = "stairlight"
 
 
 @pytest.mark.parametrize(
-    "bucket, key, params, ignore_params, expected",
+    ("bucket", "key", "params", "ignore_params", "expected"),
     [
         (
             "stairlight",

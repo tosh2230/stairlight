@@ -365,7 +365,7 @@ class TestBuildMappingConfigS3:
 
 
 @pytest.mark.parametrize(
-    "params, expected",
+    ("params", "expected"),
     [
         (
             [
