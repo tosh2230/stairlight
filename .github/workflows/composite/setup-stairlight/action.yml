@@ -39,10 +39,6 @@ runs:
         aws-access-key-id: ${{ inputs.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
         aws-region: ap-northeast-1
-    - name: Setup Google Cloud
-      uses: "google-github-actions/setup-gcloud@v1"
-      with:
-        project_id: ${{ inputs.GCP_PROJECT_ID }}
     - id: auth
       name: Authenticate to Google Cloud
       uses: google-github-actions/auth@v1
@@ -51,6 +47,10 @@ runs:
         workload_identity_provider: ${{ inputs.GCP_WORKLOAD_IDP }}
         service_account: ${{ inputs.GCP_SERVICE_ACCOUNT }}
         access_token_lifetime: 300s
+    - name: Setup Google Cloud SDK
+      uses: "google-github-actions/setup-gcloud@v1"
+      with:
+        project_id: ${{ inputs.GCP_PROJECT_ID }}
     - name: Login to Google Cloud with workload IdP
       run: gcloud auth login --brief --cred-file="${{ steps.auth.outputs.credentials_file_path }}"
       shell: bash
