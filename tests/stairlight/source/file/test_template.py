@@ -53,7 +53,7 @@ class TestFileTemplate:
 
 
 @pytest.mark.parametrize(
-    ("key", "params", "ignore_params", "expected_table", "expected_params"),
+    ("key", "params", "ignore_params", "expected_table", "detected_params"),
     [
         (
             "tests/sql/main/cte_multi_line_params.sql",
@@ -95,6 +95,29 @@ class TestFileTemplate:
             ],
         ),
         (
+            "tests/sql/main/params_with_default_value.sql",
+            {
+                "params": {
+                    "main_table": "PROJECT_P.DATASET_Q.TABLE_R",
+                    "sub_table_01": "PROJECT_S.DATASET_T.TABLE_U",
+                    "sub_table_02": "PROJECT_V.DATASET_W.TABLE_X",
+                }
+            },
+            [
+                "params.target_column | default('\"top\"')",
+                'params.target_column or "top"',
+            ],
+            "PROJECT_P.DATASET_Q.TABLE_R",
+            [
+                "params.sub_table_01",
+                "params.sub_table_02",
+                "params.main_table",
+                "params.target_column | default('\"top\"')",
+                'params.target_column_2 or "top"',
+                'params.target_column_2 or "latest"',
+            ],
+        ),
+        (
             "tests/sql/query/nested_join.sql",
             None,
             [],
@@ -105,6 +128,7 @@ class TestFileTemplate:
     ids=[
         "tests/sql/main/cte_multi_line_params.sql",
         "tests/sql/main/cte_multi_line.sql",
+        "tests/sql/main/params_with_default_value.sql",
         "tests/sql/query/nested_join.sql",
     ],
 )
@@ -126,7 +150,7 @@ class TestFileTemplateRender:
         params,
         ignore_params,
         expected_table,
-        expected_params,
+        detected_params,
     ):
         actual = file_template.render(
             params=params,
@@ -140,11 +164,11 @@ class TestFileTemplateRender:
         params,
         ignore_params,
         expected_table,
-        expected_params,
+        detected_params,
     ):
         template_str = file_template.get_template_str()
         actual = file_template.detect_jinja_params(template_str=template_str)
-        assert actual == expected_params
+        assert actual == detected_params
 
     def test_ignore_params_from_template_str(
         self,
@@ -152,7 +176,7 @@ class TestFileTemplateRender:
         params,
         ignore_params,
         expected_table,
-        expected_params,
+        detected_params,
     ):
         template_str = file_template.get_template_str()
         actual = file_template.ignore_params_from_template_str(

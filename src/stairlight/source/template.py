@@ -130,7 +130,10 @@ class Template(ABC):
         jinja_expressions = "".join(
             re.findall("{{[^}]*}}", template_str, re.IGNORECASE)
         )
-        return re.findall("[^{} ]+", jinja_expressions, re.IGNORECASE)
+        return [
+            param.strip()
+            for param in re.findall("[^{}]+", jinja_expressions, re.IGNORECASE)
+        ]
 
     @staticmethod
     def render_by_base_loader(
