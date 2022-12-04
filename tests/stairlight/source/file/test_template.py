@@ -146,6 +146,21 @@ class TestFileTemplateRender:
         actual = file_template.detect_jinja_params(template_str=template_str)
         assert actual == expected_params
 
+    def test_ignore_params_from_template_str(
+        self,
+        file_template: FileTemplate,
+        params,
+        ignore_params,
+        expected_table,
+        expected_params,
+    ):
+        template_str = file_template.get_template_str()
+        actual = file_template.ignore_params_from_template_str(
+            template_str=template_str,
+            ignore_params=ignore_params,
+        )
+        assert all(ignore_param not in actual for ignore_param in ignore_params)
+
 
 @pytest.mark.parametrize(
     "key, params",
