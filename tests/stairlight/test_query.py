@@ -237,6 +237,26 @@ class TestSuccess:
                     },
                 ],
             ),
+            (
+                "tests/sql/query/contains_str_from.sql",
+                [
+                    {
+                        MapKey.TABLE_NAME: "test.cte",
+                        MapKey.LINE_NUMBER: 5,
+                        MapKey.LINE_STRING: "        test.cte",
+                    },
+                    {
+                        MapKey.TABLE_NAME: "test.main",
+                        MapKey.LINE_NUMBER: 11,
+                        MapKey.LINE_STRING: "    test.main",
+                    },
+                    {
+                        MapKey.TABLE_NAME: "test.sub",
+                        MapKey.LINE_NUMBER: 13,
+                        MapKey.LINE_STRING: "    test.sub ON",
+                    },
+                ],
+            ),
         ],
         ids=[
             "tests/sql/query/cte_one_line.sql",
@@ -248,6 +268,7 @@ class TestSuccess:
             "tests/sql/query/backtick_each_elements.sql",
             "tests/sql/query/backtick_whole_element.sql",
             "tests/sql/query/google_bigquery_unnest_in_exists.sql",
+            "tests/sql/query/include_from_and_to_in_column_names.sql",
         ],
     )
     def test_detect_upstairs_attributes(self, file, expected):

@@ -74,7 +74,7 @@ class Query:
         query_group["cte"] = self.query_str[:boundary_num].strip()
 
         # Exclude table aliases from the main
-        table_pattern = r"(?:from|join)\s+([`.\-\w]+)"
+        table_pattern = r"\s(?:from|join)\s+([`.\-\w]+)"
         main_tables_with_alias: list[str] = re.findall(
             table_pattern, query_group["main"], re.IGNORECASE
         )
