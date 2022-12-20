@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "stairlight"
-version = "0.6.4"
+version = "0.6.5"
 description = "An end-to-end data lineage tool"
 authors = ["tosh2230 <rev.to12@gmail.com>"]
 license = "MIT"
