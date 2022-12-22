@@ -32,7 +32,7 @@ class DbtTemplate(Template):
         self.project_name = project_name
 
     def get_uri(self) -> str:
-        """Get uri from file path
+        """Get uri from a key
 
         Returns:
             str: uri
@@ -40,7 +40,7 @@ class DbtTemplate(Template):
         return str(pathlib.Path(self.key).resolve())
 
     def get_template_str(self) -> str:
-        """Get template string that read from a file
+        """Get template string that read from a key
 
         Returns:
             str: Template string

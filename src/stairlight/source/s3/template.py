@@ -40,7 +40,7 @@ class S3Template(Template):
         self.s3: S3ServiceResource = boto3.resource("s3")
 
     def get_uri(self) -> str:
-        """Get uri from file path
+        """Get uri from bucket and key
 
         Returns:
             str: uri
@@ -48,7 +48,7 @@ class S3Template(Template):
         return f"{S3_URI_SCHEME}{self.bucket}/{self.key}"
 
     def get_template_str(self) -> str:
-        """Get template string that read from a file in S3
+        """Get template string that read from a object in S3
 
         Returns:
             str: Template string
@@ -80,10 +80,10 @@ class S3TemplateSource(TemplateSource):
         self.s3: S3ServiceResource = boto3.resource("s3")
 
     def search_templates(self) -> Iterator[Template]:
-        """Search SQL template files from S3
+        """Search SQL template objects from S3
 
         Yields:
-            Iterator[SQLTemplate]: SQL template file attributes
+            Iterator[SQLTemplate]: Attributes of SQL template object
         """
         project = self._include.ProjectId
         bucket_name = self._include.BucketName
