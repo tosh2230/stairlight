@@ -396,7 +396,7 @@ optional arguments:
                         labels set for the table in mapping configuration, can be specified multiple times.
                         The separator between key and value should be a colon(:).
                         e.g. -l key_1:value_1 -l key_2:value_2
-  -o {table,file}, --output {table,file}
+  -o {table,uri}, --output {table,uri}
                         output type
   -v, --verbose         return verbose results
   -r, --recursive       search recursively

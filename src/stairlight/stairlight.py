@@ -26,7 +26,7 @@ class ResponseType(enum.Enum):
     """Enum: Execution result type of up|down command"""
 
     TABLE: str = "table"
-    FILE: str = "file"
+    URI: str = "uri"
 
     def __str__(self):
         return self.name
@@ -416,7 +416,7 @@ class StairLight:
 
             if response_type == ResponseType.TABLE.value:
                 response.append(next_table_name)
-            elif response_type == ResponseType.FILE.value:
+            elif response_type == ResponseType.URI.value:
                 response.append(relative_map[next_table_name].get(MapKey.URI))
             logger.debug(json.dumps(response, indent=2))
 

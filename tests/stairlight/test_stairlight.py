@@ -34,7 +34,7 @@ class TestResponseType:
         assert ResponseType.TABLE.value == "table"
 
     def test_file(self):
-        assert ResponseType.FILE.value == "file"
+        assert ResponseType.URI.value == "uri"
 
 
 class TestSearchDirection:
@@ -128,7 +128,7 @@ class TestStairLight:
             table_name=table_name,
             recursive=True,
             verbose=False,
-            response_type=ResponseType.FILE.value,
+            response_type=ResponseType.URI.value,
         )
         assert sorted(result) == [
             f"{tests_abspath}/sql/main/cte_multi_line.sql",
@@ -186,7 +186,7 @@ class TestStairLight:
             table_name=table_name,
             recursive=True,
             verbose=False,
-            response_type=ResponseType.FILE.value,
+            response_type=ResponseType.URI.value,
         )
         assert sorted(result) == [
             f"{tests_abspath}/sql/main/cte_multi_line.sql",
