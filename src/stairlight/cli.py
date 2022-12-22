@@ -219,7 +219,7 @@ def set_search_parser(parser: argparse.ArgumentParser) -> None:
         "--output",
         help="output type",
         type=str,
-        choices=[ResponseType.TABLE.value, ResponseType.FILE.value],
+        choices=[ResponseType.TABLE.value, ResponseType.URI.value],
         default=ResponseType.TABLE.value,
     )
     parser.add_argument(
@@ -273,9 +273,7 @@ def create_parser() -> argparse.ArgumentParser:
     set_general_parser(parser=parser_check)
 
     # up
-    parser_up = subparsers.add_parser(
-        "up", help="return upstairs ( table | file ) list"
-    )
+    parser_up = subparsers.add_parser("up", help="return upstairs ( table | uri ) list")
     parser_up.set_defaults(handler=command_up)
     set_general_parser(parser=parser_up)
     set_save_load_parser(parser=parser_up)
@@ -283,7 +281,7 @@ def create_parser() -> argparse.ArgumentParser:
 
     # down
     parser_down = subparsers.add_parser(
-        "down", help="return downstairs ( table | file ) list"
+        "down", help="return downstairs ( table | uri ) list"
     )
     parser_down.set_defaults(handler=command_down)
     set_general_parser(parser=parser_down)

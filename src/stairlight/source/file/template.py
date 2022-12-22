@@ -25,7 +25,7 @@ class FileTemplate(Template):
         self.uri = self.get_uri()
 
     def get_uri(self) -> str:
-        """Get uri from file path
+        """Get uri from a key
 
         Returns:
             str: uri

@@ -31,7 +31,7 @@ class GcsTemplate(Template):
         self.uri = self.get_uri()
 
     def get_uri(self) -> str:
-        """Get uri from file path
+        """Get uri from bucket and key
 
         Returns:
             str: uri
@@ -39,7 +39,7 @@ class GcsTemplate(Template):
         return f"{GCS_URI_SCHEME}{self.bucket}/{self.key}"
 
     def get_template_str(self) -> str:
-        """Get template string that read from a file in GCS
+        """Get template string that read from a object in GCS
 
         Returns:
             str: Template string
@@ -64,10 +64,10 @@ class GcsTemplateSource(TemplateSource):
         self._include = include
 
     def search_templates(self) -> Iterator[Template]:
-        """Search SQL template files from GCS
+        """Search SQL template objects from GCS
 
         Yields:
-            Iterator[SQLTemplate]: SQL template file attributes
+            Iterator[SQLTemplate]: attributes of SQL template object
         """
         project = self._include.ProjectId
         bucket_name = self._include.BucketName
