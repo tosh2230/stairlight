@@ -43,6 +43,19 @@ def command_check(stairlight: StairLight, args: argparse.Namespace) -> str:
     return message
 
 
+def command_list(stairlight: StairLight, args: argparse.Namespace) -> list[str]:
+    """Execute list command
+
+    Args:
+        stairlight (StairLight): Stairlight class
+        args (argparse.Namespace): CLI arguments
+
+    Returns:
+        list[str]: a list of (tables|URIs)
+    """
+    return stairlight.list_(response_type=args.output)
+
+
 def command_up(
     stairlight: StairLight, args: argparse.Namespace
 ) -> dict[str, Any] | list[dict[str, Any]]:
@@ -140,7 +153,7 @@ def set_general_parser(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "-c",
         "--config",
-        help="set Stairlight configuration directory",
+        help="set a Stairlight configuration directory",
         type=str,
         default=".",
     )
@@ -214,6 +227,14 @@ def set_search_parser(parser: argparse.ArgumentParser) -> None:
         ),
         action="append",
     )
+
+
+def set_output_parser(parser: argparse.ArgumentParser) -> None:
+    """Set arguments about outputs
+
+    Args:
+        parser (argparse.ArgumentParser): ArgumentParser
+    """
     parser.add_argument(
         "-o",
         "--output",
@@ -258,7 +279,7 @@ def create_parser() -> argparse.ArgumentParser:
 
     # init
     parser_init = subparsers.add_parser(
-        "init", help="create new Stairlight configuration file"
+        "init", help="create a new Stairlight configuration file"
     )
     parser_init.set_defaults(handler=command_init)
     set_general_parser(parser=parser_init)
@@ -267,26 +288,35 @@ def create_parser() -> argparse.ArgumentParser:
     parser_check = subparsers.add_parser(
         "map",
         aliases=["check"],
-        help="create new configuration file about undefined mappings",
+        help="create a new configuration file about undefined mappings",
     )
     parser_check.set_defaults(handler=command_check)
     set_general_parser(parser=parser_check)
 
+    # list
+    parser_list = subparsers.add_parser("list", help="return all ( tables | URIs )")
+    parser_list.set_defaults(handler=command_list)
+    set_general_parser(parser=parser_list)
+    set_save_load_parser(parser=parser_list)
+    set_output_parser(parser=parser_list)
+
     # up
-    parser_up = subparsers.add_parser("up", help="return upstairs ( table | uri ) list")
+    parser_up = subparsers.add_parser("up", help="return upstairs ( tables | URIs )")
     parser_up.set_defaults(handler=command_up)
     set_general_parser(parser=parser_up)
     set_save_load_parser(parser=parser_up)
     set_search_parser(parser=parser_up)
+    set_output_parser(parser=parser_up)
 
     # down
     parser_down = subparsers.add_parser(
-        "down", help="return downstairs ( table | uri ) list"
+        "down", help="return downstairs ( tables | URIs )"
     )
     parser_down.set_defaults(handler=command_down)
     set_general_parser(parser=parser_down)
     set_save_load_parser(parser=parser_down)
     set_search_parser(parser=parser_down)
+    set_output_parser(parser=parser_down)
 
     return parser
 

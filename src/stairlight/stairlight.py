@@ -79,19 +79,6 @@ class StairLight:
             prefix=STAIRLIGHT_CONFIG_PREFIX_DEFAULT
         )
 
-    def create_map(self) -> None:
-        if not self._stairlight_config:
-            return
-
-        if self.load_files:
-            self.load_map()
-        else:
-            self._set_config()
-            self._write_map()
-
-        if self.save_file:
-            self.save_map()
-
     @property
     def mapped(self) -> dict[str, Any]:
         """Return mapped
@@ -117,6 +104,39 @@ class StairLight:
             bool: Exists stairlight configuration file or not
         """
         return len(self._stairlight_config.Include) > 0
+
+    def create_map(self) -> None:
+        if not self._stairlight_config:
+            return
+
+        if self.load_files:
+            self.load_map()
+        else:
+            self._set_config()
+            self._write_map()
+
+        if self.save_file:
+            self.save_map()
+
+    def save_map(self) -> None:
+        """Save mapped results"""
+        save_map_controller = SaveMapController(
+            save_file=self.save_file, mapped=self._mapped
+        )
+        save_map_controller.save()
+
+    def load_map(self) -> None:
+        """Load mapped results"""
+        if not self.load_files:
+            return
+        for load_file in self.load_files:
+            load_map_controller = LoadMapController(load_file=load_file)
+            loaded_map = load_map_controller.load()
+
+            if self._mapped:
+                self._mapped = deep_merge(org=self._mapped, add=loaded_map)
+            else:
+                self._mapped = loaded_map
 
     def _set_config(self) -> None:
         """Set configurations"""
@@ -180,25 +200,47 @@ class StairLight:
             unmapped=self._unmapped, prefix=prefix
         )
 
-    def save_map(self) -> None:
-        """Save mapped results"""
-        save_map_controller = SaveMapController(
-            save_file=self.save_file, mapped=self._mapped
-        )
-        save_map_controller.save()
+    def list_(self, response_type: str) -> list[str]:
+        """show tables or URIs
 
-    def load_map(self) -> None:
-        """Load mapped results"""
-        if not self.load_files:
-            return
-        for load_file in self.load_files:
-            load_map_controller = LoadMapController(load_file=load_file)
-            loaded_map = load_map_controller.load()
+        Args:
+            response_type (str): Response type value
 
-            if self._mapped:
-                self._mapped = deep_merge(org=self._mapped, add=loaded_map)
-            else:
-                self._mapped = loaded_map
+        Returns:
+            list[str]: a list of ( tables | URIs )
+        """
+        results: list = []
+        if response_type == ResponseType.TABLE.value:
+            results = self.list_tables()
+        elif response_type == ResponseType.URI.value:
+            results = self.list_uris()
+        return results
+
+    def list_tables(self) -> list[str]:
+        """list tables
+
+        Returns:
+            list[str]: a list of tables
+        """
+        results: set[str] = set()
+        for downstairs, upstairs_dict in self._mapped.items():
+            results.add(downstairs)
+            for upstairs in upstairs_dict:
+                results.add(upstairs)
+        return sorted(results)
+
+    def list_uris(self) -> list[str]:
+        """list URIs
+
+        Returns:
+            list[str]: a list of URIs
+        """
+        results: set[str] = set()
+        for upstairs_dict in self._mapped.values():
+            for upstairs_attributes in upstairs_dict.values():
+                if upstairs_attributes.get(MapKey.URI):
+                    results.add(upstairs_attributes.get(MapKey.URI))
+        return sorted(results)
 
     def up(
         self,
@@ -214,7 +256,7 @@ class StairLight:
             recursive (bool, optional): Search recursively or not. Defaults to False.
             verbose (bool, optional): Return verbose results or not. Defaults to False.
             response_type (str, optional):
-                Response type. Defaults to ResponseType.TABLE.value.
+                Response type value. Defaults to ResponseType.TABLE.value.
 
         Returns:
             list[str] | dict[str, Any]: Search results
@@ -241,7 +283,7 @@ class StairLight:
             recursive (bool, optional): Search recursively or not. Defaults to False.
             verbose (bool, optional): Return verbose results or not. Defaults to False.
             response_type (str, optional):
-                Response type. Defaults to ResponseType.TABLE.value.
+                Response type value. Defaults to ResponseType.TABLE.value.
 
         Returns:
             list[str] | dict[str, Any]: Search results

@@ -327,16 +327,17 @@ An end-to-end data lineage tool, detects table dependencies by SQL SELECT statem
 Without positional arguments, return a table dependency map as JSON format.
 
 positional arguments:
-  {init,map,check,up,down}
-    init                create new Stairlight configuration file
-    map (check)         create new configuration file about undefined mappings
-    up                  return upstairs ( table | SQL file ) list
-    down                return downstairs ( table | SQL file ) list
+  {init,map,check,list,up,down}
+    init                create a new Stairlight configuration file
+    map (check)         create a new configuration file about undefined mappings
+    list                return all ( tables | URIs )
+    up                  return upstairs ( tables | URIs )
+    down                return downstairs ( tables | URIs )
 
 optional arguments:
   -h, --help            show this help message and exit
   -c CONFIG, --config CONFIG
-                        set Stairlight configuration directory
+                        set a Stairlight configuration directory
   -q, --quiet           keep silence
   --save SAVE           A file path where map results will be saved.
                         You can choose from local file system, GCS, S3.
@@ -356,7 +357,7 @@ usage: stairlight init [-h] [-c CONFIG]
 optional arguments:
   -h, --help            show this help message and exit
   -c CONFIG, --config CONFIG
-                        set Stairlight configuration directory.
+                        set a Stairlight configuration directory
   -q, --quiet           keep silence
 ```
 
@@ -367,7 +368,7 @@ Options are the same as `stairlight init`.
 
 ### up
 
-`stairlight up` outputs tables or SQL files located upstream(upstairs) from the specified table.
+`stairlight up` outputs tables or SQL URIs located upstream(upstairs) from the specified table.
 
 - Use table(`-t`, `--table`) or label(`-l`, `--label`) option to specify tables to search.
 - Recursive option(`-r`, `--recursive`) is set, Stairlight will find tables recursively and output as a list.
@@ -375,13 +376,13 @@ Options are the same as `stairlight init`.
 
 ```txt
 $ stairlight up --help
-usage: stairlight up [-h] [-c CONFIG] [--save SAVE] [--load LOAD] (-t TABLE | -l LABEL) [-o {table,file}]
+usage: stairlight up [-h] [-c CONFIG] [--save SAVE] [--load LOAD] (-t TABLE | -l LABEL) [-o {table,uri}]
                      [-v] [-r]
 
 optional arguments:
   -h, --help            show this help message and exit
   -c CONFIG, --config CONFIG
-                        set Stairlight configuration directory
+                        set a Stairlight configuration directory
   -q, --quiet           keep silence
   --save SAVE           A file path where map results will be saved.
                         You can choose from local file system, GCS, S3.
@@ -404,7 +405,7 @@ optional arguments:
 
 ### down
 
-`stairlight down` outputs tables or SQL files located downstream(downstairs) from the specified table.
+`stairlight down` outputs tables or SQL URIs located downstream(downstairs) from the specified table.
 Options are the same as `stairlight up`.
 
 ## Use as a library
