@@ -77,6 +77,28 @@ class TestStairLight:
             f"tests/config/{mapping_template_prefix}"
         )
 
+    @pytest.mark.parametrize(
+        ("resource_type", "expected"),
+        [
+            {"table", "PROJECT_A.DATASET_A.TABLE_A"},
+            {"uri", "gs://stairlight/sql/cte/cte_multi_line.sql"},
+        ],
+    )
+    def test_list(
+        self,
+        resource_type,
+        expected,
+    ):
+        assert expected in self.stairlight.list_(response_type=resource_type)
+
+    def test_list_tables(self):
+        assert "PROJECT_A.DATASET_A.TABLE_A" in self.stairlight.list_tables()
+
+    def test_list_uris(self):
+        assert (
+            "gs://stairlight/sql/cte/cte_multi_line.sql" in self.stairlight.list_uris()
+        )
+
     def test_up_next(self):
         table_name = "PROJECT_D.DATASET_E.TABLE_F"
         result = self.stairlight.up(
