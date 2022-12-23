@@ -80,8 +80,8 @@ class TestStairLight:
     @pytest.mark.parametrize(
         ("resource_type", "expected"),
         [
-            {"table", "PROJECT_A.DATASET_A.TABLE_A"},
-            {"uri", "gs://stairlight/sql/cte/cte_multi_line.sql"},
+            {ResponseType.TABLE.value, "PROJECT_A.DATASET_A.TABLE_A"},
+            {ResponseType.URI.value, "gs://stairlight/sql/cte/cte_multi_line.sql"},
         ],
     )
     def test_list(
@@ -287,35 +287,37 @@ class TestStairLightNoConfig:
 
 
 class TestIsCyclic:
-    def test_cyclic_each(self):
-        node_list = ["1", "2", "1", "2", "1", "2", "1", "2"]
-        assert is_cyclic(node_list)
-
-    def test_cyclic_except_first(self):
-        node_list = ["1", "2", "3", "2", "3", "2", "3"]
-        assert is_cyclic(node_list)
-
-    def test_cyclic_except_first_two(self):
-        node_list = ["1", "2", "3", "4", "5", "3", "4", "5"]
-        assert is_cyclic(node_list)
-
-    def test_cyclic_first_four(self):
-        node_list = ["1", "2", "3", "4", "5", "1", "2", "3", "4"]
-        assert is_cyclic(node_list)
-
-    def test_not_cyclic(self):
-        node_list = ["1", "2", "3", "4", "5"]
-        assert not is_cyclic(node_list)
-
-    def test_cyclic_tables(self):
-        node_list = [
-            "PROJECT_D.DATASET_E.TABLE_F",
-            "PROJECT_J.DATASET_K.TABLE_L",
-            "PROJECT_P.DATASET_Q.TABLE_R",
-            "PROJECT_S.DATASET_T.TABLE_U",
-            "PROJECT_V.DATASET_W.TABLE_X",
-            "PROJECT_C.DATASET_C.TABLE_C",
-            "PROJECT_d.DATASET_d.TABLE_d",
-            "PROJECT_J.DATASET_K.TABLE_L",
-        ]
-        assert is_cyclic(node_list)
+    @pytest.mark.parametrize(
+        ("node_list", "expected"),
+        [
+            (["1", "2", "1", "2", "1", "2", "1", "2"], True),
+            (["1", "2", "3", "2", "3", "2", "3"], True),
+            (["1", "2", "3", "4", "5", "3", "4", "5"], True),
+            (["1", "2", "3", "4", "5", "1", "2", "3", "4"], True),
+            (["1", "2", "3", "4", "5"], False),
+            (
+                [
+                    "PROJECT_D.DATASET_E.TABLE_F",
+                    "PROJECT_J.DATASET_K.TABLE_L",
+                    "PROJECT_P.DATASET_Q.TABLE_R",
+                    "PROJECT_S.DATASET_T.TABLE_U",
+                    "PROJECT_V.DATASET_W.TABLE_X",
+                    "PROJECT_C.DATASET_C.TABLE_C",
+                    "PROJECT_d.DATASET_d.TABLE_d",
+                    "PROJECT_J.DATASET_K.TABLE_L",
+                ],
+                True,
+            ),
+        ],
+        ids=[
+            "each",
+            "except_first",
+            "except_first_two",
+            "first_four",
+            "not cyclic",
+            "cyclic_tables",
+        ],
+    )
+    def test_is_cyclic(self, node_list, expected):
+        actual = is_cyclic(node_list)
+        assert expected == actual
