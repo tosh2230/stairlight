@@ -78,18 +78,22 @@ class TestStairLight:
         )
 
     @pytest.mark.parametrize(
-        ("resource_type", "expected"),
+        ("response_type", "expected"),
         [
-            {ResponseType.TABLE.value, "PROJECT_A.DATASET_A.TABLE_A"},
-            {ResponseType.URI.value, "gs://stairlight/sql/cte/cte_multi_line.sql"},
+            (ResponseType.TABLE.value, "PROJECT_A.DATASET_A.TABLE_A"),
+            (ResponseType.URI.value, "gs://stairlight/sql/cte/cte_multi_line.sql"),
+        ],
+        ids=[
+            ResponseType.TABLE.value,
+            ResponseType.URI.value,
         ],
     )
     def test_list(
         self,
-        resource_type,
+        response_type,
         expected,
     ):
-        assert expected in self.stairlight.list_(response_type=resource_type)
+        assert expected in self.stairlight.list_(response_type=response_type)
 
     def test_list_tables(self):
         assert "PROJECT_A.DATASET_A.TABLE_A" in self.stairlight.list_tables()
