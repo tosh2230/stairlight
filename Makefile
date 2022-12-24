@@ -6,7 +6,7 @@ lint:
 	poetry run isort --check --diff src tests
 	poetry run black --check src tests
 type-check:
-	poetry run mypy .
+	poetry run mypy src tests
 format:
 	poetry run isort src tests
 	poetry run black src tests
