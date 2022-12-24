@@ -10,7 +10,7 @@ from typing import Any
 
 import yaml
 
-from .source.config import (
+from src.stairlight.source.config import (
     MappingConfig,
     MappingConfigMapping,
     MappingConfigMappingTable,
@@ -18,14 +18,17 @@ from .source.config import (
     StairlightConfigExclude,
     StairlightConfigSettings,
 )
-from .source.config_key import MapKey
-from .source.controller import collect_mapping_attributes, get_default_table_name
-from .source.dbt.config import StairlightConfigIncludeDbt
-from .source.file.config import StairlightConfigIncludeFile
-from .source.gcs.config import StairlightConfigIncludeGcs
-from .source.redash.config import StairlightConfigIncludeRedash
-from .source.s3.config import StairlightConfigIncludeS3
-from .source.template import Template
+from src.stairlight.source.config_key import MapKey
+from src.stairlight.source.controller import (
+    collect_mapping_attributes,
+    get_default_table_name,
+)
+from src.stairlight.source.dbt.config import StairlightConfigIncludeDbt
+from src.stairlight.source.file.config import StairlightConfigIncludeFile
+from src.stairlight.source.gcs.config import StairlightConfigIncludeGcs
+from src.stairlight.source.redash.config import StairlightConfigIncludeRedash
+from src.stairlight.source.s3.config import StairlightConfigIncludeS3
+from src.stairlight.source.template import Template
 
 logger = logging.getLogger()
 

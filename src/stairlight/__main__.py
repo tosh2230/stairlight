@@ -1,10 +1,10 @@
 """
-Invokable Module for CLI
+Invoking Module for CLI
 
 python -m stairlight
 """
 
-from stairlight.cli import main
+from src.stairlight.cli import main
 
 if __name__ == "__main__":
     main()

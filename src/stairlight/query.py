@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from typing import Iterator
 
-from .source.config import MapKey
+from src.stairlight.source.config import MapKey
 
 
 class Query:

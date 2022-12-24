@@ -1,7 +1,7 @@
 import boto3
 from mypy_boto3_s3.service_resource import Object, S3ServiceResource
 
-from ..config_key import S3_URI_SCHEME
+from src.stairlight.source.config_key import S3_URI_SCHEME
 
 
 def get_s3_object(uri: str) -> Object:

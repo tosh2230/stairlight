@@ -3,16 +3,16 @@ from __future__ import annotations
 from logging import getLogger
 from typing import Any, Iterator, OrderedDict, Type
 
-from .query import Query
-from .source.config import (
+from src.stairlight.query import Query
+from src.stairlight.source.config import (
     MappingConfig,
     MappingConfigGlobal,
     MappingConfigMappingTable,
     StairlightConfig,
 )
-from .source.config_key import MapKey, MappingConfigKey
-from .source.controller import get_template_source_class
-from .source.template import Template, TemplateSource, TemplateSourceType
+from src.stairlight.source.config_key import MapKey, MappingConfigKey
+from src.stairlight.source.controller import get_template_source_class
+from src.stairlight.source.template import Template, TemplateSource, TemplateSourceType
 
 logger = getLogger(__name__)
 

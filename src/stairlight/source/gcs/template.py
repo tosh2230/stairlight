@@ -5,10 +5,14 @@ from typing import Any, Iterator
 
 from google.cloud import storage
 
-from ..config import ConfigAttributeNotFoundException, MappingConfig, StairlightConfig
-from ..controller import GCS_URI_SCHEME
-from ..template import Template, TemplateSource, TemplateSourceType
-from .config import StairlightConfigIncludeGcs
+from src.stairlight.source.config import (
+    ConfigAttributeNotFoundException,
+    MappingConfig,
+    StairlightConfig,
+)
+from src.stairlight.source.controller import GCS_URI_SCHEME
+from src.stairlight.source.gcs.config import StairlightConfigIncludeGcs
+from src.stairlight.source.template import Template, TemplateSource, TemplateSourceType
 
 
 class GcsTemplate(Template):

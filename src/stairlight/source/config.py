@@ -4,7 +4,7 @@ import logging
 from dataclasses import dataclass, field
 from typing import Any, Iterator, OrderedDict, Type
 
-from .config_key import MapKey
+from src.stairlight.source.config_key import MapKey
 
 logger = logging.getLogger()
 
@@ -49,29 +49,31 @@ class StairlightConfig:
         Returns:
             Type[StairlightConfigInclude]: Include section
         """
-        from .template import TemplateSourceType
+        from src.stairlight.source.template import TemplateSourceType
 
         config_include: Type[StairlightConfigInclude] = StairlightConfigInclude
 
         # Avoid to occur circular imports
         if source_type == TemplateSourceType.FILE.value:
-            from .file.config import StairlightConfigIncludeFile
+            from src.stairlight.source.file.config import StairlightConfigIncludeFile
 
             config_include = StairlightConfigIncludeFile
         elif source_type == TemplateSourceType.GCS.value:
-            from .gcs.config import StairlightConfigIncludeGcs
+            from src.stairlight.source.gcs.config import StairlightConfigIncludeGcs
 
             config_include = StairlightConfigIncludeGcs
         elif source_type == TemplateSourceType.REDASH.value:
-            from .redash.config import StairlightConfigIncludeRedash
+            from src.stairlight.source.redash.config import (
+                StairlightConfigIncludeRedash,
+            )
 
             config_include = StairlightConfigIncludeRedash
         elif source_type == TemplateSourceType.DBT.value:
-            from .dbt.config import StairlightConfigIncludeDbt
+            from src.stairlight.source.dbt.config import StairlightConfigIncludeDbt
 
             config_include = StairlightConfigIncludeDbt
         elif source_type == TemplateSourceType.S3.value:
-            from .s3.config import StairlightConfigIncludeS3
+            from src.stairlight.source.s3.config import StairlightConfigIncludeS3
 
             config_include = StairlightConfigIncludeS3
         return config_include
@@ -176,29 +178,29 @@ class MappingConfig:
         Returns:
             Type[MappingConfigMapping]: Mapping section
         """
-        from .template import TemplateSourceType
+        from src.stairlight.source.template import TemplateSourceType
 
         mapping_config: Type[MappingConfigMapping] = MappingConfigMapping
 
         # Avoid to occur circular imports
         if source_type == TemplateSourceType.FILE.value:
-            from .file.config import MappingConfigMappingFile
+            from src.stairlight.source.file.config import MappingConfigMappingFile
 
             mapping_config = MappingConfigMappingFile
         elif source_type == TemplateSourceType.GCS.value:
-            from .gcs.config import MappingConfigMappingGcs
+            from src.stairlight.source.gcs.config import MappingConfigMappingGcs
 
             mapping_config = MappingConfigMappingGcs
         elif source_type == TemplateSourceType.REDASH.value:
-            from .redash.config import MappingConfigMappingRedash
+            from src.stairlight.source.redash.config import MappingConfigMappingRedash
 
             mapping_config = MappingConfigMappingRedash
         elif source_type == TemplateSourceType.DBT.value:
-            from .dbt.config import MappingConfigMappingDbt
+            from src.stairlight.source.dbt.config import MappingConfigMappingDbt
 
             mapping_config = MappingConfigMappingDbt
         elif source_type == TemplateSourceType.S3.value:
-            from .s3.config import MappingConfigMappingS3
+            from src.stairlight.source.s3.config import MappingConfigMappingS3
 
             mapping_config = MappingConfigMappingS3
         return mapping_config
