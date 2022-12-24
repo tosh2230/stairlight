@@ -10,10 +10,10 @@ from typing import Any, Iterator
 
 import yaml
 
-from ..config import MappingConfig, StairlightConfig
-from ..config_key import DbtProjectKey
-from ..template import Template, TemplateSource, TemplateSourceType
-from .config import StairlightConfigIncludeDbt
+from src.stairlight.source.config import MappingConfig, StairlightConfig
+from src.stairlight.source.config_key import DbtProjectKey
+from src.stairlight.source.dbt.config import StairlightConfigIncludeDbt
+from src.stairlight.source.template import Template, TemplateSource, TemplateSourceType
 
 
 class DbtTemplate(Template):

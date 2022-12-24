@@ -13,10 +13,14 @@ from mypy_boto3_s3.service_resource import (
 )
 from mypy_boto3_s3.type_defs import GetObjectOutputTypeDef
 
-from ..config import ConfigAttributeNotFoundException, MappingConfig, StairlightConfig
-from ..controller import S3_URI_SCHEME
-from ..template import Template, TemplateSource, TemplateSourceType
-from .config import StairlightConfigIncludeS3
+from src.stairlight.source.config import (
+    ConfigAttributeNotFoundException,
+    MappingConfig,
+    StairlightConfig,
+)
+from src.stairlight.source.controller import S3_URI_SCHEME
+from src.stairlight.source.s3.config import StairlightConfigIncludeS3
+from src.stairlight.source.template import Template, TemplateSource, TemplateSourceType
 
 
 class S3Template(Template):

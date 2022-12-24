@@ -3,13 +3,8 @@ from typing import Any, Dict, Iterator, List
 
 import pytest
 
+from src.stairlight import ResponseType, SearchDirection, StairLight, is_cyclic
 from src.stairlight.source.config import MapKey
-from src.stairlight.stairlight import (
-    ResponseType,
-    SearchDirection,
-    StairLight,
-    is_cyclic,
-)
 from tests.conftest import teardown_rm_file
 
 

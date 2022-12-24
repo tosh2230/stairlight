@@ -9,7 +9,11 @@ from typing import Any, Iterator
 from jinja2 import BaseLoader, Environment
 from jinja2.exceptions import UndefinedError
 
-from .config import MappingConfig, MappingConfigMappingTable, StairlightConfig
+from src.stairlight.source.config import (
+    MappingConfig,
+    MappingConfigMappingTable,
+    StairlightConfig,
+)
 
 
 class TemplateSourceType(enum.Enum):

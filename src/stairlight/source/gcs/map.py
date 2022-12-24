@@ -1,6 +1,6 @@
 from google.cloud.storage import Blob, Client
 
-from ..config_key import GCS_URI_SCHEME
+from src.stairlight.source.config_key import GCS_URI_SCHEME
 
 
 def get_gcs_blob(uri: str) -> Blob:

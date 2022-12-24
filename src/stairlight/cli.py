@@ -5,7 +5,7 @@ import json
 import textwrap
 from typing import Any, Callable
 
-from stairlight.stairlight import ResponseType, StairLight
+from src.stairlight import ResponseType, StairLight
 
 
 def command_init(stairlight: StairLight, args: argparse.Namespace) -> str:

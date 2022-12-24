@@ -4,9 +4,13 @@ import pathlib
 import re
 from typing import Iterator
 
-from ..config import ConfigAttributeNotFoundException, MappingConfig, StairlightConfig
-from ..template import Template, TemplateSource, TemplateSourceType
-from .config import StairlightConfigIncludeFile
+from src.stairlight.source.config import (
+    ConfigAttributeNotFoundException,
+    MappingConfig,
+    StairlightConfig,
+)
+from src.stairlight.source.file.config import StairlightConfigIncludeFile
+from src.stairlight.source.template import Template, TemplateSource, TemplateSourceType
 
 
 class FileTemplate(Template):

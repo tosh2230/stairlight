@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from typing import Dict, List
 
 import pytest
@@ -8,7 +9,7 @@ from src.stairlight.source.config import (
     MappingConfigMappingTable,
     StairlightConfig,
 )
-from src.stairlight.source.config_key import MapKey, MappingConfigKey
+from src.stairlight.source.config_key import MapKey
 from src.stairlight.source.template import Template, TemplateSourceType
 
 
@@ -125,7 +126,7 @@ class TestSuccess:
         assert actual == {}
 
     def test_merge_global_params_if_global_none(self, dependency_map_single: Map):
-        expected = {"params": None}
+        expected = OrderedDict({"params": None})
         table_attributes = MappingConfigMappingTable(
             TableName="PROJECT_A.DATASET_B.TABLE_C",
             Parameters=expected,
@@ -143,16 +144,16 @@ class TestSuccess:
 
     def test_merge_global_params_by_table(self, dependency_map: Map):
         table_attributes = MappingConfigMappingTable(
-            **{
-                MappingConfigKey.TABLE_NAME: "PROJECT_g.DATASET_g.TABLE_g",
-                MappingConfigKey.PARAMETERS: {
+            TableName="PROJECT_g.DATASET_g.TABLE_g",
+            Parameters=OrderedDict(
+                {
                     "params": {
                         "PROJECT": "PROJECT_BY_TABLE",
                         "DATASET": "DATASET_BY_TABLE",
                         "TABLE": "TABLE_BY_TABLE",
                     },
-                },
-            }
+                }
+            ),
         )
         actual = dependency_map.merge_global_params(table_attributes=table_attributes)
         expected = {

@@ -3,7 +3,7 @@ from typing import Any, Dict, Iterator, List, Union
 import pytest
 
 import src.stairlight.cli as cli_main
-from stairlight import StairLight
+from src.stairlight import StairLight
 from tests.conftest import teardown_rm_config, teardown_rm_file
 
 

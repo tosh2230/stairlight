@@ -4,13 +4,13 @@ from typing import Iterator
 
 import pytest
 
+from src.stairlight import StairLight
 from src.stairlight.configurator import (
     MAPPING_CONFIG_PREFIX_DEFAULT,
     STAIRLIGHT_CONFIG_PREFIX_DEFAULT,
     Configurator,
 )
 from src.stairlight.source.config import MappingConfig, StairlightConfig
-from src.stairlight.stairlight import StairLight
 
 
 @pytest.fixture(scope="session")

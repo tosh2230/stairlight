@@ -3,8 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, OrderedDict
 
-from ..config import MappingConfigMapping, StairlightConfigInclude
-from ..template import TemplateSourceType as source_type
+from src.stairlight.source.config import MappingConfigMapping, StairlightConfigInclude
+from src.stairlight.source.template import TemplateSourceType as source_type
 
 
 @dataclass

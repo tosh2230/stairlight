@@ -5,19 +5,19 @@ import json
 from logging import getLogger
 from typing import Any
 
-from .configurator import (
+from src.stairlight.configurator import (
     MAPPING_CONFIG_PREFIX_DEFAULT,
     STAIRLIGHT_CONFIG_PREFIX_DEFAULT,
     Configurator,
 )
-from .map import Map
-from .source.config import (
+from src.stairlight.map import Map
+from src.stairlight.source.config import (
     MapKey,
     MappingConfig,
     StairlightConfig,
     StairlightConfigSettings,
 )
-from .source.controller import LoadMapController, SaveMapController
+from src.stairlight.source.controller import LoadMapController, SaveMapController
 
 logger = getLogger(__name__)
 
