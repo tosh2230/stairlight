@@ -1,4 +1,5 @@
 import os
+from collections import OrderedDict
 from typing import Any, Dict, List
 
 import pytest
@@ -13,6 +14,7 @@ from src.stairlight.source.redash.template import (
     RedashTemplateSource,
     TemplateSourceType,
 )
+from src.stairlight.source.template import Template
 
 
 @pytest.mark.parametrize(
@@ -32,11 +34,9 @@ from src.stairlight.source.redash.template import (
             "metadata",
             {"table": "dashboards"},
             MappingConfigMappingTable(
-                **{
-                    "TableName": "Copy of (#4) New Query",
-                    "Parameters": {"table": "dashboards"},
-                    "Labels": {"Category": "Redash test"},
-                }
+                TableName="Copy of (#4) New Query",
+                Parameters=OrderedDict({"table": "dashboards"}),
+                Labels={"Category": "Redash test"},
             ),
         ),
     ],
@@ -105,12 +105,10 @@ class TestRedashTemplateSource:
     ) -> RedashTemplateSource:
         stairlight_config = configurator.read_stairlight(prefix="stairlight_redash")
         _include = StairlightConfigIncludeRedash(
-            **{
-                SlKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.REDASH.value,
-                SlKey.Redash.DATABASE_URL_ENV_VAR: env_key,
-                SlKey.Redash.DATA_SOURCE_NAME: "metadata",
-                SlKey.Redash.QUERY_IDS: [1, 3, 5],
-            }
+            TemplateSourceType=TemplateSourceType.REDASH.value,
+            DatabaseUrlEnvironmentVariable=env_key,
+            DataSourceName="metadata",
+            QueryIds=[1, 3, 5],
         )
         return RedashTemplateSource(
             stairlight_config=stairlight_config,
@@ -132,7 +130,7 @@ class TestRedashTemplateSource:
                 ["test_id", "test_name", "test_str", "test_data_source_name"]
             ],
         )
-        templates: List[RedashTemplate] = []
+        templates: List[Template] = []
         for template in redash_template_source.search_templates():
             templates.append(template)
         assert len(templates) > 0
@@ -188,9 +186,7 @@ class TestRedashTemplateSourceConfigKeyNotFound:
             prefix="stairlight_key_not_found"
         )
         _include = StairlightConfigIncludeRedash(
-            **{
-                SlKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.REDASH.value,
-            }
+            TemplateSourceType=TemplateSourceType.REDASH.value,
         )
         return RedashTemplateSource(
             stairlight_config=stairlight_config,

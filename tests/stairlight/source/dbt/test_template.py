@@ -1,10 +1,9 @@
 import pathlib
-from typing import Any, Dict, List
+from typing import Any, Dict, List, OrderedDict
 
 import pytest
 
 from src.stairlight.source.config import MappingConfig, StairlightConfig
-from src.stairlight.source.config_key import StairlightConfigKey
 from src.stairlight.source.dbt.config import StairlightConfigIncludeDbt
 from src.stairlight.source.dbt.template import (
     DbtTemplate,
@@ -102,19 +101,17 @@ class TestDbtTemplateSource:
         project_dir: str,
         profiles_dir: str,
         target: str,
-        vars: Dict[str, Any],
+        vars: OrderedDict[str, Any],
         profile: str,
         project_name: str,
         expected_command: str,
     ) -> DbtTemplateSource:
         _include = StairlightConfigIncludeDbt(
-            **{
-                StairlightConfigKey.TEMPLATE_SOURCE_TYPE: TemplateSourceType.DBT.value,
-                StairlightConfigKey.Dbt.PROJECT_DIR: project_dir,
-                StairlightConfigKey.Dbt.PROFILES_DIR: profiles_dir,
-                StairlightConfigKey.Dbt.TARGET: target,
-                StairlightConfigKey.Dbt.VARS: vars,
-            }
+            TemplateSourceType=TemplateSourceType.DBT.value,
+            ProjectDir=project_dir,
+            ProfilesDir=profiles_dir,
+            Target=target,
+            Vars=vars,
         )
         return DbtTemplateSource(
             stairlight_config=stairlight_config,
@@ -172,7 +169,7 @@ class TestDbtTemplateSource:
             project_dir=project_dir,
             target_path="target",
             project_name=project_name,
-            model_path="models",
+            model_path=pathlib.Path("models"),
         )
         assert expected == actual
 
