@@ -290,7 +290,7 @@ Mapping:
     Uri: "s3://stairlight/sql/one_line/one_line.sql"
     Tables:
       - TableName: "PROJECT_as.DATASET_bs.TABLE_cs"
-Metadata:
+ExtraLabels:
   - TableName: "PROJECT_A.DATASET_A.TABLE_A"
     Labels:
       Source: Null
@@ -313,9 +313,9 @@ Mapping section is used to define relationships between input SELECT statements 
 
 In contrast, `IgnoreParameters` handles a list to ignore when rendering queries.
 
-#### Metadata Section
+#### Extra labels Section
 
-This section is used to set metadata to tables that appears only in queries.
+This section sets labels to tables that appears only in queries.
 
 ## Arguments and Options
 
@@ -366,12 +366,19 @@ optional arguments:
 `stairlight map` creates a new configuration file about undefined settings. `stairlight check` is an alias.
 Options are the same as `stairlight init`.
 
+### list
+
+`stairlight list` outputs all of tables or SQL URIs.
+
+- Output option(`-o`, `--output`) determines the output type, tables or URIs.
+
 ### up
 
 `stairlight up` outputs tables or SQL URIs located upstream(upstairs) from the specified table.
 
 - Use table(`-t`, `--table`) or label(`-l`, `--label`) option to specify tables to search.
-- Recursive option(`-r`, `--recursive`) is set, Stairlight will find tables recursively and output as a list.
+- Output option(`-o`, `--output`) is same as `stairlight list`.
+- Recursive option(`-r`, `--recursive`) is set, Stairlight will find dependencies recursively and output as a list.
 - Verbose option(`-v`, `--verbose`) is set, Stairlight will add detailed information and output it as a dict.
 
 ```txt
@@ -384,9 +391,9 @@ optional arguments:
   -c CONFIG, --config CONFIG
                         set a Stairlight configuration directory
   -q, --quiet           keep silence
-  --save SAVE           A file path where map results will be saved.
+  --save SAVE           A file path where mapped results will be saved.
                         You can choose from local file system, GCS, S3.
-  --load LOAD           A file path where map results are saved.
+  --load LOAD           A file path where mapped results are saved.
                         You can choose from local file system, GCS, S3.
                         It can be specified multiple times.
   -t TABLE, --table TABLE
