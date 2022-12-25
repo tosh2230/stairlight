@@ -142,3 +142,8 @@ Metadata:
     Labels:
       Source: Null
       Test: a
+ExtraLabels:
+  - TableName: "PROJECT_A.DATASET_A.TABLE_A"
+    Labels:
+      Source: Null
+      Test: a

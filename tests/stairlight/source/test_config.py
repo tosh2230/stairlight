@@ -10,8 +10,8 @@ class TestMappingConfigEmpty:
 
     def test_get_mapping(self):
         mapping_config = MappingConfig(Mapping=[OrderedDict({})])
-        assert mapping_config.get_global()
+        assert mapping_config.get_mapping()
 
-    def test_get_metadata(self):
+    def test_get_extra_labels(self):
         mapping_config = MappingConfig(Mapping=[OrderedDict({})])
-        assert mapping_config.get_global()
+        assert mapping_config.get_extra_labels()
