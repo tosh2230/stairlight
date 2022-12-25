@@ -112,9 +112,9 @@ class Map:
         )
 
         downstairs: str = table_attributes.TableName
-        mapping_labels: dict[str, Any] = table_attributes.Labels
+        mapped_labels: dict[str, Any] = table_attributes.Labels
         if self._mapping_config:
-            metadata: list[dict[str, Any]] = self._mapping_config.Metadata
+            extra_labels: list[dict[str, Any]] = self._mapping_config.ExtraLabels
 
         if downstairs not in self.mapped:
             self.mapped[downstairs] = {}
@@ -125,8 +125,8 @@ class Map:
             if not self.mapped[downstairs].get(upstairs):
                 self.mapped[downstairs][upstairs] = self.create_upstairs_value(
                     template=template,
-                    mapping_labels=mapping_labels,
-                    metadata=metadata,
+                    mapped_labels=mapped_labels,
+                    extra_labels=extra_labels,
                     upstairs=upstairs,
                 )
 
@@ -172,22 +172,22 @@ class Map:
     @staticmethod
     def create_upstairs_value(
         template: Template,
-        mapping_labels: dict[str, Any],
-        metadata: list[dict[str, Any]],
+        mapped_labels: dict[str, Any],
+        extra_labels: list[dict[str, Any]],
         upstairs: str,
     ) -> dict[str, Any]:
         """create upstairs table information
 
         Args:
             template (Template): Template class
-            mapping_labels (dict[str, Any]): Labels in mapping section
-            metadata (list[dict[str, Any]]): Metadata
+            mapped_labels (dict[str, Any]): Labels in mapping section
+            extra_labels (list[dict[str, Any]]): Extra labels
             upstairs (str): Upstairs table's Name
 
         Returns:
             dict[str, Any]: upstairs table information
         """
-        metadata_labels: list[dict[str, Any]] = []
+        target_labels: list[dict[str, Any]] = []
         upstairs_values = {
             MapKey.TEMPLATE_SOURCE_TYPE: template.source_type.value,
             MapKey.KEY: template.key,
@@ -200,25 +200,25 @@ class Map:
         elif template.source_type == TemplateSourceType.REDASH:
             upstairs_values[MapKey.DATA_SOURCE_NAME] = template.data_source_name
 
-        if metadata:
-            metadata_labels = [
-                m.get(MappingConfigKey.LABELS, {})
-                for m in metadata
-                if m.get(MappingConfigKey.TABLE_NAME) == upstairs
+        if extra_labels:
+            target_labels = [
+                extra_label.get(MappingConfigKey.LABELS, {})
+                for extra_label in extra_labels
+                if extra_label.get(MappingConfigKey.TABLE_NAME) == upstairs
             ]
-        if mapping_labels or metadata_labels:
+        if mapped_labels or extra_labels:
             upstairs_values[MapKey.LABELS] = {}
 
-        if mapping_labels:
+        if mapped_labels:
             upstairs_values[MapKey.LABELS] = {
                 **upstairs_values[MapKey.LABELS],
-                **mapping_labels,
+                **mapped_labels,
             }
 
-        if metadata_labels:
+        if target_labels:
             upstairs_values[MapKey.LABELS] = {
                 **upstairs_values[MapKey.LABELS],
-                **metadata_labels[0],
+                **target_labels[0],
             }
         return upstairs_values
 

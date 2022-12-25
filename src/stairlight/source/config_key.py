@@ -56,7 +56,9 @@ class StairlightConfigKey(Key):
 class MappingConfigKey(Key):
     GLOBAL_SECTION = "Global"
     MAPPING_SECTION = "Mapping"
-    METADATA_SECTION = "Metadata"
+
+    METADATA_SECTION = "Metadata"  # Deprecated
+    EXTRA_LABELS_SECTION = "ExtraLabels"
 
     TEMPLATE_SOURCE_TYPE = "TemplateSourceType"
     TABLES = "Tables"

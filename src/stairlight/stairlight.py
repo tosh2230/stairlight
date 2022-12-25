@@ -495,7 +495,7 @@ class StairLight:
         """
         tables_to_search: list[str] = []
 
-        # "mapping" section in mapping.yaml
+        # "Mapping" section in mapping.yaml
         if not self._mapping_config:
             return tables_to_search
 
@@ -510,16 +510,16 @@ class StairLight:
                 ):
                     tables_to_search.append(mapping_table.TableName)
 
-        # "metadata" section in mapping.yaml
-        for metadata in self._mapping_config.get_metadata():
+        # "ExtraLabels" section in mapping.yaml
+        for extra_label in self._mapping_config.get_extra_labels():
             if (
-                metadata.TableName not in tables_to_search
+                extra_label.TableName not in tables_to_search
                 and self.is_target_label_found(
                     target_labels=target_labels,
-                    configured_labels=metadata.Labels,
+                    configured_labels=extra_label.Labels,
                 )
             ):
-                tables_to_search.append(str(metadata.TableName))
+                tables_to_search.append(str(extra_label.TableName))
 
         return tables_to_search
 

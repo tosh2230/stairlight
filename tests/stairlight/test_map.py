@@ -168,7 +168,7 @@ class TestSuccess:
 
 
 @pytest.mark.integration
-class TestSuccessNoMetadata:
+class TestSuccessNoExtraLables:
     def test_find_unmapped_params(self, dependency_map: Map):
         assert dependency_map.unmapped
 

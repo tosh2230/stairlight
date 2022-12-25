@@ -119,7 +119,7 @@ Mapping:
         Labels:
           Source: s3
           Test: c
-Metadata:
+ExtraLabels:
   - TableName: "PROJECT_A.DATASET_A.TABLE_A"
     Labels:
       Source: Null
