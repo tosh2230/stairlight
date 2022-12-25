@@ -137,7 +137,7 @@ class MappingConfig:
     Metadata: list[dict[str, Any]] | None = None  # Deprecated
 
     def get_global(self) -> MappingConfigGlobal:
-        """Get a global section
+        """Get global section
 
         Returns:
             MappingConfigGlobal: Global section
@@ -149,7 +149,7 @@ class MappingConfig:
         return mapping_config_global
 
     def get_mapping(self) -> Iterator[MappingConfigMapping]:
-        """Get a mapping section
+        """Get mapping section
 
         Yields:
             Iterator[MappingConfigMapping]: Mapping section
@@ -161,7 +161,7 @@ class MappingConfig:
             yield mapping_config(**_mapping)
 
     def get_extra_labels(self) -> Iterator[MappingConfigExtraLabels]:
-        """Get a labelers section
+        """Get extra labels section
 
         Yields:
             Iterator[MappingConfigExtraLabels]: Extra labels section
