@@ -124,7 +124,7 @@ class MappingConfigMapping:
 
 
 @dataclass
-class MappingConfigMetadata:
+class MappingConfigExtraLabels:
     TableName: str | None = None
     Labels: dict[str, Any] = field(default_factory=dict)
 
@@ -133,7 +133,8 @@ class MappingConfigMetadata:
 class MappingConfig:
     Global: OrderedDict | None = None
     Mapping: list[OrderedDict] = field(default_factory=list)
-    Metadata: list[dict[str, Any]] | None = None
+    ExtraLabels: list[dict[str, Any]] | None = None
+    Metadata: list[dict[str, Any]] | None = None  # Deprecated
 
     def get_global(self) -> MappingConfigGlobal:
         """Get a global section
@@ -159,14 +160,22 @@ class MappingConfig:
             )
             yield mapping_config(**_mapping)
 
-    def get_metadata(self) -> Iterator[MappingConfigMetadata]:
-        """Get a metadata section
+    def get_extra_labels(self) -> Iterator[MappingConfigExtraLabels]:
+        """Get a labelers section
 
         Yields:
-            Iterator[MappingConfigMetadata]: Metadata section
+            Iterator[MappingConfigExtraLabels]: Extra labels section
         """
-        for _metadata in self.Metadata:
-            yield MappingConfigMetadata(**_metadata)
+        if not self.ExtraLabels:
+            return
+        for extra_label in self.ExtraLabels:
+            yield MappingConfigExtraLabels(**extra_label)
+
+        # Deprecated
+        if not self.Metadata:
+            return
+        for metadata in self.Metadata:
+            yield MappingConfigExtraLabels(**metadata)
 
     @staticmethod
     def select_mapping_config(source_type: str) -> Type[MappingConfigMapping]:
