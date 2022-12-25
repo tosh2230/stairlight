@@ -176,7 +176,7 @@ def set_save_load_parser(parser: argparse.ArgumentParser) -> None:
         "--save",
         help=textwrap.dedent(
             """\
-            A file path where map results will be saved.
+            A file path where mapped results will be saved.
             You can choose from local file system, GCS, S3.
         """
         ),
@@ -187,7 +187,7 @@ def set_save_load_parser(parser: argparse.ArgumentParser) -> None:
         "--load",
         help=textwrap.dedent(
             """\
-            A file path where map results are saved.
+            A file path where mapped results are saved.
             You can choose from local file system, GCS, S3.
             It can be specified multiple times.
         """
@@ -227,6 +227,20 @@ def set_search_parser(parser: argparse.ArgumentParser) -> None:
         ),
         action="append",
     )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        help="return verbose results",
+        action="store_true",
+        default=False,
+    )
+    parser.add_argument(
+        "-r",
+        "--recursive",
+        help="search recursively",
+        action="store_true",
+        default=False,
+    )
 
 
 def set_output_parser(parser: argparse.ArgumentParser) -> None:
@@ -242,20 +256,6 @@ def set_output_parser(parser: argparse.ArgumentParser) -> None:
         type=str,
         choices=[ResponseType.TABLE.value, ResponseType.URI.value],
         default=ResponseType.TABLE.value,
-    )
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        help="return verbose results",
-        action="store_true",
-        default=False,
-    )
-    parser.add_argument(
-        "-r",
-        "--recursive",
-        help="search recursively",
-        action="store_true",
-        default=False,
     )
 
 
@@ -305,8 +305,8 @@ def create_parser() -> argparse.ArgumentParser:
     parser_up.set_defaults(handler=command_up)
     set_general_parser(parser=parser_up)
     set_save_load_parser(parser=parser_up)
-    set_search_parser(parser=parser_up)
     set_output_parser(parser=parser_up)
+    set_search_parser(parser=parser_up)
 
     # down
     parser_down = subparsers.add_parser(
@@ -315,8 +315,8 @@ def create_parser() -> argparse.ArgumentParser:
     parser_down.set_defaults(handler=command_down)
     set_general_parser(parser=parser_down)
     set_save_load_parser(parser=parser_down)
-    set_search_parser(parser=parser_down)
     set_output_parser(parser=parser_down)
+    set_search_parser(parser=parser_down)
 
     return parser
 
