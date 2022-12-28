@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from collections import namedtuple
-from typing import Any, Callable, Dict, List
+from typing import Any, Callable
 
 import pytest
 
@@ -65,8 +67,8 @@ class TestGcsTemplate:
         bucket: str,
         key: str,
         local_file_path: str,
-        params: Dict[str, Any],
-        ignore_params: List[str],
+        params: dict[str, Any],
+        ignore_params: list[str],
         expected: str,
     ) -> GcsTemplate:
         return GcsTemplate(mapping_config=mapping_config, bucket=bucket, key=key)
@@ -103,8 +105,8 @@ class TestGcsTemplate:
         self,
         mocker,
         gcs_template: GcsTemplate,
-        params: Dict[str, Any],
-        ignore_params: List[str],
+        params: dict[str, Any],
+        ignore_params: list[str],
         expected: str,
     ):
         mocker.patch(
@@ -118,8 +120,8 @@ class TestGcsTemplate:
     def test_render_integration(
         self,
         gcs_template: GcsTemplate,
-        params: Dict[str, Any],
-        ignore_params: List[str],
+        params: dict[str, Any],
+        ignore_params: list[str],
         expected: str,
     ):
         actual = gcs_template.render(params=params, ignore_params=ignore_params)

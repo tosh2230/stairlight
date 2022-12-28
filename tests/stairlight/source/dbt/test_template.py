@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import pathlib
-from typing import Any, Dict, List, OrderedDict
+from typing import Any, OrderedDict
 
 import pytest
 
@@ -122,7 +124,7 @@ class TestDbtTemplateSource:
     @pytest.fixture(scope="function")
     def dbt_templates(
         self, mocker, dbt_template_source: DbtTemplateSource
-    ) -> List[Template]:
+    ) -> list[Template]:
         mocker.patch(
             "src.stairlight.source.dbt.template.DbtTemplateSource.execute_dbt_compile"
         )
@@ -131,16 +133,16 @@ class TestDbtTemplateSource:
             "src.stairlight.source.dbt.template.pathlib.Path.glob",
             return_value=[pathlib.Path(dummy_file)],
         )
-        dbt_templates: List[Template] = []
+        dbt_templates: list[Template] = []
         for dbt_template in dbt_template_source.search_templates():
             dbt_templates.append(dbt_template)
         return dbt_templates
 
-    def test_search_templates(self, dbt_templates: List[Template]):
+    def test_search_templates(self, dbt_templates: list[Template]):
         assert len(dbt_templates) > 0
 
     def test_search_templates_schema_not_exists(
-        self, dbt_template_source: DbtTemplateSource, dbt_templates: List[DbtTemplate]
+        self, dbt_template_source: DbtTemplateSource, dbt_templates: list[DbtTemplate]
     ):
         re_matched = [
             dbt_template.key
@@ -180,7 +182,7 @@ class TestDbtTemplateSource:
         profiles_dir: str,
         profile: str,
         target: str,
-        vars: Dict[str, Any],
+        vars: dict[str, Any],
         expected_command: str,
     ):
         expected = expected_command.format(
@@ -203,7 +205,7 @@ class TestDbtTemplateSource:
         profiles_dir: str,
         profile: str,
         target: str,
-        vars: Dict[str, Any],
+        vars: dict[str, Any],
     ):
         mocker.patch("src.stairlight.source.dbt.template.subprocess.run")
         _ = dbt_template_source.execute_dbt_compile(

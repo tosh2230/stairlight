@@ -1,4 +1,6 @@
-from typing import Any, Dict
+from __future__ import annotations
+
+from typing import Any
 
 import pytest
 
@@ -218,7 +220,7 @@ class TestFileTemplateRenderException:
         self,
         file_template: FileTemplate,
         key: str,
-        params: Dict[str, Any],
+        params: dict[str, Any],
     ):
         with pytest.raises(RenderingTemplateException) as exception:
             _ = file_template.render(params=params)

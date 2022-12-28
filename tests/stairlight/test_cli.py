@@ -1,4 +1,6 @@
-from typing import Any, Dict, Iterator, List, Union
+from __future__ import annotations
+
+from typing import Any, Iterator
 
 import pytest
 
@@ -115,10 +117,10 @@ class TestSuccess:
                 "-v",
             ]
         )
-        results: Union[Dict[str, Any], List[Dict[str, Any]]] = cli_main.command_down(
+        results: dict[str, Any] | list[dict[str, Any]] = cli_main.command_down(
             stairlight=stairlight_save, args=args
         )
-        actual: Dict[str, Any]
+        actual: dict[str, Any]
         if isinstance(results, dict):
             actual = results
         elif isinstance(results, list):
