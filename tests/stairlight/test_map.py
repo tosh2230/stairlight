@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 from collections import OrderedDict
-from typing import Dict, List
 
 import pytest
 
@@ -53,8 +54,8 @@ class TestSuccess:
     )
     def test_mapped_items(self, dependency_map: Map, template_source_type: str):
         found: bool = False
-        upstairs_items: Dict
-        upstairs_attributes: Dict
+        upstairs_items: dict
+        upstairs_attributes: dict
         for _, upstairs_items in dependency_map.mapped.items():
             for _, upstairs_attributes in upstairs_items.items():
                 if (
@@ -99,7 +100,7 @@ class TestSuccess:
         ],
     )
     def test_find_unmapped_params(
-        self, dependency_map: Map, key: str, expected: List[str]
+        self, dependency_map: Map, key: str, expected: list[str]
     ):
         actual = []
         for unmapped_attributes in dependency_map.unmapped:

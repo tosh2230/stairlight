@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import os
 from collections import OrderedDict
-from typing import Any, Dict, List
+from typing import Any
 
 import pytest
 from sqlalchemy.exc import ArgumentError
@@ -51,8 +53,8 @@ class TestRedashTemplate:
         query_name: str,
         query_str: str,
         data_source_name: str,
-        params: Dict[str, Any],
-        mapped_table_attributes: Dict[str, Any],
+        params: dict[str, Any],
+        mapped_table_attributes: dict[str, Any],
     ) -> RedashTemplate:
         mapping_config = configurator.read_mapping(prefix="mapping_redash")
         return RedashTemplate(
@@ -130,7 +132,7 @@ class TestRedashTemplateSource:
                 ["test_id", "test_name", "test_str", "test_data_source_name"]
             ],
         )
-        templates: List[Template] = []
+        templates: list[Template] = []
         for template in redash_template_source.search_templates():
             templates.append(template)
         assert len(templates) > 0

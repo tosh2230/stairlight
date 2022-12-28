@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import json
-from typing import Any, Dict, Iterator, List
+from typing import Any, Iterator
 
 import pytest
 
@@ -110,7 +112,7 @@ class TestStairLight:
         ]
 
     def test_up_recursive_verbose(self):
-        actual: List[str] = []
+        actual: list[str] = []
         table_name: str = "PROJECT_D.DATASET_E.TABLE_F"
         result = self.stairlight.up(table_name=table_name, recursive=True, verbose=True)
         if isinstance(result, dict):
@@ -170,7 +172,7 @@ class TestStairLight:
         ]
 
     def test_down_recursive_verbose(self):
-        actual: List[str] = []
+        actual: list[str] = []
         table_name = "PROJECT_C.DATASET_C.TABLE_C"
         result = self.stairlight.down(
             table_name=table_name, recursive=True, verbose=True
@@ -270,9 +272,9 @@ class TestStairLight:
 
     def test_merge(self, stairlight_merge: StairLight):
         stairlight_merge.load_map()
-        actual: Dict[str, Any] = stairlight_merge.mapped
+        actual: dict[str, Any] = stairlight_merge.mapped
         with open("tests/results/merged.json", "r") as f:
-            expected: Dict[str, Any] = json.load(f)
+            expected: dict[str, Any] = json.load(f)
         assert actual == expected
 
 

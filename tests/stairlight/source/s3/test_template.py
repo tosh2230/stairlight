@@ -1,4 +1,6 @@
-from typing import Any, Dict, List
+from __future__ import annotations
+
+from typing import Any
 
 import boto3
 import pytest
@@ -48,8 +50,8 @@ class TestS3Template:
         mapping_config: MappingConfig,
         bucket: str,
         key: str,
-        params: Dict[str, Any],
-        ignore_params: List[str],
+        params: dict[str, Any],
+        ignore_params: list[str],
         expected: str,
     ) -> S3Template:
         return S3Template(
@@ -98,8 +100,8 @@ class TestS3Template:
         self,
         s3_template: S3Template,
         key: str,
-        params: Dict[str, Any],
-        ignore_params: List[str],
+        params: dict[str, Any],
+        ignore_params: list[str],
         expected: str,
     ):
         s3_client = boto3.resource("s3", region_name="us-east-1")
@@ -113,8 +115,8 @@ class TestS3Template:
     def test_render_integration(
         self,
         s3_template: S3Template,
-        params: Dict[str, Any],
-        ignore_params: List[str],
+        params: dict[str, Any],
+        ignore_params: list[str],
         expected: str,
     ):
         actual = s3_template.render(params=params, ignore_params=ignore_params)

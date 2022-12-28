@@ -254,7 +254,7 @@ def create_nested_dict(
     """create nested dict from list
 
     Args:
-        keys (list[str]): Dict keys
+        keys (list[str]): a list of dict keys
         results (dict[str, Any]): Nested dict
         density (int, optional): Density of the dict. Defaults to 0.
         default_value (any, optional): Default dict value. Defaults to None.
