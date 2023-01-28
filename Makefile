@@ -1,6 +1,8 @@
 VERSION := $(shell grep -E '^version = *.' pyproject.toml | sed -e 's/version = //g')
 EXTRAS = gcs,redash,dbt-bigquery,s3
 
+.PHONY: lint type-check format install exec check test install-test test-report setup-test
+
 lint:
 	poetry run flake8 src tests
 	poetry run isort --check --diff src tests
