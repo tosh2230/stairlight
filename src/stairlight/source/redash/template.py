@@ -123,11 +123,12 @@ class RedashTemplateSource(TemplateSource):
 
         connection_str = self.get_connection_str()
         engine = create_engine(connection_str)
-        queries = engine.execute(
-            text(query_text),
-            data_source=data_source,
-            query_ids=query_ids,
-        )
+        with engine.connect() as conn:
+            queries = conn.execute( # type: ignore
+                text(query_text),
+                data_source=data_source,
+                query_ids=query_ids,
+            )
         return queries.fetchall()
 
     def build_query_string(self, path: str) -> str:
