@@ -124,7 +124,7 @@ class RedashTemplateSource(TemplateSource):
         connection_str = self.get_connection_str()
         engine = create_engine(connection_str)
         with engine.connect() as conn:
-            queries = conn.execute( # type: ignore
+            queries = conn.execute(  # type: ignore
                 text(query_text),
                 data_source=data_source,
                 query_ids=query_ids,
