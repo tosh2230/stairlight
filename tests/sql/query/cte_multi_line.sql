@@ -1,3 +1,4 @@
+-- This is c
 WITH c AS (
     SELECT
         test_id,
@@ -7,6 +8,7 @@ WITH c AS (
     WHERE
         0 = 0
 ),
+-- This is d
 d AS (
     SELECT
         test_id,

@@ -87,17 +87,17 @@ class TestSuccess:
                 [
                     {
                         MapKey.TABLE_NAME: "PROJECT_B.DATASET_B.TABLE_B",
-                        MapKey.LINE_NUMBER: 23,
+                        MapKey.LINE_NUMBER: 25,
                         MapKey.LINE_STRING: "    PROJECT_B.DATASET_B.TABLE_B AS b",
                     },
                     {
                         MapKey.TABLE_NAME: "PROJECT_C.DATASET_C.TABLE_C",
-                        MapKey.LINE_NUMBER: 6,
+                        MapKey.LINE_NUMBER: 7,
                         MapKey.LINE_STRING: "        PROJECT_C.DATASET_C.TABLE_C",
                     },
                     {
                         MapKey.TABLE_NAME: "PROJECT_d.DATASET_d.TABLE_d",
-                        MapKey.LINE_NUMBER: 15,
+                        MapKey.LINE_NUMBER: 17,
                         MapKey.LINE_STRING: "        PROJECT_d.DATASET_d.TABLE_d",
                     },
                 ],
