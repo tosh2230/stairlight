@@ -57,21 +57,25 @@ class Query:
         Returns:
             list[str]: A list of upstairs tables
         """
+        # Remove comments
+        comments_pattern = r"\-\-.*\n"
+        query_str = re.sub(comments_pattern, "", self.query_str)
+
         # Get Common-Table-Expressions(CTE) from query string
         cte_pattern = r"(?:with|,)\s*(\w+)\s+as\s*"
-        cte_alias: list[str] = re.findall(cte_pattern, self.query_str, re.IGNORECASE)
+        cte_alias: list[str] = re.findall(cte_pattern, query_str, re.IGNORECASE)
 
         # Search a boundary line number that a main query starts
         boundary_num: int = 0
         main_pattern = r"\)[;\s]*select" if any(cte_alias) else r"select"
-        main_search_result = re.search(main_pattern, self.query_str, re.IGNORECASE)
+        main_search_result = re.search(main_pattern, query_str, re.IGNORECASE)
         if main_search_result:
             boundary_num = main_search_result.start()
 
         # Split the query to a main query and CTEs
         query_group = {}
-        query_group["main"] = self.query_str[boundary_num:].strip()
-        query_group["cte"] = self.query_str[:boundary_num].strip()
+        query_group["main"] = query_str[boundary_num:].strip()
+        query_group["cte"] = query_str[:boundary_num].strip()
 
         # Exclude table aliases from the main
         table_pattern = r"\s(?:from|join)\s+([`.\-\w]+)"
