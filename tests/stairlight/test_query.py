@@ -257,6 +257,10 @@ class TestSuccess:
                     },
                 ],
             ),
+            (
+                "tests/sql/query/extract_date_from_timestamp.sql",
+                [],
+            ),
         ],
         ids=[
             "tests/sql/query/cte_one_line.sql",
@@ -269,6 +273,7 @@ class TestSuccess:
             "tests/sql/query/backtick_whole_element.sql",
             "tests/sql/query/google_bigquery_unnest_in_exists.sql",
             "tests/sql/query/include_from_and_to_in_column_names.sql",
+            "tests/sql/query/extract_date_from_timestamp.sql",
         ],
     )
     def test_detect_upstairs_attributes(self, file, expected):
