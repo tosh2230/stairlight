@@ -77,15 +77,23 @@ class Query:
         query_group["main"] = query_str[boundary_num:].strip()
         query_group["cte"] = query_str[:boundary_num].strip()
 
-        # Exclude table aliases from the main
         table_pattern = r"\s(?:from|join)\s+([`.\-\w]+)"
         main_tables_with_alias: list[str] = re.findall(
             table_pattern, query_group["main"], re.IGNORECASE
         )
+
+        # Exclude Google BigQuery EXTRACT function
+        bq_extract_pattern = r"(?:EXTRACT\(.+ FROM)\s+([`.\-\w]+)"
+        bq_extracts: list[str] = re.findall(
+            bq_extract_pattern, query_group["main"], re.IGNORECASE
+        )
+
         main_tables = [
             table
             for table in main_tables_with_alias
-            if table not in cte_alias and table.upper() != "UNNEST"
+            if table not in cte_alias
+            and table not in bq_extracts
+            and table.upper() != "UNNEST"
         ]
 
         # Exclude table alias from CTEs
