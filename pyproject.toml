@@ -10,7 +10,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.7.2,<3.11"
+python = ">=3.7.2"
 PyYAML = ">=5.0"
 Jinja2 = ">=2.10.3"
 
@@ -21,7 +21,7 @@ boto3-stubs = {version = ">=1.24.17", extras = ["s3"]}
 google-cloud-storage = { version = ">=2.0.0", optional = true }
 psycopg2 = { version = ">=2.9.3", optional = true }
 SQLAlchemy = { version = ">=1.4.31", optional = true }
-dbt-core = { version = ">=1.1", optional = true }
+dbt-core = { version = ">=1.4", optional = true }
 dbt-bigquery = { version = ">=1.1", optional = true }
 google-cloud-bigquery = { version = ">=2.0", optional = true }
 protobuf = { version = ">=3.20.2", optional = true }
