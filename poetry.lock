@@ -2512,13 +2512,14 @@ tests = ["coverage (>=6.0.0)", "flake8", "mypy", "pytest (>=7.0.0)", "pytest-asy
 
 [[package]]
 name = "rsa"
-version = "4.2"
+version = "4.9"
 description = "Pure-Python RSA implementation"
 category = "main"
 optional = true
-python-versions = "*"
+python-versions = ">=3.6,<4"
 files = [
-    {file = "rsa-4.2.tar.gz", hash = "sha256:aaefa4b84752e3e99bd8333a2e1e3e7a7da64614042bd66f775573424370108a"},
+    {file = "rsa-4.9-py3-none-any.whl", hash = "sha256:90260d9058e514786967344d0ef75fa8727eed8a7d2e43ce9f4bcf1b536174f7"},
+    {file = "rsa-4.9.tar.gz", hash = "sha256:e38464a49c6c85d7f1351b0126661487a7e0a14a50f1675ec50eb34d4f20ef21"},
 ]
 
 [package.dependencies]
@@ -2855,12 +2856,12 @@ docs = ["furo", "jaraco.packaging (>=9)", "jaraco.tidelift (>=1.4)", "rst.linker
 testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools", "more-itertools", "pytest (>=6)", "pytest-black (>=0.3.7)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=1.3)", "pytest-flake8", "pytest-mypy (>=0.9.1)"]
 
 [extras]
-dbt-bigquery = ["dbt-core", "dbt-bigquery", "google-cloud-bigquery", "protobuf", "networkx"]
-gcs = ["google-cloud-storage", "protobuf"]
+dbt-bigquery = ["dbt-core", "dbt-bigquery", "google-cloud-bigquery", "protobuf", "networkx", "rsa"]
+gcs = ["google-cloud-storage", "protobuf", "rsa"]
 redash = ["psycopg2", "SQLAlchemy"]
 s3 = ["boto3", "boto3-stubs"]
 
 [metadata]
 lock-version = "2.0"
-python-versions = ">=3.7.2"
-content-hash = "bd3a7ee36326dc6fecf17cd9af533ef78a68024379c8c9fe2e0836eaa19227ef"
+python-versions = ">=3.7.2,<4"
+content-hash = "64c2856e534ed378bdb70886dd95e252a2cf51e0dc2e0e860b3f655ee626c715"
