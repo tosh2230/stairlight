@@ -5,10 +5,10 @@ import json
 import textwrap
 from typing import Any, Callable
 
-from src.stairlight import ResponseType, StairLight
+from src import stairlight
 
 
-def command_init(stairlight: StairLight, args: argparse.Namespace) -> str:
+def command_init(stairlight: stairlight.StairLight, args: argparse.Namespace) -> str:
     """Execute init command
 
     Args:
@@ -25,7 +25,7 @@ def command_init(stairlight: StairLight, args: argparse.Namespace) -> str:
     return message
 
 
-def command_check(stairlight: StairLight, args: argparse.Namespace) -> str:
+def command_check(stairlight: stairlight.StairLight, args: argparse.Namespace) -> str:
     """Execute check command
 
     Args:
@@ -43,7 +43,9 @@ def command_check(stairlight: StairLight, args: argparse.Namespace) -> str:
     return message
 
 
-def command_list(stairlight: StairLight, args: argparse.Namespace) -> list[str]:
+def command_list(
+    stairlight: stairlight.StairLight, args: argparse.Namespace
+) -> list[str]:
     """Execute list command
 
     Args:
@@ -57,7 +59,7 @@ def command_list(stairlight: StairLight, args: argparse.Namespace) -> list[str]:
 
 
 def command_up(
-    stairlight: StairLight, args: argparse.Namespace
+    stairlight: stairlight.StairLight, args: argparse.Namespace
 ) -> dict[str, Any] | list[dict[str, Any]]:
     """Execute up command
 
@@ -76,7 +78,7 @@ def command_up(
 
 
 def command_down(
-    stairlight: StairLight, args: argparse.Namespace
+    stairlight: stairlight.StairLight, args: argparse.Namespace
 ) -> dict[str, Any] | list[dict[str, Any]]:
     """Execute down command
 
@@ -123,7 +125,7 @@ def search(
 
 
 def find_tables_to_search(
-    stairlight: StairLight, args: argparse.Namespace
+    stairlight: stairlight.StairLight, args: argparse.Namespace
 ) -> list[str]:
     """Find tables to search
 
@@ -163,6 +165,12 @@ def set_general_parser(parser: argparse.ArgumentParser) -> None:
         help="keep silence",
         action="store_true",
         default=False,
+    )
+    parser.add_argument(
+        "--version",
+        help="version",
+        action="version",
+        version=stairlight.__version__,
     )
 
 
@@ -254,8 +262,11 @@ def set_output_parser(parser: argparse.ArgumentParser) -> None:
         "--output",
         help="output type",
         type=str,
-        choices=[ResponseType.TABLE.value, ResponseType.URI.value],
-        default=ResponseType.TABLE.value,
+        choices=[
+            stairlight.ResponseType.TABLE.value,
+            stairlight.ResponseType.URI.value,
+        ],
+        default=stairlight.ResponseType.TABLE.value,
     )
 
 
@@ -271,7 +282,7 @@ def create_parser() -> argparse.ArgumentParser:
         "Without positional arguments, "
         "return a table dependency map as JSON format."
     )
-    parser = argparse.ArgumentParser(description=description)
+    parser = argparse.ArgumentParser(prog="Stairlight", description=description)
     set_general_parser(parser=parser)
     set_save_load_parser(parser=parser)
 
@@ -325,22 +336,22 @@ def main() -> None:
     """CLI entrypoint"""
     parser = create_parser()
     args = parser.parse_args()
-    stairlight = StairLight(
+    _stairlight = stairlight.StairLight(
         config_dir=args.config, load_files=args.load, save_file=args.save
     )
-    stairlight.create_map()
+    _stairlight.create_map()
 
     result = None
     if hasattr(args, "handler"):
-        if args.handler == command_init and stairlight.has_stairlight_config():
+        if args.handler == command_init and _stairlight.has_stairlight_config():
             exit(f"'{args.config}/stairlight.y(a)ml' already exists.")
-        elif args.handler != command_init and not stairlight.has_stairlight_config():
+        elif args.handler != command_init and not _stairlight.has_stairlight_config():
             exit(f"'{args.config}/stairlight.y(a)ml' is not found.")
         result = args.handler(stairlight, args)
     else:
-        if not stairlight.has_stairlight_config():
+        if not _stairlight.has_stairlight_config():
             exit(f"'{args.config}/stairlight.y(a)ml' is not found.")
-        result = stairlight.mapped
+        result = _stairlight.mapped
 
     if args.quiet or not result:
         return

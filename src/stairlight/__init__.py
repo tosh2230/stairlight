@@ -5,4 +5,5 @@ from src.stairlight.stairlight import (
     is_cyclic,
 )
 
-__all__ = ["StairLight", "ResponseType", "SearchDirection", "is_cyclic"]
+__version__ = "0.7.0"
+__all__ = ["StairLight", "ResponseType", "SearchDirection", "is_cyclic", "__version__"]
