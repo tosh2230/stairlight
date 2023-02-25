@@ -56,5 +56,7 @@ def deep_merge(original: dict[str, Any], add: dict[str, Any]) -> dict[str, Any]:
             original_value: dict[str, Any] = original.get(add_key, {})
             new[add_key] = deep_merge(original=original_value, add=add_value)
         elif isinstance(add_value, list):
-            new[add_key].extend(add_value)
+            for element in add_value:
+                if element not in new[add_key]:
+                    new[add_key].append(element)
     return new
