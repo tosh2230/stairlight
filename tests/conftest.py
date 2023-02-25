@@ -30,7 +30,7 @@ def mapping_config(configurator: Configurator) -> MappingConfig:
 
 @pytest.fixture(scope="session")
 def mapping_config_single(configurator: Configurator) -> MappingConfig:
-    return configurator.read_mapping_with_prefix(prefix="mapping_test_regex_01")
+    return configurator.read_mapping_with_prefix(prefix="mapping_single")
 
 
 @pytest.fixture(scope="session")
