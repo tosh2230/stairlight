@@ -23,4 +23,8 @@ Exclude:
   - TemplateSourceType: File
     Regex: "main/exclude.sql$"
 Settings:
+  MappingFilesRegex:
+    - .*/mapping\.yaml$
+    - .*/mapping\_file\.yaml$
+    - .*/mapping\_gcs\.yaml$
   MappingPrefix: "mapping"
