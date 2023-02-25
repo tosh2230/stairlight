@@ -140,3 +140,45 @@ class TestSuccess:
         cli_main.main()
         out, err = capfd.readouterr()
         assert len(out) == 0 and len(err) == 0
+
+    @pytest.mark.integration
+    def test_main_up(self, monkeypatch, capfd):
+        monkeypatch.setattr(
+            "sys.argv",
+            [
+                "",
+                "up",
+                "-c",
+                "tests/config",
+                "--table",
+                "PROJECT_D.DATASET_E.TABLE_F",
+                "-t",
+                "PROJECT_d.DATASET_d.TABLE_d",
+                "-r",
+                "-v",
+            ],
+        )
+        cli_main.main()
+        out, err = capfd.readouterr()
+        assert len(out) > 0 and len(err) == 0
+
+    @pytest.mark.integration
+    def test_main_down(self, monkeypatch, capfd):
+        monkeypatch.setattr(
+            "sys.argv",
+            [
+                "",
+                "down",
+                "-c",
+                "tests/config",
+                "--label",
+                "Test:b",
+                "-l",
+                "Source:gcs",
+                "-r",
+                "-v",
+            ],
+        )
+        cli_main.main()
+        out, err = capfd.readouterr()
+        assert len(out) > 0 and len(err) == 0
