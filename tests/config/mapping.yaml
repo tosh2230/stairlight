@@ -50,24 +50,6 @@ Mapping:
         Labels:
           Source: file
           Test: c
-  - TemplateSourceType: GCS
-    Uri: "gs://stairlight/sql/one_line/one_line.sql"
-    Tables:
-      - TableName: "PROJECT_a.DATASET_b.TABLE_c"
-  - TemplateSourceType: GCS
-    Uri: "gs://stairlight/sql/cte/cte_multi_line.sql"
-    Tables:
-      - TableName: "PROJECT_d.DATASET_e.TABLE_f"
-        IgnoreParameters:
-          - execution_date.add(days=1).isoformat()
-        Parameters:
-          params:
-            PROJECT: PROJECT_g
-            DATASET: DATASET_h
-            TABLE: TABLE_i
-        Labels:
-          Source: gcs
-          Test: b
   - TemplateSourceType: File
     FileSuffix: "tests/sql/main/one_line_1.sql"
     Tables:
@@ -91,6 +73,24 @@ Mapping:
     FileSuffix: "tests/sql/main/union_same_table.sql"
     Tables:
       - TableName: "test_project.beam_streaming.taxirides_aggregation"
+  - TemplateSourceType: GCS
+    Uri: "gs://stairlight/sql/one_line/one_line.sql"
+    Tables:
+      - TableName: "PROJECT_a.DATASET_b.TABLE_c"
+  - TemplateSourceType: GCS
+    Uri: "gs://stairlight/sql/cte/cte_multi_line.sql"
+    Tables:
+      - TableName: "PROJECT_d.DATASET_e.TABLE_f"
+        IgnoreParameters:
+          - execution_date.add(days=1).isoformat()
+        Parameters:
+          params:
+            PROJECT: PROJECT_g
+            DATASET: DATASET_h
+            TABLE: TABLE_i
+        Labels:
+          Source: gcs
+          Test: b
   - TemplateSourceType: dbt
     ProjectName: project_01
     FileSuffix: tests/dbt/project_01/target/compiled/project_01/models/example/my_first_dbt_model.sql

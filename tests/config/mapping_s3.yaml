@@ -1,0 +1,19 @@
+Mapping:
+  - TemplateSourceType: S3
+    Uri: "s3://stairlight/sql/one_line/one_line.sql"
+    Tables:
+      - TableName: "PROJECT_as.DATASET_bs.TABLE_cs"
+  - TemplateSourceType: S3
+    Uri: "s3://stairlight/sql/cte/cte_multi_line.sql"
+    Tables:
+      - TableName: "PROJECT_ds.DATASET_es.TABLE_fs"
+        IgnoreParameters:
+          - execution_date.add(days=1).isoformat()
+        Parameters:
+          params:
+            PROJECT: PROJECT_gs
+            DATASET: DATASET_hs
+            TABLE: TABLE_is
+        Labels:
+          Source: s3
+          Test: c
