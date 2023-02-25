@@ -204,13 +204,13 @@ Examples can be found [here](https://github.com/tosh2230/stairlight/tree/main/te
 ```yaml
 Include:
   - TemplateSourceType: File
-    FileSystemPath: "./tests/sql"
-    Regex: ".*/*.sql$"
+    FileSystemPath: ./tests/sql
+    Regex: .*/*\.sql$
     DefaultTablePrefix: "PROJECT_A"
   - TemplateSourceType: GCS
     ProjectId: null
     BucketName: stairlight
-    Regex: "^sql/.*/*.sql$"
+    Regex: ^sql/.*/*\.sql$
     DefaultTablePrefix: "PROJECT_A"
   - TemplateSourceType: Redash
     DatabaseUrlEnvironmentVariable: REDASH_DATABASE_URL
@@ -227,12 +227,18 @@ Include:
       key_b: value_b
   - TemplateSourceType: S3
     BucketName: stairlight
-    Regex: "^sql/.*/*.sql$"
+    Regex: ^sql/.*/*\.sql$
     DefaultTablePrefix: "PROJECT_A"
 Exclude:
   - TemplateSourceType: File
-    Regex: "main/exclude.sql$"
+    Regex: main/exclude\.sql$
 Settings:
+  MappingFilesRegex:
+    - .*/mapping\_file\.yaml$
+    - .*/mapping\_gcs\.yaml$
+    - .*/mapping\_dbt\.yaml$
+    - .*/mapping\_s3\.yaml$
+  # Deprecated from v0.7.2
   MappingPrefix: "mapping"
 ```
 

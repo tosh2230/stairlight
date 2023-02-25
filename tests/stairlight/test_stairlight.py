@@ -5,7 +5,7 @@ from typing import Any, Iterator
 
 import pytest
 
-from src.stairlight import ResponseType, SearchDirection, StairLight, is_cyclic
+from src.stairlight import ResponseType, SearchDirection, StairLight
 from src.stairlight.source.config import MapKey
 from tests.conftest import teardown_rm_file
 
@@ -285,40 +285,3 @@ class TestStairLightNoConfig:
 
     def test_has_stairlight_config(self):
         assert not self.stairlight.has_stairlight_config()
-
-
-class TestIsCyclic:
-    @pytest.mark.parametrize(
-        ("node_list", "expected"),
-        [
-            (["1", "2", "1", "2", "1", "2", "1", "2"], True),
-            (["1", "2", "3", "2", "3", "2", "3"], True),
-            (["1", "2", "3", "4", "5", "3", "4", "5"], True),
-            (["1", "2", "3", "4", "5", "1", "2", "3", "4"], True),
-            (["1", "2", "3", "4", "5"], False),
-            (
-                [
-                    "PROJECT_D.DATASET_E.TABLE_F",
-                    "PROJECT_J.DATASET_K.TABLE_L",
-                    "PROJECT_P.DATASET_Q.TABLE_R",
-                    "PROJECT_S.DATASET_T.TABLE_U",
-                    "PROJECT_V.DATASET_W.TABLE_X",
-                    "PROJECT_C.DATASET_C.TABLE_C",
-                    "PROJECT_d.DATASET_d.TABLE_d",
-                    "PROJECT_J.DATASET_K.TABLE_L",
-                ],
-                True,
-            ),
-        ],
-        ids=[
-            "each",
-            "except_first",
-            "except_first_two",
-            "first_four",
-            "not cyclic",
-            "cyclic_tables",
-        ],
-    )
-    def test_is_cyclic(self, node_list, expected):
-        actual = is_cyclic(node_list)
-        assert expected == actual

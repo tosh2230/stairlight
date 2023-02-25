@@ -25,12 +25,12 @@ def stairlight_config(configurator: Configurator) -> StairlightConfig:
 
 @pytest.fixture(scope="session")
 def mapping_config(configurator: Configurator) -> MappingConfig:
-    return configurator.read_mapping(prefix=MAPPING_CONFIG_PREFIX_DEFAULT)
+    return configurator.read_mapping_with_prefix(prefix=MAPPING_CONFIG_PREFIX_DEFAULT)
 
 
 @pytest.fixture(scope="session")
 def mapping_config_single(configurator: Configurator) -> MappingConfig:
-    return configurator.read_mapping(prefix="mapping_single")
+    return configurator.read_mapping_with_prefix(prefix="mapping_single")
 
 
 @pytest.fixture(scope="session")

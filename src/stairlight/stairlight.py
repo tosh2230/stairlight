@@ -5,6 +5,7 @@ import json
 from logging import getLogger
 from typing import Any
 
+import src.stairlight.util as sl_util
 from src.stairlight.configurator import (
     MAPPING_CONFIG_PREFIX_DEFAULT,
     STAIRLIGHT_CONFIG_PREFIX_DEFAULT,
@@ -40,14 +41,6 @@ class SearchDirection(enum.Enum):
 
     def __str__(self):
         return self.name
-
-
-class Node:
-    """A Node of singly-linked list"""
-
-    def __init__(self, val: str):
-        self.val: str = val
-        self.next: "Node" | None = None
 
 
 class StairLight:
@@ -134,7 +127,7 @@ class StairLight:
             loaded_map = load_map_controller.load()
 
             if self._mapped:
-                self._mapped = deep_merge(org=self._mapped, add=loaded_map)
+                self._mapped = sl_util.deep_merge(original=self._mapped, add=loaded_map)
             else:
                 self._mapped = loaded_map
 
@@ -144,16 +137,29 @@ class StairLight:
             logger.warning(f"{STAIRLIGHT_CONFIG_PREFIX_DEFAULT}.y(a)ml' is not found.")
             return
 
-        mapping_config_prefix: str = MAPPING_CONFIG_PREFIX_DEFAULT
         if self._stairlight_config.Settings:
             settings: StairlightConfigSettings = StairlightConfigSettings(
                 **self._stairlight_config.Settings
             )
-            if settings.MappingPrefix:
-                mapping_config_prefix = settings.MappingPrefix
-        self._mapping_config = self._configurator.read_mapping(
-            prefix=mapping_config_prefix
-        )
+            mapping_config_prefix: str = (
+                settings.MappingPrefix
+                if settings.MappingPrefix
+                else MAPPING_CONFIG_PREFIX_DEFAULT
+            )
+
+            if settings.MappingFilesRegex:
+                mapping_config = self._configurator.read_mapping_with_regex(
+                    regex_list=[rf"{regex}" for regex in settings.MappingFilesRegex]
+                )
+            else:
+                mapping_config = self._configurator.read_mapping_with_prefix(
+                    prefix=mapping_config_prefix
+                )
+        else:
+            mapping_config = self._configurator.read_mapping_with_prefix(
+                prefix=MAPPING_CONFIG_PREFIX_DEFAULT
+            )
+        self._mapping_config = mapping_config
 
     def _write_map(self) -> None:
         """Write a dependency map"""
@@ -371,7 +377,7 @@ class StairLight:
 
                 searched_tables.append(next_table_name)
 
-                if is_cyclic(tables=searched_tables):
+                if sl_util.is_cyclic(tables=searched_tables):
                     details = {
                         "table_name": table_name,
                         "next_table_name": next_table_name,
@@ -437,7 +443,7 @@ class StairLight:
 
                 searched_tables.append(next_table_name)
 
-                if is_cyclic(tables=searched_tables):
+                if sl_util.is_cyclic(tables=searched_tables):
                     details = {
                         "table_name": table_name,
                         "next_table_name": next_table_name,
@@ -552,52 +558,3 @@ class StairLight:
                     found_count += 1
 
         return found_count == len(target_labels)
-
-
-def is_cyclic(tables: list[str]) -> bool:
-    """Floyd's cycle-finding algorithm
-
-    Args:
-        tables (list[str]): Detected tables
-
-    Returns:
-        bool: The table dependency is cyclic or not
-    """
-    nodes: dict[str, Node] = {}
-    for table in tables:
-        if table not in nodes.keys():
-            nodes[table] = Node(table)
-    for i, table in enumerate(tables):
-        if not nodes[table].next and i < len(tables) - 1:
-            nodes[table].next = nodes[tables[i + 1]]
-
-    slow: Node | None
-    fast: Node | None
-    slow = fast = nodes[tables[0]]
-    while fast and fast.next:
-        if slow:
-            slow = slow.next
-        fast = fast.next.next
-        if slow == fast:
-            return True
-    return False
-
-
-def deep_merge(org: dict[str, Any], add: dict[str, Any]) -> dict[str, Any]:
-    """Merge nested dicts
-
-    Args:
-        org (dict[str, Any]): Original dict
-        add (dict[str, Any]): Dict to add
-
-    Returns:
-        dict: Merged dict
-    """
-    new: dict[str, Any] = org
-    for add_key, add_value in add.items():
-        org_value: dict[str, Any] = org.get(add_key, {})
-        if add_key not in org:
-            new[add_key] = add_value
-        elif isinstance(add_value, dict):
-            new[add_key] = deep_merge(org=org_value, add=add_value)
-    return new

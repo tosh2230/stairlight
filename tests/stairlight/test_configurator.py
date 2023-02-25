@@ -23,6 +23,7 @@ from src.stairlight.source.file.template import FileTemplate
 from src.stairlight.source.gcs.template import GcsTemplate
 from src.stairlight.source.redash.template import RedashTemplate
 from src.stairlight.source.s3.template import S3Template
+from src.stairlight.source.template import TemplateSourceType
 
 
 class TestStairlightConfig:
@@ -47,8 +48,28 @@ class TestStairlightConfig:
 
 
 class TestMappingConfig:
-    def test_read_mapping(self, configurator: Configurator):
-        assert configurator.read_mapping(prefix=MAPPING_CONFIG_PREFIX_DEFAULT)
+    def test_read_mapping_with_regex(self, configurator: Configurator):
+        mapping_config = configurator.read_mapping_with_regex(
+            regex_list=[
+                r".*/mapping\_file\.yaml$",
+                r".*/mapping\_gcs\.yaml$",
+            ]
+        )
+        is_found: bool = False
+        for config in mapping_config.Mapping:
+            if (
+                config[MappingConfigKey.TEMPLATE_SOURCE_TYPE]
+                == TemplateSourceType.FILE.value
+            ):
+                is_found = True
+                break
+        assert is_found
+
+    def test_read_mapping_with_prefix(self, configurator: Configurator):
+        mapping_config = configurator.read_mapping_with_prefix(
+            prefix=MAPPING_CONFIG_PREFIX_DEFAULT
+        )
+        assert len(mapping_config.Mapping) > 0
 
     def test_create_mapping_file(
         self, configurator: Configurator, mapping_template_prefix: str
@@ -63,7 +84,7 @@ class TestBuildMappingConfigFile:
     @pytest.fixture(scope="class")
     def file_template(self, configurator: Configurator) -> FileTemplate:
         return FileTemplate(
-            mapping_config=configurator.read_mapping(
+            mapping_config=configurator.read_mapping_with_prefix(
                 prefix=MAPPING_CONFIG_PREFIX_DEFAULT
             ),
             key="tests/sql/main/test_undefined.sql",
@@ -121,7 +142,7 @@ class TestBuildMappingConfigGcs:
     @pytest.fixture(scope="class")
     def gcs_template(self, configurator: Configurator) -> GcsTemplate:
         return GcsTemplate(
-            mapping_config=configurator.read_mapping(
+            mapping_config=configurator.read_mapping_with_prefix(
                 prefix=MAPPING_CONFIG_PREFIX_DEFAULT
             ),
             bucket="stairlight",
@@ -182,7 +203,9 @@ class TestBuildMappingConfigRedash:
     @pytest.fixture(scope="class")
     def redash_template(self, configurator: Configurator) -> RedashTemplate:
         return RedashTemplate(
-            mapping_config=configurator.read_mapping(prefix="mapping_redash"),
+            mapping_config=configurator.read_mapping_with_prefix(
+                prefix="mapping_redash"
+            ),
             query_id=5,
             query_name="redash_test_query",
             data_source_name="redash_test_data",
@@ -243,7 +266,7 @@ class TestBuildMappingConfigDbt:
     @pytest.fixture(scope="class")
     def dbt_template(self, configurator: Configurator) -> DbtTemplate:
         return DbtTemplate(
-            mapping_config=configurator.read_mapping(
+            mapping_config=configurator.read_mapping_with_prefix(
                 prefix=MAPPING_CONFIG_PREFIX_DEFAULT
             ),
             key=(
@@ -309,7 +332,7 @@ class TestBuildMappingConfigS3:
     @pytest.fixture(scope="class")
     def s3_template(self, configurator: Configurator) -> S3Template:
         return S3Template(
-            mapping_config=configurator.read_mapping(
+            mapping_config=configurator.read_mapping_with_prefix(
                 prefix=MAPPING_CONFIG_PREFIX_DEFAULT
             ),
             bucket="stairlight",

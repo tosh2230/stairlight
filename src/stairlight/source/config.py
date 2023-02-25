@@ -30,6 +30,7 @@ class StairlightConfigExclude:
 
 @dataclass
 class StairlightConfigSettings:
+    MappingFilesRegex: list[str] | None = None
     MappingPrefix: str | None = None
 
 

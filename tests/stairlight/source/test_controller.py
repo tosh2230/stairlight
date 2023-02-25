@@ -23,7 +23,7 @@ class TestControlFile:
     @pytest.fixture(scope="class")
     def file_template(self, configurator: Configurator) -> FileTemplate:
         return FileTemplate(
-            mapping_config=configurator.read_mapping(
+            mapping_config=configurator.read_mapping_with_prefix(
                 prefix=MAPPING_CONFIG_PREFIX_DEFAULT
             ),
             key="tests/sql/main/test_undefined.sql",
@@ -54,7 +54,7 @@ class TestControlGcs:
     @pytest.fixture(scope="class")
     def gcs_template(self, configurator: Configurator) -> GcsTemplate:
         return GcsTemplate(
-            mapping_config=configurator.read_mapping(
+            mapping_config=configurator.read_mapping_with_prefix(
                 prefix=MAPPING_CONFIG_PREFIX_DEFAULT
             ),
             bucket="stairlight",
@@ -88,7 +88,7 @@ class TestControlRedash:
     @pytest.fixture(scope="class")
     def redash_template(self, configurator: Configurator) -> RedashTemplate:
         return RedashTemplate(
-            mapping_config=configurator.read_mapping(
+            mapping_config=configurator.read_mapping_with_prefix(
                 prefix=MAPPING_CONFIG_PREFIX_DEFAULT
             ),
             query_id=5,
@@ -123,7 +123,7 @@ class TestControlDbt:
     @pytest.fixture(scope="class")
     def dbt_template(self, configurator: Configurator) -> DbtTemplate:
         return DbtTemplate(
-            mapping_config=configurator.read_mapping(
+            mapping_config=configurator.read_mapping_with_prefix(
                 prefix=MAPPING_CONFIG_PREFIX_DEFAULT
             ),
             key="tests/dbt/project_01/target/compiled/project_01/a/example_a.sql",
@@ -158,7 +158,7 @@ class TestControlS3:
     @pytest.fixture(scope="class")
     def s3_template(self, configurator: Configurator) -> S3Template:
         return S3Template(
-            mapping_config=configurator.read_mapping(
+            mapping_config=configurator.read_mapping_with_prefix(
                 prefix=MAPPING_CONFIG_PREFIX_DEFAULT
             ),
             bucket="stairlight",

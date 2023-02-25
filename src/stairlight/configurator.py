@@ -10,6 +10,7 @@ from typing import Any
 
 import yaml
 
+import src.stairlight.util as sl_util
 from src.stairlight.source.config import (
     MappingConfig,
     MappingConfigMapping,
@@ -61,7 +62,13 @@ class Configurator:
         config = self.read(prefix=prefix)
         return StairlightConfig(**config)
 
-    def read_mapping(
+    def read_mapping_with_regex(self, regex_list: list[str]) -> MappingConfig:
+        config: dict[str, Any] = {}
+        for regex in regex_list:
+            config = sl_util.deep_merge(original=config, add=self.read(pattern=regex))
+        return MappingConfig(**config)
+
+    def read_mapping_with_prefix(
         self, prefix: str = MAPPING_CONFIG_PREFIX_DEFAULT
     ) -> MappingConfig:
         """Read mapping configurations from yaml
@@ -77,7 +84,7 @@ class Configurator:
         config = self.read(prefix=prefix)
         return MappingConfig(**config)
 
-    def read(self, prefix: str) -> dict[str, Any]:
+    def read(self, pattern: str = "", prefix: str = "") -> dict[str, Any]:
         """Read a configuration file
 
         Args:
@@ -86,17 +93,18 @@ class Configurator:
         Returns:
             dict: configurations
         """
-        config: dict[str, Any] = {}
-        pattern = f"^{self.dir}/{prefix}.ya?ml$"
-        config_file = [
+        results: dict[str, Any] = {}
+        pattern = rf"^{self.dir}/{prefix}\.ya?ml$" if not pattern else pattern
+        config_files = [
             p
             for p in glob.glob(f"{self.dir}/**", recursive=False)
             if re.fullmatch(pattern, p)
         ]
-        if config_file:
-            with open(config_file[0]) as file:
+        for config_file in config_files:
+            with open(config_file) as file:
                 config = yaml.safe_load(file)
-        return config
+            results = sl_util.deep_merge(original=results, add=config)
+        return results
 
     def create_stairlight_file(
         self, prefix: str = STAIRLIGHT_CONFIG_PREFIX_DEFAULT
