@@ -1,12 +1,12 @@
 Include:
   - TemplateSourceType: File
     FileSystemPath: "./tests/sql"
-    Regex: ".*/*.sql$"
+    Regex: .*/*\.sql$
     DefaultTablePrefix: "PROJECT_A"
   - TemplateSourceType: GCS
     ProjectId: null
     BucketName: stairlight
-    Regex: "^sql/.*/*.sql$"
+    Regex: ^sql/.*/*\.sql$
     DefaultTablePrefix: "PROJECT_A"
   - TemplateSourceType: dbt
     ProjectDir: tests/dbt/project_01
@@ -17,11 +17,11 @@ Include:
   - TemplateSourceType: S3
     ProjectId: null
     BucketName: stairlight
-    Regex: "^sql/.*/*.sql$"
+    Regex: ^sql/.*/*\.sql$
     DefaultTablePrefix: "PROJECT_A"
 Exclude:
   - TemplateSourceType: File
-    Regex: "main/exclude.sql$"
+    Regex: main/exclude\.sql$
 Settings:
   MappingFilesRegex:
     - .*/mapping\_file\.yaml$
