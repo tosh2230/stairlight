@@ -10,6 +10,7 @@ from typing import Any
 
 import yaml
 
+import src.stairlight.util as sl_util
 from src.stairlight.source.config import (
     MappingConfig,
     MappingConfigMapping,
@@ -29,7 +30,6 @@ from src.stairlight.source.gcs.config import StairlightConfigIncludeGcs
 from src.stairlight.source.redash.config import StairlightConfigIncludeRedash
 from src.stairlight.source.s3.config import StairlightConfigIncludeS3
 from src.stairlight.source.template import Template
-import src.stairlight.util as sl_util
 
 logger = logging.getLogger()
 
