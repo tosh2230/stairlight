@@ -347,7 +347,7 @@ def main() -> None:
             exit(f"'{args.config}/stairlight.y(a)ml' already exists.")
         elif args.handler != command_init and not _stairlight.has_stairlight_config():
             exit(f"'{args.config}/stairlight.y(a)ml' is not found.")
-        result = args.handler(stairlight, args)
+        result = args.handler(_stairlight, args)
     else:
         if not _stairlight.has_stairlight_config():
             exit(f"'{args.config}/stairlight.y(a)ml' is not found.")
