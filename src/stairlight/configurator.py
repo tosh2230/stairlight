@@ -65,7 +65,7 @@ class Configurator:
     def read_mapping_with_regex(self, regex_list: list[str]) -> MappingConfig:
         config: dict[str, Any] = {}
         for regex in regex_list:
-            config.update(self.read(pattern=regex))
+            config = sl_util.deep_merge(original=config, add=self.read(pattern=regex))
         return MappingConfig(**config)
 
     def read_mapping_with_prefix(
