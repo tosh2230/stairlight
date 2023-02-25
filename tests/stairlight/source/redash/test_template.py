@@ -56,7 +56,7 @@ class TestRedashTemplate:
         params: dict[str, Any],
         mapped_table_attributes: dict[str, Any],
     ) -> RedashTemplate:
-        mapping_config = configurator.read_mapping(prefix="mapping_redash")
+        mapping_config = configurator.read_mapping_with_prefix(prefix="mapping_redash")
         return RedashTemplate(
             mapping_config=mapping_config,
             query_id=query_id,
