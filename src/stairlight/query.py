@@ -1,9 +1,15 @@
 from __future__ import annotations
 
 import re
+from dataclasses import dataclass
 from typing import Iterator
 
-from src.stairlight.source.config import MapKey
+
+@dataclass
+class UpstairsReference:
+    TableName: str
+    LineNumber: int
+    LineString: str
 
 
 class Query:
@@ -21,11 +27,11 @@ class Query:
         self.query_str = query_str
         self.default_table_prefix = default_table_prefix
 
-    def detect_upstairs_attributes(self) -> Iterator[dict]:
-        """Parse a query statement and detect upstream table attributes
+    def detect_upstairs_reference(self) -> Iterator[UpstairsReference]:
+        """Parse a query statement and detect a upstream table reference
 
         Yields:
-            Iterator[dict]: upstream table attributes
+            Iterator[UpstairsResults]: upstream table results
         """
         upstairs_tables = self.parse_and_get_upstairs_tables()
 
@@ -45,11 +51,11 @@ class Query:
                     )
                 else:
                     table_name = upstairs_table
-                yield {
-                    MapKey.TABLE_NAME: table_name.replace("`", ""),  # for BigQuery
-                    MapKey.LINE_NUMBER: line_index + 1,
-                    MapKey.LINE_STRING: self.query_str.splitlines()[line_index],
-                }
+                yield UpstairsReference(
+                    TableName=table_name.replace("`", ""),
+                    LineNumber=line_index + 1,
+                    LineString=self.query_str.splitlines()[line_index],
+                )
 
     def parse_and_get_upstairs_tables(self) -> list[str]:
         """Parse query and get upstairs tables

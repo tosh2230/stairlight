@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 from logging import getLogger
 from typing import Any, Iterator, OrderedDict, Type
 
-from src.stairlight.query import Query
+from src.stairlight.query import Query, UpstairsReference
 from src.stairlight.source.config import (
     MappingConfig,
     MappingConfigGlobal,
@@ -17,6 +18,27 @@ from src.stairlight.source.template import Template, TemplateSource, TemplateSou
 logger = getLogger(__name__)
 
 
+@dataclass
+class Upstairs:
+    name: str
+    attributes: UpstairsAttributes | list[UpstairsAttributes]
+
+
+@dataclass
+class UpstairsAttributes:
+    TemplateSourceType: str
+    Key: str
+    Uri: str
+    Lines: list[Line]
+    Labels: dict[str, str] | None = None
+
+
+@dataclass
+class Line:
+    LineNumber: int
+    LineString: str
+
+
 class Map:
     """Manages functions related to dependency map objects"""
 
@@ -24,7 +46,7 @@ class Map:
         self,
         stairlight_config: StairlightConfig,
         mapping_config: MappingConfig,
-        mapped: dict[str, Any] | None = None,
+        mapped: dict[str, dict] | None = None,
     ) -> None:
         """Manages functions related to dependency map objects
 
@@ -32,7 +54,7 @@ class Map:
             stairlight_config (StairlightConfig): Stairlight configurations.
             mapping_config (MappingConfig):
                 Mapping configurations.
-            mapped (dict[str, Any], optional):
+            mapped (dict[str, UpStairs], optional):
                 Mapped table attributes. Defaults to None.
         """
         if mapped:
@@ -111,29 +133,32 @@ class Map:
             default_table_prefix=template.default_table_prefix,
         )
 
-        downstairs: str = table_attributes.TableName
-        mapped_labels: dict[str, Any] = table_attributes.Labels
+        current_floor_name: str = table_attributes.TableName
+        current_floor_labels: dict[str, Any] = table_attributes.Labels
         if self._mapping_config:
             extra_labels: list[dict[str, Any]] = self._mapping_config.ExtraLabels
 
-        if downstairs not in self.mapped:
-            self.mapped[downstairs] = {}
+        if current_floor_name not in self.mapped:
+            self.mapped[current_floor_name] = {}
 
-        for upstairs_attributes in query.detect_upstairs_attributes():
-            upstairs: str = upstairs_attributes[MapKey.TABLE_NAME]
+        upstairs_reference: UpstairsReference
+        for upstairs_reference in query.detect_upstairs_reference():
+            upstairs_name: str = upstairs_reference.TableName
 
-            if not self.mapped[downstairs].get(upstairs):
-                self.mapped[downstairs][upstairs] = self.create_upstairs_value(
+            if not self.mapped[current_floor_name].get(upstairs_name):
+                self.mapped[current_floor_name][
+                    upstairs_name
+                ] = self.create_upstairs_value(
                     template=template,
-                    mapped_labels=mapped_labels,
+                    mapped_labels=current_floor_labels,
                     extra_labels=extra_labels,
-                    upstairs=upstairs,
+                    upstairs=upstairs_name,
                 )
 
-            self.mapped[downstairs][upstairs][MapKey.LINES].append(
+            self.mapped[current_floor_name][upstairs_name][MapKey.LINES].append(
                 {
-                    MapKey.LINE_NUMBER: upstairs_attributes[MapKey.LINE_NUMBER],
-                    MapKey.LINE_STRING: upstairs_attributes[MapKey.LINE_STRING],
+                    MapKey.LINE_NUMBER: upstairs_reference.LineNumber,
+                    MapKey.LINE_STRING: upstairs_reference.LineString,
                 }
             )
 
