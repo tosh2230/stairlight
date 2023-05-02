@@ -1,6 +1,7 @@
 import pytest
 
-from src.stairlight.query import Query, UpstairsReference, solve_table_prefix
+from src.stairlight.query import Query, UpstairsTableReference, solve_table_prefix
+from src.stairlight.source.config import MapKey
 
 
 class TestSuccess:
@@ -10,19 +11,25 @@ class TestSuccess:
             "INNER JOIN PROJECT_X.DATASET_X.TABLE_Y USING(ID)"
         )
         query = Query(query_str=query_str)
-        results: list[UpstairsReference] = []
-        for result in query.detect_upstairs_reference():
+        results: list[UpstairsTableReference] = []
+        for result in query.detect_upstairs_table_reference():
             results.append(result)
         assert results == [
-            UpstairsReference(
+            UpstairsTableReference(
                 TableName="PROJECT_X.DATASET_X.TABLE_X",
-                LineNumber=1,
-                LineString="SELECT * FROM PROJECT_X.DATASET_X.TABLE_X ",
+                Line={
+                    MapKey.LINE_NUMBER: 1,
+                    MapKey.LINE_STRING: "SELECT * FROM PROJECT_X.DATASET_X.TABLE_X ",
+                },
             ),
-            UpstairsReference(
+            UpstairsTableReference(
                 TableName="PROJECT_X.DATASET_X.TABLE_Y",
-                LineNumber=2,
-                LineString=("INNER JOIN PROJECT_X.DATASET_X.TABLE_Y USING(ID)"),
+                Line={
+                    MapKey.LINE_NUMBER: 2,
+                    MapKey.LINE_STRING: (
+                        "INNER JOIN PROJECT_X.DATASET_X.TABLE_Y USING(ID)"
+                    ),
+                },
             ),
         ]
 
@@ -32,211 +39,272 @@ class TestSuccess:
             (
                 "tests/sql/query/cte_one_line.sql",
                 [
-                    UpstairsReference(
+                    UpstairsTableReference(
                         TableName="PROJECT_B.DATASET_B.TABLE_B",
-                        LineNumber=1,
-                        LineString=(
-                            "WITH c AS (SELECT test_id, col_c "
-                            "FROM PROJECT_C.DATASET_C.TABLE_C WHERE 0 = 0),"
-                            "d AS ("
-                            "SELECT test_id, col_d "
-                            "FROM PROJECT_d.DATASET_d.TABLE_d "
-                            "WHERE 0 = 0) "
-                            "SELECT * FROM PROJECT_B.DATASET_B.TABLE_B AS b "
-                            "INNER JOIN c ON b.test_id = c.test_id "
-                            "INNER JOIN d ON b.test_id = d.test_id WHERE 1 = 1"
-                        ),
+                        Line={
+                            MapKey.LINE_NUMBER: 1,
+                            MapKey.LINE_STRING: (
+                                "WITH c AS (SELECT test_id, col_c "
+                                "FROM PROJECT_C.DATASET_C.TABLE_C WHERE 0 = 0),"
+                                "d AS ("
+                                "SELECT test_id, col_d "
+                                "FROM PROJECT_d.DATASET_d.TABLE_d "
+                                "WHERE 0 = 0) "
+                                "SELECT * FROM PROJECT_B.DATASET_B.TABLE_B AS b "
+                                "INNER JOIN c ON b.test_id = c.test_id "
+                                "INNER JOIN d ON b.test_id = d.test_id WHERE 1 = 1"
+                            ),
+                        },
                     ),
-                    UpstairsReference(
+                    UpstairsTableReference(
                         TableName="PROJECT_C.DATASET_C.TABLE_C",
-                        LineNumber=1,
-                        LineString=(
-                            "WITH c AS (SELECT test_id, col_c "
-                            "FROM PROJECT_C.DATASET_C.TABLE_C WHERE 0 = 0),"
-                            "d AS ("
-                            "SELECT test_id, col_d "
-                            "FROM PROJECT_d.DATASET_d.TABLE_d "
-                            "WHERE 0 = 0) "
-                            "SELECT * FROM PROJECT_B.DATASET_B.TABLE_B AS b "
-                            "INNER JOIN c ON b.test_id = c.test_id "
-                            "INNER JOIN d ON b.test_id = d.test_id WHERE 1 = 1"
-                        ),
+                        Line={
+                            MapKey.LINE_NUMBER: 1,
+                            MapKey.LINE_STRING: (
+                                "WITH c AS (SELECT test_id, col_c "
+                                "FROM PROJECT_C.DATASET_C.TABLE_C WHERE 0 = 0),"
+                                "d AS ("
+                                "SELECT test_id, col_d "
+                                "FROM PROJECT_d.DATASET_d.TABLE_d "
+                                "WHERE 0 = 0) "
+                                "SELECT * FROM PROJECT_B.DATASET_B.TABLE_B AS b "
+                                "INNER JOIN c ON b.test_id = c.test_id "
+                                "INNER JOIN d ON b.test_id = d.test_id WHERE 1 = 1"
+                            ),
+                        },
                     ),
-                    UpstairsReference(
+                    UpstairsTableReference(
                         TableName="PROJECT_d.DATASET_d.TABLE_d",
-                        LineNumber=1,
-                        LineString=(
-                            "WITH c AS (SELECT test_id, col_c "
-                            "FROM PROJECT_C.DATASET_C.TABLE_C WHERE 0 = 0),"
-                            "d AS ("
-                            "SELECT test_id, col_d "
-                            "FROM PROJECT_d.DATASET_d.TABLE_d "
-                            "WHERE 0 = 0) "
-                            "SELECT * FROM PROJECT_B.DATASET_B.TABLE_B AS b "
-                            "INNER JOIN c ON b.test_id = c.test_id "
-                            "INNER JOIN d ON b.test_id = d.test_id WHERE 1 = 1"
-                        ),
+                        Line={
+                            MapKey.LINE_NUMBER: 1,
+                            MapKey.LINE_STRING: (
+                                "WITH c AS (SELECT test_id, col_c "
+                                "FROM PROJECT_C.DATASET_C.TABLE_C WHERE 0 = 0),"
+                                "d AS ("
+                                "SELECT test_id, col_d "
+                                "FROM PROJECT_d.DATASET_d.TABLE_d "
+                                "WHERE 0 = 0) "
+                                "SELECT * FROM PROJECT_B.DATASET_B.TABLE_B AS b "
+                                "INNER JOIN c ON b.test_id = c.test_id "
+                                "INNER JOIN d ON b.test_id = d.test_id WHERE 1 = 1"
+                            ),
+                        },
                     ),
                 ],
             ),
             (
                 "tests/sql/query/cte_multi_line.sql",
                 [
-                    UpstairsReference(
+                    UpstairsTableReference(
                         TableName="PROJECT_B.DATASET_B.TABLE_B",
-                        LineNumber=25,
-                        LineString="    PROJECT_B.DATASET_B.TABLE_B AS b",
+                        Line={
+                            MapKey.LINE_NUMBER: 25,
+                            MapKey.LINE_STRING: "    PROJECT_B.DATASET_B.TABLE_B AS b",
+                        },
                     ),
-                    UpstairsReference(
+                    UpstairsTableReference(
                         TableName="PROJECT_C.DATASET_C.TABLE_C",
-                        LineNumber=7,
-                        LineString="        PROJECT_C.DATASET_C.TABLE_C",
+                        Line={
+                            MapKey.LINE_NUMBER: 7,
+                            MapKey.LINE_STRING: "        PROJECT_C.DATASET_C.TABLE_C",
+                        },
                     ),
-                    UpstairsReference(
+                    UpstairsTableReference(
                         TableName="PROJECT_d.DATASET_d.TABLE_d",
-                        LineNumber=17,
-                        LineString="        PROJECT_d.DATASET_d.TABLE_d",
+                        Line={
+                            MapKey.LINE_NUMBER: 17,
+                            MapKey.LINE_STRING: "        PROJECT_d.DATASET_d.TABLE_d",
+                        },
                     ),
                 ],
             ),
             (
                 "tests/sql/query/nested_join.sql",
                 [
-                    UpstairsReference(
+                    UpstairsTableReference(
                         TableName="PROJECT_B.DATASET_B.TABLE_B",
-                        LineNumber=4,
-                        LineString="    PROJECT_B.DATASET_B.TABLE_B AS b",
+                        Line={
+                            MapKey.LINE_NUMBER: 4,
+                            MapKey.LINE_STRING: "    PROJECT_B.DATASET_B.TABLE_B AS b",
+                        },
                     ),
-                    UpstairsReference(
+                    UpstairsTableReference(
                         TableName="PROJECT_C.DATASET_C.TABLE_C",
-                        LineNumber=10,
-                        LineString="            PROJECT_C.DATASET_C.TABLE_C",
+                        Line={
+                            MapKey.LINE_NUMBER: 10,
+                            MapKey.LINE_STRING: "            PROJECT_C.DATASET_C.TABLE_C",
+                        },
                     ),
-                    UpstairsReference(
+                    UpstairsTableReference(
                         TableName="PROJECT_d.DATASET_d.TABLE_d",
-                        LineNumber=20,
-                        LineString=("            PROJECT_d.DATASET_d.TABLE_d d"),
+                        Line={
+                            MapKey.LINE_NUMBER: 20,
+                            MapKey.LINE_STRING: (
+                                "            PROJECT_d.DATASET_d.TABLE_d d"
+                            ),
+                        },
                     ),
-                    UpstairsReference(
+                    UpstairsTableReference(
                         TableName="PROJECT_e.DATASET_e.TABLE_e",
-                        LineNumber=21,
-                        LineString=(
-                            "            LEFT OUTER JOIN PROJECT_e.DATASET_e.TABLE_e"
-                        ),
+                        Line={
+                            MapKey.LINE_NUMBER: 21,
+                            MapKey.LINE_STRING: (
+                                "            LEFT OUTER JOIN "
+                                "PROJECT_e.DATASET_e.TABLE_e"
+                            ),
+                        },
                     ),
                 ],
             ),
             (
                 "tests/sql/query/union_same_table.sql",
                 [
-                    UpstairsReference(
+                    UpstairsTableReference(
                         TableName=("test_project.beam_streaming.taxirides_realtime"),
-                        LineNumber=6,
-                        LineString=(
-                            "    test_project.beam_streaming.taxirides_realtime"
-                        ),
+                        Line={
+                            MapKey.LINE_NUMBER: 6,
+                            MapKey.LINE_STRING: (
+                                "    test_project.beam_streaming.taxirides_realtime"
+                            ),
+                        },
                     ),
-                    UpstairsReference(
+                    UpstairsTableReference(
                         TableName=("test_project.beam_streaming.taxirides_realtime"),
-                        LineNumber=15,
-                        LineString=(
-                            "    test_project.beam_streaming.taxirides_realtime"
-                        ),
+                        Line={
+                            MapKey.LINE_NUMBER: 15,
+                            MapKey.LINE_STRING: (
+                                "    test_project.beam_streaming.taxirides_realtime"
+                            ),
+                        },
                     ),
                 ],
             ),
             (
                 "tests/sql/query/cte_multi_tables_01.sql",
                 [
-                    UpstairsReference(
+                    UpstairsTableReference(
                         TableName="project.dataset.table_test_A",
-                        LineNumber=6,
-                        LineString="		project.dataset.table_test_A",
+                        Line={
+                            MapKey.LINE_NUMBER: 6,
+                            MapKey.LINE_STRING: "		project.dataset.table_test_A",
+                        },
                     ),
-                    UpstairsReference(
+                    UpstairsTableReference(
                         TableName="project.dataset.table_test_B",
-                        LineNumber=13,
-                        LineString="		project.dataset.table_test_B AS test_B",
+                        Line={
+                            MapKey.LINE_NUMBER: 13,
+                            MapKey.LINE_STRING: "		project.dataset.table_test_B AS test_B",
+                        },
                     ),
-                    UpstairsReference(
+                    UpstairsTableReference(
                         TableName="project.dataset.table_test_C",
-                        LineNumber=19,
-                        LineString=("FROM project.dataset.table_test_C AS test_C"),
+                        Line={
+                            MapKey.LINE_NUMBER: 19,
+                            MapKey.LINE_STRING: (
+                                "FROM project.dataset.table_test_C AS test_C"
+                            ),
+                        },
                     ),
                 ],
             ),
             (
                 "tests/sql/query/cte_multi_tables_02.sql",
                 [
-                    UpstairsReference(
+                    UpstairsTableReference(
                         TableName="project.dataset.table_test_A",
-                        LineNumber=6,
-                        LineString=("		project.dataset.table_test_A -- table_test_B"),
+                        Line={
+                            MapKey.LINE_NUMBER: 6,
+                            MapKey.LINE_STRING: (
+                                "		project.dataset.table_test_A -- table_test_B"
+                            ),
+                        },
                     ),
-                    UpstairsReference(
+                    UpstairsTableReference(
                         TableName="project.dataset.table_test_B",
-                        LineNumber=12,
-                        LineString="		project.dataset.table_test_B AS test_B",
+                        Line={
+                            MapKey.LINE_NUMBER: 12,
+                            MapKey.LINE_STRING: "		project.dataset.table_test_B AS test_B",
+                        },
                     ),
-                    UpstairsReference(
+                    UpstairsTableReference(
                         TableName="project.dataset.table_test_C",
-                        LineNumber=19,
-                        LineString="		project.dataset.table_test_C AS test_C",
+                        Line={
+                            MapKey.LINE_NUMBER: 19,
+                            MapKey.LINE_STRING: "		project.dataset.table_test_C AS test_C",
+                        },
                     ),
-                    UpstairsReference(
+                    UpstairsTableReference(
                         TableName="project.dataset.table_test_D",
-                        LineNumber=26,
-                        LineString=("FROM project.dataset.table_test_D AS test_D"),
+                        Line={
+                            MapKey.LINE_NUMBER: 26,
+                            MapKey.LINE_STRING: (
+                                "FROM project.dataset.table_test_D AS test_D"
+                            ),
+                        },
                     ),
                 ],
             ),
             (
                 "tests/sql/query/backtick_each_elements.sql",
                 [
-                    UpstairsReference(
+                    UpstairsTableReference(
                         TableName="dummy.dummy.my_first_dbt_model",
-                        LineNumber=4,
-                        LineString=("from `dummy`.`dummy`.`my_first_dbt_model`"),
+                        Line={
+                            MapKey.LINE_NUMBER: 4,
+                            MapKey.LINE_STRING: (
+                                "from `dummy`.`dummy`.`my_first_dbt_model`"
+                            ),
+                        },
                     ),
                 ],
             ),
             (
                 "tests/sql/query/backtick_whole_element.sql",
                 [
-                    UpstairsReference(
+                    UpstairsTableReference(
                         TableName="dummy.dummy.my_first_dbt_model",
-                        LineNumber=4,
-                        LineString="from `dummy.dummy.my_first_dbt_model`",
+                        Line={
+                            MapKey.LINE_NUMBER: 4,
+                            MapKey.LINE_STRING: "from `dummy.dummy.my_first_dbt_model`",
+                        },
                     ),
                 ],
             ),
             (
                 "tests/sql/query/google_bigquery_unnest_in_exists.sql",
                 [
-                    UpstairsReference(
+                    UpstairsTableReference(
                         TableName="PROJECT_d.DATASET_e.TABLE_f",
-                        LineNumber=5,
-                        LineString="    PROJECT_d.DATASET_e.TABLE_f",
+                        Line={
+                            MapKey.LINE_NUMBER: 5,
+                            MapKey.LINE_STRING: "    PROJECT_d.DATASET_e.TABLE_f",
+                        },
                     ),
                 ],
             ),
             (
                 "tests/sql/query/contains_str_from.sql",
                 [
-                    UpstairsReference(
+                    UpstairsTableReference(
                         TableName="test.cte",
-                        LineNumber=5,
-                        LineString="        test.cte",
+                        Line={
+                            MapKey.LINE_NUMBER: 5,
+                            MapKey.LINE_STRING: "        test.cte",
+                        },
                     ),
-                    UpstairsReference(
+                    UpstairsTableReference(
                         TableName="test.main",
-                        LineNumber=11,
-                        LineString="    test.main",
+                        Line={
+                            MapKey.LINE_NUMBER: 11,
+                            MapKey.LINE_STRING: "    test.main",
+                        },
                     ),
-                    UpstairsReference(
+                    UpstairsTableReference(
                         TableName="test.sub",
-                        LineNumber=13,
-                        LineString="    test.sub ON",
+                        Line={
+                            MapKey.LINE_NUMBER: 13,
+                            MapKey.LINE_STRING: "    test.sub ON",
+                        },
                     ),
                 ],
             ),
@@ -264,7 +332,7 @@ class TestSuccess:
             query_str = f.read()
         query = Query(query_str=query_str)
         actual = []
-        for result in query.detect_upstairs_reference():
+        for result in query.detect_upstairs_table_reference():
             actual.append(result)
         assert actual == expected
 

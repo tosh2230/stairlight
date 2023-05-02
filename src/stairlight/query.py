@@ -1,13 +1,18 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from typing import Iterator
 
 
 @dataclass
-class UpstairsReference:
+class UpstairsTableReference:
     TableName: str
+    Line: dict
+
+
+@dataclass
+class UpstairsTableReferenceLine:
     LineNumber: int
     LineString: str
 
@@ -27,7 +32,7 @@ class Query:
         self.query_str = query_str
         self.default_table_prefix = default_table_prefix
 
-    def detect_upstairs_reference(self) -> Iterator[UpstairsReference]:
+    def detect_upstairs_table_reference(self) -> Iterator[UpstairsTableReference]:
         """Parse a query statement and detect a upstream table reference
 
         Yields:
@@ -44,17 +49,22 @@ class Query:
             ]
 
             for line_index in line_indexes:
-                if self.default_table_prefix:
-                    table_name = solve_table_prefix(
+                table_name = (
+                    solve_table_prefix(
                         table=upstairs_table,
                         default_table_prefix=self.default_table_prefix,
                     )
-                else:
-                    table_name = upstairs_table
-                yield UpstairsReference(
+                    if self.default_table_prefix
+                    else upstairs_table
+                )
+                yield UpstairsTableReference(
                     TableName=table_name.replace("`", ""),
-                    LineNumber=line_index + 1,
-                    LineString=self.query_str.splitlines()[line_index],
+                    Line=asdict(
+                        UpstairsTableReferenceLine(
+                            LineNumber=line_index + 1,
+                            LineString=self.query_str.splitlines()[line_index],
+                        )
+                    ),
                 )
 
     def parse_and_get_upstairs_tables(self) -> list[str]:
