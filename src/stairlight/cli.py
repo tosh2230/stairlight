@@ -3,9 +3,11 @@ from __future__ import annotations
 import argparse
 import json
 import textwrap
+from dataclasses import asdict
 from typing import Any, Callable
 
 from src import stairlight
+from src.stairlight.map import Stair
 
 
 def command_init(stairlight: stairlight.StairLight, args: argparse.Namespace) -> str:
@@ -341,25 +343,34 @@ def main() -> None:
     )
     _stairlight.create_map()
 
-    result = None
+    result_command: Any = None
+    result_mapped: dict[str, list[Stair | None]] = {}
     if hasattr(args, "handler"):
         if args.handler == command_init and _stairlight.has_stairlight_config():
             exit(f"'{args.config}/stairlight.y(a)ml' already exists.")
         elif args.handler != command_init and not _stairlight.has_stairlight_config():
             exit(f"'{args.config}/stairlight.y(a)ml' is not found.")
-        result = args.handler(_stairlight, args)
+        result_command = args.handler(_stairlight, args)
     else:
         if not _stairlight.has_stairlight_config():
             exit(f"'{args.config}/stairlight.y(a)ml' is not found.")
-        result = _stairlight.mapped
+        result_mapped = _stairlight.mapped
 
-    if args.quiet or not result:
+    if args.quiet or (not result_command and not result_mapped):
         return
 
-    if result and isinstance(result, str):
-        print(result)
-    else:
-        print(json.dumps(result, indent=2))
+    if result_command and isinstance(result_command, str):
+        print(result_command)
+    elif result_command:
+        print(json.dumps(result_command, indent=2))
+    elif result_mapped:
+        result_dict: dict = {}
+        for table_name, stairs in result_mapped.items():
+            result_dict = {
+                **result_dict,
+                **{table_name: asdict(stair) for stair in stairs},
+            }
+        print(json.dumps(result_dict, indent=2))
 
 
 if __name__ == "__main__":

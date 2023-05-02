@@ -132,7 +132,7 @@ class TestSuccess:
         monkeypatch.setattr("sys.argv", ["", "-c", "tests/config"])
         cli_main.main()
         out, err = capfd.readouterr()
-        assert len(out) > 0 and len(err) == 0
+        assert "PROJECT_d.DATASET_e.TABLE_f" in out and len(err) == 0
 
     @pytest.mark.integration
     def test_main_quiet(self, monkeypatch, capfd):
