@@ -45,23 +45,24 @@ class TestSuccess:
     @pytest.mark.parametrize(
         "template_source_type",
         [
-            TemplateSourceType.FILE.value,
-            TemplateSourceType.GCS.value,
-            # TemplateSourceType.REDASH.value,
-            TemplateSourceType.DBT.value,
-            TemplateSourceType.S3.value,
+            TemplateSourceType.FILE,
+            TemplateSourceType.GCS,
+            # TemplateSourceType.REDASH,
+            TemplateSourceType.DBT,
+            TemplateSourceType.S3,
         ],
     )
-    def test_mapped_items(self, dependency_map: Map, template_source_type: str):
+    def test_mapped_items(
+        self, dependency_map: Map, template_source_type: TemplateSourceType
+    ):
         found: bool = False
-        upstairs_items: dict
-        upstairs_attributes: dict
-        for _, upstairs_items in dependency_map.mapped.items():
-            for _, upstairs_attributes in upstairs_items.items():
-                if (
-                    upstairs_attributes.get(MapKey.TEMPLATE_SOURCE_TYPE)
-                    == template_source_type
-                ):
+        for stairs in dependency_map.mapped.values():
+            for stair in stairs:
+                for _ in [
+                    table
+                    for table in stair.tables
+                    if table.TemplateSourceType == template_source_type.value
+                ]:
                     found = True
                     break
 

@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from logging import getLogger
 from typing import Any, Iterator, OrderedDict, Type
 
-from src.stairlight.query import Query, UpstairsReference
+from src.stairlight.query import Query, UpstairsTableReference
 from src.stairlight.source.config import (
     MappingConfig,
     MappingConfigGlobal,
@@ -19,24 +19,28 @@ logger = getLogger(__name__)
 
 
 @dataclass
-class Upstairs:
+class Stair:
     name: str
-    attributes: UpstairsAttributes | list[UpstairsAttributes]
+    tables: list[Table]
 
 
 @dataclass
-class UpstairsAttributes:
+class Table:
     TemplateSourceType: str
     Key: str
     Uri: str
-    Lines: list[Line]
+    Lines: list[dict]
     Labels: dict[str, str] | None = None
 
 
 @dataclass
-class Line:
-    LineNumber: int
-    LineString: str
+class TableInObjectStorage(Table):
+    BucketName: str | None = None
+
+
+@dataclass
+class TableInRedash(Table):
+    DataSourceType: str | None = None
 
 
 class Map:
@@ -46,7 +50,7 @@ class Map:
         self,
         stairlight_config: StairlightConfig,
         mapping_config: MappingConfig,
-        mapped: dict[str, dict] | None = None,
+        mapped: dict[str, list[Stair | None]] | None = None,
     ) -> None:
         """Manages functions related to dependency map objects
 
@@ -54,7 +58,7 @@ class Map:
             stairlight_config (StairlightConfig): Stairlight configurations.
             mapping_config (MappingConfig):
                 Mapping configurations.
-            mapped (dict[str, UpStairs], optional):
+            mapped (dict[str, Any], optional):
                 Mapped table attributes. Defaults to None.
         """
         if mapped:
@@ -71,7 +75,7 @@ class Map:
         for template_source in self.find_template_source():
             self.write_by_template_source(template_source=template_source)
 
-        self.mapped = {k: v for k, v in self.mapped.items() if v != {}}
+        self.mapped = {k: v for k, v in self.mapped.items() if v != []}
 
     def find_template_source(self) -> Iterator[TemplateSource]:
         """find template source
@@ -124,43 +128,50 @@ class Map:
             table_attributes (MappingConfigMappingTable):
                 Table attributes from mapping configuration
         """
-        query_str: str = template.render(
-            params=self.merge_global_params(table_attributes=table_attributes),
-            ignore_params=table_attributes.IgnoreParameters,
-        )
+        current_floor_name: str = table_attributes.TableName
+        current_floor_label: dict[str, Any] = table_attributes.Labels
+        if self._mapping_config:
+            extra_labels: list[dict[str, Any]] = self._mapping_config.ExtraLabels or []
+
+        if current_floor_name not in self.mapped:
+            self.mapped[current_floor_name] = []
+
         query = Query(
-            query_str=query_str,
+            query_str=template.render(
+                params=self.merge_global_params(table_attributes=table_attributes),
+                ignore_params=table_attributes.IgnoreParameters,
+            ),
             default_table_prefix=template.default_table_prefix,
         )
 
-        current_floor_name: str = table_attributes.TableName
-        current_floor_labels: dict[str, Any] = table_attributes.Labels
-        if self._mapping_config:
-            extra_labels: list[dict[str, Any]] = self._mapping_config.ExtraLabels
-
-        if current_floor_name not in self.mapped:
-            self.mapped[current_floor_name] = {}
-
-        upstairs_reference: UpstairsReference
-        for upstairs_reference in query.detect_upstairs_reference():
-            upstairs_name: str = upstairs_reference.TableName
-
-            if not self.mapped[current_floor_name].get(upstairs_name):
-                self.mapped[current_floor_name][
-                    upstairs_name
-                ] = self.create_upstairs_value(
-                    template=template,
-                    mapped_labels=current_floor_labels,
-                    extra_labels=extra_labels,
-                    upstairs=upstairs_name,
-                )
-
-            self.mapped[current_floor_name][upstairs_name][MapKey.LINES].append(
-                {
-                    MapKey.LINE_NUMBER: upstairs_reference.LineNumber,
-                    MapKey.LINE_STRING: upstairs_reference.LineString,
-                }
+        upstairs_table_reference: UpstairsTableReference
+        for upstairs_table_reference in query.detect_upstairs_table_reference():
+            upstairs_extra_labels = [
+                extra_label.get(MappingConfigKey.LABELS, {})
+                for extra_label in extra_labels
+                if extra_label.get(MappingConfigKey.TABLE_NAME)
+                == upstairs_table_reference.TableName
+            ]
+            upstairs_extra_label = (
+                upstairs_extra_labels[0] if upstairs_extra_labels else []
             )
+            upstairs_table = self.create_upstairs_table(
+                template=template,
+                current_floor_label=current_floor_label,
+                extra_label=upstairs_extra_label,
+            )
+
+            self.mapped[current_floor_name].append(
+                Stair(
+                    name=upstairs_table_reference.TableName,
+                    tables=[upstairs_table],
+                )
+            )
+
+            for upstairs in self.mapped[current_floor_name]:
+                for table in upstairs.tables:
+                    if table.Key == template.key:
+                        table.Lines.append(upstairs_table_reference.Line)
 
     def get_global_params(self) -> dict[str, Any]:
         """get global parameters in mapping.yaml
@@ -195,13 +206,12 @@ class Map:
         return {**global_params, **table_params}
 
     @staticmethod
-    def create_upstairs_value(
+    def create_upstairs_table(
         template: Template,
-        mapped_labels: dict[str, Any],
-        extra_labels: list[dict[str, Any]],
-        upstairs: str,
-    ) -> dict[str, Any]:
-        """create upstairs table information
+        current_floor_label: dict[str, Any],
+        extra_label: dict[str, Any],
+    ) -> Table:
+        """create upstairs table attributes
 
         Args:
             template (Template): Template class
@@ -210,42 +220,45 @@ class Map:
             upstairs (str): Upstairs table's Name
 
         Returns:
-            dict[str, Any]: upstairs table information
+            UpstairsTable: upstairs table attributes
         """
-        target_labels: list[dict[str, Any]] = []
-        upstairs_values = {
-            MapKey.TEMPLATE_SOURCE_TYPE: template.source_type.value,
-            MapKey.KEY: template.key,
-            MapKey.URI: template.uri,
-            MapKey.LINES: [],
+        upstairs_labels: dict = {
+            **(current_floor_label or {}),
+            **(extra_label or {}),
         }
 
-        if template.source_type in (TemplateSourceType.GCS, TemplateSourceType.S3):
-            upstairs_values[MapKey.BUCKET_NAME] = template.bucket
+        upstairs_table: Table
+        if template.source_type in (
+            TemplateSourceType.GCS,
+            TemplateSourceType.S3,
+        ):
+            upstairs_table = TableInObjectStorage(
+                TemplateSourceType=template.source_type.value,
+                Key=template.key,
+                Uri=template.uri,
+                Lines=[],
+                Labels=upstairs_labels,
+                BucketName=template.bucket,
+            )
         elif template.source_type == TemplateSourceType.REDASH:
-            upstairs_values[MapKey.DATA_SOURCE_NAME] = template.data_source_name
+            upstairs_table = TableInRedash(
+                TemplateSourceType=template.source_type.value,
+                Key=template.key,
+                Uri=template.uri,
+                Lines=[],
+                Labels=upstairs_labels,
+                DataSourceType=template.data_source_name,
+            )
+        else:
+            upstairs_table = Table(
+                TemplateSourceType=template.source_type.value,
+                Key=template.key,
+                Uri=template.uri,
+                Lines=[],
+                Labels=upstairs_labels,
+            )
 
-        if extra_labels:
-            target_labels = [
-                extra_label.get(MappingConfigKey.LABELS, {})
-                for extra_label in extra_labels
-                if extra_label.get(MappingConfigKey.TABLE_NAME) == upstairs
-            ]
-        if mapped_labels or extra_labels:
-            upstairs_values[MapKey.LABELS] = {}
-
-        if mapped_labels:
-            upstairs_values[MapKey.LABELS] = {
-                **upstairs_values[MapKey.LABELS],
-                **mapped_labels,
-            }
-
-        if target_labels:
-            upstairs_values[MapKey.LABELS] = {
-                **upstairs_values[MapKey.LABELS],
-                **target_labels[0],
-            }
-        return upstairs_values
+        return upstairs_table
 
     def add_unmapped_params(
         self, template: Template, params: list[str] | None = None
@@ -305,13 +318,13 @@ def create_dict_key_list(d: dict[str, Any], delimiter: str = ".") -> list[str]:
     Returns:
         list[str]: key-combined and list-converted results
     """
-    results = []
+    results: list = []
     for key, value in d.items():
         if isinstance(value, dict):
-            recursive_results = create_dict_key_list(d=value)
-            for recursive_result in recursive_results:
-                concat = key + delimiter + recursive_result
-                results.append(concat)
+            results = results + [
+                key + delimiter + recursive_result
+                for recursive_result in create_dict_key_list(d=value)
+            ]
         else:
             results.append(key)
     return results
