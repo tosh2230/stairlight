@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import enum
-import json
+from dataclasses import asdict
 from logging import getLogger
 from typing import Any
 
@@ -11,7 +11,7 @@ from src.stairlight.configurator import (
     STAIRLIGHT_CONFIG_PREFIX_DEFAULT,
     Configurator,
 )
-from src.stairlight.map import Map
+from src.stairlight.map import Map, Stair
 from src.stairlight.source.config import (
     MapKey,
     MappingConfig,
@@ -65,7 +65,7 @@ class StairLight:
         self.load_files = load_files
         self.save_file: str = save_file
         self._configurator = Configurator(dir=config_dir)
-        self._mapped: dict[str, Any] = {}
+        self._mapped: dict[str, list[Stair | None]] = {}
         self._unmapped: list[dict[str, Any]] = []
         self._mapping_config: MappingConfig | None = None
         self._stairlight_config: StairlightConfig = self._configurator.read_stairlight(
@@ -73,7 +73,7 @@ class StairLight:
         )
 
     @property
-    def mapped(self) -> dict[str, Any]:
+    def mapped(self) -> dict[str, list[Stair | None]]:
         """Return mapped
 
         Returns:
@@ -113,8 +113,14 @@ class StairLight:
 
     def save_map(self) -> None:
         """Save mapped results"""
+        mapped: dict[str, list[dict]] = {}
+        for table_name, stairs in self._mapped.items():
+            mapped[table_name] = [
+                asdict(stair) for stair in stairs if isinstance(stair, Stair)
+            ]
         save_map_controller = SaveMapController(
-            save_file=self.save_file, mapped=self._mapped
+            save_file=self.save_file,
+            mapped=mapped,
         )
         save_map_controller.save()
 
@@ -229,10 +235,9 @@ class StairLight:
             list[str]: a list of tables
         """
         results: set[str] = set()
-        for downstairs, upstairs_dict in self._mapped.items():
-            results.add(downstairs)
-            for upstairs in upstairs_dict:
-                results.add(upstairs)
+        for table_name, stairs in self._mapped.items():
+            results.add(table_name)
+            results.update(set([stair.name for stair in stairs]))
         return sorted(results)
 
     def list_uris(self) -> list[str]:
@@ -242,10 +247,16 @@ class StairLight:
             list[str]: a list of URIs
         """
         results: set[str] = set()
-        for upstairs_dict in self._mapped.values():
-            for upstairs_attributes in upstairs_dict.values():
-                if upstairs_attributes.get(MapKey.URI):
-                    results.add(upstairs_attributes.get(MapKey.URI))
+        for stairs in self._mapped.values():
+            for stair in stairs:
+                results.update(
+                    set(
+                        [
+                            table.Uri
+                            for table in [table for table in stair.tables if table.Uri]
+                        ]
+                    )
+                )
         return sorted(results)
 
     def up(
@@ -350,7 +361,7 @@ class StairLight:
         direction: SearchDirection,
         searched_tables: list[str],
         head: bool,
-    ) -> dict:
+    ) -> dict[str, Any]:
         """Search nodes and return verbose results
 
         Args:
@@ -364,11 +375,10 @@ class StairLight:
             dict: Search results
         """
         relative_map = self.create_relative_map(
-            table_name=table_name, direction=direction
+            target_table_name=table_name, direction=direction
         )
+        results: dict = {}
         response: dict[str, Any] = {table_name: {}}
-        if not relative_map:
-            return response
 
         if recursive:
             for next_table_name in relative_map.keys():
@@ -383,7 +393,7 @@ class StairLight:
                         "next_table_name": next_table_name,
                         "searched_tables": searched_tables,
                     }
-                    logger.warning(f"Circular reference detected!: {details}")
+                    logger.warning(f"Circular references detected!: {details}")
                     continue
 
                 next_response = self.search_verbose(
@@ -397,12 +407,20 @@ class StairLight:
                 if not next_response.get(next_table_name):
                     continue
 
-                relative_map[next_table_name] = {
-                    **relative_map[next_table_name],
-                    **next_response[next_table_name],
-                }
+                results[next_table_name] = {}
+                results[next_table_name]["Attributes"] = relative_map[next_table_name]
+                if next_response[next_table_name][direction.value]:
+                    results[next_table_name][direction.value] = next_response[
+                        next_table_name
+                    ][direction.value]
 
-        response[table_name][direction.value] = relative_map
+        else:
+            for table_name, attributes in relative_map.items():
+                results[table_name] = {}
+                results[table_name]["Attributes"] = attributes
+
+        response[table_name][direction.value] = results
+
         return response
 
     def search_plain(
@@ -428,14 +446,15 @@ class StairLight:
             list[str]: Search results
         """
         relative_map = self.create_relative_map(
-            table_name=table_name, direction=direction
+            target_table_name=table_name,
+            direction=direction,
         )
         response: list[str] = []
         if not relative_map:
             return response
 
         next_table_name: str
-        for next_table_name in relative_map.keys():
+        for next_table_name, next_table_attributes in relative_map.items():
             if recursive:
                 if head:
                     searched_tables = []
@@ -465,29 +484,43 @@ class StairLight:
             if response_type == ResponseType.TABLE.value:
                 response.append(next_table_name)
             elif response_type == ResponseType.URI.value:
-                response.append(relative_map[next_table_name].get(MapKey.URI))
-            logger.debug(json.dumps(response, indent=2))
+                response = response + [
+                    table_attribute.get(MapKey.URI)
+                    for table_attribute in next_table_attributes
+                ]
 
         return sorted(list(set(response)))
 
     def create_relative_map(
-        self, table_name: str, direction: SearchDirection
-    ) -> dict[str, Any]:
+        self, target_table_name: str, direction: SearchDirection
+    ) -> dict[str, list[dict[str, Any]]]:
         """Create a relative map for the specified direction
 
         Args:
-            table_name (str): Table name
+            target_table_name (str): Target table name
             direction (SearchDirection): Search direction
 
         Returns:
             dict: Relative map
         """
-        relative_map: dict[str, Any] = {}
+        relative_map: dict[str, list[dict]] = {}
         if direction == SearchDirection.UP:
-            relative_map = self._mapped.get(table_name, {})
+            for upstairs in {
+                table_name: upstairs
+                for table_name, upstairs in self._mapped.items()
+                if table_name == target_table_name
+            }.values():
+                for upstair in upstairs:
+                    relative_map[upstair.name] = [
+                        asdict(table) for table in upstair.tables
+                    ]
         elif direction == SearchDirection.DOWN:
-            for key in [k for k, v in self._mapped.items() if v.get(table_name)]:
-                relative_map[key] = self._mapped[key][table_name]
+            for table_name, downstairs in self._mapped.items():
+                for downstair in downstairs:
+                    if downstair.name == target_table_name:
+                        relative_map[table_name] = [
+                            asdict(table) for table in downstair.tables
+                        ]
         return relative_map
 
     def find_tables_by_labels(self, target_labels: list[str]) -> list[str]:

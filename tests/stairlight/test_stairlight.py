@@ -219,16 +219,16 @@ class TestStairLight:
         ]
 
     def test_create_relative_map_up(self):
-        table_name = "PROJECT_d.DATASET_d.TABLE_d"
+        target_table_name = "PROJECT_d.DATASET_d.TABLE_d"
         result = self.stairlight.create_relative_map(
-            table_name=table_name, direction=SearchDirection.UP
+            target_table_name=target_table_name, direction=SearchDirection.UP
         )
         assert "PROJECT_e.DATASET_e.TABLE_e" in result
 
     def test_create_relative_map_down(self):
-        table_name = "PROJECT_A.DATASET_A.TABLE_A"
+        target_table_name = "PROJECT_A.DATASET_A.TABLE_A"
         result = self.stairlight.create_relative_map(
-            table_name=table_name, direction=SearchDirection.DOWN
+            target_table_name=target_table_name, direction=SearchDirection.DOWN
         )
         assert "PROJECT_A.DATASET_B.TABLE_C" in result
 
