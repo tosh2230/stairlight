@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pytest
 
 from src.stairlight.query import Query, UpstairTableReference, solve_table_prefix
