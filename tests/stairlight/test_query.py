@@ -132,7 +132,9 @@ class TestSuccess:
                         TableName="PROJECT_C.DATASET_C.TABLE_C",
                         Line={
                             MapKey.LINE_NUMBER: 10,
-                            MapKey.LINE_STRING: "            PROJECT_C.DATASET_C.TABLE_C",
+                            MapKey.LINE_STRING: (
+                                "            PROJECT_C.DATASET_C.TABLE_C"
+                            ),
                         },
                     ),
                     UpstairTableReference(
@@ -193,7 +195,9 @@ class TestSuccess:
                         TableName="project.dataset.table_test_B",
                         Line={
                             MapKey.LINE_NUMBER: 13,
-                            MapKey.LINE_STRING: "		project.dataset.table_test_B AS test_B",
+                            MapKey.LINE_STRING: (
+                                "		project.dataset.table_test_B AS test_B"
+                            ),
                         },
                     ),
                     UpstairTableReference(
@@ -223,14 +227,18 @@ class TestSuccess:
                         TableName="project.dataset.table_test_B",
                         Line={
                             MapKey.LINE_NUMBER: 12,
-                            MapKey.LINE_STRING: "		project.dataset.table_test_B AS test_B",
+                            MapKey.LINE_STRING: (
+                                "		project.dataset.table_test_B AS test_B"
+                            ),
                         },
                     ),
                     UpstairTableReference(
                         TableName="project.dataset.table_test_C",
                         Line={
                             MapKey.LINE_NUMBER: 19,
-                            MapKey.LINE_STRING: "		project.dataset.table_test_C AS test_C",
+                            MapKey.LINE_STRING: (
+                                "		project.dataset.table_test_C AS test_C"
+                            ),
                         },
                     ),
                     UpstairTableReference(
