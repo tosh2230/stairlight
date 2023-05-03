@@ -24,11 +24,13 @@ from src.stairlight.source.template import RenderingTemplateException
     ("key", "expected_is_mapped"),
     [
         ("tests/sql/main/cte_multi_line_params.sql", True),
+        ("tests/sql/main/cte_multi_line_params_copy.sql", True),
         ("tests/sql/main/undefined.sql", False),
         ("tests/sql/gcs/cte/cte_multi_line.sql", False),
     ],
     ids=[
         "tests/sql/main/cte_multi_line_params.sql",
+        "tests/sql/main/cte_multi_line_params_copy.sql",
         "tests/sql/main/undefined.sql",
         "tests/sql/gcs/cte/cte_multi_line.sql",
     ],
