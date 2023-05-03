@@ -3,11 +3,10 @@ from __future__ import annotations
 import argparse
 import json
 import textwrap
-from dataclasses import asdict
 from typing import Any, Callable
 
 from src import stairlight
-from src.stairlight.map import Stair
+from src.stairlight.map import MappedTemplate
 
 
 def command_init(stairlight: stairlight.StairLight, args: argparse.Namespace) -> str:
@@ -344,7 +343,7 @@ def main() -> None:
     _stairlight.create_map()
 
     result_command: Any = None
-    result_mapped: dict[str, list[Stair | None]] = {}
+    result_mapped: dict[str, dict[str, list[MappedTemplate] | None] | None] = {}
     if hasattr(args, "handler"):
         if args.handler == command_init and _stairlight.has_stairlight_config():
             exit(f"'{args.config}/stairlight.y(a)ml' already exists.")
@@ -364,12 +363,9 @@ def main() -> None:
     elif result_command:
         print(json.dumps(result_command, indent=2))
     elif result_mapped:
-        result_dict: dict = {}
-        for table_name, stairs in result_mapped.items():
-            result_dict = {
-                **result_dict,
-                **{table_name: asdict(stair) for stair in stairs},
-            }
+        result_dict: dict[str, Any] = _stairlight.cast_mapped_dict_all(
+            mapped=result_mapped
+        )
         print(json.dumps(result_dict, indent=2))
 
 

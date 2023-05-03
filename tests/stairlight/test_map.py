@@ -56,13 +56,16 @@ class TestSuccess:
         self, dependency_map: Map, template_source_type: TemplateSourceType
     ):
         found: bool = False
-        for stairs in dependency_map.mapped.values():
-            for stair in stairs:
-                for _ in [
-                    table
-                    for table in stair.tables
-                    if table.TemplateSourceType == template_source_type.value
-                ]:
+        for upstairs in dependency_map.mapped.values():
+            for mapped_templates in upstairs.values():
+                if any(
+                    [
+                        mapped_template
+                        for mapped_template in mapped_templates
+                        if mapped_template.TemplateSourceType
+                        == template_source_type.value
+                    ]
+                ):
                     found = True
                     break
 

@@ -51,7 +51,21 @@ class TestStairLight:
         assert self.stairlight.has_stairlight_config()
 
     def test_mapped(self):
-        assert self.stairlight.mapped
+        actual = set()
+        upstairs = self.stairlight.mapped["PROJECT_J.DATASET_K.TABLE_L"]
+        for mapped_templates in upstairs.values():
+            actual.update(
+                set([mapped_template.Key for mapped_template in mapped_templates])
+            )
+        assert (
+            set(
+                [
+                    "tests/sql/main/cte_multi_line_params.sql",
+                    "tests/sql/main/cte_multi_line_params_copy.sql",
+                ]
+            )
+            == actual
+        )
 
     def test_mapped_exclude_empty_value(self):
         assert "dummy.dummy.my_first_dbt_model" not in self.stairlight.mapped.keys()
@@ -156,6 +170,7 @@ class TestStairLight:
         assert sorted(result) == [
             f"{tests_abspath}/sql/main/cte_multi_line.sql",
             f"{tests_abspath}/sql/main/cte_multi_line_params.sql",
+            f"{tests_abspath}/sql/main/cte_multi_line_params_copy.sql",
             f"{tests_abspath}/sql/main/one_line_3.sql",
         ]
 
