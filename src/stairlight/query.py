@@ -6,13 +6,13 @@ from typing import Iterator
 
 
 @dataclass
-class UpstairsTableReference:
+class UpstairTableReference:
     TableName: str
     Line: dict
 
 
 @dataclass
-class UpstairsTableReferenceLine:
+class UpstairTableReferenceLine:
     LineNumber: int
     LineString: str
 
@@ -32,7 +32,7 @@ class Query:
         self.query_str = query_str
         self.default_table_prefix = default_table_prefix
 
-    def detect_upstairs_table_reference(self) -> Iterator[UpstairsTableReference]:
+    def detect_upstair_table_reference(self) -> Iterator[UpstairTableReference]:
         """Parse a query statement and detect a upstream table reference
 
         Yields:
@@ -57,10 +57,10 @@ class Query:
                     if self.default_table_prefix
                     else upstairs_table
                 )
-                yield UpstairsTableReference(
+                yield UpstairTableReference(
                     TableName=table_name.replace("`", ""),
                     Line=asdict(
-                        UpstairsTableReferenceLine(
+                        UpstairTableReferenceLine(
                             LineNumber=line_index + 1,
                             LineString=self.query_str.splitlines()[line_index],
                         )

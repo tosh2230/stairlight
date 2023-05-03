@@ -1,6 +1,6 @@
 import pytest
 
-from src.stairlight.query import Query, UpstairsTableReference, solve_table_prefix
+from src.stairlight.query import Query, UpstairTableReference, solve_table_prefix
 from src.stairlight.source.config import MapKey
 
 
@@ -11,18 +11,18 @@ class TestSuccess:
             "INNER JOIN PROJECT_X.DATASET_X.TABLE_Y USING(ID)"
         )
         query = Query(query_str=query_str)
-        results: list[UpstairsTableReference] = []
-        for result in query.detect_upstairs_table_reference():
+        results: list[UpstairTableReference] = []
+        for result in query.detect_upstair_table_reference():
             results.append(result)
         assert results == [
-            UpstairsTableReference(
+            UpstairTableReference(
                 TableName="PROJECT_X.DATASET_X.TABLE_X",
                 Line={
                     MapKey.LINE_NUMBER: 1,
                     MapKey.LINE_STRING: "SELECT * FROM PROJECT_X.DATASET_X.TABLE_X ",
                 },
             ),
-            UpstairsTableReference(
+            UpstairTableReference(
                 TableName="PROJECT_X.DATASET_X.TABLE_Y",
                 Line={
                     MapKey.LINE_NUMBER: 2,
@@ -39,7 +39,7 @@ class TestSuccess:
             (
                 "tests/sql/query/cte_one_line.sql",
                 [
-                    UpstairsTableReference(
+                    UpstairTableReference(
                         TableName="PROJECT_B.DATASET_B.TABLE_B",
                         Line={
                             MapKey.LINE_NUMBER: 1,
@@ -56,7 +56,7 @@ class TestSuccess:
                             ),
                         },
                     ),
-                    UpstairsTableReference(
+                    UpstairTableReference(
                         TableName="PROJECT_C.DATASET_C.TABLE_C",
                         Line={
                             MapKey.LINE_NUMBER: 1,
@@ -73,7 +73,7 @@ class TestSuccess:
                             ),
                         },
                     ),
-                    UpstairsTableReference(
+                    UpstairTableReference(
                         TableName="PROJECT_d.DATASET_d.TABLE_d",
                         Line={
                             MapKey.LINE_NUMBER: 1,
@@ -95,21 +95,21 @@ class TestSuccess:
             (
                 "tests/sql/query/cte_multi_line.sql",
                 [
-                    UpstairsTableReference(
+                    UpstairTableReference(
                         TableName="PROJECT_B.DATASET_B.TABLE_B",
                         Line={
                             MapKey.LINE_NUMBER: 25,
                             MapKey.LINE_STRING: "    PROJECT_B.DATASET_B.TABLE_B AS b",
                         },
                     ),
-                    UpstairsTableReference(
+                    UpstairTableReference(
                         TableName="PROJECT_C.DATASET_C.TABLE_C",
                         Line={
                             MapKey.LINE_NUMBER: 7,
                             MapKey.LINE_STRING: "        PROJECT_C.DATASET_C.TABLE_C",
                         },
                     ),
-                    UpstairsTableReference(
+                    UpstairTableReference(
                         TableName="PROJECT_d.DATASET_d.TABLE_d",
                         Line={
                             MapKey.LINE_NUMBER: 17,
@@ -121,21 +121,21 @@ class TestSuccess:
             (
                 "tests/sql/query/nested_join.sql",
                 [
-                    UpstairsTableReference(
+                    UpstairTableReference(
                         TableName="PROJECT_B.DATASET_B.TABLE_B",
                         Line={
                             MapKey.LINE_NUMBER: 4,
                             MapKey.LINE_STRING: "    PROJECT_B.DATASET_B.TABLE_B AS b",
                         },
                     ),
-                    UpstairsTableReference(
+                    UpstairTableReference(
                         TableName="PROJECT_C.DATASET_C.TABLE_C",
                         Line={
                             MapKey.LINE_NUMBER: 10,
                             MapKey.LINE_STRING: "            PROJECT_C.DATASET_C.TABLE_C",
                         },
                     ),
-                    UpstairsTableReference(
+                    UpstairTableReference(
                         TableName="PROJECT_d.DATASET_d.TABLE_d",
                         Line={
                             MapKey.LINE_NUMBER: 20,
@@ -144,7 +144,7 @@ class TestSuccess:
                             ),
                         },
                     ),
-                    UpstairsTableReference(
+                    UpstairTableReference(
                         TableName="PROJECT_e.DATASET_e.TABLE_e",
                         Line={
                             MapKey.LINE_NUMBER: 21,
@@ -159,7 +159,7 @@ class TestSuccess:
             (
                 "tests/sql/query/union_same_table.sql",
                 [
-                    UpstairsTableReference(
+                    UpstairTableReference(
                         TableName=("test_project.beam_streaming.taxirides_realtime"),
                         Line={
                             MapKey.LINE_NUMBER: 6,
@@ -168,7 +168,7 @@ class TestSuccess:
                             ),
                         },
                     ),
-                    UpstairsTableReference(
+                    UpstairTableReference(
                         TableName=("test_project.beam_streaming.taxirides_realtime"),
                         Line={
                             MapKey.LINE_NUMBER: 15,
@@ -182,21 +182,21 @@ class TestSuccess:
             (
                 "tests/sql/query/cte_multi_tables_01.sql",
                 [
-                    UpstairsTableReference(
+                    UpstairTableReference(
                         TableName="project.dataset.table_test_A",
                         Line={
                             MapKey.LINE_NUMBER: 6,
                             MapKey.LINE_STRING: "		project.dataset.table_test_A",
                         },
                     ),
-                    UpstairsTableReference(
+                    UpstairTableReference(
                         TableName="project.dataset.table_test_B",
                         Line={
                             MapKey.LINE_NUMBER: 13,
                             MapKey.LINE_STRING: "		project.dataset.table_test_B AS test_B",
                         },
                     ),
-                    UpstairsTableReference(
+                    UpstairTableReference(
                         TableName="project.dataset.table_test_C",
                         Line={
                             MapKey.LINE_NUMBER: 19,
@@ -210,7 +210,7 @@ class TestSuccess:
             (
                 "tests/sql/query/cte_multi_tables_02.sql",
                 [
-                    UpstairsTableReference(
+                    UpstairTableReference(
                         TableName="project.dataset.table_test_A",
                         Line={
                             MapKey.LINE_NUMBER: 6,
@@ -219,21 +219,21 @@ class TestSuccess:
                             ),
                         },
                     ),
-                    UpstairsTableReference(
+                    UpstairTableReference(
                         TableName="project.dataset.table_test_B",
                         Line={
                             MapKey.LINE_NUMBER: 12,
                             MapKey.LINE_STRING: "		project.dataset.table_test_B AS test_B",
                         },
                     ),
-                    UpstairsTableReference(
+                    UpstairTableReference(
                         TableName="project.dataset.table_test_C",
                         Line={
                             MapKey.LINE_NUMBER: 19,
                             MapKey.LINE_STRING: "		project.dataset.table_test_C AS test_C",
                         },
                     ),
-                    UpstairsTableReference(
+                    UpstairTableReference(
                         TableName="project.dataset.table_test_D",
                         Line={
                             MapKey.LINE_NUMBER: 26,
@@ -247,7 +247,7 @@ class TestSuccess:
             (
                 "tests/sql/query/backtick_each_elements.sql",
                 [
-                    UpstairsTableReference(
+                    UpstairTableReference(
                         TableName="dummy.dummy.my_first_dbt_model",
                         Line={
                             MapKey.LINE_NUMBER: 4,
@@ -261,7 +261,7 @@ class TestSuccess:
             (
                 "tests/sql/query/backtick_whole_element.sql",
                 [
-                    UpstairsTableReference(
+                    UpstairTableReference(
                         TableName="dummy.dummy.my_first_dbt_model",
                         Line={
                             MapKey.LINE_NUMBER: 4,
@@ -273,7 +273,7 @@ class TestSuccess:
             (
                 "tests/sql/query/google_bigquery_unnest_in_exists.sql",
                 [
-                    UpstairsTableReference(
+                    UpstairTableReference(
                         TableName="PROJECT_d.DATASET_e.TABLE_f",
                         Line={
                             MapKey.LINE_NUMBER: 5,
@@ -285,21 +285,21 @@ class TestSuccess:
             (
                 "tests/sql/query/contains_str_from.sql",
                 [
-                    UpstairsTableReference(
+                    UpstairTableReference(
                         TableName="test.cte",
                         Line={
                             MapKey.LINE_NUMBER: 5,
                             MapKey.LINE_STRING: "        test.cte",
                         },
                     ),
-                    UpstairsTableReference(
+                    UpstairTableReference(
                         TableName="test.main",
                         Line={
                             MapKey.LINE_NUMBER: 11,
                             MapKey.LINE_STRING: "    test.main",
                         },
                     ),
-                    UpstairsTableReference(
+                    UpstairTableReference(
                         TableName="test.sub",
                         Line={
                             MapKey.LINE_NUMBER: 13,
@@ -332,7 +332,7 @@ class TestSuccess:
             query_str = f.read()
         query = Query(query_str=query_str)
         actual = []
-        for result in query.detect_upstairs_table_reference():
+        for result in query.detect_upstair_table_reference():
             actual.append(result)
         assert actual == expected
 
