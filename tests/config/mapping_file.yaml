@@ -51,6 +51,18 @@ Mapping:
           Source: file
           Test: c
   - TemplateSourceType: File
+    FileSuffix: "tests/sql/main/cte_multi_line_params_copy.sql"
+    Tables:
+      - TableName: "PROJECT_J.DATASET_K.TABLE_L"
+        Parameters:
+          params:
+            main_table: "PROJECT_P.DATASET_Q.TABLE_R"
+            sub_table_01: "PROJECT_S.DATASET_T.TABLE_U"
+            sub_table_02: "PROJECT_V.DATASET_W.TABLE_X"
+        Labels:
+          Source: file
+          Test: c
+  - TemplateSourceType: File
     FileSuffix: "tests/sql/main/one_line_1.sql"
     Tables:
       - TableName: "PROJECT_j.DATASET_k.TABLE_l"
