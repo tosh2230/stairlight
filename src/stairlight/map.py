@@ -59,7 +59,7 @@ class Map:
             mapping_config (MappingConfig):
                 Mapping configurations.
             mapped (dict[str, Any], optional):
-                Mapped table attributes. Defaults to None.
+                Mapped templates. Defaults to None.
         """
         if mapped:
             self.mapped = mapped

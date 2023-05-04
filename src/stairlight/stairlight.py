@@ -379,7 +379,7 @@ class StairLight:
             target_table_name=table_name, direction=direction
         )
 
-        for next_table_name, attributes_list in relative_map.items():
+        for next_table_name, templates in relative_map.items():
             if recursive:
                 if head:
                     searched_tables = [table_name]
@@ -395,7 +395,9 @@ class StairLight:
                     logger.warning(f"Circular references detected!: {details}")
                     continue
 
-            for attributes in attributes_list:
+            search_results[next_table_name] = {}
+            search_results[next_table_name]["Templates"] = []
+            for template in templates:
                 if recursive:
                     next_response = self.search_verbose(
                         table_name=next_table_name,
@@ -408,8 +410,7 @@ class StairLight:
                     if not next_response.get(next_table_name):
                         continue
 
-                    search_results[next_table_name] = {}
-                    search_results[next_table_name]["Attributes"] = relative_map[
+                    search_results[next_table_name]["Templates"] = relative_map[
                         next_table_name
                     ]
                     if next_response[next_table_name][direction.value]:
@@ -417,9 +418,7 @@ class StairLight:
                             direction.value
                         ] = next_response[next_table_name][direction.value]
                 else:
-                    for attributes in attributes_list:
-                        search_results[table_name] = {}
-                        search_results[table_name]["Attributes"] = attributes
+                    search_results[table_name]["Templates"].append(template)
 
         response[table_name][direction.value] = search_results
         return response
@@ -454,7 +453,7 @@ class StairLight:
             return response
 
         next_table_name: str
-        for next_table_name, attributes_list in relative_map.items():
+        for next_table_name, templates in relative_map.items():
             if recursive:
                 if head:
                     searched_tables = []
@@ -471,7 +470,7 @@ class StairLight:
                     logger.info(f"Circular reference detected!: {details}")
                     continue
 
-            for attributes in attributes_list:
+            for template in templates:
                 if recursive:
                     next_response = self.search_plain(
                         table_name=next_table_name,
@@ -486,7 +485,7 @@ class StairLight:
                 if response_type == ResponseType.TABLE.value:
                     response.append(next_table_name)
                 elif response_type == ResponseType.URI.value:
-                    uri = attributes.get(MapKey.URI)
+                    uri = template.get(MapKey.URI)
                     if uri:
                         response.append(uri)
 
