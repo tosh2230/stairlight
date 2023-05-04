@@ -467,7 +467,7 @@ class StairLight:
                         "next_table_name": next_table_name,
                         "searched_tables": searched_tables,
                     }
-                    logger.info(f"Circular reference detected!: {details}")
+                    logger.info(f"Circular references detected!: {details}")
                     continue
 
             for template in templates:
