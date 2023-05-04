@@ -51,7 +51,21 @@ class TestStairLight:
         assert self.stairlight.has_stairlight_config()
 
     def test_mapped(self):
-        assert self.stairlight.mapped
+        actual = set()
+        upstairs = self.stairlight.mapped["PROJECT_J.DATASET_K.TABLE_L"]
+        for mapped_templates in upstairs.values():
+            actual.update(
+                set([mapped_template.Key for mapped_template in mapped_templates])
+            )
+        assert (
+            set(
+                [
+                    "tests/sql/main/cte_multi_line_params.sql",
+                    "tests/sql/main/cte_multi_line_params_copy.sql",
+                ]
+            )
+            == actual
+        )
 
     def test_mapped_exclude_empty_value(self):
         assert "dummy.dummy.my_first_dbt_model" not in self.stairlight.mapped.keys()
@@ -156,6 +170,7 @@ class TestStairLight:
         assert sorted(result) == [
             f"{tests_abspath}/sql/main/cte_multi_line.sql",
             f"{tests_abspath}/sql/main/cte_multi_line_params.sql",
+            f"{tests_abspath}/sql/main/cte_multi_line_params_copy.sql",
             f"{tests_abspath}/sql/main/one_line_3.sql",
         ]
 
@@ -219,16 +234,16 @@ class TestStairLight:
         ]
 
     def test_create_relative_map_up(self):
-        table_name = "PROJECT_d.DATASET_d.TABLE_d"
+        target_table_name = "PROJECT_d.DATASET_d.TABLE_d"
         result = self.stairlight.create_relative_map(
-            table_name=table_name, direction=SearchDirection.UP
+            target_table_name=target_table_name, direction=SearchDirection.UP
         )
         assert "PROJECT_e.DATASET_e.TABLE_e" in result
 
     def test_create_relative_map_down(self):
-        table_name = "PROJECT_A.DATASET_A.TABLE_A"
+        target_table_name = "PROJECT_A.DATASET_A.TABLE_A"
         result = self.stairlight.create_relative_map(
-            table_name=table_name, direction=SearchDirection.DOWN
+            target_table_name=target_table_name, direction=SearchDirection.DOWN
         )
         assert "PROJECT_A.DATASET_B.TABLE_C" in result
 
@@ -276,6 +291,15 @@ class TestStairLight:
         with open("tests/results/merged.json", "r") as f:
             expected: dict[str, Any] = json.load(f)
         assert actual == expected
+
+    def test_cast_mapped_dict_all(self):
+        casted = self.stairlight.cast_mapped_dict_all(mapped=self.stairlight.mapped)
+        all_mapped_templates: list = []
+        for upstairs in casted.values():
+            for mapped_templates in upstairs.values():
+                all_mapped_templates = all_mapped_templates + mapped_templates
+
+        assert all([isinstance(actual, dict) for actual in all_mapped_templates])
 
 
 @pytest.mark.integration

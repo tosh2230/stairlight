@@ -1,9 +1,20 @@
 from __future__ import annotations
 
 import re
+from dataclasses import asdict, dataclass
 from typing import Iterator
 
-from src.stairlight.source.config import MapKey
+
+@dataclass
+class UpstairTableReference:
+    TableName: str
+    Line: dict
+
+
+@dataclass
+class UpstairTableReferenceLine:
+    LineNumber: int
+    LineString: str
 
 
 class Query:
@@ -21,11 +32,11 @@ class Query:
         self.query_str = query_str
         self.default_table_prefix = default_table_prefix
 
-    def detect_upstairs_attributes(self) -> Iterator[dict]:
-        """Parse a query statement and detect upstream table attributes
+    def detect_upstair_table_reference(self) -> Iterator[UpstairTableReference]:
+        """Parse a query statement and detect a upstream table reference
 
         Yields:
-            Iterator[dict]: upstream table attributes
+            Iterator[UpstairsResults]: upstream table results
         """
         upstairs_tables = self.parse_and_get_upstairs_tables()
 
@@ -38,18 +49,23 @@ class Query:
             ]
 
             for line_index in line_indexes:
-                if self.default_table_prefix:
-                    table_name = solve_table_prefix(
+                table_name = (
+                    solve_table_prefix(
                         table=upstairs_table,
                         default_table_prefix=self.default_table_prefix,
                     )
-                else:
-                    table_name = upstairs_table
-                yield {
-                    MapKey.TABLE_NAME: table_name.replace("`", ""),  # for BigQuery
-                    MapKey.LINE_NUMBER: line_index + 1,
-                    MapKey.LINE_STRING: self.query_str.splitlines()[line_index],
-                }
+                    if self.default_table_prefix
+                    else upstairs_table
+                )
+                yield UpstairTableReference(
+                    TableName=table_name.replace("`", ""),
+                    Line=asdict(
+                        UpstairTableReferenceLine(
+                            LineNumber=line_index + 1,
+                            LineString=self.query_str.splitlines()[line_index],
+                        )
+                    ),
+                )
 
     def parse_and_get_upstairs_tables(self) -> list[str]:
         """Parse query and get upstairs tables

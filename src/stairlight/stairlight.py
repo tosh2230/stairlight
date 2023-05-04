@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import enum
-import json
+from dataclasses import asdict
 from logging import getLogger
 from typing import Any
 
@@ -11,7 +11,7 @@ from src.stairlight.configurator import (
     STAIRLIGHT_CONFIG_PREFIX_DEFAULT,
     Configurator,
 )
-from src.stairlight.map import Map
+from src.stairlight.map import Map, MappedTemplate
 from src.stairlight.source.config import (
     MapKey,
     MappingConfig,
@@ -65,7 +65,7 @@ class StairLight:
         self.load_files = load_files
         self.save_file: str = save_file
         self._configurator = Configurator(dir=config_dir)
-        self._mapped: dict[str, Any] = {}
+        self._mapped: dict[str, dict[str, list[MappedTemplate] | None] | None] = {}
         self._unmapped: list[dict[str, Any]] = []
         self._mapping_config: MappingConfig | None = None
         self._stairlight_config: StairlightConfig = self._configurator.read_stairlight(
@@ -73,7 +73,7 @@ class StairLight:
         )
 
     @property
-    def mapped(self) -> dict[str, Any]:
+    def mapped(self) -> dict[str, dict[str, list[MappedTemplate] | None] | None]:
         """Return mapped
 
         Returns:
@@ -114,7 +114,8 @@ class StairLight:
     def save_map(self) -> None:
         """Save mapped results"""
         save_map_controller = SaveMapController(
-            save_file=self.save_file, mapped=self._mapped
+            save_file=self.save_file,
+            mapped=self.cast_mapped_dict_all(mapped=self._mapped),
         )
         save_map_controller.save()
 
@@ -229,10 +230,11 @@ class StairLight:
             list[str]: a list of tables
         """
         results: set[str] = set()
-        for downstairs, upstairs_dict in self._mapped.items():
-            results.add(downstairs)
-            for upstairs in upstairs_dict:
-                results.add(upstairs)
+        for table_name, upstairs in self._mapped.items():
+            results.update(
+                set(table_name),
+                set([upstair_name for upstair_name in upstairs.keys()]),
+            )
         return sorted(results)
 
     def list_uris(self) -> list[str]:
@@ -242,10 +244,17 @@ class StairLight:
             list[str]: a list of URIs
         """
         results: set[str] = set()
-        for upstairs_dict in self._mapped.values():
-            for upstairs_attributes in upstairs_dict.values():
-                if upstairs_attributes.get(MapKey.URI):
-                    results.add(upstairs_attributes.get(MapKey.URI))
+        for upstairs in self._mapped.values():
+            for mapped_templates in upstairs.values():
+                results.update(
+                    set(
+                        [
+                            mapped_template.Uri
+                            for mapped_template in mapped_templates
+                            if mapped_templates
+                        ]
+                    )
+                )
         return sorted(results)
 
     def up(
@@ -350,7 +359,7 @@ class StairLight:
         direction: SearchDirection,
         searched_tables: list[str],
         head: bool,
-    ) -> dict:
+    ) -> dict[str, Any]:
         """Search nodes and return verbose results
 
         Args:
@@ -363,15 +372,15 @@ class StairLight:
         Returns:
             dict: Search results
         """
-        relative_map = self.create_relative_map(
-            table_name=table_name, direction=direction
-        )
+        search_results: dict[str, dict[str, Any]] = {}
         response: dict[str, Any] = {table_name: {}}
-        if not relative_map:
-            return response
 
-        if recursive:
-            for next_table_name in relative_map.keys():
+        relative_map = self.create_relative_map(
+            target_table_name=table_name, direction=direction
+        )
+
+        for next_table_name, templates in relative_map.items():
+            if recursive:
                 if head:
                     searched_tables = [table_name]
 
@@ -383,26 +392,35 @@ class StairLight:
                         "next_table_name": next_table_name,
                         "searched_tables": searched_tables,
                     }
-                    logger.warning(f"Circular reference detected!: {details}")
+                    logger.warning(f"Circular references detected!: {details}")
                     continue
 
-                next_response = self.search_verbose(
-                    table_name=next_table_name,
-                    direction=direction,
-                    recursive=recursive,
-                    searched_tables=searched_tables,
-                    head=False,
-                )
+            search_results[next_table_name] = {}
+            search_results[next_table_name]["Templates"] = []
+            for template in templates:
+                if recursive:
+                    next_response = self.search_verbose(
+                        table_name=next_table_name,
+                        direction=direction,
+                        recursive=recursive,
+                        searched_tables=searched_tables,
+                        head=False,
+                    )
 
-                if not next_response.get(next_table_name):
-                    continue
+                    if not next_response.get(next_table_name):
+                        continue
 
-                relative_map[next_table_name] = {
-                    **relative_map[next_table_name],
-                    **next_response[next_table_name],
-                }
+                    search_results[next_table_name]["Templates"] = relative_map[
+                        next_table_name
+                    ]
+                    if next_response[next_table_name][direction.value]:
+                        search_results[next_table_name][
+                            direction.value
+                        ] = next_response[next_table_name][direction.value]
+                else:
+                    search_results[table_name]["Templates"].append(template)
 
-        response[table_name][direction.value] = relative_map
+        response[table_name][direction.value] = search_results
         return response
 
     def search_plain(
@@ -428,14 +446,14 @@ class StairLight:
             list[str]: Search results
         """
         relative_map = self.create_relative_map(
-            table_name=table_name, direction=direction
+            target_table_name=table_name, direction=direction
         )
         response: list[str] = []
         if not relative_map:
             return response
 
         next_table_name: str
-        for next_table_name in relative_map.keys():
+        for next_table_name, templates in relative_map.items():
             if recursive:
                 if head:
                     searched_tables = []
@@ -449,45 +467,57 @@ class StairLight:
                         "next_table_name": next_table_name,
                         "searched_tables": searched_tables,
                     }
-                    logger.info(f"Circular reference detected!: {details}")
+                    logger.info(f"Circular references detected!: {details}")
                     continue
 
-                next_response = self.search_plain(
-                    table_name=next_table_name,
-                    direction=direction,
-                    recursive=recursive,
-                    response_type=response_type,
-                    searched_tables=searched_tables,
-                    head=False,
-                )
-                response = response + next_response
+            for template in templates:
+                if recursive:
+                    next_response = self.search_plain(
+                        table_name=next_table_name,
+                        direction=direction,
+                        recursive=recursive,
+                        response_type=response_type,
+                        searched_tables=searched_tables,
+                        head=False,
+                    )
+                    response = response + next_response
 
-            if response_type == ResponseType.TABLE.value:
-                response.append(next_table_name)
-            elif response_type == ResponseType.URI.value:
-                response.append(relative_map[next_table_name].get(MapKey.URI))
-            logger.debug(json.dumps(response, indent=2))
+                if response_type == ResponseType.TABLE.value:
+                    response.append(next_table_name)
+                elif response_type == ResponseType.URI.value:
+                    uri = template.get(MapKey.URI)
+                    if uri:
+                        response.append(uri)
 
         return sorted(list(set(response)))
 
     def create_relative_map(
-        self, table_name: str, direction: SearchDirection
-    ) -> dict[str, Any]:
+        self, target_table_name: str, direction: SearchDirection
+    ) -> dict[str, list[dict[str, Any]]]:
         """Create a relative map for the specified direction
 
         Args:
-            table_name (str): Table name
+            target_table_name (str): Target table name
             direction (SearchDirection): Search direction
 
         Returns:
             dict: Relative map
         """
-        relative_map: dict[str, Any] = {}
+        relative_map: dict[str, list[dict[str, Any]]] = {}
         if direction == SearchDirection.UP:
-            relative_map = self._mapped.get(table_name, {})
+            upstairs = self._mapped.get(target_table_name, {})
+            for upstair_name, mapped_templates in upstairs.items():
+                relative_map[upstair_name] = [
+                    asdict(mapped_template) for mapped_template in mapped_templates
+                ]
         elif direction == SearchDirection.DOWN:
-            for key in [k for k, v in self._mapped.items() if v.get(table_name)]:
-                relative_map[key] = self._mapped[key][table_name]
+            for table_name, upstairs in self._mapped.items():
+                for upstair_name, mapped_templates in upstairs.items():
+                    if mapped_templates and upstair_name == target_table_name:
+                        relative_map[table_name] = [
+                            asdict(mapped_template)
+                            for mapped_template in mapped_templates
+                        ]
         return relative_map
 
     def find_tables_by_labels(self, target_labels: list[str]) -> list[str]:
@@ -558,3 +588,19 @@ class StairLight:
                     found_count += 1
 
         return found_count == len(target_labels)
+
+    @staticmethod
+    def cast_mapped_dict_all(
+        mapped: dict[str, dict[str, list[MappedTemplate] | None]]
+    ) -> dict[str, dict[str, list[dict] | None]]:
+        casted: dict[str, Any] = {}
+        for table_name, upstairs in mapped.items():
+            if not casted.get(table_name):
+                casted[table_name] = {}
+            for upstair_name, mapped_templates in upstairs.items():
+                if not casted[table_name].get(upstair_name):
+                    casted[table_name][upstair_name] = []
+                for mapped_template in mapped_templates:
+                    if mapped_template and isinstance(mapped_template, MappedTemplate):
+                        casted[table_name][upstair_name].append(asdict(mapped_template))
+        return casted
