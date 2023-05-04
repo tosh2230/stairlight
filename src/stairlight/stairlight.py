@@ -119,20 +119,6 @@ class StairLight:
         )
         save_map_controller.save()
 
-    @staticmethod
-    def cast_mapped_dict_all(mapped: dict) -> dict[str, Any]:
-        casted: dict[str, Any] = {}
-        for table_name, upstair in mapped.items():
-            if not casted.get(table_name):
-                casted[table_name] = {}
-            for upstair_name, mapped_templates in upstair.items():
-                if not casted[table_name].get(upstair_name):
-                    casted[table_name][upstair_name] = []
-                for mapped_template in mapped_templates:
-                    if mapped_template and isinstance(mapped_template, MappedTemplate):
-                        casted[table_name][upstair_name].append(asdict(mapped_template))
-        return casted
-
     def load_map(self) -> None:
         """Load mapped results"""
         if not self.load_files:
@@ -603,3 +589,19 @@ class StairLight:
                     found_count += 1
 
         return found_count == len(target_labels)
+
+    @staticmethod
+    def cast_mapped_dict_all(
+        mapped: dict[str, dict[str, list[MappedTemplate] | None]]
+    ) -> dict[str, Any]:
+        casted: dict[str, Any] = {}
+        for table_name, upstair in mapped.items():
+            if not casted.get(table_name):
+                casted[table_name] = {}
+            for upstair_name, mapped_templates in upstair.items():
+                if not casted[table_name].get(upstair_name):
+                    casted[table_name][upstair_name] = []
+                for mapped_template in mapped_templates:
+                    if mapped_template and isinstance(mapped_template, MappedTemplate):
+                        casted[table_name][upstair_name].append(asdict(mapped_template))
+        return casted
