@@ -593,12 +593,12 @@ class StairLight:
     @staticmethod
     def cast_mapped_dict_all(
         mapped: dict[str, dict[str, list[MappedTemplate] | None]]
-    ) -> dict[str, Any]:
+    ) -> dict[str, dict[str, list[dict] | None]]:
         casted: dict[str, Any] = {}
-        for table_name, upstair in mapped.items():
+        for table_name, upstairs in mapped.items():
             if not casted.get(table_name):
                 casted[table_name] = {}
-            for upstair_name, mapped_templates in upstair.items():
+            for upstair_name, mapped_templates in upstairs.items():
                 if not casted[table_name].get(upstair_name):
                     casted[table_name][upstair_name] = []
                 for mapped_template in mapped_templates:

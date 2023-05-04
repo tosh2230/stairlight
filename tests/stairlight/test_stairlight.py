@@ -292,6 +292,15 @@ class TestStairLight:
             expected: dict[str, Any] = json.load(f)
         assert actual == expected
 
+    def test_cast_mapped_dict_all(self):
+        casted = self.stairlight.cast_mapped_dict_all(mapped=self.stairlight.mapped)
+        all_mapped_templates: list = []
+        for upstairs in casted.values():
+            for mapped_templates in upstairs.values():
+                all_mapped_templates = all_mapped_templates + mapped_templates
+
+        assert all([isinstance(actual, dict) for actual in all_mapped_templates])
+
 
 @pytest.mark.integration
 class TestStairLightNoConfig:
