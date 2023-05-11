@@ -22,7 +22,7 @@ def stairlight_check() -> Iterator[StairLight]:
     stairlight = StairLight(config_dir="tests/config/test_check")
     stairlight.create_map()
     yield stairlight
-    teardown_rm_config(pathname="tests/config/test_check/mapping_*.yaml")
+    teardown_rm_config(pathname="tests/config/test_check/.mapping_*.yaml")
 
 
 @pytest.fixture(scope="session")

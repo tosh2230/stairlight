@@ -47,7 +47,7 @@ def stairlight_save() -> Iterator[StairLight]:
     teardown_rm_file(save_file)
     teardown_rm_config(
         pathname=(
-            "tests/config/mapping_[0-9][0-9][0-9][0-9]"
+            "tests/config/.mapping_[0-9][0-9][0-9][0-9]"
             "[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].yaml"
         )
     )
@@ -64,7 +64,7 @@ def stairlight_template_prefix() -> Iterator[str]:
 def mapping_template_prefix() -> Iterator[str]:
     prefix = "pytest_mapping"
     yield prefix
-    teardown_rm_config(pathname=f"tests/config/{prefix}*.yaml")
+    teardown_rm_config(pathname=f"tests/config/.{prefix}*.yaml")
 
 
 def teardown_rm_file(file: str) -> None:
