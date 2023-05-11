@@ -85,7 +85,7 @@ class TestStairLight:
 
     def test_check(self, mapping_template_prefix: str):
         assert self.stairlight.check(prefix=mapping_template_prefix).startswith(
-            f"tests/config/{mapping_template_prefix}"
+            f"tests/config/.{mapping_template_prefix}"
         )
 
     @pytest.mark.parametrize(
