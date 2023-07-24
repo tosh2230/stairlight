@@ -288,8 +288,8 @@ class StairLight:
         """
         results: set[str] = set()
         for table_name, upstairs in self._mapped.items():
+            results.add(table_name)
             results.update(
-                set(table_name),
                 set([upstair_name for upstair_name in upstairs.keys()]),
             )
         return sorted(results)
