@@ -121,10 +121,9 @@ class Configurator:
         """Create a mapping template file
 
         Args:
-            detected (list[dict]): Unmapped results
-            prefix (str, optional):
-                Prefix of the configuration file name.
-                Defaults to MAPPING_CONFIG_PREFIX.
+            config (list[dict]): config to write
+            prefix (str):
+                Prefix of file name.
 
         Returns:
             str: Created file name
