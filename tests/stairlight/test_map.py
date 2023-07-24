@@ -137,15 +137,17 @@ class TestSuccess:
             Parameters=expected,
         )
         actual = dependency_map_single.merge_global_params(
-            table_attributes=table_attributes
+            table_attributes=table_attributes, global_params={}
         )
         assert actual == expected
 
     def test_merge_global_params_if_only_global(self, dependency_map: Map):
         table_attributes = MappingConfigMappingTable(TableName="")
-        actual = dependency_map.merge_global_params(table_attributes=table_attributes)
-        expected = dependency_map.get_global_params()
-        assert actual == expected
+        global_params = dependency_map.get_global_params()
+        actual = dependency_map.merge_global_params(
+            table_attributes=table_attributes, global_params=global_params
+        )
+        assert actual == global_params
 
     def test_merge_global_params_by_table(self, dependency_map: Map):
         table_attributes = MappingConfigMappingTable(
@@ -160,7 +162,10 @@ class TestSuccess:
                 }
             ),
         )
-        actual = dependency_map.merge_global_params(table_attributes=table_attributes)
+        global_params = dependency_map.get_global_params()
+        actual = dependency_map.merge_global_params(
+            table_attributes=table_attributes, global_params=global_params
+        )
         expected = {
             "DESTINATION_PROJECT": "PROJECT_GLOBAL",
             "params": {

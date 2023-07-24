@@ -4,12 +4,12 @@ from typing import Iterator
 
 import pytest
 
-from src.stairlight import StairLight
-from src.stairlight.configurator import (
+from src.stairlight import (
     MAPPING_CONFIG_PREFIX_DEFAULT,
     STAIRLIGHT_CONFIG_PREFIX_DEFAULT,
-    Configurator,
+    StairLight,
 )
+from src.stairlight.configurator import Configurator
 from src.stairlight.source.config import MappingConfig, StairlightConfig
 
 
@@ -47,7 +47,7 @@ def stairlight_save() -> Iterator[StairLight]:
     teardown_rm_file(save_file)
     teardown_rm_config(
         pathname=(
-            "tests/config/.mapping_[0-9][0-9][0-9][0-9]"
+            "tests/config/.unmapped_[0-9][0-9][0-9][0-9]"
             "[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].yaml"
         )
     )
@@ -61,8 +61,15 @@ def stairlight_template_prefix() -> Iterator[str]:
 
 
 @pytest.fixture(scope="session")
-def mapping_template_prefix() -> Iterator[str]:
-    prefix = "pytest_mapping"
+def prefix_unmapped() -> Iterator[str]:
+    prefix = "unmapped"
+    yield prefix
+    teardown_rm_config(pathname=f"tests/config/.{prefix}*.yaml")
+
+
+@pytest.fixture(scope="session")
+def prefix_not_found() -> Iterator[str]:
+    prefix = "not_found"
     yield prefix
     teardown_rm_config(pathname=f"tests/config/.{prefix}*.yaml")
 

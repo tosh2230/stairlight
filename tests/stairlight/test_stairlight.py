@@ -83,9 +83,20 @@ class TestStairLight:
             == f"tests/config/{stairlight_template_prefix}.yaml"
         )
 
-    def test_check(self, mapping_template_prefix: str):
-        assert self.stairlight.check(prefix=mapping_template_prefix).startswith(
-            f"tests/config/.{mapping_template_prefix}"
+    def test_check_unmapped(self, prefix_unmapped, prefix_not_found):
+        file_names = self.stairlight.check(
+            prefix_unmapped=prefix_unmapped, prefix_not_found=prefix_not_found
+        )
+        assert any(
+            [
+                file_name.startswith(f"tests/config/.{prefix_unmapped}")
+                for file_name in file_names
+            ]
+        ) and any(
+            [
+                file_name.startswith(f"tests/config/.{prefix_not_found}")
+                for file_name in file_names
+            ]
         )
 
     @pytest.mark.parametrize(
@@ -111,7 +122,8 @@ class TestStairLight:
 
     def test_list_uris(self):
         assert (
-            "gs://stairlight/sql/cte/cte_multi_line.sql" in self.stairlight.list_uris()
+            "tests/dbt/project_01/target/compiled/project_01/models/example/my_first_dbt_model.sql"
+            in self.stairlight.list_uris()
         )
 
     def test_up_next(self):
@@ -300,6 +312,10 @@ class TestStairLight:
                 all_mapped_templates = all_mapped_templates + mapped_templates
 
         assert all([isinstance(actual, dict) for actual in all_mapped_templates])
+
+    def test_get_templates_not_found(self):
+        not_found = self.stairlight.get_templates_not_found()
+        assert not_found == ["tests/sql/main/not_found_test.sql"]
 
 
 @pytest.mark.integration

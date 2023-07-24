@@ -2,7 +2,8 @@ from dataclasses import asdict
 
 import pytest
 
-from src.stairlight.configurator import MAPPING_CONFIG_PREFIX_DEFAULT, Configurator
+from src.stairlight import MAPPING_CONFIG_PREFIX_DEFAULT
+from src.stairlight.configurator import Configurator
 from src.stairlight.source.config_key import MappingConfigKey
 from src.stairlight.source.controller import (
     LoadMapController,

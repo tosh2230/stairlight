@@ -6,12 +6,11 @@ from typing import Any
 
 import pytest
 
-from src.stairlight.configurator import (
+from src.stairlight import (
     MAPPING_CONFIG_PREFIX_DEFAULT,
     STAIRLIGHT_CONFIG_PREFIX_DEFAULT,
-    Configurator,
-    create_nested_dict,
 )
+from src.stairlight.configurator import Configurator, create_nested_dict
 from src.stairlight.source.config_key import (
     MapKey,
     MappingConfigKey,
@@ -72,10 +71,10 @@ class TestMappingConfig:
         assert len(mapping_config.Mapping) > 0
 
     def test_create_mapping_file(
-        self, configurator: Configurator, mapping_template_prefix: str
+        self, configurator: Configurator, prefix_unmapped: str
     ):
         file_name = configurator.create_mapping_file(
-            unmapped=[], prefix=mapping_template_prefix
+            config=[{"key": "value"}], prefix=prefix_unmapped
         )
         assert os.path.exists(file_name)
 
@@ -133,7 +132,7 @@ class TestBuildMappingConfigFile:
             }
         )
         actual = configurator.build_mapping_config(
-            unmapped_templates=unmapped_templates
+            detected_templates=unmapped_templates
         )
         assert actual == expected
 
@@ -194,7 +193,7 @@ class TestBuildMappingConfigGcs:
             }
         )
         actual = configurator.build_mapping_config(
-            unmapped_templates=unmapped_templates
+            detected_templates=unmapped_templates
         )
         assert actual == expected
 
@@ -257,7 +256,7 @@ class TestBuildMappingConfigRedash:
             }
         )
         actual = configurator.build_mapping_config(
-            unmapped_templates=unmapped_templates
+            detected_templates=unmapped_templates
         )
         assert actual == expected
 
@@ -323,7 +322,7 @@ class TestBuildMappingConfigDbt:
             }
         )
         actual = configurator.build_mapping_config(
-            unmapped_templates=unmapped_templates
+            detected_templates=unmapped_templates
         )
         assert actual == expected
 
@@ -384,7 +383,7 @@ class TestBuildMappingConfigS3:
             }
         )
         actual = configurator.build_mapping_config(
-            unmapped_templates=unmapped_templates
+            detected_templates=unmapped_templates
         )
         assert actual == expected
 

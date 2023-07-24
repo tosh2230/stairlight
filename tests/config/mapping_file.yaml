@@ -85,6 +85,10 @@ Mapping:
     FileSuffix: "tests/sql/main/union_same_table.sql"
     Tables:
       - TableName: "test_project.beam_streaming.taxirides_aggregation"
+  - TemplateSourceType: File
+    FileSuffix: "tests/sql/main/not_found_test.sql"
+    Tables:
+      - TableName: "test_project.not_found_test.not_found_test"
 ExtraLabels:
   - TableName: "PROJECT_A.DATASET_A.TABLE_A"
     Labels:
