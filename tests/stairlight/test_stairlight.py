@@ -118,7 +118,9 @@ class TestStairLight:
         assert expected in self.stairlight.list_(response_type=response_type)
 
     def test_list_tables(self):
-        assert "PROJECT_A.DATASET_A.TABLE_A" in self.stairlight.list_tables()
+        actual = self.stairlight.list_tables()
+        assert "PROJECT_A.DATASET_A.TABLE_A" in actual
+        assert "PROJECT_A.DATASET_B.TABLE_C" in actual
 
     def test_list_uris(self):
         assert (
