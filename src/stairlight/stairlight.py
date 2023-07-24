@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import enum
+import os
 from dataclasses import asdict
 from logging import getLogger
 from typing import Any
@@ -197,27 +198,21 @@ class StairLight:
         not_found: set[str] = set()
         mapped_urls: list[str] = self.list_uris()
         for config in self._mapping_config.Mapping:
-            target_key: str = ""
+            uri: str = ""
             if config.get(MappingConfigKey.TEMPLATE_SOURCE_TYPE) in [
                 TemplateSourceType.FILE.value,
                 TemplateSourceType.DBT.value,
             ]:
-                target_key = config.get(MappingConfigKey.File.FILE_SUFFIX)
+                file_suffix = config.get(MappingConfigKey.File.FILE_SUFFIX)
+                uri = os.path.abspath(f"./{file_suffix}")
             elif config.get(MappingConfigKey.TEMPLATE_SOURCE_TYPE) in [
                 TemplateSourceType.GCS.value,
                 TemplateSourceType.S3.value,
             ]:
-                target_key = config.get(MappingConfigKey.Gcs.URI)
+                uri = config.get(MappingConfigKey.Gcs.URI)
 
-            found = any(
-                [
-                    mapped_url
-                    for mapped_url in mapped_urls
-                    if mapped_url.endswith(target_key)
-                ]
-            )
-            if not found:
-                not_found.add(target_key)
+            if uri not in mapped_urls:
+                not_found.add(uri)
 
         return sorted(not_found)
 
@@ -303,11 +298,11 @@ class StairLight:
         results: set[str] = set()
         for upstairs in self._mapped.values():
             for upstair, mapped_templates in upstairs.items():
-                upstair_key: str = self.get_key_from_mapping_config(
+                upstair_uri: str = self.get_uri_from_mapping_config(
                     target_table=upstair
                 )
-                if upstair_key:
-                    results.add(upstair_key)
+                if upstair_uri:
+                    results.add(upstair_uri)
                 results.update(
                     set(
                         [
@@ -319,26 +314,27 @@ class StairLight:
                 )
         return sorted(results)
 
-    def get_key_from_mapping_config(self, target_table: str) -> str:
+    def get_uri_from_mapping_config(self, target_table: str) -> str:
         for config in self._mapping_config.Mapping:
-            key: str = ""
+            uri: str = ""
             if config.get(MappingConfigKey.TEMPLATE_SOURCE_TYPE) in [
                 TemplateSourceType.FILE.value,
                 TemplateSourceType.DBT.value,
             ]:
-                key = config.get(MappingConfigKey.File.FILE_SUFFIX)
+                file_suffix = config.get(MappingConfigKey.File.FILE_SUFFIX)
+                uri = os.path.abspath(f"./{file_suffix}")
             elif config.get(MappingConfigKey.TEMPLATE_SOURCE_TYPE) in [
                 TemplateSourceType.GCS.value,
                 TemplateSourceType.S3.value,
             ]:
-                key = config.get(MappingConfigKey.Gcs.URI)
+                uri = config.get(MappingConfigKey.Gcs.URI)
             table_names = [
                 tables.get(MappingConfigKey.TABLE_NAME)
                 for tables in config.get(MappingConfigKey.TABLES)
             ]
 
             if target_table in table_names:
-                return key
+                return uri
 
         return ""
 

@@ -123,10 +123,18 @@ class TestStairLight:
         assert "PROJECT_A.DATASET_B.TABLE_C" in actual
 
     def test_list_uris(self):
-        assert (
-            "tests/dbt/project_01/target/compiled/project_01/"
-            "models/example/my_first_dbt_model.sql"
-        ) in self.stairlight.list_uris()
+        assert any(
+            [
+                uri
+                for uri in self.stairlight.list_uris()
+                if uri.endswith(
+                    (
+                        "tests/dbt/project_01/target/compiled/project_01/"
+                        "models/example/my_first_dbt_model.sql"
+                    )
+                )
+            ]
+        )
 
     def test_up_next(self):
         table_name = "PROJECT_D.DATASET_E.TABLE_F"
@@ -317,7 +325,8 @@ class TestStairLight:
 
     def test_get_templates_not_found(self):
         not_found = self.stairlight.get_templates_not_found()
-        assert not_found == ["tests/sql/main/not_found_test.sql"]
+        assert len(not_found) == 1
+        assert not_found[0].endswith("tests/sql/main/not_found_test.sql")
 
 
 @pytest.mark.integration
