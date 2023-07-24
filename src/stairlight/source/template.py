@@ -88,21 +88,21 @@ class Template(ABC):
         """
         mapping: Any
         for mapping in self._mapping_config.get_mapping():
-            not_found: bool = True
+            found: bool = False
             if mapping.TemplateSourceType in (
                 TemplateSourceType.FILE.value,
                 TemplateSourceType.DBT.value,
             ):
                 if self.key.endswith(mapping.FileSuffix):
-                    not_found = False
+                    found = True
             elif mapping.TemplateSourceType in (
                 TemplateSourceType.GCS.value,
                 TemplateSourceType.S3.value,
             ):
                 if self.uri == mapping.Uri:
-                    not_found = False
+                    found = True
 
-            if not_found:
+            if not found:
                 continue
 
             for table_attributes in mapping.get_table():

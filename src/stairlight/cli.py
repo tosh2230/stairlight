@@ -36,12 +36,8 @@ def command_check(stairlight: stairlight.StairLight, args: argparse.Namespace) -
     Returns:
         str: return messages
     """
-    message = ""
-    mapping_template_file = stairlight.check()
-    if mapping_template_file:
-        message = mapping_template_file
-
-    return message
+    created_files = stairlight.check()
+    return "\n".join([f for f in created_files if f != ""])
 
 
 def command_list(
@@ -300,7 +296,10 @@ def create_parser() -> argparse.ArgumentParser:
     parser_check = subparsers.add_parser(
         "map",
         aliases=["check"],
-        help="create a new configuration file about undefined mappings",
+        help=(
+            "create a new configuration file about undefined mappings"
+            " and templates not found"
+        ),
     )
     parser_check.set_defaults(handler=command_check)
     set_general_parser(parser=parser_check)
