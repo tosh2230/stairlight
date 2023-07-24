@@ -33,9 +33,6 @@ from src.stairlight.source.template import Template
 
 logger = logging.getLogger()
 
-STAIRLIGHT_CONFIG_PREFIX_DEFAULT = "stairlight"
-MAPPING_CONFIG_PREFIX_DEFAULT = "mapping"
-
 
 class Configurator:
     def __init__(self, dir: str) -> None:
@@ -46,15 +43,12 @@ class Configurator:
         """
         self.dir = dir
 
-    def read_stairlight(
-        self, prefix: str = STAIRLIGHT_CONFIG_PREFIX_DEFAULT
-    ) -> StairlightConfig:
+    def read_stairlight(self, prefix: str) -> StairlightConfig:
         """Read stairlight configurations from yaml
 
         Args:
             prefix (str, optional):
                 Prefix of the configuration file name.
-                Defaults to STAIRLIGHT_CONFIG_PREFIX_DEFAULT.
 
         Returns:
             StairlightConfig: Stairlight configurations
@@ -68,15 +62,12 @@ class Configurator:
             config = sl_util.deep_merge(original=config, add=self.read(pattern=regex))
         return MappingConfig(**config)
 
-    def read_mapping_with_prefix(
-        self, prefix: str = MAPPING_CONFIG_PREFIX_DEFAULT
-    ) -> MappingConfig:
+    def read_mapping_with_prefix(self, prefix: str) -> MappingConfig:
         """Read mapping configurations from yaml
 
         Args:
-            prefix (str, optional):
+            prefix (str):
                 Prefix of the configuration file name.
-                Defaults to MAPPING_CONFIG_PREFIX_DEFAULT.
 
         Returns:
             MappingConfig: Mapping configurations
@@ -106,15 +97,12 @@ class Configurator:
             results = sl_util.deep_merge(original=results, add=config)
         return results
 
-    def create_stairlight_file(
-        self, prefix: str = STAIRLIGHT_CONFIG_PREFIX_DEFAULT
-    ) -> str:
+    def create_stairlight_file(self, prefix: str) -> str:
         """Create a Stairlight template file
 
         Args:
             prefix (str, optional):
                 Prefix of the configuration file name.
-                Defaults to STAIRLIGHT_CONFIG_PREFIX.
 
         Returns:
             str: Created file name
@@ -127,13 +115,13 @@ class Configurator:
 
     def create_mapping_file(
         self,
-        unmapped: list[dict[str, Any]],
-        prefix: str = MAPPING_CONFIG_PREFIX_DEFAULT,
+        config: list[dict[str, Any]] | list[str] | dict,
+        prefix: str,
     ) -> str:
         """Create a mapping template file
 
         Args:
-            unmapped (list[dict]): Unmapped results
+            detected (list[dict]): Unmapped results
             prefix (str, optional):
                 Prefix of the configuration file name.
                 Defaults to MAPPING_CONFIG_PREFIX.
@@ -149,7 +137,7 @@ class Configurator:
                 data_type=OrderedDict, representer=self.represent_odict
             )
             yaml.dump(
-                self.build_mapping_config(unmapped_templates=unmapped),
+                config,
                 stream=f,
             )
         return template_file_name
@@ -195,27 +183,26 @@ class Configurator:
         )
 
     def build_mapping_config(
-        self, unmapped_templates: list[dict[str, Any]]
+        self, detected_templates: list[dict[str, Any]]
     ) -> OrderedDict:
         """Create a OrderedDict object for mapping configurations
 
         Args:
-            unmapped_templates (list[dict[str, Any]]):
-                Unmapped settings that Stairlight detects
+            detected_templates (list[dict[str, Any]]):
+                Templates that Stairlight detected
 
         Returns:
             OrderedDict: Template dict for mapping.yaml
         """
         # Mapping section
         mappings: list[MappingConfigMapping] = []
-        unmapped_template: dict[str, Any]
-        for unmapped_template in unmapped_templates:
+        detected_template: dict[str, Any]
+        for detected_template in detected_templates:
             # Tables.Parameters
             parameters: OrderedDict = OrderedDict()
-            template: Template = unmapped_template[MapKey.TEMPLATE]
 
-            if MapKey.PARAMETERS in unmapped_template:
-                undefined_params: list[str] = unmapped_template.get(MapKey.PARAMETERS)
+            if MapKey.PARAMETERS in detected_template:
+                undefined_params: list[str] = detected_template.get(MapKey.PARAMETERS)
                 for undefined_param in undefined_params:
                     splitted_params = undefined_param.split(".")
                     create_nested_dict(keys=splitted_params, results=parameters)
@@ -224,6 +211,7 @@ class Configurator:
             if len(parameters) == 0:
                 parameters = None
 
+            template: Template = detected_template.get(MapKey.TEMPLATE)
             mapping_table = MappingConfigMappingTable(
                 TableName=get_default_table_name(template=template),
                 Parameters=parameters,

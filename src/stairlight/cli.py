@@ -36,12 +36,8 @@ def command_check(stairlight: stairlight.StairLight, args: argparse.Namespace) -
     Returns:
         str: return messages
     """
-    message = ""
-    mapping_template_file = stairlight.check()
-    if mapping_template_file:
-        message = mapping_template_file
-
-    return message
+    created_files = stairlight.check()
+    return "\n".join([f for f in created_files if f != ""])
 
 
 def command_list(

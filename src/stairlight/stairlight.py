@@ -6,11 +6,7 @@ from logging import getLogger
 from typing import Any
 
 import src.stairlight.util as sl_util
-from src.stairlight.configurator import (
-    MAPPING_CONFIG_PREFIX_DEFAULT,
-    STAIRLIGHT_CONFIG_PREFIX_DEFAULT,
-    Configurator,
-)
+from src.stairlight.configurator import Configurator
 from src.stairlight.map import Map, MappedTemplate
 from src.stairlight.source.config import (
     MapKey,
@@ -18,7 +14,14 @@ from src.stairlight.source.config import (
     StairlightConfig,
     StairlightConfigSettings,
 )
+from src.stairlight.source.config_key import MappingConfigKey
 from src.stairlight.source.controller import LoadMapController, SaveMapController
+from src.stairlight.source.template import TemplateSourceType
+
+STAIRLIGHT_CONFIG_PREFIX_DEFAULT = "stairlight"
+MAPPING_CONFIG_PREFIX_DEFAULT = "mapping"
+CONFIG_UNMAPPED_PREFIX_DEFAULT = "unmapped"
+CONFIG_NOT_FOUND_PREFIX_DEFAULT = "not_found"
 
 logger = getLogger(__name__)
 
@@ -51,6 +54,8 @@ class StairLight:
         config_dir: str = ".",
         load_files: list[str] = None,
         save_file: str = "",
+        stairlight_config_prefix: str = STAIRLIGHT_CONFIG_PREFIX_DEFAULT,
+        mapping_config_prefix: str = MAPPING_CONFIG_PREFIX_DEFAULT,
     ) -> None:
         """A table dependency detector
 
@@ -67,9 +72,12 @@ class StairLight:
         self._configurator = Configurator(dir=config_dir)
         self._mapped: dict[str, dict[str, list[MappedTemplate] | None] | None] = {}
         self._unmapped: list[dict[str, Any]] = []
+        self._not_found: list[str] = []
         self._mapping_config: MappingConfig | None = None
+        self._stairlight_config_prefix: str = stairlight_config_prefix
+        self._mapping_config_prefix: str = mapping_config_prefix
         self._stairlight_config: StairlightConfig = self._configurator.read_stairlight(
-            prefix=STAIRLIGHT_CONFIG_PREFIX_DEFAULT
+            prefix=stairlight_config_prefix
         )
 
     @property
@@ -89,6 +97,15 @@ class StairLight:
             list[dict]: Unmapped results
         """
         return self._unmapped
+
+    @property
+    def not_found(self) -> list[str]:
+        """Return not_found
+
+        Returns:
+            list[dict]: Results of not found
+        """
+        return self._not_found
 
     def has_stairlight_config(self) -> bool:
         """Exists a stairlight configuration file or not
@@ -174,6 +191,35 @@ class StairLight:
             self._mapped = dependency_map.mapped
 
         self._unmapped = dependency_map.unmapped
+        self._not_found = self.get_templates_not_found()
+
+    def get_templates_not_found(self) -> list[str]:
+        not_found: set[str] = set()
+        mapped_urls: list[str] = self.list_uris()
+        for config in self._mapping_config.Mapping:
+            target_key: str = ""
+            if config.get(MappingConfigKey.TEMPLATE_SOURCE_TYPE) in [
+                TemplateSourceType.FILE.value,
+                TemplateSourceType.DBT.value,
+            ]:
+                target_key = config.get(MappingConfigKey.File.FILE_SUFFIX)
+            elif config.get(MappingConfigKey.TEMPLATE_SOURCE_TYPE) in [
+                TemplateSourceType.GCS.value,
+                TemplateSourceType.S3.value,
+            ]:
+                target_key = config.get(MappingConfigKey.Gcs.URI)
+
+            found = any(
+                [
+                    mapped_url
+                    for mapped_url in mapped_urls
+                    if mapped_url.endswith(target_key)
+                ]
+            )
+            if not found:
+                not_found.add(target_key)
+
+        return sorted(not_found)
 
     def init(self, prefix: str = STAIRLIGHT_CONFIG_PREFIX_DEFAULT) -> str:
         """Create Stairlight template file
@@ -187,7 +233,11 @@ class StairLight:
         """
         return self._configurator.create_stairlight_file(prefix=prefix)
 
-    def check(self, prefix: str = MAPPING_CONFIG_PREFIX_DEFAULT) -> str:
+    def check(
+        self,
+        prefix_unmapped: str = CONFIG_UNMAPPED_PREFIX_DEFAULT,
+        prefix_not_found: str = CONFIG_NOT_FOUND_PREFIX_DEFAULT,
+    ) -> list[str]:
         """Check mapped results and create a mapping template file
 
         Args:
@@ -195,17 +245,24 @@ class StairLight:
                 Template file prefix. Defaults to MAPPING_CONFIG_PREFIX.
 
         Returns:
-            str: Template file name
+            list[str]: Created file names
         """
-        if self.load_files:
-            logger.warning("Load option is used, skip checking.")
-            return ""
-        elif not self._unmapped:
-            return ""
+        unmapped_file = ""
+        not_found_file = ""
+        if self.load_files or (not self._unmapped and not self._unmapped):
+            return []
 
-        return self._configurator.create_mapping_file(
-            unmapped=self._unmapped, prefix=prefix
+        unmapped_config = self._configurator.build_mapping_config(
+            detected_templates=self._unmapped
         )
+        unmapped_file = self._configurator.create_mapping_file(
+            config=unmapped_config, prefix=prefix_unmapped
+        )
+        if self._not_found:
+            not_found_file = self._configurator.create_mapping_file(
+                config=self._not_found, prefix=prefix_not_found
+            )
+        return [unmapped_file, not_found_file]
 
     def list_(self, response_type: str) -> list[str]:
         """show tables or URIs
@@ -245,7 +302,12 @@ class StairLight:
         """
         results: set[str] = set()
         for upstairs in self._mapped.values():
-            for mapped_templates in upstairs.values():
+            for upstair, mapped_templates in upstairs.items():
+                upstair_key: str = self.get_key_from_mapping_config(
+                    target_table=upstair
+                )
+                if upstair_key:
+                    results.add(upstair_key)
                 results.update(
                     set(
                         [
@@ -256,6 +318,29 @@ class StairLight:
                     )
                 )
         return sorted(results)
+
+    def get_key_from_mapping_config(self, target_table: str) -> str:
+        for config in self._mapping_config.Mapping:
+            key: str = ""
+            if config.get(MappingConfigKey.TEMPLATE_SOURCE_TYPE) in [
+                TemplateSourceType.FILE.value,
+                TemplateSourceType.DBT.value,
+            ]:
+                key = config.get(MappingConfigKey.File.FILE_SUFFIX)
+            elif config.get(MappingConfigKey.TEMPLATE_SOURCE_TYPE) in [
+                TemplateSourceType.GCS.value,
+                TemplateSourceType.S3.value,
+            ]:
+                key = config.get(MappingConfigKey.Gcs.URI)
+            table_names = [
+                tables.get(MappingConfigKey.TABLE_NAME)
+                for tables in config.get(MappingConfigKey.TABLES)
+            ]
+
+            if target_table in table_names:
+                return key
+
+        return ""
 
     def up(
         self,

@@ -103,6 +103,7 @@ class Map:
             template_source (TemplateSource): Template source
         """
         for template in template_source.search_templates():
+            # Check if the template is in the mapping_config
             if not self._mapping_config:
                 self.add_unmapped_params(template=template)
             elif template.is_mapped():
@@ -137,9 +138,13 @@ class Map:
         if not current_floor_map:
             self.mapped[current_floor_name] = {}
 
+        global_params: dict[str, Any] = self.get_global_params()
+        params = self.merge_global_params(
+            table_attributes=table_attributes, global_params=global_params
+        )
         query = Query(
             query_str=template.render(
-                params=self.merge_global_params(table_attributes=table_attributes),
+                params=params,
                 ignore_params=table_attributes.IgnoreParameters,
             ),
             default_table_prefix=template.default_table_prefix,
@@ -207,17 +212,19 @@ class Map:
         return global_params
 
     def merge_global_params(
-        self, table_attributes: MappingConfigMappingTable
+        self,
+        table_attributes: MappingConfigMappingTable,
+        global_params: dict[str, Any],
     ) -> dict[str, Any]:
         """return a combination of global parameters and table parameters
 
         Args:
             table_attributes (MappingConfigMappingTable): table attributes
+            global_params (dict[str, Any]): global params
 
         Returns:
             dict[str, Any]: Combined global parameters
         """
-        global_params: dict[str, Any] = self.get_global_params()
         table_params: OrderedDict[str, Any] = (
             table_attributes.Parameters or OrderedDict()
         )
@@ -317,8 +324,9 @@ class Map:
         if not template_params:
             return []
 
+        global_params: dict[str, Any] = self.get_global_params()
         mapped_params_dict: dict[str, Any] = self.merge_global_params(
-            table_attributes=table_attributes
+            table_attributes=table_attributes, global_params=global_params
         )
         mapped_params: list[str] = create_dict_key_list(d=mapped_params_dict)
         ignore_params: list[str] = table_attributes.IgnoreParameters or []
