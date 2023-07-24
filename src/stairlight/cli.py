@@ -296,7 +296,10 @@ def create_parser() -> argparse.ArgumentParser:
     parser_check = subparsers.add_parser(
         "map",
         aliases=["check"],
-        help="create a new configuration file about undefined mappings",
+        help=(
+            "create a new configuration file about undefined mappings"
+            " and templates not found"
+        ),
     )
     parser_check.set_defaults(handler=command_check)
     set_general_parser(parser=parser_check)
