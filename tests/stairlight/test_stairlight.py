@@ -122,9 +122,9 @@ class TestStairLight:
 
     def test_list_uris(self):
         assert (
-            "tests/dbt/project_01/target/compiled/project_01/models/example/my_first_dbt_model.sql"
-            in self.stairlight.list_uris()
-        )
+            "tests/dbt/project_01/target/compiled/project_01/"
+            "models/example/my_first_dbt_model.sql"
+        ) in self.stairlight.list_uris()
 
     def test_up_next(self):
         table_name = "PROJECT_D.DATASET_E.TABLE_F"
