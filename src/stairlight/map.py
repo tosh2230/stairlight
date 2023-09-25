@@ -185,11 +185,9 @@ class Map:
                     mapped_templates=[upstair_template],
                 )
 
+            # Lines
             for i, mapped_template in enumerate(upstair.mapped_templates):
-                if (
-                    upstair_table_reference.Line not in mapped_template.Lines
-                    and upstair.name in upstair_table_reference.Line["LineString"]
-                ):
+                if upstair_table_reference.Line not in mapped_template.Lines:
                     upstair.mapped_templates[i].Lines.append(
                         upstair_table_reference.Line
                     )

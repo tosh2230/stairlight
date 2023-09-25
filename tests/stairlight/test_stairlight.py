@@ -67,6 +67,11 @@ class TestStairLight:
             == actual
         )
 
+    def test_mapped_Lines(self):
+        upstairs = self.stairlight.mapped["PROJECT_A.DATASET_B.TABLE_C"]
+        upstair_attribute = upstairs["PROJECT_A.DATASET_A.TABLE_A"][0]
+        assert upstair_attribute.Lines
+
     def test_mapped_exclude_empty_value(self):
         assert "dummy.dummy.my_first_dbt_model" not in self.stairlight.mapped.keys()
 
