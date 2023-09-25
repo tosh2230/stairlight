@@ -140,7 +140,8 @@ class TestSuccess:
         monkeypatch.setattr("sys.argv", ["", "-c", "tests/config", "-q"])
         cli_main.main()
         out, err = capfd.readouterr()
-        assert len(out) == 0 and len(err) == 0
+        assert len(out) == 0
+        assert len(err) == 0
 
     @pytest.mark.integration
     def test_main_up(self, monkeypatch, capfd):
