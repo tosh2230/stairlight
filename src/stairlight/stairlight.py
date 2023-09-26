@@ -4,7 +4,7 @@ import enum
 import os
 from dataclasses import asdict
 from logging import getLogger
-from typing import Any
+from typing import Any, OrderedDict
 
 import src.stairlight.util as sl_util
 from src.stairlight.configurator import Configurator
@@ -196,25 +196,33 @@ class StairLight:
 
     def get_templates_not_found(self) -> list[str]:
         not_found: set[str] = set()
-        mapped_urls: list[str] = self.list_uris()
-        for config in self._mapping_config.Mapping:
-            uri: str = ""
-            if config.get(MappingConfigKey.TEMPLATE_SOURCE_TYPE) in [
-                TemplateSourceType.FILE.value,
-                TemplateSourceType.DBT.value,
-            ]:
-                file_suffix = config.get(MappingConfigKey.File.FILE_SUFFIX)
-                uri = os.path.abspath(f"./{file_suffix}")
-            elif config.get(MappingConfigKey.TEMPLATE_SOURCE_TYPE) in [
-                TemplateSourceType.GCS.value,
-                TemplateSourceType.S3.value,
-            ]:
-                uri = config.get(MappingConfigKey.Gcs.URI)
 
+        # Uris that stairlight knows
+        mapped_urls: list[str] = self.list_uris()
+
+        for config in self._mapping_config.Mapping:
+            # Uri that mapping config set
+            uri: str = self.get_uri(config=config)
             if uri not in mapped_urls:
                 not_found.add(uri)
 
         return sorted(not_found)
+
+    @staticmethod
+    def get_uri(config: OrderedDict[str, Any]) -> str:
+        uri: str = ""
+        if config.get(MappingConfigKey.TEMPLATE_SOURCE_TYPE) in [
+            TemplateSourceType.FILE.value,
+            TemplateSourceType.DBT.value,
+        ]:
+            file_suffix = config.get(MappingConfigKey.File.FILE_SUFFIX)
+            uri = os.path.abspath(f"./{file_suffix}")
+        elif config.get(MappingConfigKey.TEMPLATE_SOURCE_TYPE) in [
+            TemplateSourceType.GCS.value,
+            TemplateSourceType.S3.value,
+        ]:
+            uri = config.get(MappingConfigKey.Gcs.URI)
+        return uri
 
     def init(self, prefix: str = STAIRLIGHT_CONFIG_PREFIX_DEFAULT) -> str:
         """Create Stairlight template file
