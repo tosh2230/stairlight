@@ -244,15 +244,17 @@ class StairLight:
         """
         unmapped_file = ""
         not_found_file = ""
-        if self.load_files or (not self._unmapped and not self._unmapped):
+        if self.load_files or (not self._unmapped and not self._not_found):
             return []
 
-        unmapped_config = self._configurator.build_mapping_config(
-            detected_templates=self._unmapped
-        )
-        unmapped_file = self._configurator.create_mapping_file(
-            config=unmapped_config, prefix=prefix_unmapped
-        )
+        if self._unmapped:
+            unmapped_config = self._configurator.build_mapping_config(
+                detected_templates=self._unmapped
+            )
+            unmapped_file = self._configurator.create_mapping_file(
+                config=unmapped_config, prefix=prefix_unmapped
+            )
+
         if self._not_found:
             not_found_file = self._configurator.create_mapping_file(
                 config=self._not_found, prefix=prefix_not_found
