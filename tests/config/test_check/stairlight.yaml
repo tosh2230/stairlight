@@ -1,10 +1,10 @@
 Include:
   - TemplateSourceType: File
     FileSystemPath: "./tests/sql"
-    Regex: ".*/*.sql$"
+    Regex: ".*?/*.sql$"
     DefaultTablePrefix: "PROJECT_A"
 Exclude:
   - TemplateSourceType: File
-    Regex: "main/exclude.sql$"
+    Regex: "exclude.sql$"
 Settings:
   MappingPrefix: "mapping"
