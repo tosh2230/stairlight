@@ -13,11 +13,11 @@ from tests.conftest import teardown_rm_file
 @pytest.fixture(scope="session")
 def stairlight_merge() -> Iterator[StairLight]:
     load_files = [
-        "./tests/results/file_01.json",
-        "./tests/results/file_02.json",
-        "./tests/results/gcs.json",
+        "./tests/expected/file_01.json",
+        "./tests/expected/file_02.json",
+        "./tests/expected/gcs.json",
     ]
-    save_file = "./tests/results/actual.json"
+    save_file = "./tests/expected/actual.json"
     stairlight = StairLight(
         config_dir="tests/config", load_files=load_files, save_file=save_file
     )
@@ -60,8 +60,8 @@ class TestStairLight:
         assert (
             set(
                 [
-                    "tests/sql/main/cte_multi_line_params.sql",
-                    "tests/sql/main/cte_multi_line_params_copy.sql",
+                    "tests/sql/cte_multi_line_params.sql",
+                    "tests/sql/cte_multi_line_params_copy.sql",
                 ]
             )
             == actual
@@ -195,10 +195,10 @@ class TestStairLight:
             response_type=ResponseType.URI.value,
         )
         assert sorted(result) == [
-            f"{tests_abspath}/sql/main/cte_multi_line.sql",
-            f"{tests_abspath}/sql/main/cte_multi_line_params.sql",
-            f"{tests_abspath}/sql/main/cte_multi_line_params_copy.sql",
-            f"{tests_abspath}/sql/main/one_line_3.sql",
+            f"{tests_abspath}/sql/cte_multi_line.sql",
+            f"{tests_abspath}/sql/cte_multi_line_params.sql",
+            f"{tests_abspath}/sql/cte_multi_line_params_copy.sql",
+            f"{tests_abspath}/sql/one_line_3.sql",
         ]
 
     def test_down_next(self):
@@ -254,8 +254,8 @@ class TestStairLight:
             response_type=ResponseType.URI.value,
         )
         assert sorted(result) == [
-            f"{tests_abspath}/sql/main/cte_multi_line.sql",
-            f"{tests_abspath}/sql/main/one_line_1.sql",
+            f"{tests_abspath}/sql/cte_multi_line.sql",
+            f"{tests_abspath}/sql/one_line_1.sql",
             "gs://stairlight/sql/cte/cte_multi_line.sql",
             "s3://stairlight/sql/cte/cte_multi_line.sql",
         ]
@@ -315,7 +315,7 @@ class TestStairLight:
     def test_merge(self, stairlight_merge: StairLight):
         stairlight_merge.load_map()
         actual: dict[str, Any] = stairlight_merge.mapped
-        with open("tests/results/merged.json", "r") as f:
+        with open("tests/expected/merged.json", "r") as f:
             expected: dict[str, Any] = json.load(f)
         assert actual == expected
 
@@ -331,7 +331,7 @@ class TestStairLight:
     def test_get_templates_not_found(self):
         not_found = self.stairlight.get_templates_not_found()
         assert len(not_found) == 1
-        assert not_found[0].endswith("tests/sql/main/not_found_test.sql")
+        assert not_found[0].endswith("tests/sql/not_found_test.sql")
 
 
 @pytest.mark.integration

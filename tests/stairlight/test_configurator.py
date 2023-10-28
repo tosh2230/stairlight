@@ -94,7 +94,7 @@ class TestBuildMappingConfigFile:
             mapping_config=configurator.read_mapping_with_prefix(
                 prefix=MAPPING_CONFIG_PREFIX_DEFAULT
             ),
-            key="tests/sql/main/test_undefined.sql",
+            key="tests/sql/test_undefined.sql",
         )
 
     def test_build_mapping_config(

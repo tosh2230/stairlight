@@ -1,7 +1,7 @@
 Include:
   - TemplateSourceType: File
     FileSystemPath: "./tests/sql"
-    Regex: .*/*\.sql$
+    Regex: .*?/*\.sql$
     DefaultTablePrefix: "PROJECT_A"
   - TemplateSourceType: GCS
     ProjectId: null
@@ -21,7 +21,7 @@ Include:
     DefaultTablePrefix: "PROJECT_A"
 Exclude:
   - TemplateSourceType: File
-    Regex: main/exclude\.sql$
+    Regex: exclude\.sql$
 Settings:
   MappingFilesRegex:
     - .*/file_storage/mapping\_file\.yaml$
