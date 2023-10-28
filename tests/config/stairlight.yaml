@@ -24,10 +24,10 @@ Exclude:
     Regex: main/exclude\.sql$
 Settings:
   MappingFilesRegex:
-    - .*/mapping\_file\.yaml$
-    - .*/mapping\_gcs\.yaml$
-    - .*/mapping\_dbt\.yaml$
-    - .*/mapping\_s3\.yaml$
+    - .*/file_storage/mapping\_file\.yaml$
+    - .*/object_storage/mapping\_gcs\.yaml$
+    - .*/file_storage/mapping\_dbt\.yaml$
+    - .*/object_storage/mapping\_s3\.yaml$
     # TODO: Create a test environment
     # - .*/mapping\_redash\.yaml$
   MappingPrefix: "mapping"
