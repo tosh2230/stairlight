@@ -25,6 +25,14 @@ from src.stairlight.source.s3.template import S3Template
 from src.stairlight.source.template import TemplateSourceType
 
 
+def test_read_with_regex(configurator: Configurator):
+    assert configurator.read(regex=r".*/file_storage/mapping\_file\.yaml$")
+
+
+def test_read_with_prefix(configurator: Configurator):
+    assert configurator.read(prefix="mapping")
+
+
 class TestStairlightConfig:
     def test_read_stairlight(self, configurator: Configurator):
         assert configurator.read_stairlight(prefix=STAIRLIGHT_CONFIG_PREFIX_DEFAULT)
@@ -50,8 +58,8 @@ class TestMappingConfig:
     def test_read_mapping_with_regex(self, configurator: Configurator):
         mapping_config = configurator.read_mapping_with_regex(
             regex_list=[
-                r".*/mapping\_file\.yaml$",
-                r".*/mapping\_gcs\.yaml$",
+                r".*/file_storage/mapping\_file\.yaml$",
+                r".*/object_storage/mapping\_gcs\.yaml$",
             ]
         )
         is_found: bool = False

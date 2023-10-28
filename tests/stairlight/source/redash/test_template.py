@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 from collections import OrderedDict
-from typing import Any
+from typing import Any, Optional
 
 import pytest
 from sqlalchemy.exc import ArgumentError
@@ -56,7 +56,9 @@ class TestRedashTemplate:
         params: dict[str, Any],
         mapped_table_attributes: dict[str, Any],
     ) -> RedashTemplate:
-        mapping_config = configurator.read_mapping_with_prefix(prefix="mapping_redash")
+        mapping_config = configurator.read_mapping_with_regex(
+            regex_list=[r".*/database/mapping\_redash\.yaml$"]
+        )
         return RedashTemplate(
             mapping_config=mapping_config,
             query_id=query_id,
@@ -71,7 +73,7 @@ class TestRedashTemplate:
         mapped_table_attributes: MappingConfigMappingTable,
     ):
         expected = mapped_table_attributes
-        actual: MappingConfigMappingTable
+        actual: Optional[MappingConfigMappingTable] = None
         for attribute in redash_template.find_mapped_table_attributes():
             actual = attribute
             break
