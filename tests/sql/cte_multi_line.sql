@@ -1,3 +1,4 @@
+-- This is c
 WITH c AS (
     SELECT
         test_id,
@@ -8,6 +9,7 @@ WITH c AS (
         created_at = {{ execution_date.add(days=1).isoformat() }}
         and updated_at = {{ execution_date.add(days=2).isoformat() }}
 ),
+-- This is d
 d AS (
     SELECT
         test_id,
