@@ -39,7 +39,7 @@ class TestSuccess:
         ("file", "expected"),
         [
             (
-                "tests/sql/query/cte_one_line.sql",
+                "tests/sql/cte_one_line.sql",
                 [
                     UpstairTableReference(
                         TableName="PROJECT_B.DATASET_B.TABLE_B",
@@ -95,15 +95,8 @@ class TestSuccess:
                 ],
             ),
             (
-                "tests/sql/query/cte_multi_line.sql",
+                "tests/sql/cte_multi_line.sql",
                 [
-                    UpstairTableReference(
-                        TableName="PROJECT_B.DATASET_B.TABLE_B",
-                        Line={
-                            MapKey.LINE_NUMBER: 25,
-                            MapKey.LINE_STRING: "    PROJECT_B.DATASET_B.TABLE_B AS b",
-                        },
-                    ),
                     UpstairTableReference(
                         TableName="PROJECT_C.DATASET_C.TABLE_C",
                         Line={
@@ -114,14 +107,14 @@ class TestSuccess:
                     UpstairTableReference(
                         TableName="PROJECT_d.DATASET_d.TABLE_d",
                         Line={
-                            MapKey.LINE_NUMBER: 17,
+                            MapKey.LINE_NUMBER: 18,
                             MapKey.LINE_STRING: "        PROJECT_d.DATASET_d.TABLE_d",
                         },
                     ),
                 ],
             ),
             (
-                "tests/sql/query/nested_join.sql",
+                "tests/sql/nested_join.sql",
                 [
                     UpstairTableReference(
                         TableName="PROJECT_B.DATASET_B.TABLE_B",
@@ -161,7 +154,7 @@ class TestSuccess:
                 ],
             ),
             (
-                "tests/sql/query/union_same_table.sql",
+                "tests/sql/union_same_table.sql",
                 [
                     UpstairTableReference(
                         TableName=("test_project.beam_streaming.taxirides_realtime"),
@@ -184,7 +177,7 @@ class TestSuccess:
                 ],
             ),
             (
-                "tests/sql/query/cte_multi_tables_01.sql",
+                "tests/sql/cte_multi_tables_01.sql",
                 [
                     UpstairTableReference(
                         TableName="project.dataset.table_test_A",
@@ -214,7 +207,7 @@ class TestSuccess:
                 ],
             ),
             (
-                "tests/sql/query/cte_multi_tables_02.sql",
+                "tests/sql/cte_multi_tables_02.sql",
                 [
                     UpstairTableReference(
                         TableName="project.dataset.table_test_A",
@@ -255,7 +248,7 @@ class TestSuccess:
                 ],
             ),
             (
-                "tests/sql/query/backtick_each_elements.sql",
+                "tests/sql/backtick_each_elements.sql",
                 [
                     UpstairTableReference(
                         TableName="dummy.dummy.my_first_dbt_model",
@@ -269,7 +262,7 @@ class TestSuccess:
                 ],
             ),
             (
-                "tests/sql/query/backtick_whole_element.sql",
+                "tests/sql/backtick_whole_element.sql",
                 [
                     UpstairTableReference(
                         TableName="dummy.dummy.my_first_dbt_model",
@@ -281,7 +274,7 @@ class TestSuccess:
                 ],
             ),
             (
-                "tests/sql/query/google_bigquery_unnest_in_exists.sql",
+                "tests/sql/google_bigquery_unnest_in_exists.sql",
                 [
                     UpstairTableReference(
                         TableName="PROJECT_d.DATASET_e.TABLE_f",
@@ -293,7 +286,7 @@ class TestSuccess:
                 ],
             ),
             (
-                "tests/sql/query/contains_str_from.sql",
+                "tests/sql/contains_str_from.sql",
                 [
                     UpstairTableReference(
                         TableName="test.cte",
@@ -319,22 +312,22 @@ class TestSuccess:
                 ],
             ),
             (
-                "tests/sql/query/extract_date_from_timestamp.sql",
+                "tests/sql/extract_date_from_timestamp.sql",
                 [],
             ),
         ],
         ids=[
-            "tests/sql/query/cte_one_line.sql",
-            "tests/sql/query/cte_multi_line.sql",
-            "tests/sql/query/nested_join.sql",
-            "tests/sql/query/union_same_table.sql",
-            "tests/sql/query/cte_multi_tables_01.sql",
-            "tests/sql/query/cte_multi_tables_02.sql",
-            "tests/sql/query/backtick_each_elements.sql",
-            "tests/sql/query/backtick_whole_element.sql",
-            "tests/sql/query/google_bigquery_unnest_in_exists.sql",
-            "tests/sql/query/include_from_and_to_in_column_names.sql",
-            "tests/sql/query/extract_date_from_timestamp.sql",
+            "tests/sql/cte_one_line.sql",
+            "tests/sql/cte_multi_line.sql",
+            "tests/sql/nested_join.sql",
+            "tests/sql/union_same_table.sql",
+            "tests/sql/cte_multi_tables_01.sql",
+            "tests/sql/cte_multi_tables_02.sql",
+            "tests/sql/backtick_each_elements.sql",
+            "tests/sql/backtick_whole_element.sql",
+            "tests/sql/google_bigquery_unnest_in_exists.sql",
+            "tests/sql/include_from_and_to_in_column_names.sql",
+            "tests/sql/extract_date_from_timestamp.sql",
         ],
     )
     def test_detect_upstairs_attributes(self, file, expected):

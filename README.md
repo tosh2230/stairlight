@@ -88,8 +88,8 @@ Top-level keys are table names, and values represents tables that are the data s
   "test_project.beam_streaming.taxirides_aggregation": {
     "test_project.beam_streaming.taxirides_realtime": {
       "TemplateSourceType": "File",
-      "Key": "tests/sql/main/union_same_table.sql",
-      "Uri": "/foo/bar/stairlight/tests/sql/main/union_same_table.sql",
+      "Key": "tests/sql/union_same_table.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/union_same_table.sql",
       "Lines": [
         {
           "LineNumber": 6,
@@ -265,7 +265,7 @@ Global:
       TABLE: taxirides
 Mapping:
   - TemplateSourceType: File
-    FileSuffix: "tests/sql/main/union_same_table.sql"
+    FileSuffix: "tests/sql/union_same_table.sql"
     Tables:
       - TableName: "test_project.beam_streaming.taxirides_aggregation"
         Parameters:

@@ -23,15 +23,15 @@ from src.stairlight.source.template import RenderingTemplateException
 @pytest.mark.parametrize(
     ("key", "expected_is_mapped"),
     [
-        ("tests/sql/main/cte_multi_line_params.sql", True),
-        ("tests/sql/main/cte_multi_line_params_copy.sql", True),
-        ("tests/sql/main/undefined.sql", False),
+        ("tests/sql/cte_multi_line_params.sql", True),
+        ("tests/sql/cte_multi_line_params_copy.sql", True),
+        ("tests/sql/undefined.sql", False),
         ("tests/sql/gcs/cte/cte_multi_line.sql", False),
     ],
     ids=[
-        "tests/sql/main/cte_multi_line_params.sql",
-        "tests/sql/main/cte_multi_line_params_copy.sql",
-        "tests/sql/main/undefined.sql",
+        "tests/sql/cte_multi_line_params.sql",
+        "tests/sql/cte_multi_line_params_copy.sql",
+        "tests/sql/undefined.sql",
         "tests/sql/gcs/cte/cte_multi_line.sql",
     ],
 )
@@ -60,7 +60,7 @@ class TestFileTemplate:
     ("key", "params", "ignore_params", "expected_table", "detected_params"),
     [
         (
-            "tests/sql/main/cte_multi_line_params.sql",
+            "tests/sql/cte_multi_line_params.sql",
             {
                 "params": {
                     "main_table": "PROJECT_P.DATASET_Q.TABLE_R",
@@ -77,7 +77,7 @@ class TestFileTemplate:
             ],
         ),
         (
-            "tests/sql/main/cte_multi_line.sql",
+            "tests/sql/cte_multi_line.sql",
             {
                 "params": {
                     "PROJECT": "PROJECT_g",
@@ -99,7 +99,7 @@ class TestFileTemplate:
             ],
         ),
         (
-            "tests/sql/main/params_with_default_value.sql",
+            "tests/sql/params_with_default_value.sql",
             {
                 "params": {
                     "main_table": "PROJECT_P.DATASET_Q.TABLE_R",
@@ -122,7 +122,7 @@ class TestFileTemplate:
             ],
         ),
         (
-            "tests/sql/query/nested_join.sql",
+            "tests/sql/nested_join.sql",
             None,
             [],
             "PROJECT_B.DATASET_B.TABLE_B",
@@ -130,10 +130,10 @@ class TestFileTemplate:
         ),
     ],
     ids=[
-        "tests/sql/main/cte_multi_line_params.sql",
-        "tests/sql/main/cte_multi_line.sql",
-        "tests/sql/main/params_with_default_value.sql",
-        "tests/sql/query/nested_join.sql",
+        "tests/sql/cte_multi_line_params.sql",
+        "tests/sql/cte_multi_line.sql",
+        "tests/sql/params_with_default_value.sql",
+        "tests/sql/nested_join.sql",
     ],
 )
 class TestFileTemplateRender:
@@ -194,7 +194,7 @@ class TestFileTemplateRender:
     ("key", "params"),
     [
         (
-            "tests/sql/main/cte_multi_line.sql",
+            "tests/sql/cte_multi_line.sql",
             {
                 "params": {
                     "PROJECT": "RENDERED_PROJECT",
@@ -204,7 +204,7 @@ class TestFileTemplateRender:
             },
         ),
     ],
-    ids=["tests/sql/main/cte_multi_line.sql"],
+    ids=["tests/sql/cte_multi_line.sql"],
 )
 class TestFileTemplateRenderException:
     @pytest.fixture(scope="function")
@@ -236,12 +236,12 @@ class TestFileTemplateRenderException:
 @pytest.mark.parametrize(
     ("key", "expected_is_excluded"),
     [
-        ("tests/sql/main/one_line_no_project.sql", False),
-        ("tests/sql/main/exclude.sql", True),
+        ("tests/sql/one_line_no_project.sql", False),
+        ("tests/sql/exclude.sql", True),
     ],
     ids=[
-        "tests/sql/main/one_line_no_project.sql",
-        "tests/sql/main/exclude.sql",
+        "tests/sql/one_line_no_project.sql",
+        "tests/sql/exclude.sql",
     ],
 )
 class TestFileTemplateSource:
@@ -291,12 +291,12 @@ class TestFileTemplateSource:
 @pytest.mark.parametrize(
     ("key", "expected_is_excluded"),
     [
-        ("tests/sql/main/one_line_no_project.sql", False),
-        ("tests/sql/main/exclude.sql", False),
+        ("tests/sql/one_line_no_project.sql", False),
+        ("tests/sql/exclude.sql", False),
     ],
     ids=[
-        "tests/sql/main/one_line_no_project.sql",
-        "tests/sql/main/exclude.sql",
+        "tests/sql/one_line_no_project.sql",
+        "tests/sql/exclude.sql",
     ],
 )
 class TestFileTemplateSourceNoExclude:
