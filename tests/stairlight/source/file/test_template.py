@@ -17,7 +17,6 @@ from src.stairlight.source.file.template import (
     FileTemplateSource,
     TemplateSourceType,
 )
-from src.stairlight.source.template import RenderingTemplateException
 
 
 @pytest.mark.parametrize(
