@@ -60,11 +60,11 @@ class TestS3Template:
             key=key,
         )
 
-    def test_is_mapped(
+    def test_mapped(
         self,
         s3_template: S3Template,
     ):
-        assert s3_template.is_mapped()
+        assert s3_template.mapped
 
     def test_get_uri(
         self,

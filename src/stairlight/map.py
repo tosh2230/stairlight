@@ -103,21 +103,17 @@ class Map:
             template_source (TemplateSource): Template source
         """
         for template in template_source.search_templates():
-            # Check if the template is in the mapping_config
-            if not self._mapping_config:
+            if not self._mapping_config or not template.mapped:
                 self.add_unmapped_params(template=template)
-            elif template.is_mapped():
-                for table_attributes in template.find_mapped_table_attributes():
-                    unmapped_params = self.detect_unmapped_params(
-                        template=template, table_attributes=table_attributes
-                    )
-                    if unmapped_params:
-                        self.add_unmapped_params(
-                            template=template, params=unmapped_params
-                        )
-                    self.remap(template=template, table_attributes=table_attributes)
-            else:
-                self.add_unmapped_params(template=template)
+                continue
+
+            for table_attributes in template.find_mapped_table_attributes():
+                unmapped_params = self.detect_unmapped_params(
+                    template=template, table_attributes=table_attributes
+                )
+                if unmapped_params:
+                    self.add_unmapped_params(template=template, params=unmapped_params)
+                self.remap(template=template, table_attributes=table_attributes)
 
     def remap(
         self, template: Template, table_attributes: MappingConfigMappingTable

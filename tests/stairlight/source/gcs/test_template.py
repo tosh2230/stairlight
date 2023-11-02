@@ -73,8 +73,8 @@ class TestGcsTemplate:
     ) -> GcsTemplate:
         return GcsTemplate(mapping_config=mapping_config, bucket=bucket, key=key)
 
-    def test_is_mapped(self, gcs_template: GcsTemplate):
-        assert gcs_template.is_mapped()
+    def test_mapped(self, gcs_template: GcsTemplate):
+        assert gcs_template.mapped
 
     def test_get_uri(
         self,

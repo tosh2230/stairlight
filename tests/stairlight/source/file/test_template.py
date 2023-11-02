@@ -21,7 +21,7 @@ from src.stairlight.source.template import RenderingTemplateException
 
 
 @pytest.mark.parametrize(
-    ("key", "expected_is_mapped"),
+    ("key", "expected_mapped"),
     [
         ("tests/sql/cte_multi_line_params.sql", True),
         ("tests/sql/cte_multi_line_params_copy.sql", True),
@@ -41,15 +41,15 @@ class TestFileTemplate:
         self,
         mapping_config: MappingConfig,
         key: str,
-        expected_is_mapped: bool,
+        expected_mapped: bool,
     ):
         return FileTemplate(
             mapping_config=mapping_config,
             key=key,
         )
 
-    def test_is_mapped(self, file_template: FileTemplate, expected_is_mapped: bool):
-        assert file_template.is_mapped() == expected_is_mapped
+    def test_mapped(self, file_template: FileTemplate, expected_mapped: bool):
+        assert file_template.mapped == expected_mapped
 
     def test_detect_jinja_params(self, file_template: FileTemplate):
         template_str = file_template.get_template_str()
@@ -206,7 +206,7 @@ class TestFileTemplateRender:
     ],
     ids=["tests/sql/cte_multi_line.sql"],
 )
-class TestFileTemplateRenderException:
+class TestFileTemplateUndefinedError:
     @pytest.fixture(scope="function")
     def file_template(
         self,
@@ -223,14 +223,10 @@ class TestFileTemplateRenderException:
         file_template: FileTemplate,
         key: str,
         params: dict[str, Any],
+        caplog,
     ):
-        with pytest.raises(RenderingTemplateException) as exception:
-            _ = file_template.render(params=params)
-        assert exception.value.args[0] == (
-            f"'execution_date' is undefined, "
-            f"source_type: {file_template.source_type}, "
-            f"key: {key}"
-        )
+        _ = file_template.render(params=params)
+        assert "undefined" in caplog.text
 
 
 @pytest.mark.parametrize(
