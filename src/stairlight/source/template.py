@@ -15,6 +15,8 @@ from src.stairlight.source.config import (
     StairlightConfig,
 )
 
+logger = getLogger(__name__)
+
 
 class TemplateSourceType(enum.Enum):
     """Query template source type"""
@@ -109,7 +111,8 @@ class Template(ABC):
                 yield table_attributes
             break
 
-    def is_mapped(self) -> bool:
+    @property
+    def mapped(self) -> bool:
         """Check if the template is set to mapping configuration
 
         Returns:
@@ -160,17 +163,20 @@ class Template(ABC):
         Returns:
             str: rendered query string
         """
+        result: str = ""
+        jinja_template = Environment(loader=BaseLoader()).from_string(template_str)
         try:
-            jinja_template = Environment(loader=BaseLoader()).from_string(template_str)
-            return jinja_template.render(params)
+            result = jinja_template.render(params)
         except UndefinedError as undefined_error:
-            raise RenderingTemplateException(
+            logger.warning(
                 (
                     f"{undefined_error.message}, "
                     f"source_type: {source_type}, "
                     f"key: {key}"
                 )
-            ) from None
+            )
+            result = template_str
+        return result
 
     @staticmethod
     def ignore_params_from_template_str(
