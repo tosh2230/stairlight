@@ -12,7 +12,7 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square)](https://github.com/psf/black)
 [![CI](https://github.com/tosh2230/stairlight/actions/workflows/ci.yml/badge.svg)](https://github.com/tosh2230/stairlight/actions/workflows/ci.yml)
 
-An end-to-end data lineage tool, detects table dependencies from SQL statements.
+Stairlight is a data lineage tool, detects table dependencies from rendered SQL statements.
 
 <div align="left">
   <img src="https://raw.githubusercontent.com/tosh2230/stairlight/main/img/drawio/concepts.drawio.png" width="1080" alt="concepts">
