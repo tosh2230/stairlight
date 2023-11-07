@@ -292,7 +292,7 @@ class Map:
         """
         if not params:
             template_str = template.get_template_str()
-            params = template.detect_jinja_params(template_str=template_str)
+            params = template.get_jinja_params(template_str=template_str)
         self.unmapped.append(
             {
                 MapKey.TEMPLATE: template,
@@ -314,7 +314,7 @@ class Map:
             list[str]: Unmapped parameters
         """
         template_str: str = template.get_template_str()
-        template_params: list[str] = template.detect_jinja_params(template_str)
+        template_params: list[str] = template.get_jinja_params(template_str)
         if not template_params:
             return []
 

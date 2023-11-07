@@ -75,7 +75,7 @@ class TestS3Template:
         assert s3_template.uri == f"{S3_URI_SCHEME}{bucket}/{key}"
 
     @mock_s3
-    def test_detect_jinja_params(
+    def test_get_jinja_params(
         self,
         s3_template: S3Template,
         key: str,
@@ -85,15 +85,15 @@ class TestS3Template:
         s3_bucket = s3_client.Bucket(BUCKET_NAME)
         s3_bucket.upload_file("tests/sql/gcs/cte/cte_multi_line.sql", key)
         template_str = s3_template.get_template_str()
-        assert len(s3_template.detect_jinja_params(template_str)) > 0
+        assert len(s3_template.get_jinja_params(template_str)) > 0
 
     @pytest.mark.integration
-    def test_detect_jinja_params_integration(
+    def test_get_jinja_params_integration(
         self,
         s3_template: S3Template,
     ):
         template_str = s3_template.get_template_str()
-        assert len(s3_template.detect_jinja_params(template_str)) > 0
+        assert len(s3_template.get_jinja_params(template_str)) > 0
 
     @mock_s3
     def test_render(
