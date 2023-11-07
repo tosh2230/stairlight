@@ -193,8 +193,6 @@ class Template(ABC):
             str: rendered query string
         """
         s = StringTemplate(template=template_str)
-        if not s.get_identifiers():
-            return template_str
 
         try:
             rendered_str = s.substitute(params)
