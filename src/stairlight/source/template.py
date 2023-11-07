@@ -201,7 +201,7 @@ class Template(ABC):
         except KeyError as e:
             logger.warning(
                 (
-                    f"{e.message}, "
+                    f"{e.with_traceback}, "
                     f"source_type: {self.source_type}, "
                     f"key: {self.key}"
                 )
