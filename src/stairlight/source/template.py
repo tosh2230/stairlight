@@ -201,10 +201,23 @@ class Template(ABC):
                 (
                     f"{e.with_traceback}, "
                     f"source_type: {self.source_type}, "
-                    f"key: {self.key}"
+                    f"key: {self.key}",
+                    f"template_str: {template_str}",
+                    f"params: {params}",
                 )
             )
             rendered_str = s.safe_substitute(params)
+        except ValueError as e:
+            logger.warning(
+                (
+                    f"{e.with_traceback}, "
+                    f"source_type: {self.source_type}, "
+                    f"key: {self.key}",
+                    f"template_str: {template_str}",
+                    f"params: {params}",
+                )
+            )
+            rendered_str = template_str
         return rendered_str
 
     @staticmethod
