@@ -217,7 +217,7 @@ class Template(ABC):
                     f"params: {params}",
                 )
             )
-            rendered_str = s
+            rendered_str = template_str
         return rendered_str
 
     @staticmethod
