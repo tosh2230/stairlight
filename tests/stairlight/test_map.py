@@ -78,10 +78,10 @@ class TestSuccess:
     @pytest.mark.parametrize(
         ("key", "expected"),
         [
-            ("tests/sql/main/cte_multi_line.sql", []),
-            ("tests/sql/main/one_line_1.sql", []),
+            ("tests/sql/cte_multi_line.sql", []),
+            ("tests/sql/one_line_1.sql", []),
             (
-                "tests/sql/main/undefined.sql",
+                "tests/sql/undefined.sql",
                 [
                     "params.main_table",
                     "params.sub_table_01",
@@ -89,7 +89,7 @@ class TestSuccess:
                 ],
             ),
             (
-                "tests/sql/main/undefined_part.sql",
+                "tests/sql/undefined_part.sql",
                 [
                     "params.sub_table_01",
                     "params.sub_table_02",
@@ -97,10 +97,10 @@ class TestSuccess:
             ),
         ],
         ids=[
-            "tests/sql/main/cte_multi_line.sql",
-            "tests/sql/main/one_line_1.sql",
-            "tests/sql/main/undefined.sql",
-            "tests/sql/main/undefined_part.sql",
+            "tests/sql/cte_multi_line.sql",
+            "tests/sql/one_line_1.sql",
+            "tests/sql/undefined.sql",
+            "tests/sql/undefined_part.sql",
         ],
     )
     def test_find_unmapped_params(

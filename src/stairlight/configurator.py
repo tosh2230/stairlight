@@ -59,7 +59,7 @@ class Configurator:
     def read_mapping_with_regex(self, regex_list: list[str]) -> MappingConfig:
         config: dict[str, Any] = {}
         for regex in regex_list:
-            config = sl_util.deep_merge(original=config, add=self.read(pattern=regex))
+            config = sl_util.deep_merge(original=config, add=self.read(regex=regex))
         return MappingConfig(**config)
 
     def read_mapping_with_prefix(self, prefix: str) -> MappingConfig:
@@ -75,7 +75,7 @@ class Configurator:
         config = self.read(prefix=prefix)
         return MappingConfig(**config)
 
-    def read(self, pattern: str = "", prefix: str = "") -> dict[str, Any]:
+    def read(self, regex: str = "", prefix: str = "") -> dict[str, Any]:
         """Read a configuration file
 
         Args:
@@ -85,10 +85,10 @@ class Configurator:
             dict: configurations
         """
         results: dict[str, Any] = {}
-        pattern = rf"^{self.dir}/{prefix}\.ya?ml$" if not pattern else pattern
+        pattern = regex or rf"^{self.dir}/{prefix}\.ya?ml$"
         config_files = [
             p
-            for p in glob.glob(f"{self.dir}/**", recursive=False)
+            for p in glob.glob(f"{self.dir}/**", recursive=True)
             if re.fullmatch(pattern, p)
         ]
         for config_file in config_files:

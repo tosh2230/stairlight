@@ -4,6 +4,7 @@ import enum
 import re
 from abc import ABC, abstractmethod
 from logging import getLogger
+from string import Template as StringTemplate
 from typing import Any, Iterator
 
 from jinja2 import BaseLoader, Environment
@@ -14,6 +15,8 @@ from src.stairlight.source.config import (
     MappingConfigMappingTable,
     StairlightConfig,
 )
+
+logger = getLogger(__name__)
 
 
 class TemplateSourceType(enum.Enum):
@@ -109,7 +112,8 @@ class Template(ABC):
                 yield table_attributes
             break
 
-    def is_mapped(self) -> bool:
+    @property
+    def mapped(self) -> bool:
         """Check if the template is set to mapping configuration
 
         Returns:
@@ -122,8 +126,8 @@ class Template(ABC):
         return result
 
     @staticmethod
-    def detect_jinja_params(template_str: str) -> list:
-        """Detect jinja parameters from template string
+    def get_jinja_params(template_str: str) -> list:
+        """get jinja parameters from template string
 
         Args:
             template_str (str): Template string
@@ -139,18 +143,14 @@ class Template(ABC):
             for param in re.findall("[^{}]+", jinja_expressions, re.IGNORECASE)
         ]
 
-    @staticmethod
-    def render_by_base_loader(
-        source_type: TemplateSourceType,
-        key: str,
+    def render_by_jinja(
+        self,
         template_str: str,
         params: dict[str, Any],
     ) -> str:
-        """Render query string from template string
+        """Render query string by jinja2
 
         Args:
-            source_type (str): source type
-            key (str): key path
             template_str (str): template string
             params (dict[str, Any]): Jinja parameters
 
@@ -160,39 +160,106 @@ class Template(ABC):
         Returns:
             str: rendered query string
         """
+        if not self.get_jinja_params(template_str=template_str):
+            return template_str
+
+        rendered_str: str = template_str
         try:
-            jinja_template = Environment(loader=BaseLoader()).from_string(template_str)
-            return jinja_template.render(params)
+            env = Environment(loader=BaseLoader())
+            template = env.from_string(template_str)
+            rendered_str = template.render(params)
         except UndefinedError as undefined_error:
-            raise RenderingTemplateException(
+            logger.warning(
                 (
                     f"{undefined_error.message}, "
-                    f"source_type: {source_type}, "
-                    f"key: {key}"
+                    f"source_type: {self.source_type}, "
+                    f"key: {self.key}"
                 )
-            ) from None
+            )
+        return rendered_str
+
+    def render_by_string_template(
+        self,
+        template_str: str,
+        params: dict[str, Any],
+    ) -> str:
+        """_summary_
+
+        Args:
+            template_str (str): template string
+            params (dict[str, Any]): mapping dict
+
+        Returns:
+            str: rendered query string
+        """
+        s = StringTemplate(template=template_str)
+
+        try:
+            rendered_str = s.substitute(params)
+        except KeyError as e:
+            logger.warning(
+                (
+                    f"{e.with_traceback}, "
+                    f"source_type: {self.source_type}, "
+                    f"key: {self.key}",
+                    f"template_str: {template_str}",
+                    f"params: {params}",
+                )
+            )
+            rendered_str = s.safe_substitute(params)
+        except ValueError as e:
+            logger.warning(
+                (
+                    f"{e.with_traceback}, "
+                    f"source_type: {self.source_type}, "
+                    f"key: {self.key}",
+                    f"template_str: {template_str}",
+                    f"params: {params}",
+                )
+            )
+            rendered_str = template_str
+        return rendered_str
 
     @staticmethod
-    def ignore_params_from_template_str(
-        template_str: str, ignore_params: list[str]
-    ) -> str:
-        """ignore parameters from template string
+    def ignore_jinja_params(template_str: str, ignore_params: list[str]) -> str:
+        """ignore jinja parameters
 
         Args:
             template_str (str): template string
             ignore_params (list[str]): ignore parameters
 
         Returns:
-            str: replaced template string
+            str: ignored template string
         """
         if not ignore_params:
-            ignore_params = []
-        replaced_str = template_str
+            return template_str
+
+        ignored_str = template_str
         for ignore_param in ignore_params:
-            replaced_str = replaced_str.replace(
+            ignored_str = ignored_str.replace(
                 "{{{{ {} }}}}".format(ignore_param), "ignored"
             )
-        return replaced_str
+        return ignored_str
+
+    @staticmethod
+    def ignore_string_template_params(
+        template_str: str, ignore_params: list[str]
+    ) -> str:
+        """ignore string.Template parameters
+
+        Args:
+            template_str (str): template string
+            ignore_params (list[str]): ignore parameters
+
+        Returns:
+            str: ignored template string
+        """
+        if not ignore_params:
+            return template_str
+
+        s = StringTemplate(template=template_str)
+        ignore_mapping = {k: "ignored" for k in ignore_params}
+        return s.safe_substitute(ignore_mapping)
 
     @abstractmethod
     def get_uri(self) -> str:
@@ -212,23 +279,30 @@ class Template(ABC):
         Returns:
             str: Query statement
         """
-        if not ignore_params:
-            ignore_params = []
-        template_str = self.get_template_str()
-        replaced_template_str = self.ignore_params_from_template_str(
-            template_str=template_str,
+        rendered_str = self.get_template_str()
+        rendered_str = self.ignore_jinja_params(
+            template_str=rendered_str,
             ignore_params=ignore_params,
         )
-        if params:
-            results = self.render_by_base_loader(
-                source_type=self.source_type,
-                key=self.key,
-                template_str=replaced_template_str,
-                params=params,
-            )
-        else:
-            results = replaced_template_str
-        return results
+        rendered_str = self.ignore_string_template_params(
+            template_str=rendered_str,
+            ignore_params=ignore_params,
+        )
+
+        if not params:
+            return rendered_str
+
+        rendered_str = self.render_by_jinja(
+            template_str=rendered_str,
+            params=params,
+        )
+
+        rendered_str = self.render_by_string_template(
+            template_str=rendered_str,
+            params=params,
+        )
+
+        return rendered_str
 
 
 class RenderingTemplateException(Exception):

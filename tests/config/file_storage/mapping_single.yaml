@@ -1,6 +1,6 @@
 Mapping:
   - TemplateSourceType: File
-    FileSuffix: "tests/sql/main/one_line_no_project.sql"
+    FileSuffix: "tests/sql/one_line_no_project.sql"
     Tables:
       - TableName: "PROJECT_A.DATASET_B.TABLE_C"
         Parameters:

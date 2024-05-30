@@ -17,21 +17,20 @@ from src.stairlight.source.file.template import (
     FileTemplateSource,
     TemplateSourceType,
 )
-from src.stairlight.source.template import RenderingTemplateException
 
 
 @pytest.mark.parametrize(
-    ("key", "expected_is_mapped"),
+    ("key", "expected_mapped"),
     [
-        ("tests/sql/main/cte_multi_line_params.sql", True),
-        ("tests/sql/main/cte_multi_line_params_copy.sql", True),
-        ("tests/sql/main/undefined.sql", False),
+        ("tests/sql/cte_multi_line_params.sql", True),
+        ("tests/sql/cte_multi_line_params_copy.sql", True),
+        ("tests/sql/undefined.sql", False),
         ("tests/sql/gcs/cte/cte_multi_line.sql", False),
     ],
     ids=[
-        "tests/sql/main/cte_multi_line_params.sql",
-        "tests/sql/main/cte_multi_line_params_copy.sql",
-        "tests/sql/main/undefined.sql",
+        "tests/sql/cte_multi_line_params.sql",
+        "tests/sql/cte_multi_line_params_copy.sql",
+        "tests/sql/undefined.sql",
         "tests/sql/gcs/cte/cte_multi_line.sql",
     ],
 )
@@ -41,149 +40,245 @@ class TestFileTemplate:
         self,
         mapping_config: MappingConfig,
         key: str,
-        expected_is_mapped: bool,
+        expected_mapped: bool,
     ):
         return FileTemplate(
             mapping_config=mapping_config,
             key=key,
         )
 
-    def test_is_mapped(self, file_template: FileTemplate, expected_is_mapped: bool):
-        assert file_template.is_mapped() == expected_is_mapped
+    def test_mapped(self, file_template: FileTemplate, expected_mapped: bool):
+        assert file_template.mapped == expected_mapped
 
-    def test_detect_jinja_params(self, file_template: FileTemplate):
+    def test_get_jinja_params(self, file_template: FileTemplate):
         template_str = file_template.get_template_str()
-        assert len(file_template.detect_jinja_params(template_str)) > 0
+        assert len(file_template.get_jinja_params(template_str)) > 0
 
 
-@pytest.mark.parametrize(
-    ("key", "params", "ignore_params", "expected_table", "detected_params"),
-    [
-        (
-            "tests/sql/main/cte_multi_line_params.sql",
-            {
-                "params": {
-                    "main_table": "PROJECT_P.DATASET_Q.TABLE_R",
-                    "sub_table_01": "PROJECT_S.DATASET_T.TABLE_U",
-                    "sub_table_02": "PROJECT_V.DATASET_W.TABLE_X",
-                }
-            },
-            [],
-            "PROJECT_P.DATASET_Q.TABLE_R",
-            [
-                "params.sub_table_01",
-                "params.sub_table_02",
-                "params.main_table",
-            ],
-        ),
-        (
-            "tests/sql/main/cte_multi_line.sql",
-            {
-                "params": {
-                    "PROJECT": "PROJECT_g",
-                    "DATASET": "DATASET_h",
-                    "TABLE": "TABLE_i",
-                }
-            },
-            [
-                "execution_date.add(days=1).isoformat()",
-                "execution_date.add(days=2).isoformat()",
-            ],
-            "PROJECT_g.DATASET_h.TABLE_i",
-            [
-                "execution_date.add(days=1).isoformat()",
-                "execution_date.add(days=2).isoformat()",
-                "params.PROJECT",
-                "params.DATASET",
-                "params.TABLE",
-            ],
-        ),
-        (
-            "tests/sql/main/params_with_default_value.sql",
-            {
-                "params": {
-                    "main_table": "PROJECT_P.DATASET_Q.TABLE_R",
-                    "sub_table_01": "PROJECT_S.DATASET_T.TABLE_U",
-                    "sub_table_02": "PROJECT_V.DATASET_W.TABLE_X",
-                }
-            },
-            [
-                "params.target_column | default('\"top\"')",
-                'params.target_column or "top"',
-            ],
-            "PROJECT_P.DATASET_Q.TABLE_R",
-            [
-                "params.sub_table_01",
-                "params.sub_table_02",
-                "params.main_table",
-                "params.target_column | default('\"top\"')",
-                'params.target_column_2 or "top"',
-                'params.target_column_2 or "latest"',
-            ],
-        ),
-        (
-            "tests/sql/query/nested_join.sql",
-            None,
-            [],
-            "PROJECT_B.DATASET_B.TABLE_B",
-            [],
-        ),
-    ],
-    ids=[
-        "tests/sql/main/cte_multi_line_params.sql",
-        "tests/sql/main/cte_multi_line.sql",
-        "tests/sql/main/params_with_default_value.sql",
-        "tests/sql/query/nested_join.sql",
-    ],
-)
 class TestFileTemplateRender:
-    @pytest.fixture(scope="function")
-    def file_template(
-        self,
-        mapping_config: MappingConfig,
-        key: str,
-    ) -> FileTemplate:
-        return FileTemplate(
-            mapping_config=mapping_config,
-            key=key,
-        )
-
+    @pytest.mark.parametrize(
+        (
+            "key",
+            "params",
+            "ignore_params",
+            "expected_table",
+        ),
+        [
+            (
+                "tests/sql/cte_multi_line_params.sql",
+                {
+                    "params": {
+                        "main_table": "PROJECT_P.DATASET_Q.TABLE_R",
+                        "sub_table_01": "PROJECT_S.DATASET_T.TABLE_U",
+                        "sub_table_02": "PROJECT_V.DATASET_W.TABLE_X",
+                    }
+                },
+                [],
+                "PROJECT_P.DATASET_Q.TABLE_R",
+            ),
+            (
+                "tests/sql/cte_multi_line.sql",
+                {
+                    "params": {
+                        "PROJECT": "PROJECT_g",
+                        "DATASET": "DATASET_h",
+                        "TABLE": "TABLE_i",
+                    }
+                },
+                [
+                    "execution_date.add(days=1).isoformat()",
+                    "execution_date.add(days=2).isoformat()",
+                ],
+                "PROJECT_g.DATASET_h.TABLE_i",
+            ),
+            (
+                "tests/sql/params_with_default_value.sql",
+                {
+                    "params": {
+                        "main_table": "PROJECT_P.DATASET_Q.TABLE_R",
+                        "sub_table_01": "PROJECT_S.DATASET_T.TABLE_U",
+                        "sub_table_02": "PROJECT_V.DATASET_W.TABLE_X",
+                    }
+                },
+                [
+                    "params.target_column | default('\"top\"')",
+                    'params.target_column or "top"',
+                ],
+                "PROJECT_P.DATASET_Q.TABLE_R",
+            ),
+            (
+                "tests/sql/nested_join.sql",
+                None,
+                [],
+                "PROJECT_B.DATASET_B.TABLE_B",
+            ),
+            (
+                "tests/sql/cte_multi_line_identifiers.sql",
+                {
+                    "main_table": "PROJECT_P.DATASET_Q.TABLE_R",
+                    "sub_table_01": "PROJECT_S.DATASET_T.TABLE_U",
+                    "sub_table_02": "PROJECT_V.DATASET_W.TABLE_X",
+                },
+                [],
+                "PROJECT_P.DATASET_Q.TABLE_R",
+            ),
+        ],
+        ids=[
+            "tests/sql/cte_multi_line_params.sql",
+            "tests/sql/cte_multi_line.sql",
+            "tests/sql/params_with_default_value.sql",
+            "tests/sql/nested_join.sql",
+            "tests/sql/cte_multi_line_identifiers.sql",
+        ],
+    )
     def test_render(
         self,
-        file_template: FileTemplate,
+        mapping_config: MappingConfig,
+        key,
         params,
         ignore_params,
         expected_table,
-        detected_params,
     ):
+        file_template = FileTemplate(
+            mapping_config=mapping_config,
+            key=key,
+        )
         actual = file_template.render(
             params=params,
             ignore_params=ignore_params,
         )
         assert expected_table in actual
 
-    def test_detect_jinja_params(
+    @pytest.mark.parametrize(
+        ("key", "detected_params"),
+        [
+            (
+                "tests/sql/cte_multi_line_params.sql",
+                [
+                    "params.sub_table_01",
+                    "params.sub_table_02",
+                    "params.main_table",
+                ],
+            ),
+            (
+                "tests/sql/cte_multi_line.sql",
+                [
+                    "execution_date.add(days=1).isoformat()",
+                    "execution_date.add(days=2).isoformat()",
+                    "params.PROJECT",
+                    "params.DATASET",
+                    "params.TABLE",
+                ],
+            ),
+            (
+                "tests/sql/params_with_default_value.sql",
+                [
+                    "params.sub_table_01",
+                    "params.sub_table_02",
+                    "params.main_table",
+                    "params.target_column | default('\"top\"')",
+                    'params.target_column_2 or "top"',
+                    'params.target_column_2 or "latest"',
+                ],
+            ),
+            (
+                "tests/sql/nested_join.sql",
+                [],
+            ),
+            (
+                "tests/sql/cte_multi_line_identifiers.sql",
+                [],
+            ),
+        ],
+        ids=[
+            "tests/sql/cte_multi_line_params.sql",
+            "tests/sql/cte_multi_line.sql",
+            "tests/sql/params_with_default_value.sql",
+            "tests/sql/nested_join.sql",
+            "tests/sql/cte_multi_line_identifiers.sql",
+        ],
+    )
+    def test_get_jinja_params(
         self,
-        file_template: FileTemplate,
-        params,
-        ignore_params,
-        expected_table,
+        mapping_config,
+        key,
         detected_params,
     ):
+        file_template = FileTemplate(
+            mapping_config=mapping_config,
+            key=key,
+        )
         template_str = file_template.get_template_str()
-        actual = file_template.detect_jinja_params(template_str=template_str)
+        actual = file_template.get_jinja_params(template_str=template_str)
         assert actual == detected_params
 
-    def test_ignore_params_from_template_str(
+    @pytest.mark.parametrize(
+        ("key", "ignore_params"),
+        [
+            (
+                "tests/sql/cte_multi_line.sql",
+                [
+                    "execution_date.add(days=1).isoformat()",
+                    "execution_date.add(days=2).isoformat()",
+                ],
+            ),
+            (
+                "tests/sql/params_with_default_value.sql",
+                [
+                    "params.target_column | default('\"top\"')",
+                    'params.target_column or "top"',
+                ],
+            ),
+            (
+                "tests/sql/nested_join.sql",
+                [],
+            ),
+        ],
+        ids=[
+            "tests/sql/cte_multi_line.sql",
+            "tests/sql/params_with_default_value.sql",
+            "tests/sql/nested_join.sql",
+        ],
+    )
+    def test_ignore_jinja_params(
         self,
-        file_template: FileTemplate,
-        params,
+        mapping_config,
+        key,
         ignore_params,
-        expected_table,
-        detected_params,
     ):
+        file_template = FileTemplate(
+            mapping_config=mapping_config,
+            key=key,
+        )
         template_str = file_template.get_template_str()
-        actual = file_template.ignore_params_from_template_str(
+        actual = file_template.ignore_jinja_params(
+            template_str=template_str,
+            ignore_params=ignore_params,
+        )
+        assert all(ignore_param not in actual for ignore_param in ignore_params)
+
+    @pytest.mark.parametrize(
+        ("key", "ignore_params"),
+        [
+            (
+                "tests/sql/cte_multi_line_identifiers.sql",
+                ["main_table", "sub_table_02"],
+            ),
+        ],
+        ids=["tests/sql/cte_multi_line_identifiers.sql"],
+    )
+    def test_ignore_string_template_params(
+        self,
+        mapping_config,
+        key,
+        ignore_params,
+    ):
+        file_template = FileTemplate(
+            mapping_config=mapping_config,
+            key=key,
+        )
+        template_str = file_template.get_template_str()
+        actual = file_template.ignore_string_template_params(
             template_str=template_str,
             ignore_params=ignore_params,
         )
@@ -194,7 +289,7 @@ class TestFileTemplateRender:
     ("key", "params"),
     [
         (
-            "tests/sql/main/cte_multi_line.sql",
+            "tests/sql/cte_multi_line.sql",
             {
                 "params": {
                     "PROJECT": "RENDERED_PROJECT",
@@ -204,9 +299,9 @@ class TestFileTemplateRender:
             },
         ),
     ],
-    ids=["tests/sql/main/cte_multi_line.sql"],
+    ids=["tests/sql/cte_multi_line.sql"],
 )
-class TestFileTemplateRenderException:
+class TestFileTemplateUndefinedError:
     @pytest.fixture(scope="function")
     def file_template(
         self,
@@ -223,25 +318,21 @@ class TestFileTemplateRenderException:
         file_template: FileTemplate,
         key: str,
         params: dict[str, Any],
+        caplog,
     ):
-        with pytest.raises(RenderingTemplateException) as exception:
-            _ = file_template.render(params=params)
-        assert exception.value.args[0] == (
-            f"'execution_date' is undefined, "
-            f"source_type: {file_template.source_type}, "
-            f"key: {key}"
-        )
+        _ = file_template.render(params=params)
+        assert "undefined" in caplog.text
 
 
 @pytest.mark.parametrize(
     ("key", "expected_is_excluded"),
     [
-        ("tests/sql/main/one_line_no_project.sql", False),
-        ("tests/sql/main/exclude.sql", True),
+        ("tests/sql/one_line_no_project.sql", False),
+        ("tests/sql/exclude.sql", True),
     ],
     ids=[
-        "tests/sql/main/one_line_no_project.sql",
-        "tests/sql/main/exclude.sql",
+        "tests/sql/one_line_no_project.sql",
+        "tests/sql/exclude.sql",
     ],
 )
 class TestFileTemplateSource:
@@ -291,12 +382,12 @@ class TestFileTemplateSource:
 @pytest.mark.parametrize(
     ("key", "expected_is_excluded"),
     [
-        ("tests/sql/main/one_line_no_project.sql", False),
-        ("tests/sql/main/exclude.sql", False),
+        ("tests/sql/one_line_no_project.sql", False),
+        ("tests/sql/exclude.sql", False),
     ],
     ids=[
-        "tests/sql/main/one_line_no_project.sql",
-        "tests/sql/main/exclude.sql",
+        "tests/sql/one_line_no_project.sql",
+        "tests/sql/exclude.sql",
     ],
 )
 class TestFileTemplateSourceNoExclude:

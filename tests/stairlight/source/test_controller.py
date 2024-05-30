@@ -27,7 +27,7 @@ class TestControlFile:
             mapping_config=configurator.read_mapping_with_prefix(
                 prefix=MAPPING_CONFIG_PREFIX_DEFAULT
             ),
-            key="tests/sql/main/test_undefined.sql",
+            key="tests/sql/test_undefined.sql",
         )
 
     def test_get_template_source_class(self):
@@ -44,7 +44,7 @@ class TestControlFile:
     def test_collect_mapping_attributes(self, file_template: FileTemplate):
         actual = asdict(collect_mapping_attributes(template=file_template, tables=[]))
         expected = {
-            MappingConfigKey.File.FILE_SUFFIX: "tests/sql/main/test_undefined.sql",
+            MappingConfigKey.File.FILE_SUFFIX: "tests/sql/test_undefined.sql",
             MappingConfigKey.TABLES: [],
             MappingConfigKey.TEMPLATE_SOURCE_TYPE: "File",
         }
@@ -195,7 +195,7 @@ class TestSaveMapController:
             "src.stairlight.source.controller.SaveMapController._save_map_file"
         )
         save_map_controller = SaveMapController(
-            save_file="tests/results/file_test.json",
+            save_file="tests/expected/file_test.json",
             mapped={},
         )
         save_map_controller.save()
@@ -203,7 +203,7 @@ class TestSaveMapController:
     def test_save_type_gcs(self, mocker):
         mocker.patch("src.stairlight.source.controller.SaveMapController._save_map_gcs")
         save_map_controller = SaveMapController(
-            save_file="gs://stairlight/results/gcs_test.json",
+            save_file="gs://stairlight/expected/gcs_test.json",
             mapped={},
         )
         save_map_controller.save()
@@ -211,7 +211,7 @@ class TestSaveMapController:
     def test_save_type_s3(self, mocker):
         mocker.patch("src.stairlight.source.controller.SaveMapController._save_map_s3")
         save_map_controller = SaveMapController(
-            save_file="s3://stairlight/results/s3_test.json",
+            save_file="s3://stairlight/expected/s3_test.json",
             mapped={},
         )
         save_map_controller.save()
@@ -223,20 +223,20 @@ class TestLoadMapController:
             "src.stairlight.source.controller.LoadMapController._load_map_file"
         )
         load_map_controller = LoadMapController(
-            load_file="tests/results/file_test.json",
+            load_file="tests/expected/file_test.json",
         )
         load_map_controller.load()
 
     def test_load_type_gcs(self, mocker):
         mocker.patch("src.stairlight.source.controller.LoadMapController._load_map_gcs")
         load_map_controller = LoadMapController(
-            load_file="gs://stairlight/results/gcs_test.json",
+            load_file="gs://stairlight/expected/gcs_test.json",
         )
         load_map_controller.load()
 
     def test_load_type_s3(self, mocker):
         mocker.patch("src.stairlight.source.controller.LoadMapController._load_map_s3")
         load_map_controller = LoadMapController(
-            load_file="s3://stairlight/results/s3_test.json",
+            load_file="s3://stairlight/expected/s3_test.json",
         )
         load_map_controller.load()

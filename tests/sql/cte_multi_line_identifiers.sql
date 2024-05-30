@@ -1,20 +1,27 @@
--- This is c
 WITH c AS (
     SELECT
         test_id,
         col_c
     FROM
-        PROJECT_C.DATASET_C.TABLE_C
+        $sub_table_01
     WHERE
         0 = 0
 ),
--- This is d
 d AS (
     SELECT
         test_id,
         col_d
     FROM
-        PROJECT_d.DATASET_d.TABLE_d
+        ${sub_table_02}
+    WHERE
+        0 = 0
+),
+e AS (
+    SELECT
+        test_id,
+        col_d
+    FROM
+        $sub_table_02
     WHERE
         0 = 0
 )
@@ -22,7 +29,7 @@ d AS (
 SELECT
     *
 FROM
-    PROJECT_B.DATASET_B.TABLE_B AS b
+    ${main_table} AS b
     INNER JOIN c
         ON b.test_id = c.test_id
     INNER JOIN d

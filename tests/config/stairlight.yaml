@@ -1,7 +1,7 @@
 Include:
   - TemplateSourceType: File
     FileSystemPath: "./tests/sql"
-    Regex: .*/*\.sql$
+    Regex: .*?/*\.sql$
     DefaultTablePrefix: "PROJECT_A"
   - TemplateSourceType: GCS
     ProjectId: null
@@ -21,13 +21,13 @@ Include:
     DefaultTablePrefix: "PROJECT_A"
 Exclude:
   - TemplateSourceType: File
-    Regex: main/exclude\.sql$
+    Regex: exclude\.sql$
 Settings:
   MappingFilesRegex:
-    - .*/mapping\_file\.yaml$
-    - .*/mapping\_gcs\.yaml$
-    - .*/mapping\_dbt\.yaml$
-    - .*/mapping\_s3\.yaml$
+    - .*/file_storage/mapping\_file\.yaml$
+    - .*/object_storage/mapping\_gcs\.yaml$
+    - .*/file_storage/mapping\_dbt\.yaml$
+    - .*/object_storage/mapping\_s3\.yaml$
     # TODO: Create a test environment
     # - .*/mapping\_redash\.yaml$
   MappingPrefix: "mapping"

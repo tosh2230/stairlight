@@ -140,3 +140,6 @@ tests/dbt/.user.yml
 tests/dbt/*/dbt_packages
 tests/dbt/*/logs
 tests/dbt/*/target
+
+# Visual Studio Code
+.vscode

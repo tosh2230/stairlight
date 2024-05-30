@@ -73,8 +73,8 @@ class TestGcsTemplate:
     ) -> GcsTemplate:
         return GcsTemplate(mapping_config=mapping_config, bucket=bucket, key=key)
 
-    def test_is_mapped(self, gcs_template: GcsTemplate):
-        assert gcs_template.is_mapped()
+    def test_mapped(self, gcs_template: GcsTemplate):
+        assert gcs_template.mapped
 
     def test_get_uri(
         self,
@@ -84,7 +84,7 @@ class TestGcsTemplate:
     ):
         assert gcs_template.uri == f"{GCS_URI_SCHEME}{bucket}/{key}"
 
-    def test_detect_jinja_params(
+    def test_get_jinja_params(
         self, mocker, gcs_template: GcsTemplate, local_file_path: str
     ):
         with open(local_file_path, "r") as test_file:
@@ -94,12 +94,12 @@ class TestGcsTemplate:
             return_value=test_file_str.encode(),
         )
         template_str = gcs_template.get_template_str()
-        assert len(gcs_template.detect_jinja_params(template_str)) > 0
+        assert len(gcs_template.get_jinja_params(template_str)) > 0
 
     @pytest.mark.integration
-    def test_detect_jinja_params_integration(self, gcs_template: GcsTemplate):
+    def test_get_jinja_params_integration(self, gcs_template: GcsTemplate):
         template_str = gcs_template.get_template_str()
-        assert len(gcs_template.detect_jinja_params(template_str)) > 0
+        assert len(gcs_template.get_jinja_params(template_str)) > 0
 
     def test_render(
         self,

@@ -12,7 +12,7 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square)](https://github.com/psf/black)
 [![CI](https://github.com/tosh2230/stairlight/actions/workflows/ci.yml/badge.svg)](https://github.com/tosh2230/stairlight/actions/workflows/ci.yml)
 
-An end-to-end data lineage tool, detects table dependencies from SQL statements.
+Stairlight is a data lineage tool, detects table dependencies from rendered SQL statements.
 
 <div align="left">
   <img src="https://raw.githubusercontent.com/tosh2230/stairlight/main/img/drawio/concepts.drawio.png" width="1080" alt="concepts">
@@ -88,8 +88,8 @@ Top-level keys are table names, and values represents tables that are the data s
   "test_project.beam_streaming.taxirides_aggregation": {
     "test_project.beam_streaming.taxirides_realtime": {
       "TemplateSourceType": "File",
-      "Key": "tests/sql/main/union_same_table.sql",
-      "Uri": "/foo/bar/stairlight/tests/sql/main/union_same_table.sql",
+      "Key": "tests/sql/union_same_table.sql",
+      "Uri": "/foo/bar/stairlight/tests/sql/union_same_table.sql",
       "Lines": [
         {
           "LineNumber": 6,
@@ -265,7 +265,7 @@ Global:
       TABLE: taxirides
 Mapping:
   - TemplateSourceType: File
-    FileSuffix: "tests/sql/main/union_same_table.sql"
+    FileSuffix: "tests/sql/union_same_table.sql"
     Tables:
       - TableName: "test_project.beam_streaming.taxirides_aggregation"
         Parameters:
