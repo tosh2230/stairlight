@@ -67,7 +67,7 @@ class RedashTemplate(Template):
 
     def get_uri(self) -> str:
         """Get uri"""
-        return super().get_uri()
+        return self.uri
 
 
 class RedashTemplateSource(TemplateSource):
