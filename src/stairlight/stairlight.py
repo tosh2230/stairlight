@@ -505,9 +505,9 @@ class StairLight:
                         next_table_name
                     ]
                     if next_response[next_table_name][direction.value]:
-                        search_results[next_table_name][
-                            direction.value
-                        ] = next_response[next_table_name][direction.value]
+                        search_results[next_table_name][direction.value] = (
+                            next_response[next_table_name][direction.value]
+                        )
                 else:
                     search_results[table_name]["Templates"].append(template)
 
