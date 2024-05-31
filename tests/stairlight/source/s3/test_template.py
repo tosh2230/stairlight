@@ -4,7 +4,7 @@ from typing import Any
 
 import boto3
 import pytest
-from moto import mock_s3
+from moto import mock_aws
 
 from src.stairlight.configurator import Configurator
 from src.stairlight.source.config import (
@@ -74,7 +74,7 @@ class TestS3Template:
     ):
         assert s3_template.uri == f"{S3_URI_SCHEME}{bucket}/{key}"
 
-    @mock_s3
+    @mock_aws
     def test_get_jinja_params(
         self,
         s3_template: S3Template,
@@ -95,7 +95,7 @@ class TestS3Template:
         template_str = s3_template.get_template_str()
         assert len(s3_template.get_jinja_params(template_str)) > 0
 
-    @mock_s3
+    @mock_aws
     def test_render(
         self,
         s3_template: S3Template,
@@ -143,7 +143,7 @@ class TestS3TemplateSource:
             include=_include,
         )
 
-    @mock_s3
+    @mock_aws
     def test_search_templates(self, s3_template_source: S3TemplateSource):
         s3_client = boto3.resource("s3", region_name="us-east-1")
         s3_client.create_bucket(Bucket=BUCKET_NAME)
