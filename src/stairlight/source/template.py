@@ -199,7 +199,7 @@ class Template(ABC):
         except KeyError:
             logger.warning(
                 (
-                    f"Params not found; "
+                    f"Params not found. "
                     f"source_type: {self.source_type}, "
                     f"key: {self.key}",
                     f"params: {params}",
@@ -209,7 +209,7 @@ class Template(ABC):
         except ValueError:
             logger.warning(
                 (
-                    f"Query rendering failed; "
+                    f"Query rendering failed. "
                     f"source_type: {self.source_type}, "
                     f"key: {self.key}",
                     f"params: {params}",
