@@ -11,7 +11,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = ">=3.8,<4"
-PyYAML = ">=5.0"
+PyYAML = { version = "!=6.0.0,!=5.4.0,!=5.4.1" }
 Jinja2 = ">=2.10.3"
 
 # For unit tests
