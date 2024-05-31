@@ -196,24 +196,22 @@ class Template(ABC):
 
         try:
             rendered_str = s.substitute(params)
-        except KeyError as e:
+        except KeyError:
             logger.warning(
                 (
-                    f"{e.with_traceback}, "
+                    f"Params not found; "
                     f"source_type: {self.source_type}, "
                     f"key: {self.key}",
-                    f"template_str: {template_str}",
                     f"params: {params}",
                 )
             )
             rendered_str = s.safe_substitute(params)
-        except ValueError as e:
+        except ValueError:
             logger.warning(
                 (
-                    f"{e.with_traceback}, "
+                    f"Query rendering failed; "
                     f"source_type: {self.source_type}, "
                     f"key: {self.key}",
-                    f"template_str: {template_str}",
                     f"params: {params}",
                 )
             )
