@@ -42,10 +42,10 @@ dbt-bigquery = [
     "dbt-core",
     "dbt-bigquery",
     "google-cloud-bigquery",
-    "numpy"
+    "numpy",
     "protobuf",
     "networkx",
-    "rsa",
+    "rsa"
 ]
 gcs = ["google-cloud-storage", "protobuf", "rsa"]
 redash = ["psycopg2", "SQLAlchemy"]
