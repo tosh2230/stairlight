@@ -155,14 +155,14 @@ class Map:
                 ),
             )
 
-            upstairs_extra_labels = [
+            upstairs_extra_labels: list[dict[str, Any]] = [
                 extra_label.get(MappingConfigKey.LABELS, {})
                 for extra_label in extra_labels
                 if extra_label.get(MappingConfigKey.TABLE_NAME)
                 == upstair_table_reference.TableName
             ]
             upstairs_extra_label = (
-                upstairs_extra_labels[0] if upstairs_extra_labels else []
+                upstairs_extra_labels[0] if upstairs_extra_labels else {}
             )
             upstair_template = self.create_upstair_template(
                 template=template,
@@ -237,7 +237,7 @@ class Map:
         Args:
             template (Template): Template class
             mapped_labels (dict[str, Any]): Labels in mapping section
-            extra_labels (list[dict[str, Any]]): Extra labels
+            extra_label (dict[str, Any]): Extra labels
             upstairs (str): Upstairs table's Name
 
         Returns:
